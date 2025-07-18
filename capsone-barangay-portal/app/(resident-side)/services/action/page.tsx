@@ -1032,14 +1032,14 @@ const handleFileChange = (
         requiredImageFields.push("barangayIDjpg", "validIDjpg", "letterjpg");
       }
       if(clearanceInput.purpose === "Barangay ID"){
-        requiredImageFields.push("signaturejpg", "twoByTwoPicture");
+        requiredImageFields.push("signaturejpg", "validIDjpg");
 
       }
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
-        requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "letterjpg");
+        requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "validIDjpg");
       }
       if (docType === "Construction") {
-        requiredImageFields.push("copyOfPropertyTitle", "taxDeclaration", "approvedBldgPlan", "letterjpg");
+        requiredImageFields.push("copyOfPropertyTitle", "taxDeclaration", "approvedBldgPlan", "validIDjpg");
       }
       if (clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax") {
         requiredImageFields.push("deathCertificate");
@@ -1071,9 +1071,19 @@ const handleFileChange = (
         imgField !== "validIDjpg" &&
         (!clearanceInput[imgField] || !(clearanceInput[imgField] instanceof File))
       ) {
-        if(imgField === "isCCTV") setErrorMessage("Please upload the required image of CCTV");
-        else if(imgField === "letterjpg") setErrorMessage("Please upload the required letter of endorsement.");
-        else setErrorMessage(`Please upload the required image: ${imgField.replace(/([A-Z])/g, ' $1').replace(/jpg$/, '').toLowerCase()}.`);
+        let fieldLabel = "";
+
+        if (imgField === "isCCTV") {
+          fieldLabel = "CCTV Picture";
+        } else {
+          fieldLabel = imgField
+            .replace(/([A-Z])/g, " $1")
+            .replace(/jpg$/, "")
+            .toLowerCase();
+        }
+
+
+        setErrorMessage(`Please upload the required image: ${fieldLabel}.`);
         setShowErrorPopup(true);
         return;
       }
@@ -1276,7 +1286,6 @@ const handleFileChange = (
         dtiRegistration: filenames.dtiRegistration,
         isCCTV: filenames.isCCTV,
         signaturejpg: filenames.signaturejpg,
-        letterjpg: filenames.letterjpg,
       };
       handleReportUpload(clearanceVars, storageRefs);
       }
@@ -1308,7 +1317,6 @@ const handleFileChange = (
         approvedBldgPlan: filenames.approvedBldgPlan,
         copyOfPropertyTitle: filenames.copyOfPropertyTitle,
         signaturejpg: filenames.signaturejpg,
-        letterjpg: filenames.letterjpg,
         ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
       };
       handleReportUpload(clearanceVars, storageRefs);
@@ -2033,7 +2041,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleMake}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle Make"  
+                          placeholder="Enter Tricycle Make (e.g. Honda, Yamaha)"  
                         />
                       </div>
                     </>
@@ -2640,7 +2648,7 @@ const handleFileChange = (
                       <input
                         type="text"
                         className="form-input-document-req"
-                        placeholder="Specify other citizenship (e.g., American)"
+                        placeholder="Specify other citizenship (e.g. American)"
                         value={
                           clearanceInput.citizenship.includes("(")
                             ? clearanceInput.citizenship.slice(
@@ -2980,7 +2988,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehiclePlateNo}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle Plate No."  
+                          placeholder="Enter Tricycle Plate No. (e.g. 1234 AB)"  
                         />
                       </div>
                       <div className="form-group-document-req">
@@ -2993,7 +3001,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleSerialNo}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle Serial No."  
+                          placeholder="Enter Tricycle Serial No. (e.g. TSN123456789)"  
                         />
                       </div>
                       <div className="form-group-document-req">
@@ -3006,7 +3014,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleChassisNo}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle Chassis No."  
+                          placeholder="Enter Tricycle Chassis No. (e.g. CHS98765432)"  
                         />
                       </div>
                       <div className="form-group-document-req">
@@ -3019,7 +3027,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleEngineNo}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle Engine No."  
+                          placeholder="Enter Tricycle Engine No. (e.g. ENG654321789)"  
                         />
                       </div>
                       <div className="form-group-document-req">
@@ -3032,7 +3040,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleFileNo}
                           onChange={handleChange}
-                          placeholder="Enter Tricycle File No."  
+                          placeholder="Enter Tricycle File No. (e.g. 2023-TRU-001234)"  
                         />
                       </div>
                       
@@ -3200,7 +3208,7 @@ const handleFileChange = (
                           value={clearanceInput.height}
                           onChange={handleChange}
                           required 
-                          placeholder="Enter Height" 
+                          placeholder="Enter Height (e.g. 170 cm)" 
                         />
                       </div>
 
@@ -3214,7 +3222,7 @@ const handleFileChange = (
                           onChange={handleChange}
                           className="form-input-document-req" 
                           required 
-                          placeholder="Enter Weight" 
+                          placeholder="Enter Weight (e.g. 65 kg)" 
                         />
                       </div>
                     </>
@@ -3360,6 +3368,305 @@ const handleFileChange = (
           {activeSection === "others" && (
             <>
               <div className="document-req-form-container-requirements">
+
+                <div className="required-documents-container">
+                  <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
+
+                  <div className="file-upload-container-required-documents">
+                    <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
+                      <input
+                        id="file-upload1"
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        name="signaturejpg"
+                        //required = {docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction"}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          handleFileChange(e, setFiles, 'signaturejpg');
+                        }} 
+                        
+                        style={{ display: "none" }}
+                      />
+                      
+                    <div className="uploadedFiles-container">
+                      {/* Display the file names with image previews */}
+                      {files.length > 0 && (
+                        <div className="file-name-image-display">
+                          <ul>
+                            {files.map((file, index) => (
+                              <div className="file-name-image-display-indiv" key={index}>
+                                <li> 
+                                    {/* Display the image preview */}
+                                    {file.preview && (
+                                      <div className="filename&image-container">
+                                        <img
+                                          src={file.preview}
+                                          alt={file.name}
+                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                        />
+                                      </div>
+                                      )}
+                                    {file.name}  
+                                  <div className="delete-container">
+                                    {/* Delete button with image */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleFileDelete('file-upload1', setFiles)}
+                                        className="delete-button"
+                                      >
+                                        <img
+                                          src="/images/trash.png"  
+                                          alt="Delete"
+                                          className="delete-icon"
+                                        />
+                                      </button>
+                                  </div>   
+                                </li>
+                              </div>
+                            ))}  
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+
+                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                ) && (
+                  <>
+                    <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
+                  </>
+                )}
+
+                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                ) &&(
+                  <>
+                    <div className="required-documents-container">
+                      <label className="form-label-required-documents"> Barangay ID</label>
+
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
+                        <input
+                            id="file-upload2"
+                            name="barangayIDjpg"
+                            type="file"
+                            accept=".jpg,.jpeg,.png"
+                            //required={docType === "Temporary Business Permit" || docType === "Business Permit"}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles2, 'barangayIDjpg');
+                            }}
+                            style={{ display: "none" }}
+                        />
+
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files2.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files2.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('file-upload2', setFiles2)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+
+                                      </div>
+                                                  
+                                        
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                
+                    <div className="required-documents-container">
+                      {(//docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction"
+                        docType !=="Barangay Certificate" && docType !=="Barangay Clearance" && docType !== "Barangay Indigency" && clearanceInput.purpose !=="Barangay ID" && clearanceInput.purpose !=="First Time Jobseeker"
+                      ) &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID<span className="required">*</span></label>
+                        </>
+                      )}
+
+                      
+                      {(clearanceInput.purpose ==="Barangay ID") &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew<span className="required">*</span></label>
+                          <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                        </>
+                      )}
+                      {(docType ==="Barangay Certificate" || docType ==="Barangay Clearance" || docType === "Barangay Indigency" || clearanceInput.purpose ==="First Time Jobseeker"
+                        
+                      )
+                      
+                      &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
+                          <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                        </>
+                      )}
+                    
+                      <div className="file-upload-container-required-documents">
+                        {/* Only show upload button if no uploaded file exists */}
+                        {!userData?.upload && (
+                          <>
+                            <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
+                            <input
+                              id="file-upload3"
+                              name="validIDjpg"
+                              type="file"
+                              accept=".jpg,.jpeg,.png"
+                              //required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                handleFileChange(e, setFiles3, 'validIDjpg');
+                              }}
+                              style={{ display: "none" }}
+                            />
+                          </>
+                        )}
+
+                        {/* Always show file preview if exists */}
+                        {files3.length > 0 && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              {files3.map((file, index) => (
+                                <div className="file-name-image-display-indiv" key={index}>
+                                  <li>
+                                    <div className="filename-image-container">
+                                      <img
+                                        src={file.preview}
+                                        alt={file.name}
+                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                      />
+                                    </div>
+                                    <div className="file-name-truncated">{file.name}</div>
+                                    {!userData?.upload && (
+                                      <div className="delete-container">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
+                                      </div>
+                                    )}
+                                  </li>
+                                </div>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                   
+
+                {(//docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                ) && (
+                  <>
+                    <div className="required-documents-container">
+                    <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
+                    <label className="form-sub-label-required-documents"> (for residents of Barangay Fairview for less than 6 months)</label>
+
+                    <div className="file-upload-container-required-documents">
+                      <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
+                        <input
+                          id="file-upload4"
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          name="letterjpg"
+                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                            handleFileChange(e,setFiles4, 'letterjpg');
+                          
+                          }} // Handle file selection
+
+                          style={{ display: "none" }}
+                        />
+
+                      <div className="uploadedFiles-container">
+                        {/* Display the file names with image previews */}
+                        {files4.length > 0 && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              {files4.map((file, index) => (
+                                <div className="file-name-image-display-indiv" key={index}>
+                                  <li> 
+                                      {/* Display the image preview */}
+                                      {file.preview && (
+                                        <div className="filename&image-container">
+                                          <img
+                                            src={file.preview}
+                                            alt={file.name}
+                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                          />
+                                        </div>
+                                        )}
+                                      {file.name}  
+                                    <div className="delete-container">
+                                      {/* Delete button with image */}
+                                      <button
+                                          type="button"
+                                          onClick={() => handleFileDelete('file-upload4', setFiles4)}
+                                          className="delete-button"
+                                        >
+                                          <img
+                                            src="/images/trash.png"  
+                                            alt="Delete"
+                                            className="delete-icon"
+                                          />
+                                        </button>
+
+                                    </div>
+
+                                      
+                                  </li>
+                                </div>
+                              ))}  
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  </>
+                  )}
+                
                 {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
                   <>
                     <div className="required-documents-container">
@@ -3734,7 +4041,7 @@ const handleFileChange = (
 
                 {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
                   <div className="required-documents-container">
-                    <label className="form-label-required-documents"> 2x2 Barangay ID picture<span className="required">*</span></label>
+                    <label className="form-label-required-documents"> 2x2 ID picture</label>
 
                     <div className="file-upload-container-required-documents">
                       <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
@@ -3800,66 +4107,7 @@ const handleFileChange = (
                 )}
 
 
-                <div className="required-documents-container">
-                  <label className="form-label-required-documents"> Upload Signature Over Printed Name<span className="required">*</span></label>
-
-                  <div className="file-upload-container-required-documents">
-                    <label htmlFor="file-upload1"  className="upload-link">Click to Upload File</label>
-                      <input
-                        id="file-upload1"
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        name="signaturejpg"
-                        //required = {docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction"}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          handleFileChange(e, setFiles, 'signaturejpg');
-                        }} 
-                        
-                        style={{ display: "none" }}
-                      />
-                      
-                    <div className="uploadedFiles-container">
-                      {/* Display the file names with image previews */}
-                      {files.length > 0 && (
-                        <div className="file-name-image-display">
-                          <ul>
-                            {files.map((file, index) => (
-                              <div className="file-name-image-display-indiv" key={index}>
-                                <li> 
-                                    {/* Display the image preview */}
-                                    {file.preview && (
-                                      <div className="filename&image-container">
-                                        <img
-                                          src={file.preview}
-                                          alt={file.name}
-                                          style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                        />
-                                      </div>
-                                      )}
-                                    {file.name}  
-                                  <div className="delete-container">
-                                    {/* Delete button with image */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleFileDelete('file-upload1', setFiles)}
-                                        className="delete-button"
-                                      >
-                                        <img
-                                          src="/images/trash.png"  
-                                          alt="Delete"
-                                          className="delete-icon"
-                                        />
-                                      </button>
-                                  </div>   
-                                </li>
-                              </div>
-                            ))}  
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                
 
                 {/* Dynamically Render Extra Image Upload Fields */}
                 {dynamicImageFields.map((fieldName) => (
@@ -3928,221 +4176,6 @@ const handleFileChange = (
                     </div>
                   </div>
                 ))}
-
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction") && (
-                  <>
-                    <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
-                  </>
-                )}
-
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID") &&(
-                  <>
-                    <div className="required-documents-container">
-                      <label className="form-label-required-documents"> Barangay ID</label>
-
-                      <div className="file-upload-container-required-documents">
-                        <label htmlFor="file-upload2"  className="upload-link">Click to Upload File</label>
-                        <input
-                            id="file-upload2"
-                            name="barangayIDjpg"
-                            type="file"
-                            accept=".jpg,.jpeg,.png"
-                            //required={docType === "Temporary Business Permit" || docType === "Business Permit"}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              handleFileChange(e, setFiles2, 'barangayIDjpg');
-                            }}
-                            style={{ display: "none" }}
-                        />
-
-                        <div className="uploadedFiles-container">
-                          {/* Display the file names with image previews */}
-                          {files2.length > 0 && (
-                            <div className="file-name-image-display">
-                              <ul>
-                                {files2.map((file, index) => (
-                                  <div className="file-name-image-display-indiv" key={index}>
-                                    <li> 
-                                        {/* Display the image preview */}
-                                        {file.preview && (
-                                          <div className="filename&image-container">
-                                            <img
-                                              src={file.preview}
-                                              alt={file.name}
-                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                            />
-                                          </div>
-                                          )}
-                                        {file.name}  
-                                      <div className="delete-container">
-                                        {/* Delete button with image */}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleFileDelete('file-upload2', setFiles2)}
-                                            className="delete-button"
-                                          >
-                                            <img
-                                              src="/images/trash.png"  
-                                              alt="Delete"
-                                              className="delete-icon"
-                                            />
-                                          </button>
-
-                                      </div>
-                                                  
-                                        
-                                    </li>
-                                  </div>
-                                ))}  
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction") &&(
-                  <>
-                    <div className="required-documents-container">
-                      <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
-                      <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
-                    
-                      <div className="file-upload-container-required-documents">
-                        {/* Only show upload button if no uploaded file exists */}
-                        {!userData?.upload && (
-                          <>
-                            <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
-                            <input
-                              id="file-upload3"
-                              name="validIDjpg"
-                              type="file"
-                              accept=".jpg,.jpeg,.png"
-                              //required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleFileChange(e, setFiles3, 'validIDjpg');
-                              }}
-                              style={{ display: "none" }}
-                            />
-                          </>
-                        )}
-
-                        {/* Always show file preview if exists */}
-                        {files3.length > 0 && (
-                          <div className="file-name-image-display">
-                            <ul>
-                              {files3.map((file, index) => (
-                                <div className="file-name-image-display-indiv" key={index}>
-                                  <li>
-                                    <div className="filename-image-container">
-                                      <img
-                                        src={file.preview}
-                                        alt={file.name}
-                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                      />
-                                    </div>
-                                    <div className="file-name-truncated">{file.name}</div>
-                                    {!userData?.upload && (
-                                      <div className="delete-container">
-                                        <button
-                                          type="button"
-                                          onClick={() => handleFileDelete('file-upload3', setFiles3)}
-                                          className="delete-button"
-                                        >
-                                          <img
-                                            src="/images/trash.png"
-                                            alt="Delete"
-                                            className="delete-icon"
-                                          />
-                                        </button>
-                                      </div>
-                                    )}
-                                  </li>
-                                </div>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-                    
-
-                {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
-                  <>
-                    <div className="required-documents-container">
-                    <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
-                    <label className="form-sub-label-required-documents"> (for residents of Barangay Fairview for less than 6 months)</label>
-
-                    <div className="file-upload-container-required-documents">
-                      <label htmlFor="file-upload4"  className="upload-link">Click to Upload File</label>
-                        <input
-                          id="file-upload4"
-                          type="file"
-                          accept=".jpg,.jpeg,.png"
-                          name="letterjpg"
-                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            handleFileChange(e,setFiles4, 'letterjpg');
-                          
-                          }} // Handle file selection
-
-                          style={{ display: "none" }}
-                        />
-
-                      <div className="uploadedFiles-container">
-                        {/* Display the file names with image previews */}
-                        {files4.length > 0 && (
-                          <div className="file-name-image-display">
-                            <ul>
-                              {files4.map((file, index) => (
-                                <div className="file-name-image-display-indiv" key={index}>
-                                  <li> 
-                                      {/* Display the image preview */}
-                                      {file.preview && (
-                                        <div className="filename&image-container">
-                                          <img
-                                            src={file.preview}
-                                            alt={file.name}
-                                            style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                          />
-                                        </div>
-                                        )}
-                                      {file.name}  
-                                    <div className="delete-container">
-                                      {/* Delete button with image */}
-                                      <button
-                                          type="button"
-                                          onClick={() => handleFileDelete('file-upload4', setFiles4)}
-                                          className="delete-button"
-                                        >
-                                          <img
-                                            src="/images/trash.png"  
-                                            alt="Delete"
-                                            className="delete-icon"
-                                          />
-                                        </button>
-
-                                    </div>
-
-                                      
-                                  </li>
-                                </div>
-                              ))}  
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  </>
-                  )}
-                    
-
-                
-
-                
 
               </div>
             </>
