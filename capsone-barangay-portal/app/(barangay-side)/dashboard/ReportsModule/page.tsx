@@ -113,12 +113,23 @@ const ReportsPage = () => {
 const [selectedFolder, setSelectedFolder] = useState<string>("ReportsModule/");
 const [viewingFolder, setViewingFolder] = useState<string>("ReportsModule/");
 
-const showErrorToast = (message: string) => {
-  setPopupErrorGenerateReportMessage(message);
-  setShowErrorGenerateReportPopup(true);
-  setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
-};
 
+let toastQueue: Promise<void> = Promise.resolve();
+
+const showErrorToast = (message: string) => {
+  // Chain onto the queue to ensure order
+  toastQueue = toastQueue.then(() => {
+    return new Promise((resolve) => {
+      setPopupErrorGenerateReportMessage(message);
+      setShowErrorGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+        resolve(); // Let the next toast proceed
+      }, 3000);
+    });
+  });
+};
 
 
 const fetchDownloadLinks = async () => {
@@ -208,7 +219,7 @@ const confirmDelete = async () => {
     setFiles((prev) => prev.filter((file) => file.name !== fileToDelete));
   } catch (error) {
     console.error("Delete failed:", error);
-    alert("Failed to delete file.");
+    setPopupMessage("Failed to delete file.!");
   }
 
   setShowPopup(true);
@@ -431,9 +442,10 @@ const uploadForms = async (url: string): Promise<void> => {
       });
   
       if (oldMembers.length === 0 && currentMonthMembers.length === 0) {
-        alert(`No Kasambahay records${natureOfWork !== "All" ? ` for ${natureOfWork}` : ""}.`);
+        await showErrorToast(`No Kasambahay records${natureOfWork !== "All" ? ` for ${natureOfWork}` : ""}.`);
         return null;
       }
+      
   
       oldMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
       currentMonthMembers.sort((a, b) => Number(a.registrationControlNumber) - Number(b.registrationControlNumber));
@@ -608,11 +620,10 @@ const uploadForms = async (url: string): Promise<void> => {
   
       if (!fileUrl) {
         setIsGenerating(false);
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -705,7 +716,7 @@ const uploadForms = async (url: string): Promise<void> => {
       const currentMonthSeekers = currentMonthSnapshot.docs.map((doc) => doc.data());
   
       if (oldSeekers.length === 0 && currentMonthSeekers.length === 0) {
-        alert("No new job seekers found.");
+        await showErrorToast("No new job seekers found.");
         setLoadingJobSeeker(false);
         return;
       }
@@ -888,19 +899,13 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingJobSeeker(true);
     try {
       const fileUrl = await generateFirstTimeJobSeekerReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -928,7 +933,6 @@ const uploadForms = async (url: string): Promise<void> => {
         transactionType: "System Report",
       });
 
-      /*alert("First-Time Job Seeker Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -946,7 +950,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingJobSeeker(false);
       setIsGenerating(false); 
@@ -975,7 +978,7 @@ const uploadForms = async (url: string): Promise<void> => {
         .filter((resident) => resident.isSeniorCitizen === true);
   
       if (residents.length === 0) {
-        alert("No senior citizens found.");
+        await showErrorToast("No senior citizens found.");
         setLoadingResidentSeniorDemographic(false);
         return;
       }
@@ -1139,7 +1142,6 @@ const uploadForms = async (url: string): Promise<void> => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      /*alert("Senior Citizen Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Senior Citizen Report...")
       return fileUrl;
     } catch (error) {
@@ -1154,7 +1156,6 @@ const uploadForms = async (url: string): Promise<void> => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
 
-      /*alert("Failed to generate Senior Citizen Report.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
     }
@@ -1164,18 +1165,13 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingResidentSeniorDemographic(true);
     try {
       const fileUrl = await generateSeniorCitizenReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -1199,7 +1195,6 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      /*alert("Senior Citizen Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -1218,7 +1213,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
     }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingResidentSeniorDemographic(false);
       setIsGenerating(false); 
@@ -1243,7 +1237,7 @@ const uploadForms = async (url: string): Promise<void> => {
         .filter((resident) => resident.isStudent === true || (resident.age !== undefined && resident.age <= 18));
   
       if (residents.length === 0) {
-        alert("No student records found.");
+        await showErrorToast("No student records found.");
         setLoadingResidentStudentDemographic(false);
         return;
       }
@@ -1413,7 +1407,6 @@ const uploadForms = async (url: string): Promise<void> => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      /*alert("Student Demographic Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Student Demographic Report...");
       return fileUrl;
     } catch (error) {
@@ -1427,7 +1420,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Student Report.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
     }
@@ -1439,19 +1431,13 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingResidentStudentDemographic(true);
     try {
       const fileUrl = await generateStudentDemographicReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -1475,7 +1461,6 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      /*alert("Student Demographic Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -1493,7 +1478,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Student PDF.");*/
     } finally {
       setLoadingResidentStudentDemographic(false);
       setIsGenerating(false); 
@@ -1518,7 +1502,7 @@ const uploadForms = async (url: string): Promise<void> => {
         .filter((resident) => resident.isPWD === true);
   
       if (residents.length === 0) {
-        alert("No PWD records found.");
+        await showErrorToast("No PWD records found.");
         return;
       }
   
@@ -1670,7 +1654,6 @@ const uploadForms = async (url: string): Promise<void> => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      /*alert("PWD Demographic Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating PWD Demographic Report...");
       return fileUrl;
     } catch (error) {
@@ -1684,7 +1667,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PWD Report.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
@@ -1718,7 +1700,6 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      /*alert("PWD Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -1736,7 +1717,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PWD PDF.");*/
     } finally {
       setLoadingResidentPWDDemographic(false);
       setIsGenerating(false); 
@@ -1761,7 +1741,7 @@ const uploadForms = async (url: string): Promise<void> => {
         .filter((resident) => resident.isSoloParent === true);
   
       if (residents.length === 0) {
-        alert("No solo parent records found.");
+        await showErrorToast("No solo parent records found.");
         setLoadingResidentSoloParentDemographic(false);
         return;
       }
@@ -1931,7 +1911,6 @@ const uploadForms = async (url: string): Promise<void> => {
       await uploadBytes(storageRef, blob);
   
       const fileUrl = await getDownloadURL(storageRef);
-      /*alert("Solo Parent Demographic Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Solo Parent Demographic Report...");
       return fileUrl;
     } catch (error) {
@@ -1944,7 +1923,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Solo Parent Report.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
     }
@@ -1978,7 +1956,6 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      /*alert("Solo Parent Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -1996,7 +1973,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Solo Parent PDF.");*/
     } finally {
       setLoadingResidentSoloParentDemographic(false);
       setIsGenerating(false); 
@@ -2035,7 +2011,7 @@ const uploadForms = async (url: string): Promise<void> => {
         });
   
         if (residents.length === 0) {
-          showErrorToast(
+          await showErrorToast(
             allTime
               ? "No registered residents found."
               : "No residents registered this month."
@@ -2208,11 +2184,10 @@ const uploadForms = async (url: string): Promise<void> => {
   
       if (!fileUrl) {
         setIsGenerating(false);
-        setPopupErrorGenerateReportMessage("Failed to generate PDF summary report");
-        setShowErrorGenerateReportPopup(true);
-        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -2273,7 +2248,7 @@ const uploadForms = async (url: string): Promise<void> => {
       let residents = querySnapshot.docs.map((doc) => doc.data());
   
       if (residents.length === 0) {
-        alert("No resident found.");
+        await showErrorToast("No residents found.");
         setLoadingMasterResident(false);
         return;
       }
@@ -2428,7 +2403,6 @@ const uploadForms = async (url: string): Promise<void> => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Resident Masterlist generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Resident Masterlist...");
       return fileUrl;
     } catch (error) {
@@ -2441,7 +2415,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Resident Masterlist Report.");*/
     } finally {
       setLoadingMasterResident(false);
     }
@@ -2452,19 +2425,13 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingMasterResident(true);
     try {
       const fileUrl = await generateResidentListReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
   
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
 
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -2492,7 +2459,6 @@ const uploadForms = async (url: string): Promise<void> => {
         transactionType: "System Report",
       });
   
-      /*alert("Resident Masterlist Report successfully converted to PDF!");*/
       setIsGenerating(false); 
       setGeneratingMessage("");
       setPopupSuccessGenerateReportMessage("Resident Masterlist Report generated successfully");
@@ -2509,7 +2475,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingMasterResident(false);
       setIsGenerating(false); 
@@ -2556,7 +2521,7 @@ const uploadForms = async (url: string): Promise<void> => {
   
       const filteredGroups = Object.entries(addressGroups).filter(([_, members]) => members.length > 0);
       if (filteredGroups.length === 0) {
-        alert("No residents found.");
+        await showErrorToast("No residents found for East Fairview.");
         setLoadingEastResident(false);
         return;
       }
@@ -2745,8 +2710,12 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingEastResident(true);
     try {
       const fileUrl = await generateEastResidentListReport();
-      if (!fileUrl) return alert("Failed to generate PDF report.");
-  
+      if (!fileUrl) {
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
+        return;
+      }
+        
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2771,10 +2740,9 @@ const uploadForms = async (url: string): Promise<void> => {
         transactionType: "System Report",
       });
 
-      alert("Resident Report (East Fairview) successfully converted to PDF!");
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      await showErrorToast("Failed to generate PDF.");
     } finally {
       setLoadingEastResident(false);
       setIsGenerating(false); 
@@ -2832,7 +2800,7 @@ const uploadForms = async (url: string): Promise<void> => {
       const filteredGroups = Object.entries(addressGroups).filter(([_, members]) => members.length > 0);
   
       if (filteredGroups.length === 0) {
-        alert("No residents found.");
+        await showErrorToast("No residents found for West Fairview.");
         setLoadingWestResident(false);
         return;
       }
@@ -3018,7 +2986,6 @@ const uploadForms = async (url: string): Promise<void> => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Resident List for West Fairview generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Resident List for West Fairview...");
       return fileUrl;
     } catch (error) {
@@ -3032,7 +2999,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate West Fairview Resident Report.");*/
     } finally {
       setLoadingWestResident(false);
     }
@@ -3043,8 +3009,12 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingWestResident(true);
     try {
       const fileUrl = await generateWestResidentListReport();
-      if (!fileUrl) return alert("Failed to generate PDF report.");
-  
+      if (!fileUrl) {
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
+        return;
+      }
+        
       const response = await fetch("/api/convertPDF", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3068,10 +3038,11 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      alert("Resident Report (West Fairview) successfully converted to PDF!");
+      
+
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to generate PDF.");
+      showErrorToast("Failed to generate PDF.");
     } finally {
       setLoadingWestResident(false);
       setIsGenerating(false); 
@@ -3117,7 +3088,7 @@ const uploadForms = async (url: string): Promise<void> => {
       );
   
       if (filteredGroups.length === 0) {
-        alert("No residents found.");
+        await showErrorToast("No residents for found for South Fairivew.");
         setLoadingSouthResident(false);
         return;
       }
@@ -3293,7 +3264,6 @@ const uploadForms = async (url: string): Promise<void> => {
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Resident List for South Fairview generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Resident List for South Fairview...");
       return fileUrl;
     } catch (error) {
@@ -3307,7 +3277,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate South Fairview Resident Report.");*/
     } finally {
       setLoadingSouthResident(false);
     }
@@ -3318,19 +3287,13 @@ const uploadForms = async (url: string): Promise<void> => {
     setLoadingSouthResident(true);
     try {
       const fileUrl = await generateSouthResidentListReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -3355,7 +3318,6 @@ const uploadForms = async (url: string): Promise<void> => {
         recipientRole: "Punong Barangay",
         transactionType: "System Report",
       });
-      /*alert("Resident Report (South Fairview) successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -3373,7 +3335,6 @@ const uploadForms = async (url: string): Promise<void> => {
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingSouthResident(false);
       setIsGenerating(false); 
@@ -3469,9 +3430,10 @@ const uploadForms = async (url: string): Promise<void> => {
       );
   
       if (filteredGroups.length === 0) {
-        alert(allTime
-          ? "No incident reports found."
-          : `No incident reports found for ${monthName} ${year}.`
+        await showErrorToast(
+          allTime
+            ? "No incident reports found."
+            : `No incident reports found for ${monthName} ${year}.`
         );
         return null;
       }
@@ -3690,13 +3652,10 @@ const handleGenerateIncidentSummaryPDF = async (
 
     if (!fileUrl) {
       setIsGenerating(false);
-      setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-      setShowErrorGenerateReportPopup(true);
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
+      await showErrorToast("Failed to generate PDF report");
       return;
     }
+    
 
     const response = await fetch("/api/convertPDF", {
       method: "POST",
@@ -3856,7 +3815,7 @@ const generateDepartmentalReport = async (
       const noReportsMessage = allTime
         ? `No reports found for ${department === "ALL" ? "any department" : department}.`
         : `No reports found for ${department === "ALL" ? "any department" : department} in ${monthName} ${year}.`;
-      setPopupErrorGenerateReportMessage(noReportsMessage);
+      showErrorToast(noReportsMessage);
       setShowErrorGenerateReportPopup(true);
       setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
       return null;
@@ -4079,11 +4038,10 @@ const generateDepartmentalReport = async (
   
       if (!fileUrl) {
         setIsGenerating(false);
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-        setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -4363,19 +4321,13 @@ const generateDepartmentalReport = async (
     setLoadingLuponSettledReport(true);
     try {
       const fileUrl = await generateLuponSettledReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -4391,7 +4343,6 @@ const generateDepartmentalReport = async (
   
       saveAs(blob, `Lupon_Settled_Report_${year}.pdf`);
   
-      /*alert("Lupon Settled Report successfully converted to PDF!");*/
       const notificationRef = collection(db, "BarangayNotifications");
       const reportName = "Lupon Settled Report"; // You can replace this with your dynamic report name
       await addDoc(notificationRef, {
@@ -4417,7 +4368,6 @@ const generateDepartmentalReport = async (
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponSettledReport(false);
       setIsGenerating(false); 
@@ -4652,19 +4602,13 @@ const generateDepartmentalReport = async (
     setLoadingLuponPendingReport(true);
     try {
       const fileUrl = await generateLuponPendingReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
   
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -4680,7 +4624,6 @@ const generateDepartmentalReport = async (
   
       saveAs(blob, `Lupon_Pending_Report_${year}.pdf`);
   
-      /*alert("Lupon Pending Report successfully converted to PDF!");*/
 
       const notificationRef = collection(db, "BarangayNotifications");
       const reportName = "Lupon Pending Report"; // You can replace this with your dynamic report name
@@ -4707,7 +4650,6 @@ const generateDepartmentalReport = async (
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate PDF.");*/
     } finally {
       setLoadingLuponPendingReport(false);
       setIsGenerating(false); 
@@ -4827,7 +4769,6 @@ const generateDepartmentalReport = async (
   
       const fileUrl = await getDownloadURL(storageRef);
   
-      /*alert("Incident Summary Report generated successfully. Please wait for the downloadable file!");*/
       setGeneratingMessage("Generating Incident Summary Report...");
       return fileUrl;
     } catch (error) {
@@ -4842,7 +4783,6 @@ const generateDepartmentalReport = async (
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Incident Summary Report.");*/
     } finally {
       setLoadingIncidentStatuses(false);
     }
@@ -4852,19 +4792,13 @@ const generateDepartmentalReport = async (
     setLoadingIncidentStatuses(true);
     try {
       const fileUrl = await generateIncidentStatusSummaryReport();
-      /*if (!fileUrl) return alert("Failed to generate Excel report.");*/
 
       if (!fileUrl) {
-        setIsGenerating(false); 
-  
-        setPopupErrorGenerateReportMessage("Failed to generate PDF report");
-        setShowErrorGenerateReportPopup(true);
-  
-        setTimeout(() => {
-          setShowErrorGenerateReportPopup(false);
-        }, 5000);
+        setIsGenerating(false);
+        await showErrorToast("Failed to generate PDF report");
         return;
       }
+      
 
       const response = await fetch("/api/convertPDF", {
         method: "POST",
@@ -4894,7 +4828,6 @@ const generateDepartmentalReport = async (
       });
             
   
-      /*alert("Incident Summary Report successfully converted to PDF!");*/
 
       setIsGenerating(false); 
       setGeneratingMessage("");
@@ -4912,7 +4845,6 @@ const generateDepartmentalReport = async (
       setTimeout(() => {
         setShowErrorGenerateReportPopup(false);
       }, 5000);
-      /*alert("Failed to generate Incident Summary PDF.");*/
     } finally {
       setLoadingIncidentSummary(false);
       setIsGenerating(false); 
@@ -4966,7 +4898,7 @@ const generateDepartmentalReport = async (
           });
 
           if (requests.length === 0) {
-            showErrorToast("No service requests found for the selected criteria.");
+            await showErrorToast("No service requests found for the selected criteria.");
             setShowCertMonthlyModal(false);
             setIsGenerating(false);
             return null;
@@ -5112,7 +5044,7 @@ const generateDepartmentalReport = async (
         return finalFileUrl;
       } catch (err) {
         console.error("Error generating report:", err);
-        showErrorToast("An error occurred while generating the service request report.");
+        await showErrorToast("An error occurred while generating the service request report.");
         return null;
       } finally {
         setLoadingBarangayCertMonthly(false);
@@ -5136,8 +5068,11 @@ const generateDepartmentalReport = async (
           const fileUrl = await generateServiceRequestReport(month, year, allTime, docType, status);
       
           if (!fileUrl) {
+            setIsGenerating(false);
+            await showErrorToast("Failed to generate PDF report");
             return;
           }
+          
       
           const response = await fetch("/api/convertPDF", {
             method: "POST",
@@ -5167,9 +5102,19 @@ const generateDepartmentalReport = async (
             recipientRole: "Punong Barangay",
             transactionType: "System Report",
           });
+
+          setIsGenerating(false); 
+          setGeneratingMessage("");
+          setPopupSuccessGenerateReportMessage("Service Request Report generated successfully");
+          setShowSuccessGenerateReportPopup(true);
+    
+          setTimeout(() => {
+            setShowSuccessGenerateReportPopup(false);
+          }, 5000);
+
         } catch (err) {
           console.error("Error:", err);
-          alert("Failed to generate PDF");
+          await showErrorToast("Failed to generate PDF.");
         } finally {
           setLoadingBarangayCertMonthly(false);
           setShowCertMonthlyModal(false);
@@ -5743,9 +5688,11 @@ const generateDepartmentalReport = async (
               <h1> Download Form </h1>
             </div>
 
-                <div className="action-btn-downloadble-forms">
-                    <button className="action-download" onClick={handleUploadClick} >Upload File</button>
+            {session?.user?.position === "Assistant Secretary" && (
+              <div className="action-btn-downloadble-forms">
+                <button className="action-download" onClick={handleUploadClick}>Upload File</button>
               </div>
+            )}
 
           </div>
 
