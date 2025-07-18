@@ -2102,7 +2102,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleMake}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Make"  
+                                  placeholder="Enter Tricycle Make (e.g. Honda, Yamaha)"  
                                 />
                               </div>
 
@@ -2816,7 +2816,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehiclePlateNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Plate No."  
+                                  placeholder="Enter Tricycle Plate No. (e.g. 1234 AB)"  
                                 />
                               </div>
 
@@ -2830,7 +2830,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleSerialNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Serial No."  
+                                  placeholder="Enter Tricycle Serial No. (e.g. TSN123456789)"  
                                 />
                               </div>
 
@@ -2844,7 +2844,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleChassisNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Chassis No."  
+                                  placeholder="Enter Tricycle Chassis No. (e.g. CHS98765432)"  
                                 />
                               </div>
 
@@ -2858,7 +2858,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleEngineNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Engine No."  
+                                  placeholder="Enter Tricycle Engine No. (e.g. ENG654321789)"  
                                 />
                               </div>
 
@@ -2872,7 +2872,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleFileNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle File No."  
+                                  placeholder="Enter Tricycle File No. (e.g. 2023-TRU-001234)"  
                                 />
                               </div>     
                             </>
