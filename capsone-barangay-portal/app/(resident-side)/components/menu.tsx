@@ -140,25 +140,50 @@ const Menu = () => {
   
 
   const filterValidNotifications = async (notifications: Notification[]) => {
-    return Promise.all(notifications.map(async notif => {
-      try {
-        if (notif.incidentID) {
-          const incidentSnap = await getDoc(doc(db, "IncidentReports", notif.incidentID));
-          if (!incidentSnap.exists()) return null;
-        }
-        if (notif.requestID) {
-          const serviceSnap = await getDoc(doc(db, "ServiceRequests", notif.requestID));
-          if (!serviceSnap.exists()) return null;
-        }
-        return notif;
-      } catch (err) {
-        console.error("Error checking linked docs:", err);
-        return null;
-      }
-    }))
-    .then(results => results.filter((notif): notif is Notification => notif !== null));
-  };
+    return Promise.all(
+      notifications.map(async (notif) => {
+        try {
+          if (notif.isRead) {
+            // Check if the linked document still exists before keeping read notifications
+            if (notif.incidentID) {
+              const incidentSnap = await getDoc(doc(db, "IncidentReports", notif.incidentID));
+              if (!incidentSnap.exists()) return null;
   
+              const incidentData = incidentSnap.data();
+              if (
+                incidentData.status === "settled" ||
+                incidentData.status === "archived" ||
+                incidentData.status === "CFA" ||
+                incidentData.status === "Settled"
+              ) {
+                return null;
+              }
+            }
+  
+            if (notif.requestID) {
+              const requestSnap = await getDoc(doc(db, "ServiceRequests", notif.requestID));
+              if (!requestSnap.exists()) return null;
+  
+              const requestData = requestSnap.data();
+              if (
+                requestData.status === "Completed" ||
+                requestData.status === "Rejected"
+              ) {
+                return null;
+              }
+            }
+          }
+  
+          return notif;
+        } catch (err) {
+          console.error("Error validating resident notification:", err);
+          return null;
+        }
+      })
+    ).then((results) =>
+      results.filter((notif): notif is Notification => notif !== null)
+    );
+  };
   
 
   // Fetch Notifications for the logged-in user in real time
