@@ -1600,6 +1600,18 @@ const handleChange = (
     const today = new Date();
     const minDateTyphoon = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split("T")[0]; // 1st of this month
     const maxDateTyphoon = today.toISOString().split("T")[0];
+
+
+
+    useEffect(() => {
+  const isPurposeResidentOnly = forResidentOnlyMap[clearanceInput.purpose || ""] === true;
+  if (docType === "Other Documents" && isPurposeResidentOnly) {
+    setClearanceInput(prev => ({
+      ...prev,
+      isResident: true, // force it to true so popup logic works
+    }));
+  }
+}, [clearanceInput.purpose, docType]);
     return (
         <main className="createRequest-main-container">
           {/* NEW */}
@@ -1829,8 +1841,8 @@ const handleChange = (
                           allExistingPermits.includes(docType || "") ||
                           (
                             (
-                              otherDocPurposes["Barangay Permit"]?.includes(docType || "") &&
-                              forResidentOnlyMap[docType || ""] === false
+                              docType === "Barangay Permit" &&
+                              forResidentOnlyMap[clearanceInput.purpose || ""] === false
                             ) || 
                             (
                               docType === "Other Documents" &&
@@ -1871,20 +1883,32 @@ const handleChange = (
                                     id="requestorFname"
                                     name="requestorFname"
                                     readOnly={
-                                      forResidentOnlyMap[docType || ""] === true ||
-                                      (docType === "Other Documents" && clearanceInput?.isResident) ||
-                                      clearanceInput?.isResident
+                                      clearanceInput?.isResident ||
+                                      forResidentOnlyMap[clearanceInput.purpose || ""] === true
                                     }
+                                    
                                     onClick={() => {
-                                      const isExplicitResidentOnly = forResidentOnlyMap[docType || ""] === true;
+                                      const isSpecialPurpose =
+                                        clearanceInput.purpose === "Barangay ID" ||
+                                        clearanceInput.purpose === "First Time Jobseeker";
+
                                       const isOtherDocs = docType === "Other Documents";
+                                      const isExistingPermit = docType === "Business Permit" || docType === "Temporary Business Permit" || docType === "Construction"
+                                      const isPermit = docType === "Barangay Permit";
+
+                                      const isPurposeResidentOnly =
+                                        isOtherDocs &&
+                                        !isSpecialPurpose &&
+                                        forResidentOnlyMap[clearanceInput.purpose || ""] === true;
+
+                                      const isResident = clearanceInput?.isResident;
 
                                       const allowPopup =
-                                        isExplicitResidentOnly ||
-                                        (!isPermitLike && !isOtherDocs) ||
-                                        (isOtherDocs && clearanceInput?.isResident) ||
-                                        clearanceInput?.isResident ||
-                                        (clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker");
+                                      isSpecialPurpose ||                            
+                                      isPurposeResidentOnly ||                       
+                                      (isExistingPermit && clearanceInput?.isResident) ||
+                                      (isPermit && clearanceInput?.isResident) ||
+                                      (isOtherDocs && !isPurposeResidentOnly && isResident); 
 
                                       if (allowPopup) {
                                         setSelectingFor("requestor");
