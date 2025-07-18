@@ -782,31 +782,40 @@ const handleFileChange = (
     const notificationRef = collection(db, "BarangayNotifications");
 
     const useDocTypeAsMessage = 
-  clearanceInput.docType === "Business Permit" || 
-  clearanceInput.docType === "Temporary Business Permit";
-  
-  await addDoc(notificationRef, {
-    message: 
-      clearanceInput.purpose === "Residency"
-        ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate}.`
-        : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-    timestamp: new Date(),
-    requestorId: userData?.residentId,
-    isRead: false,
-    transactionType: "Online Service Request",
-    recipientRole: (
-      clearanceInput.purpose === "First Time Jobseeker" ||
-      clearanceInput.docType === "Barangay Certificate" ||
-      clearanceInput.docType === "Barangay Clearance" ||
-      clearanceInput.docType === "Barangay Indigency" ||
-      clearanceInput.docType === "Temporary Business Permit" ||
-      clearanceInput.docType === "Construction" ||
-      (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-    )
-      ? "Assistant Secretary"
-      : "Admin Staff",
-    requestID: newDoc,
-  });
+      clearanceInput.docType === "Business Permit" || 
+      clearanceInput.docType === "Temporary Business Permit";
+    
+    // Determine message
+    let notificationMessage = "";
+    
+    if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
+      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+    } else if (clearanceInput.docType === "Barangay Indigency") {
+      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+    } else {
+      notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
+    }
+    
+    await addDoc(notificationRef, {
+      message: notificationMessage,
+      timestamp: new Date(),
+      requestorId: userData?.residentId,
+      isRead: false,
+      transactionType: "Online Service Request",
+      recipientRole: (
+        clearanceInput.purpose === "First Time Jobseeker" ||
+        clearanceInput.docType === "Barangay Certificate" ||
+        clearanceInput.docType === "Barangay Clearance" ||
+        clearanceInput.docType === "Barangay Indigency" ||
+        clearanceInput.docType === "Temporary Business Permit" ||
+        clearanceInput.docType === "Construction" ||
+        (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+      )
+        ? "Assistant Secretary"
+        : "Admin Staff",
+      requestID: newDoc,
+    });
+    
   
   await addDoc(collection(db, "Notifications"), {
     residentID: userData?.residentId,

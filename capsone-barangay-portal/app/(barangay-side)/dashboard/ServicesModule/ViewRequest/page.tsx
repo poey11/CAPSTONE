@@ -1890,8 +1890,12 @@ Functions for Reason for Reject
         }
                 
         const notificationRef = collection(db, "BarangayNotifications");
+
+        const isOnline = requestData?.accID !== "INBRGY-REQ";
+        const messageSuffix = isOnline ? " (Online)" : "";
+        
         await addDoc(notificationRef, {
-          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.`,
+          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -1899,7 +1903,7 @@ Functions for Reason for Reject
           recipientRole: "Admin Staff",
           requestID: id,
         });
-
+        
         // await addDoc(collection(db, "Notifications"), {
         //   residentID: requestData?.accID,
         //   requestID: id,
@@ -1964,7 +1968,7 @@ Functions for Reason for Reject
 
       const notificationRef = collection(db, "BarangayNotifications");
 
-      if (requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
+      if ( requestData?.docType === "Barangay Certificate" && requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
           message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
           timestamp: new Date(),
@@ -2007,8 +2011,12 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
 
       const notificationRef = collection(db, "BarangayNotifications");
+
+      const isOnline = requestData?.accID !== "INBRGY-REQ";
+      const messageSuffix = isOnline ? " (Online)" : "";
+      
       await addDoc(notificationRef, {
-        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.`,
+        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
@@ -2016,6 +2024,7 @@ Functions for Reason for Reject
         recipientRole: "Assistant Secretary",
         requestID: id,
       });
+      
 
       setShowInterviewForm(false);
       setShowInterviewRemarksSuccessPopup(true);
@@ -2063,15 +2072,20 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
 
       const notificationRef = collection(db, "BarangayNotifications");
+
+      const isOnline = requestData?.accID !== "INBRGY-REQ";
+      const messageSuffix = isOnline ? " (Online)" : "";
+      
       await addDoc(notificationRef, {
-        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.`,
+        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}`,
         timestamp: new Date(),
-        requestorId: requestData?.accID || "",  // adjust based on your actual data context
+        requestorId: requestData?.accID || "",
         isRead: false,
         transactionType: "Online Service Request",
         recipientRole: "Assistant Secretary",
         requestID: id,
       });
+      
     
 
       setshowPhotoUpload(false); 
