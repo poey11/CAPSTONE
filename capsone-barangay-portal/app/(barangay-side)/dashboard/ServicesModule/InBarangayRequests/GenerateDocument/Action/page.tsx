@@ -1338,36 +1338,39 @@ export default function action() {
         const notificationRef = collection(db, "BarangayNotifications");
 
         const useDocTypeAsMessage = 
-      clearanceInput.docType === "Business Permit" || 
-      clearanceInput.docType === "Temporary Business Permit";
-      
-      await addDoc(notificationRef, {
-        message: 
-          clearanceInput.purpose === "Residency"
-            ? `New Residency requested by ${clearanceInput.requestorFname}.`
-            : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-        timestamp: new Date(),
-        requestorId: clearanceInput.residentId,
-        isRead: false,
-        transactionType: "Online Service Request",
-        recipientRole: (
-          // Override for Barangay Certificate + Residency
-          (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency")
-            ? "Admin Staff"
-            : (
-              clearanceInput.purpose === "First Time Jobseeker" ||
-              clearanceInput.docType === "Barangay Certificate" ||
-              clearanceInput.docType === "Barangay Clearance" ||
-              clearanceInput.docType === "Temporary Business Permit" ||
-              clearanceInput.docType === "Construction" ||
-              (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-            )
-              ? "Assistant Secretary"
-              : "Admin Staff"
-        ),
+          clearanceInput.docType === "Business Permit" || 
+          clearanceInput.docType === "Temporary Business Permit";
         
-        requestID: id,
-      });
+        
+        await addDoc(notificationRef, {
+          message: 
+            clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate"
+              ? `New Certificate of Residency requested by ${clearanceInput.requestorFname}.`
+              : clearanceInput.docType === "Barangay Indigency"
+                ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`
+                : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+          
+          timestamp: new Date(),
+          requestorId: clearanceInput.residentId,
+          isRead: false,
+          transactionType: "Online Service Request",
+          recipientRole: (
+            (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency")
+              ? "Admin Staff"
+              : (
+                clearanceInput.purpose === "First Time Jobseeker" ||
+                clearanceInput.docType === "Barangay Certificate" ||
+                clearanceInput.docType === "Barangay Clearance" ||
+                clearanceInput.docType === "Temporary Business Permit" ||
+                clearanceInput.docType === "Construction" ||
+                (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+              )
+                ? "Assistant Secretary"
+                : "Admin Staff"
+          ),
+          requestID: id,
+        });
+        
               
                 
     };

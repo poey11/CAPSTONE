@@ -1891,7 +1891,7 @@ Functions for Reason for Reject
                 
         const notificationRef = collection(db, "BarangayNotifications");
 
-        const isOnline = requestData?.accID !== "INBRG-REQ";
+        const isOnline = requestData?.accID !== "INBRGY-REQ";
         const messageSuffix = isOnline ? " (Online)" : "";
         
         await addDoc(notificationRef, {
@@ -2012,7 +2012,7 @@ Functions for Reason for Reject
 
       const notificationRef = collection(db, "BarangayNotifications");
 
-      const isOnline = requestData?.accID !== "INBRG-REQ";
+      const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
       await addDoc(notificationRef, {
@@ -2073,7 +2073,7 @@ Functions for Reason for Reject
 
       const notificationRef = collection(db, "BarangayNotifications");
 
-      const isOnline = requestData?.accID !== "INBRG-REQ";
+      const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
       await addDoc(notificationRef, {

@@ -791,7 +791,7 @@ const handleFileChange = (
     if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
       notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
     } else if (clearanceInput.docType === "Barangay Indigency") {
-      notificationMessage = `New ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
     } else {
       notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
     }
