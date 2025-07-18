@@ -1127,7 +1127,7 @@ export default function action() {
         }
       } 
       
-      /*
+      
       if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
         if(!files12 || files12.length === 0) {
           setPopupErrorMessage("Please upload 2x2 ID Picture.");
