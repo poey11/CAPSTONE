@@ -3521,16 +3521,17 @@ const handleChange = (
                                   </div>
 
                                   <div className="box-container-inbrgy">
-                                   {(
-                                      clearanceInput.purpose === "Barangay ID" ||
-                                      docType !== "Barangay Clearance" &&
-                                      docType !== "Barangay Indigency" &&
-                                      docType !== "Barangay Certificate"
-                                    ) && (
-                                      <>
-                                        <span className="required-asterisk">*</span>
-                                      </>
-                                    )}
+                                  {(
+                                    clearanceInput.purpose === "Barangay ID" ||
+                                    clearanceInput.purpose !== "First Time Jobseeker" &&
+                                    docType !== "Barangay Clearance" &&
+                                    docType !== "Barangay Indigency" &&
+                                    docType !== "Barangay Certificate"
+                                  ) && (
+                                    <>
+                                      <span className="required-asterisk">*</span>
+                                    </>
+                                  )}
                                     
 
                                     {/* File Upload Section */}
