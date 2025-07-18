@@ -348,11 +348,16 @@ export default function action() {
     const [maxDate, setMaxDate] = useState<any>()
     
 
-    const filteredResidents = residents.filter((resident) =>
-        `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      );
+   const filteredResidents = residents
+  .slice()
+  .sort((a, b) => a.residentNumber - b.residentNumber)
+  .filter((resident) =>
+    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  )
+  .filter((resident) => resident.age >= 18);
+
     useEffect(() => {
         setMaxDate(getLocalDateString(new Date()));
     },[]);
@@ -1211,6 +1216,28 @@ export default function action() {
       for (const fieldName of dynamicImageFields) {
         if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
           setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+      }
+
+      // Validate birthday and age are >= 18
+      if (clearanceInput?.birthday) {
+        const today = new Date();
+        const birthDate = new Date(clearanceInput.birthday);
+        
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        const dayDiff = today.getDate() - birthDate.getDate();
+
+        // Adjust age if birthday hasn't occurred yet this year
+        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+          calculatedAge--;
+        }
+
+        if (calculatedAge < 18) {
+          setPopupErrorMessage("Requestor must be at least 18 years old.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
@@ -4422,6 +4449,7 @@ const handleChange = (
                                     <th>First Name</th>
                                     <th>Middle Name</th>
                                     <th>Last Name</th>
+                                    <th>Age</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -4492,6 +4520,7 @@ const handleChange = (
                                       <td>{resident.firstName}</td>
                                       <td>{resident.middleName}</td>
                                       <td>{resident.lastName}</td>
+                                      <td>{resident.age}</td>
                                     </tr>
                                   ))}
                                 </tbody>
