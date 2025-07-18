@@ -3840,7 +3840,7 @@ const handleFileChange = (
                 ))}
 
                 {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) && (
                   <>
                     <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
@@ -3848,7 +3848,7 @@ const handleFileChange = (
                 )}
 
                 {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) &&(
                   <>
                     <div className="required-documents-container">
@@ -3918,18 +3918,22 @@ const handleFileChange = (
 
                 
                     <div className="required-documents-container">
-                      {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
+                      {(//docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction"
+                        docType !=="Barangay Certificate" && docType !=="Barangay Clearance" && docType !== "Barangay Indigency" && clearanceInput.purpose !=="Barangay ID" && clearanceInput.purpose !=="First Time Jobseeker"
+                      ) &&(
                         <>
                           <label className="form-label-required-documents"> Valid ID<span className="required">*</span></label>
                         </>
                       )}
+
+                      
                       {(clearanceInput.purpose ==="Barangay ID") &&(
                         <>
                           <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew<span className="required">*</span></label>
                           <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
                         </>
                       )}
-                      {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
+                      {(docType ==="Barangay Certificate" || docType ==="Barangay Clearance" || docType === "Barangay Indigency" || clearanceInput.purpose ==="First Time Jobseeker"
                         
                       )
                       
@@ -4000,7 +4004,7 @@ const handleFileChange = (
                    
 
                 {(//docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) && (
                   <>
                     <div className="required-documents-container">
