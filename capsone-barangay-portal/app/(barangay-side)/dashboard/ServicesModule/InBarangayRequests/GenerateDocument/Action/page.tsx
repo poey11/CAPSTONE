@@ -958,15 +958,7 @@ export default function action() {
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
 
-      // Check if any required dynamic image field is missing
-      for (const fieldName of dynamicImageFields) {
-        if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
-          setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
-      }
+      
 
 
     if (
@@ -1001,23 +993,26 @@ export default function action() {
         const hasValidID = files3 && files3.length > 0;
         const hasLetter = files4 && files4.length > 0;
 
-        if (!hasValidID && !hasLetter) {
+        if (!hasValidID && !hasLetter && !hasBarangayID) {
           setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
-      } else if (clearanceInput.purpose !== "Barangay ID") {
-        // Only check Endorsement Letter if not in the Barangay Permit category and not Barangay ID
-        if (!files4 || files4.length === 0) {
-          setPopupErrorMessage("Please upload Endorsement Letter.");
+      } 
+      
+      /*
+      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
+        if(!files12 || files12.length === 0) {
+          setPopupErrorMessage("Please upload 2x2 ID Picture.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
-      }
+      }*/
 
-      if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
+      if (clearanceInput.docType !== "Barangay Clearance" && clearanceInput.docType !== "Barangay Certificate" && clearanceInput.docType !== "Barangay Indigency"
+      ) {
         if (!files3 || files3.length === 0) {
           setPopupErrorMessage("Please upload Valid ID.");
           setShowErrorPopup(true);
@@ -1026,14 +1021,6 @@ export default function action() {
         }
       }
 
-      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
-        if(!files12 || files12.length === 0) {
-          setPopupErrorMessage("Please upload 2x2 ID Picture.");
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
-      }
 
       
     
@@ -1086,6 +1073,16 @@ export default function action() {
       if (["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "")) {
         if (!files10 || files10.length === 0) {
           setPopupErrorMessage("Please upload Death Certificate.");
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+      }
+
+      // Check if any required dynamic image field is missing
+      for (const fieldName of dynamicImageFields) {
+        if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
+          setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
@@ -2240,7 +2237,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Precinct Number"  
+                                  placeholder="Enter Precinct Number (e.g. 1102A)"  
                                 />
                               </div>
                               
@@ -2955,7 +2952,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Height"  
+                                  placeholder="Enter Height (e.g. 170 cm)"  
                                 />
                               </div>
 
@@ -2969,7 +2966,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Weight"  
+                                  placeholder="Enter Weight (e.g. 65 kg)"  
                                 />
                               </div>
                             </>
@@ -3389,11 +3386,11 @@ const handleChange = (
                               <>
                               <div className="box-container-outer-inbrgy">
                                 <div className="title-verificationdocs-barangayID">
-                                  2x2 Barangay ID Picture
+                                  2x2 ID Picture
                                 </div>
 
                                 <div className="box-container-inbrgy">
-                                  <span className="required-asterisk">*</span>
+                                  {/*<span className="required-asterisk">*</span>*/}
 
                                   {/* File Upload Section */}
                                   <div className="file-upload-container-inbrgy">
