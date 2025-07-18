@@ -1044,7 +1044,21 @@ const handleFileChange = (
         imgField !== "letterjpg" &&
         (!clearanceInput[imgField] || !(clearanceInput[imgField] instanceof File))
       ) {
-        setErrorMessage(`Please upload the required image: ${imgField.replace(/([A-Z])/g, ' $1').replace(/jpg$/, '').toLowerCase()}.`);
+        let fieldLabel = "";
+
+        if (imgField === "isCCTV") {
+          fieldLabel = "CCTV Picture";
+        } else if (imgField === "twoByTwoPicture") {
+          fieldLabel = "2x2 Picture";
+        } else {
+          fieldLabel = imgField
+            .replace(/([A-Z])/g, " $1")
+            .replace(/jpg$/, "")
+            .toLowerCase();
+        }
+
+
+        setErrorMessage(`Please upload the required image: ${fieldLabel}.`);
         setShowErrorPopup(true);
         return;
       }
@@ -1246,7 +1260,6 @@ const handleFileChange = (
         dtiRegistration: filenames.dtiRegistration,
         isCCTV: filenames.isCCTV,
         signaturejpg: filenames.signaturejpg,
-        letterjpg: filenames.letterjpg,
       };
       handleReportUpload(clearanceVars, storageRefs);
       }
@@ -1278,7 +1291,6 @@ const handleFileChange = (
         approvedBldgPlan: filenames.approvedBldgPlan,
         copyOfPropertyTitle: filenames.copyOfPropertyTitle,
         signaturejpg: filenames.signaturejpg,
-        letterjpg: filenames.letterjpg,
         ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
       };
       handleReportUpload(clearanceVars, storageRefs);
@@ -3827,7 +3839,7 @@ const handleFileChange = (
                   </div>
                 ))}
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction") && (
+                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID") && (
                   <>
                     <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
                   </>
@@ -3900,11 +3912,19 @@ const handleFileChange = (
                   </>
                 )}
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction") &&(
-                  <>
+                
                     <div className="required-documents-container">
-                      <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
-                      <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                      {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID</label>
+                        </>
+                      )}
+                      {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction") &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
+                          <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                        </>
+                      )}
                     
                       <div className="file-upload-container-required-documents">
                         {/* Only show upload button if no uploaded file exists */}
@@ -3963,11 +3983,9 @@ const handleFileChange = (
                         )}
                       </div>
                     </div>
-                  </>
-                )}
-                    
+                   
 
-                {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
+                {(docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID") && (
                   <>
                     <div className="required-documents-container">
                     <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
