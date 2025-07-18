@@ -1690,7 +1690,7 @@ Functions for Reason for Reject
               },
               body: JSON.stringify({
                   to: requestData?.contact,
-                  message: `Hello Mr/Ms. ${requestData?.requestorFname}, your 
+                  message: `Hello Mr/Ms. ${requestData?.requestor}, your 
                   document request with ID ${requestData?.requestId} 
                   is now ready for pick-up. Please visit the barangay hall 
                   to collect your document. Thank you!`,
@@ -1912,7 +1912,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        //handleSMS(); Admin Staff will handle the sending of SMS to the resident
+        //handleSMS();//Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
