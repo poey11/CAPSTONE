@@ -239,8 +239,11 @@ html, body {
 }
 
 .generate-documents-dropdown p:hover {
-    background-color: #BC5F1C;
-    color: #ffffff;
+    background-color: #d1d9e6;  
+    color: #2C3E50;            
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    transform: scale(1.02);
 }
 
   .generate-documents-dropdown-container:hover .generate-documents-dropdown,
@@ -402,6 +405,19 @@ html, body {
 
 /* NEW CSS */
 
+
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 .generatedocument-inbrgy-main-content {
     display: flex;
     flex-direction: column;
@@ -413,6 +429,7 @@ html, body {
     height: 610px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     margin-top: 20px;
+    animation: fadeSlideIn 0.5s ease-out;
 }
 
 .generatedocument-inbrgy-main-section1{
@@ -462,10 +479,20 @@ html, body {
     color: white;
 }
 
+
+
 .action-edit-new-doc {
     background-color: #e97e1f; /* Green */
     color: white;
 }
+
+.action-add-new-doc:hover,
+.action-edit-new-doc:hover,
+.action-save-new-doc:hover {
+  transform: scale(1.05);
+  background-color: #306632;
+}
+
 
 .generatedocument-inbrgy-info-main-container {
     width: 100%;
@@ -473,6 +500,7 @@ html, body {
     flex-direction: column;
     justify-content: center;
     height: 610px;
+    
 }
 
 .generatedocument-inbrgy-top-section {
