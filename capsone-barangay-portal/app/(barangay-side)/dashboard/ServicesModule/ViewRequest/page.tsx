@@ -468,7 +468,7 @@ Functions for Reason for Reject
 
             const notificationRef = doc(collection(db, "Notifications"));
             await setDoc(notificationRef, {
-                residentID: data?.accID,       // the user id linked to this request
+                residentID: data?.residentId,       // the user id linked to this request
                 requestID: id,                 // the Firestore UID
                 message: `Your Document Request (${data?.requestId}) has been rejected. Reason: (${rejectionReason.reason})`,
                 timestamp: new Date(),
