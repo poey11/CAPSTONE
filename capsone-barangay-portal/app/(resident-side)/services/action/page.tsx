@@ -3839,13 +3839,17 @@ const handleFileChange = (
                   </div>
                 ))}
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID") && (
+                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                ) && (
                   <>
                     <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
                   </>
                 )}
 
-                {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID") &&(
+                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                ) &&(
                   <>
                     <div className="required-documents-container">
                       <label className="form-label-required-documents"> Barangay ID</label>
@@ -3916,10 +3920,20 @@ const handleFileChange = (
                     <div className="required-documents-container">
                       {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
                         <>
-                          <label className="form-label-required-documents"> Valid ID</label>
+                          <label className="form-label-required-documents"> Valid ID<span className="required">*</span></label>
                         </>
                       )}
-                      {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction") &&(
+                      {(clearanceInput.purpose ==="Barangay ID") &&(
+                        <>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew<span className="required">*</span></label>
+                          <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
+                        </>
+                      )}
+                      {(docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
+                        
+                      )
+                      
+                      &&(
                         <>
                           <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
                           <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
@@ -3985,7 +3999,9 @@ const handleFileChange = (
                     </div>
                    
 
-                {(docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID") && (
+                {(//docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID"
+                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance"
+                ) && (
                   <>
                     <div className="required-documents-container">
                     <label className="form-label-required-documents"> Endorsement Letter from Homeowner/Sitio President</label>
