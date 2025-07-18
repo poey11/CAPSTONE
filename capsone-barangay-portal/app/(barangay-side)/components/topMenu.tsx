@@ -250,9 +250,10 @@ export default function TopMenu() {
       ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
   
       const isGenericToMyRole =
-        msg.recipientRole === userPosition &&
+      (msg.recipientRole === userPosition || msg.respondentID === session?.user?.id) ||
+      (msg.recipientRole === userPosition &&
         !msg.respondentID &&
-        isMyDeptOrOnline;
+        isMyDeptOrOnline);
     
       const isDirectlyAssignedToMe = msg.respondentID === session?.user?.id;
 
@@ -325,10 +326,11 @@ export default function TopMenu() {
             userPosition === "Secretary" &&
             ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
       
-          const isGenericToMyRole =
-            msg.recipientRole === userPosition &&
-            !msg.respondentID &&
-            isMyDeptOrOnline;
+            const isGenericToMyRole =
+            (msg.recipientRole === userPosition || msg.respondentID === session?.user?.id) ||
+            (msg.recipientRole === userPosition &&
+              !msg.respondentID &&
+              isMyDeptOrOnline);
       
             const isDirectlyAssignedToMe = msg.respondentID === session?.user?.id;
 
