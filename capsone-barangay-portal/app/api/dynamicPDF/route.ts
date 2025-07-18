@@ -20,11 +20,17 @@ export async function POST(req: NextRequest, res:NextResponse) {
         
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const fontSize = 12;
+        const titleWidth = font.widthOfTextAtSize(title, 30);
+
+        const pageWidth = page.getWidth();
+
+        const titleX = (pageWidth - titleWidth) / 2;
+        
 
         page.drawText(title, {
-            x: 50,
-            y: 700,
-            size: fontSize,
+            x: titleX,
+            y: 550,
+            size:25,
             font: font,
             color: rgb(0, 0, 0),
             lineHeight: 14,
@@ -32,9 +38,9 @@ export async function POST(req: NextRequest, res:NextResponse) {
         })
 
         page.drawText(body, {
-            x: 50,
-            y: 680,
-            size: fontSize,
+            x: 55,
+            y: 460,
+            size:fontSize,
             font: font,
             color: rgb(0, 0, 0),
             lineHeight: 14,

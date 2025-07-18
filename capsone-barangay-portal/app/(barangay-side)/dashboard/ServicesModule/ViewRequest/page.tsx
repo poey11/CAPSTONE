@@ -1912,7 +1912,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        handleSMS();//Admin Staff will handle the sending of SMS to the resident
+        //handleSMS();//Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,

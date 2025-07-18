@@ -900,7 +900,7 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "summon") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
-                                    sendSMSForSummons();
+                                    //sendSMSForSummons();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                                 }, 5000); // wait 3 seconds
                               } else {
@@ -922,7 +922,7 @@ export default function GenerateDialogueLetter() {
                             if (showSubmitPopup.letterType === "dialogue") {
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
-                                    sendSMSForDialogue();
+                                    //sendSMSForDialogue();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                                 }, 5000); // wait 3 seconds
                               } else {

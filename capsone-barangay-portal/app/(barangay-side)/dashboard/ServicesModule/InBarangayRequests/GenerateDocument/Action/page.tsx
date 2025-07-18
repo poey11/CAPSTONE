@@ -5,12 +5,11 @@ import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 import { getLocalDateString } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
-import { addDoc, collection, getDocs} from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, onSnapshot} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
-import { clear } from "console";
 
 
 interface EmergencyDetails {
@@ -190,46 +189,45 @@ export default function action() {
       }, []);
 
       useEffect(() => {
-        const fetchOtherDocumentPurposes = async () => {
-          try {
-            const otherDocsRef = collection(db, "OtherDocuments");
-            const snapshot = await getDocs(otherDocsRef);
-      
-            const groupedTitles: { [key: string]: string[] } = {};
-            const fieldMap: { [key: string]: string[] } = {};
-            const imageFieldMap: { [key: string]: string[] } = {};
-            const residentOnlyMap: { [key: string]: boolean } = {};
-      
-            snapshot.docs.forEach((doc) => {
-              const data = doc.data();
-              const { type, title, fields, imageFields, forResidentOnly } = data;
-      
-              if (type && title) {
-                if (!groupedTitles[type]) groupedTitles[type] = [];
-                groupedTitles[type].push(title);
-      
-                if (Array.isArray(fields)) {
-                  fieldMap[title] = fields.map((f: any) => f.name);
+        const otherDocsRef = collection(db, "OtherDocuments");
+            const unsubscribe  = onSnapshot(otherDocsRef, (snapshot) => {
+              let groupedTitles: { [key: string]: string[] } = {};
+              let fieldMap: { [key: string]: string[] } = {};
+              let imageFieldMap: { [key: string]: string[] } = {};
+              let residentOnlyMap: { [key: string]: boolean } = {};
+
+              snapshot.docs.forEach((doc) => {
+                const data = doc.data();
+                const { type, title, fields, imageFields, forResidentOnly } = data;
+        
+                if (type && title) {
+                  if (!groupedTitles[type]) groupedTitles[type] = [];
+                  groupedTitles[type].push(title);
+        
+                  if (Array.isArray(fields)) {
+                    fieldMap[title] = fields.map((f: any) => f.name);
+                  }
+        
+                  if (Array.isArray(imageFields)) {
+                    imageFieldMap[title] = imageFields;
+                  }
+        
+                  residentOnlyMap[title] = !!forResidentOnly;
+                  
                 }
-      
-                if (Array.isArray(imageFields)) {
-                  imageFieldMap[title] = imageFields;
-                }
-      
-                residentOnlyMap[title] = !!forResidentOnly;
-              }
-            });
-      
+              });
+              
             setOtherDocPurposes(groupedTitles);
             setOtherDocFields(fieldMap);
             setOtherDocImageFields(imageFieldMap);
             setForResidentOnlyMap(residentOnlyMap);
-          } catch (error) {
-            console.error("Error fetching OtherDocuments:", error);
+            })
+            
+        return () => {
+          if (unsubscribe) {
+            unsubscribe();
           }
-        };
-      
-        fetchOtherDocumentPurposes();
+        }
       }, []);
 
 
@@ -938,10 +936,8 @@ export default function action() {
           }),
           ...uploadedFileUrls,
         };
-        console.log("Uploaded", docData);
 
         const doc = await addDoc(docRef, docData);
-        console.log("Document written with ID: ", doc.id);
 
         router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${doc.id}`); // changed by dirick note para if may maging bug haha
 
@@ -955,10 +951,133 @@ export default function action() {
         setShowCreatePopup(true);
     }
 
+    const  requiredFields: string[] = [];
+
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
 
-      // Check if any required dynamic image field is missing
+     
+
+      /* wala pa ung custom document */
+      requiredFields.push("requestorFname",
+          "requestorMrMs", "address","dateOfResidency",
+          "birthday","age", "gender", "contact", "civilStatus",
+          "citizenship"
+        );
+
+      if(clearanceInput.docType === "Barangay Certificate" ){
+        requiredFields.push("purpose")
+        if(clearanceInput.purpose === "Residency"){
+          requiredFields.push("CYFrom", "CYTo");
+        }
+        
+        if(clearanceInput.purpose === "Occupancy /  Moving Out") {
+          requiredFields.push("fromAddress", "toAddress","fullName");
+        }
+        if(clearanceInput.purpose === "Estate Tax" || clearanceInput.purpose === "Death Residency") {
+          requiredFields.push("fullName","dateofdeath" );
+          if(clearanceInput.purpose === "Estate Tax") {
+            requiredFields.push("estateSince");
+          }
+        }
+        
+        if(clearanceInput.purpose === "No Income") {
+          requiredFields.push("noIncomePurpose","noIncomeChildFName");
+
+        }
+        if(clearanceInput.purpose === "Cohabitation") {
+          requiredFields.push("partnerWifeHusbandFullName","cohabitationRelationship", "cohabitationStartDate");
+        }
+        if(clearanceInput.purpose === "Guardianship") {
+          requiredFields.push("goodMoralPurpose", );
+        
+        }
+        if(clearanceInput.purpose === "Good Moral and Probation") {
+          requiredFields.push("goodMoralPurpose",);
+          if(clearanceInput.goodMoralPurpose === "Others") {
+            requiredFields.push("goodMoralOtherPurpose");
+          }
+        }
+        if(clearanceInput.purpose === "Garage/PUV") {
+          requiredFields.push("goodMoralOtherPurpose",
+            "vehicleType","noOfVehicles"
+          );
+        }
+        if(clearanceInput.purpose === "Garage/TRU") {
+          requiredFields.push(
+            "businessName","businessNature", "businessLocation",
+            "noOfVehicles", "vehicleMake","vehicleType",
+            "vehiclePlateNo", "vehicleSerialNo", "vehicleChassisNo",
+            "vehicleEngineNo", "vehicleFileNo", 
+          );
+        }
+      }
+      
+      if (clearanceInput.docType === "Barangay Indigency") {
+        requiredFields.push("purpose");
+        if(clearanceInput.purpose === "No Income") {
+          requiredFields.push("noIncomePurpose","noIncomeChildFName");
+
+        }
+        if(clearanceInput.purpose === "Financial Subsidy of Solo Parent") {
+          requiredFields.push("noIncomeChildFName",)
+        }
+        if(clearanceInput.purpose === "Fire Victims") {
+          requiredFields.push("dateOfFireIncident")
+        }
+        if(clearanceInput.purpose === "Flood Victims") {
+          requiredFields.push("nameOfTyphoon", "dateOfTyphoon");
+        }
+      }
+
+      if(clearanceInput.docType === "Barangay Clearance") {
+        
+        if(clearanceInput.purpose === "Residency"){
+          requiredFields.push("CYFrom", "CYTo");
+        }
+      }
+
+      if(clearanceInput.docType === "Other Documents") {
+        if(clearanceInput.purpose === "Barangay ID") {
+          requiredFields.push("birthplace","religion","nationality","precinctnumber"
+            ,"occupation","height","weight","bloodtype"
+          );
+        }
+        if(clearanceInput.purpose === "First Time Jobseeker") {
+          requiredFields.push("emergencyDetails.fullName","emergencyDetails.address"
+            ,"emergencyDetails.contactNumber", "emergencyDetails.relationship"
+          )
+        }
+      }
+      // Barangay Permits
+      if(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") {
+        requiredFields.push("purpose", "businessName", 
+          "businessNature", "businessLocation","estimatedCapital")
+      }
+      if(clearanceInput.docType === "Construction") {
+        requiredFields.push("typeofconstruction", "typeofbldg",
+          "homeOrOfficeAddress", "projectName", "projectLocation"
+        );
+      }
+
+      const docFields = otherDocFields[clearanceInput.docType || ''];
+      const purposeFields = otherDocFields[clearanceInput.purpose || ''];
+      
+      if (docFields) {
+        requiredFields.push(...docFields);
+      }
+
+      if (purposeFields) {
+        requiredFields.push(...purposeFields);
+      }
+
+      // Remove duplicates
+      const uniqueFields = new Set(requiredFields);
+    
+      if(!isAllRequiredFieldsFilledUp(Array.from(uniqueFields))){
+        return;
+      }
+       // Check if any required dynamic image field is missing
       for (const fieldName of dynamicImageFields) {
         if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
           setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
@@ -967,7 +1086,6 @@ export default function action() {
           return;
         }
       }
-
 
     if (
       clearanceInput.docType === "Barangay Certificate" &&
@@ -1015,6 +1133,7 @@ export default function action() {
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
+        requiredFields.push("Endorsement Letter");
       }
 
       if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
@@ -1091,19 +1210,90 @@ export default function action() {
           return;
         }
       }
-    
+      
+
       // If all validations pass
       handleConfirmClick();
     };
 
-    
+    const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
+
+    for (const key of requiredFields) {
+        const fieldValue = clearanceInput[key as keyof ClearanceInput];
+        if (
+          fieldValue === undefined ||
+          fieldValue === null ||
+          (typeof fieldValue === "string" && fieldValue.trim() === "") ||
+          (typeof fieldValue === "object" && Object.keys(fieldValue).length === 0)
+        ) {
+          let message = "";
+          if(key ==="CYFrom") message = "Cohabitation Year From";
+          else if(key ==="CYTo") message = "Cohabitation Year To";
+          else if(key ==="noIncomePurpose") message = "No Income Purpose";
+          else if(key ==="noIncomeChildFName") message = "No Income Child's First Name";
+          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose";
+          else if(key ==="cohabitationRelationship") message = "Cohabitation Relationship";
+          else if(key ==="cohabitationStartDate") message = "Cohabitation Start Date";
+          else if(key ==="goodMoralPurpose") message = "Good Moral Purpose";
+          else if(key ==="vehicleType") message = "Vehicle Type";
+          else if(key ==="vehicleMake") message = "Vehicle Make";
+          else if(key ==="vehiclePlateNo") message = "Vehicle Plate Number";
+          else if(key ==="vehicleSerialNo") message = "Vehicle Serial Number";
+          else if(key ==="vehicleChassisNo") message = "Vehicle Chassis Number";
+          else if(key ==="vehicleEngineNo") message = "Vehicle Engine Number";
+          else if(key ==="vehicleFileNo") message = "Vehicle File Number";
+          else if(key ==="businessName") message = "Business Name";
+          else if(key ==="businessNature") message = "Business Nature";
+          else if(key ==="businessLocation") message = "Business Location";
+          else if(key ==="estimatedCapital") message = "Estimated Capital";
+          else if(key ==="typeofconstruction") message = "Type of Construction";
+          else if(key ==="typeofbldg") message = "Type of Building";
+          else if(key ==="homeOrOfficeAddress") message = "Home or Office Address";
+          else if(key ==="projectName") message = "Project Name";
+          else if(key ==="projectLocation") message = "Project Location";
+          else if(key ==="dateOfFireIncident") message = "Date of Fire Incident";
+          else if(key ==="nameOfTyphoon") message = "Name of Typhoon";
+          else if(key ==="dateOfTyphoon") message = "Date of Typhoon";
+          else if(key ==="fullName") message = `${addOn}Full Name`;
+          else if (key === "emergencyDetails.fullName") message = "Emergency Contact Full Name";
+          else if (key === "emergencyDetails.address") message = "Emergency Contact Address";
+          else if (key === "emergencyDetails.contactNumber") message = "Emergency Contact Number";
+          else if (key === "emergencyDetails.relationship") message = "Emergency Contact Relationship";
+          else if (key === "requestorFname") message = "Requestor's First Name";
+          else if (key === "requestorMrMs") message = "Requestor's Mr/Ms";
+          else if (key === "address") message = "Address";
+          else if (key === "dateOfResidency") message = "Date of Residency";
+          else if (key === "birthday") message = "Birthday";
+          else if (key === "age") message = "Age";
+          else if(key === "birthplace") message = "Place of Birth";
+          else if(key === "religion") message = "Religion";
+          else if(key === "nationality") message  = "Nationality";
+          else if(key === "precinctnumber") message = "Precinct Number";
+          else if(key === "occupation") message = "Occupation";
+          else if(key === "height") message = "Height";
+          else if(key === "weight") message = "Weight";
+          else if(key === "bloodtype") message = "Blood Type";
+          else if (key === "contact") message = "Contact Number";
+          else if (key === "civilStatus") message = "Civil Status";
+          else if (key === "citizenship") message = "Citizenship";
+          else if (key === "purpose") message = "Purpose";
+          else message = key
+          .replace(/([A-Z])/g, ' $1')   // Add space before capital letters
+          .replace(/[\.\-_]/g, ' ')     // Replace dot (.), dash (-), and underscore (_) with space
+          
+          setPopupErrorMessage(`Please fill up ${message}.`);
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return false;
+        }
+      }
+      return true;
+    }    
 
     const confirmCreate = async () => {
         setShowCreatePopup(false);
         setPopupMessage(`${docType} created successfully!`);
         setShowPopup(true);
-        console.log("Files:", files);
-        console.log("Clearance Input:", clearanceInput);
 
         const wait = await handleUploadClick(); // changed by dirick note para if may maging bug haha
         console.log("Wait:", wait);
@@ -1149,6 +1339,7 @@ export default function action() {
               
                 
     };
+console.log("otherDocFields", otherDocFields);
 
 const handleChange = (
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -2793,7 +2984,7 @@ const handleChange = (
                                   name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVehicles || 1}
+                                  value={clearanceInput.noOfVehicles}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
