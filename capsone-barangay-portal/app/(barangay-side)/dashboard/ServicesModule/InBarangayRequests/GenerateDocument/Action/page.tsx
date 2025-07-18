@@ -1119,16 +1119,18 @@ export default function action() {
         const hasValidID = files3 && files3.length > 0;
         const hasLetter = files4 && files4.length > 0;
 
-        if (!hasValidID && !hasLetter) {
+        if (!hasValidID && !hasLetter && !hasBarangayID) {
           setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
         }
-      } else if (clearanceInput.purpose !== "Barangay ID") {
-        // Only check Endorsement Letter if not in the Barangay Permit category and not Barangay ID
-        if (!files4 || files4.length === 0) {
-          setPopupErrorMessage("Please upload Endorsement Letter.");
+      } 
+      
+      
+      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
+        if(!files12 || files12.length === 0) {
+          setPopupErrorMessage("Please upload 2x2 ID Picture.");
           setShowErrorPopup(true);
           setTimeout(() => setShowErrorPopup(false), 3000);
           return;
@@ -1136,7 +1138,8 @@ export default function action() {
         requiredFields.push("Endorsement Letter");
       }
 
-      if (["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose || "")) {
+      if (clearanceInput.docType !== "Barangay Clearance" && clearanceInput.docType !== "Barangay Certificate" && clearanceInput.docType !== "Barangay Indigency"
+      ) {
         if (!files3 || files3.length === 0) {
           setPopupErrorMessage("Please upload Valid ID.");
           setShowErrorPopup(true);
@@ -1145,14 +1148,6 @@ export default function action() {
         }
       }
 
-      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
-        if(!files12 || files12.length === 0) {
-          setPopupErrorMessage("Please upload 2x2 ID Picture.");
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
-      }
 
       
     
@@ -1211,6 +1206,16 @@ export default function action() {
         }
       }
       
+
+      // Check if any required dynamic image field is missing
+      for (const fieldName of dynamicImageFields) {
+        if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
+          setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
+          setShowErrorPopup(true);
+          setTimeout(() => setShowErrorPopup(false), 3000);
+          return;
+        }
+      }
 
       // If all validations pass
       handleConfirmClick();
@@ -2296,7 +2301,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleMake}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Make"  
+                                  placeholder="Enter Tricycle Make (e.g. Honda, Yamaha)"  
                                 />
                               </div>
 
@@ -2431,7 +2436,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Precinct Number"  
+                                  placeholder="Enter Precinct Number (e.g. 1102A)"  
                                 />
                               </div>
                               
@@ -3010,7 +3015,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehiclePlateNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Plate No."  
+                                  placeholder="Enter Tricycle Plate No. (e.g. 1234 AB)"  
                                 />
                               </div>
 
@@ -3024,7 +3029,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleSerialNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Serial No."  
+                                  placeholder="Enter Tricycle Serial No. (e.g. TSN123456789)"  
                                 />
                               </div>
 
@@ -3038,7 +3043,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleChassisNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Chassis No."  
+                                  placeholder="Enter Tricycle Chassis No. (e.g. CHS98765432)"  
                                 />
                               </div>
 
@@ -3052,7 +3057,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleEngineNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle Engine No."  
+                                  placeholder="Enter Tricycle Engine No. (e.g. ENG654321789)"  
                                 />
                               </div>
 
@@ -3066,7 +3071,7 @@ const handleChange = (
                                   required 
                                   value={clearanceInput.vehicleFileNo}
                                   onChange={handleChange}
-                                  placeholder="Enter Tricycle File No."  
+                                  placeholder="Enter Tricycle File No. (e.g. 2023-TRU-001234)"  
                                 />
                               </div>     
                             </>
@@ -3146,7 +3151,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Height"  
+                                  placeholder="Enter Height (e.g. 170 cm)"  
                                 />
                               </div>
 
@@ -3160,7 +3165,7 @@ const handleChange = (
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Weight"  
+                                  placeholder="Enter Weight (e.g. 65 kg)"  
                                 />
                               </div>
                             </>
@@ -3580,11 +3585,11 @@ const handleChange = (
                               <>
                               <div className="box-container-outer-inbrgy">
                                 <div className="title-verificationdocs-barangayID">
-                                  2x2 Barangay ID Picture
+                                  2x2 ID Picture
                                 </div>
 
                                 <div className="box-container-inbrgy">
-                                  <span className="required-asterisk">*</span>
+                                  {/*<span className="required-asterisk">*</span>*/}
 
                                   {/* File Upload Section */}
                                   <div className="file-upload-container-inbrgy">
@@ -3649,7 +3654,7 @@ const handleChange = (
                               </div>
 
                               <div className="box-container-inbrgy">
-                                <span className="required-asterisk">*</span>
+                                {/*<span className="required-asterisk">*</span>*/}
 
                                 {/* File Upload Section */}
                                 <div className="file-upload-container-inbrgy">
@@ -3705,15 +3710,25 @@ const handleChange = (
                           </>
                         )}
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker" || docType === "Construction") && (
-                              <>
+                       
                                 <div className="box-container-outer-inbrgy">
                                   <div className="title-verificationdocs-validID">
                                     Valid ID
                                   </div>
 
                                   <div className="box-container-inbrgy">
-                                    <span className="required-asterisk">*</span>
+                                  {(
+                                    clearanceInput.purpose === "Barangay ID" ||
+                                    clearanceInput.purpose !== "First Time Jobseeker" &&
+                                    docType !== "Barangay Clearance" &&
+                                    docType !== "Barangay Indigency" &&
+                                    docType !== "Barangay Certificate"
+                                  ) && (
+                                    <>
+                                      <span className="required-asterisk">*</span>
+                                    </>
+                                  )}
+                                    
 
                                     {/* File Upload Section */}
                                     <div className="file-upload-container-inbrgy">
@@ -3766,9 +3781,10 @@ const handleChange = (
                                     </div>
                                   </div>
                                 </div>
-                              </>
-                            )}
-                        {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
+                             
+                        {( docType === "Barangay Clearance" || docType === "Barangay Certificate" || docType === "Barangay Indigency" || clearanceInput.purpose === "First Time Jobseeker"
+                          //docType !== "Construction" &&  docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID"
+                          ) && (
 
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-endorsement">
@@ -3776,7 +3792,7 @@ const handleChange = (
                           </div>
 
                           <div className="box-container-inbrgy">
-                            <span className="required-asterisk">*</span>
+                            {/*<span className="required-asterisk">*</span>*/}
 
                             {/* File Upload Section */}
                             <div className="file-upload-container-inbrgy">

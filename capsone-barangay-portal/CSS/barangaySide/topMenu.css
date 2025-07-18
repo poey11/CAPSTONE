@@ -272,6 +272,8 @@ height: 100px
   padding-right: 5px; 
     scrollbar-width: medium;
   scrollbar-color: #cbd5e1 transparent;
+  padding-bottom: 80px; 
+
   }
   
   .notification-content-brgyside p{
@@ -297,7 +299,8 @@ height: 100px
   padding: 12px 0;
   transition: background 0.2s ease;
   color: #000000;
-  height: 100px;
+  /*height: 100px;*/
+    
   }
   
   .notification-item-brgyside:hover {

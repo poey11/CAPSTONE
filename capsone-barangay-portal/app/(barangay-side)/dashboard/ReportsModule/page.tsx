@@ -5835,14 +5835,7 @@ const generateDepartmentalReport = async (
         </div>
       )}
 
-      {isLoading.status && (
-            <div className="popup-backdrop-download">
-              <div className="popup-content-download">
-                  <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-download" />
-                    <p>{isLoading.message}</p>
-              </div>
-             </div>
-                )}
+
 
         {showPopup && (
           <div className={`popup-overlay-downloadble-forms show`}>
@@ -5976,14 +5969,25 @@ const generateDepartmentalReport = async (
       )}
 
       {/* Generating of Report Popup */}
-      {isGenerating && (
-        <div className="popup-backdrop">
-          <div className="popup-content">
-            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
-            <p>{generatingMessage}</p>
-          </div>
-        </div>
-      )}
+          {isGenerating && (
+            <div className="popup-backdrop">
+              <div className="popup-content">
+                <div className="spinner" />
+                <p>{generatingMessage}</p>
+              </div>
+            </div>
+          )}
+
+                {isLoading.status && (
+            <div className="popup-backdrop-download">
+              <div className="popup-content-download">
+                  <div className="spinner"/>
+                    <p>{isLoading.message}</p>
+              </div>
+             </div>
+                )}
+
+
 
       {/* Success Generate Report Popup*/}
       {showSuccessGenerateReportPopup && (

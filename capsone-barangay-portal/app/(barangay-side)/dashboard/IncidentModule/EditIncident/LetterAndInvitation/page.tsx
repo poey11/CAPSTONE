@@ -945,7 +945,7 @@ export default function GenerateDialogueLetter() {
             {isLoading && (
                     <div className="popup-backdrop">
                         <div className="popup-content">
-                            <img src="/Images/loading.png" alt="loading..." className="successful-icon-popup-letter" />
+                            <div className="spinner"/>
                             <p>Generating letter, please wait...</p>
                         </div>
                     </div>
@@ -1305,6 +1305,9 @@ export default function GenerateDialogueLetter() {
                                          <div className="section-2-information-bottom">
                                         {actionId === "dialogue" ? (
                                         <>
+
+                                        <div className="section-2-letter-left-side-others">
+
                                             <div className="fields-section-letter">
                                                 <p>Date of Delivery</p>
                                                 <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
@@ -1332,7 +1335,12 @@ export default function GenerateDialogueLetter() {
                                                 />
 
                                             </div>
-                                            <div className="fields-section-letter">
+
+                                        </div>
+
+                                         <div className="section-2-letter-right-side-others">
+
+                                         <div className="fields-section-letter">
                                                 <p>Delivered By</p>      
                                                 <select
                                                         className="generate-letter-input-field-dropdown"
@@ -1380,38 +1388,51 @@ export default function GenerateDialogueLetter() {
                                                 disabled
                                                 />
                                             </div>
+
+
+                                         </div>
+
+
+
                                         </>
                                         ) : (
                                         <>
-                                            <div className="fields-section-letter">
-                                                <p>Date of Delivery</p>
-                                                <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
-                                                value={hearingSection?.DateOfDelivery||otherInfo.DateOfDelivery}
-                                                id="DateOfDelivery"
-                                                name="DateOfDelivery"
-                                                min={today}
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                onChange={handleChange}
-                                                required
-                                                disabled = {hearingSection?.DateOfDelivery ? true : false}
-                                                />
 
-                                            </div>
+                                         <div className="section-2-letter-left-side-others">
 
                                             <div className="fields-section-letter">
-                                                <p>Date and Time of Meeting</p>
-                                                    <input type="datetime-local" className="generate-letter-input-field" 
-                                                    value={hearingSection?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                    <p>Date of Delivery</p>
+                                                    <input type="date" className="generate-letter-input-field" placeholder="Enter Date of Delivery" 
+                                                    value={hearingSection?.DateOfDelivery||otherInfo.DateOfDelivery}
+                                                    id="DateOfDelivery"
+                                                    name="DateOfDelivery"
+                                                    min={today}
                                                     onKeyDown={(e) => e.preventDefault()}
-                                                    id="DateTimeOfMeeting"
-                                                    name="DateTimeOfMeeting"
                                                     onChange={handleChange}
-                                                    min={todayWithTime}
-                                                    required             
-                                                    disabled = {hearingSection?.DateTimeOfMeeting ? true : false}
+                                                    required
+                                                    disabled = {hearingSection?.DateOfDelivery ? true : false}
                                                     />
 
-                                            </div>
+                                                </div>
+
+                                                <div className="fields-section-letter">
+                                                    <p>Date and Time of Meeting</p>
+                                                        <input type="datetime-local" className="generate-letter-input-field" 
+                                                        value={hearingSection?.DateTimeOfMeeting||otherInfo.DateTimeOfMeeting}
+                                                        onKeyDown={(e) => e.preventDefault()}
+                                                        id="DateTimeOfMeeting"
+                                                        name="DateTimeOfMeeting"
+                                                        onChange={handleChange}
+                                                        min={todayWithTime}
+                                                        required             
+                                                        disabled = {hearingSection?.DateTimeOfMeeting ? true : false}
+                                                        />
+
+                                                </div>
+
+                                         </div>
+
+                                          <div className="section-2-letter-right-side-others">
 
                                             <div className="fields-section-letter">
                                                 <p>Delivered By</p>
@@ -1449,21 +1470,26 @@ export default function GenerateDialogueLetter() {
                                                     </select>
 
 
-                                            </div>
+                                                    </div>
 
-                                            <div className="fields-section-letter">
-                                                <p>Date Filed</p>
-                                                <input type="date" className="generate-letter-input-field" 
-                                                value={hearingSection?.DateFiled || otherInfo.DateFiled}
-                                                max={today}
-                                                id="DateFiled"
-                                                name="DateFiled"
-                                                onKeyDown={(e) => e.preventDefault()}
-                                                onChange={handleChange}
-                                                disabled
-                                                />
+                                                    <div className="fields-section-letter">
+                                                        <p>Date Filed</p>
+                                                        <input type="date" className="generate-letter-input-field" 
+                                                        value={hearingSection?.DateFiled || otherInfo.DateFiled}
+                                                        max={today}
+                                                        id="DateFiled"
+                                                        name="DateFiled"
+                                                        onKeyDown={(e) => e.preventDefault()}
+                                                        onChange={handleChange}
+                                                        disabled
+                                                        />
 
-                                            </div>
+                                                    </div>
+
+                                          </div>
+
+
+
                                         </>
                                         )}
                                     </div>
