@@ -249,14 +249,12 @@ const normalizeStatus = (status: string): string =>
       router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument");
     };
 
-    const handleView =(id: string,reqType:string) => {
-      if(reqType === "Other Documents"){
-        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument/view?id=${id}`);
-      }
-      else{
-        router.push(`/dashboard/ServicesModule/ViewRequest?id=${id}`);
-      }
-    };
+    const handleView = (id: string, reqType: string) => {
+  
+    const cleanedReqType = reqType === "In Barangay" ? "inbarangay" : "online";
+    router.push(`/dashboard/ServicesModule/ViewRequest?reqType=${cleanedReqType}&id=${id}`);
+
+};
 
 
 
