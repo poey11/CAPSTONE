@@ -3458,7 +3458,7 @@ const handleChange = (
                               </div>
 
                               <div className="box-container-inbrgy">
-                                <span className="required-asterisk">*</span>
+                                {/*<span className="required-asterisk">*</span>*/}
 
                                 {/* File Upload Section */}
                                 <div className="file-upload-container-inbrgy">
@@ -3514,15 +3514,24 @@ const handleChange = (
                           </>
                         )}
 
-                        {(isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "Barangay ID" || clearanceInput.purpose === "First Time Jobseeker" || docType === "Construction") && (
-                              <>
+                       
                                 <div className="box-container-outer-inbrgy">
                                   <div className="title-verificationdocs-validID">
                                     Valid ID
                                   </div>
 
                                   <div className="box-container-inbrgy">
-                                    <span className="required-asterisk">*</span>
+                                   {(
+                                      clearanceInput.purpose === "Barangay ID" ||
+                                      docType !== "Barangay Clearance" &&
+                                      docType !== "Barangay Indigency" &&
+                                      docType !== "Barangay Certificate"
+                                    ) && (
+                                      <>
+                                        <span className="required-asterisk">*</span>
+                                      </>
+                                    )}
+                                    
 
                                     {/* File Upload Section */}
                                     <div className="file-upload-container-inbrgy">
@@ -3575,9 +3584,10 @@ const handleChange = (
                                     </div>
                                   </div>
                                 </div>
-                              </>
-                            )}
-                        {(docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID") && (
+                             
+                        {( docType === "Barangay Clearance" || docType === "Barangay Certificate" || docType === "Barangay Indigency" || clearanceInput.purpose === "First Time Jobseeker"
+                          //docType !== "Construction" &&  docType !== "Construction" &&  clearanceInput.purpose !== "Barangay ID"
+                          ) && (
 
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-endorsement">
@@ -3585,7 +3595,7 @@ const handleChange = (
                           </div>
 
                           <div className="box-container-inbrgy">
-                            <span className="required-asterisk">*</span>
+                            {/*<span className="required-asterisk">*</span>*/}
 
                             {/* File Upload Section */}
                             <div className="file-upload-container-inbrgy">
