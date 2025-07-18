@@ -299,7 +299,7 @@ const handleSubmitClick = async () => {
 
       setPopupMessage("Online Report Submitted Succesfuly!!");
       setShowPopup(true);
-      handleSMSToAssignedOfficer(); // Call the SMS function
+      //handleSMSToAssignedOfficer(); // Call the SMS function
       // Hide the popup after 3 seconds
       setTimeout(() => {
         setShowPopup(false);
