@@ -563,7 +563,7 @@ const [activeSection, setActiveSection] = useState("basic");
                                   value={formData.sex}
                                   onChange={handleChange}
                                   required>
-                                  <option value="" disabled>Choose a Gender</option>
+                                  <option value="" disabled>Select Gender</option>
                                   <option value="Male">Male</option>
                                   <option value="Female">Female</option>
                                 </select>

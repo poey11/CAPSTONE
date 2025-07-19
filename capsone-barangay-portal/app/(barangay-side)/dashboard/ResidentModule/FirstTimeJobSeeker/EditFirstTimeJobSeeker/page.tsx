@@ -360,7 +360,7 @@ export default function EditFirstTimeJobSeeker() {
                           value={formData.sex} 
                           onChange={handleChange} 
                           required>
-                          <option value="" disabled>Choose a Gender</option>
+                          <option value="" disabled>Select Gender</option>
                           <option value="M">Male</option>
                           <option value="F">Female</option>
                         </select>

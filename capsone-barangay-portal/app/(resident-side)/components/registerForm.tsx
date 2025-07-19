@@ -366,7 +366,7 @@ const confirmSubmit = async () => {
                             <div className="form-group-register-form">
                                     <label htmlFor="sex" className="form-label-register-form">Gender:<span className="required">*</span></label>
                                     <select value={resident.sex} onChange={handleChange} id="sex" name="sex"  className={`form-input-register-form ${invalidFields.includes("sex") ? "input-error" : ""}`} required>
-                                        <option value="" disabled>Select a Gender</option>
+                                        <option value="" disabled>Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
