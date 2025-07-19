@@ -600,6 +600,34 @@ export default function GenerateDialogueLetter() {
                 });
             }
 
+            // notif for dialogue letter signature for Punong Barangay
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "Punong Barangay",
+                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
+                    message: `Dialogue letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }
+
+            // notif for dialogue letter signature for Secretary
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "Secretary",
+                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
+                    message: `Dialogue letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }            
+
             // complainant notification
 
             if (userInfo.complainant?.residentId) {
@@ -668,6 +696,34 @@ export default function GenerateDialogueLetter() {
                     transactionType: "Assigned Incident"
                 });
             }
+
+            // notif for hearing letter signature for Punong Barangay
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "Punong Barangay",
+                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
+                    message: `Summons letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }
+
+            // notif for hearing letter signature for Secretary
+            if (otherInfo.LuponStaffId) {
+                const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
+                await setDoc(barangayNotificationRef, {
+                    recipientRole: "Secretary",
+                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
+                    message: `Summons letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
+                    timestamp: new Date(),
+                    isRead: false,
+                    incidentID: docId,
+                    transactionType: "Assigned Incident"
+                });
+            }   
 
             // complainant notification
             if (userInfo.complainant?.residentID) {
