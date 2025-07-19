@@ -410,7 +410,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                       <button
                         key={section}
                         type="button"
-                        className={`info-toggle-btn-assigned-online assigned-tasks-online ${activeSection === section ? "active" : ""}`}
+                        className={`info-toggle-btn-assigned-online assigned-tasks ${activeSection === section ? "active" : ""}`}
                         onClick={() => {
                           setActiveSection(section);
                           const params = new URLSearchParams(searchParams.toString());
