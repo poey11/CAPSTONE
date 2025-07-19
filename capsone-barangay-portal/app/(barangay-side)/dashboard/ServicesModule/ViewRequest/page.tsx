@@ -1860,7 +1860,7 @@ Functions for Reason for Reject
     const purpose = requestData?.purpose;
     const requestorName = requestData?.requestorFname;
 
-    // BARANGAY CLEARANCE
+    // BARANGAY CLEARANCE need else if for residency(only needs secretary)
     if (docType === "Barangay Clearance") {
         // Both PB and Secretary
         await addDoc(notificationRef, {
@@ -1910,6 +1910,17 @@ Functions for Reason for Reject
           recipientRole: "Punong Barangay",
           requestID: id,
         });
+
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Secretary",
+          requestID: id,
+        });
+                
       } else {
         // Secretary only
         await addDoc(notificationRef, {
