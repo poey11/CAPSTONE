@@ -958,11 +958,11 @@ export default function GenerateDialogueLetter() {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
                                     //sendSMSForSummons();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                                }, 5000); // wait 3 seconds
+                                }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
                                   router.back();
-                                }, 3000); // wait 3 seconds
+                                }, 2000); // wait 2 seconds
                               }
                             }}
                         className="send-sms-btn"
@@ -980,11 +980,11 @@ export default function GenerateDialogueLetter() {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
                                     //sendSMSForDialogue();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                                }, 5000); // wait 3 seconds
+                                }, 3000); // wait 3 seconds
                               } else {
                                 setTimeout(() => {
                                   router.back();
-                                }, 3000); // wait 3 seconds
+                                }, 2000); // wait 2 seconds
                               }
                             }}
                         className="send-sms-btn"
