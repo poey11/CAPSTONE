@@ -200,33 +200,33 @@ export default function ViewOnlineReports() {
 
 
 
-  const handleSMSToAssignedOfficer = async () => {
-    //sends an sms to the assigned officer regarding the incident report to conduct an investigation 
+  // const handleSMSToAssignedOfficer = async () => {
+  //   //sends an sms to the assigned officer regarding the incident report to conduct an investigation 
 
-    let respondentContact = listOfStaffs.find(staff => staff.id === respondent.respondentName)?.phone;
-    console.log("Respondent Contact:", respondentContact);
-    try {
-      const response = await fetch("/api/clickSendApi", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          to: respondentContact,
-          message: `You have been assigned to an incident report (${formData.caseNumber}). Please check the Barangay Portal for details.`,
-        }),
-      });
+  //   let respondentContact = listOfStaffs.find(staff => staff.id === respondent.respondentName)?.phone;
+  //   console.log("Respondent Contact:", respondentContact);
+  //   try {
+  //     const response = await fetch("/api/clickSendApi", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         to: respondentContact,
+  //         message: `You have been assigned to an incident report (${formData.caseNumber}). Please check the Barangay Portal for details.`,
+  //       }),
+  //     });
 
-      if (!response.ok) {
-        throw new Error("Failed to send SMS to assigned officer.");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to send SMS to assigned officer.");
+  //     }
       
-    } catch (error) {
+  //   } catch (error) {
       
-    }
+  //   }
 
 
-  }
+  // }
 
 const handleSubmitClick = async () => {
   const { respondentName, investigationReport  } = respondent;
