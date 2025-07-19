@@ -471,7 +471,7 @@ const confirmAccept = async () => {
                   <th>Name</th>
                   <th>Address</th>
                   <th>Phone</th>
-                  <th>Sex</th>
+                  <th>Gender</th>
                   <th>Role</th>
                   <th>Email</th>
                   <th>Status</th>
@@ -672,7 +672,7 @@ const confirmAccept = async () => {
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>Sex</p>
+                              <p>Gender</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
@@ -886,7 +886,7 @@ const confirmAccept = async () => {
                                     }}
                                     >
                                     <td>{resident.firstName}</td>
-                                    <td>{resident.middleName}</td> 
+                                    <td>{resident.middleName || "N/A"}</td> 
                                     <td>{resident.lastName}</td>
                                     <td>{resident.dateOfBirth}</td>
                                     </tr>
@@ -933,7 +933,7 @@ const confirmAccept = async () => {
                                         <td>{resident.contactNumber || "N/A"}</td>
                                     </tr>
                                     <tr>
-                                        <th>Sex</th>
+                                        <th>Gender</th>
                                         <td>{resident.sex || "N/A"}</td>
                                     </tr>
                                     <tr>
@@ -993,7 +993,7 @@ const confirmAccept = async () => {
                                     <td>{selectedUser?.phone || "N/A"}</td>
                                 </tr>
                                 <tr>
-                                    <th>Sex</th>
+                                    <th>Gender</th>
                                     <td>{selectedUser?.sex || "N/A"}</td>
                                 </tr>
                                 <tr>

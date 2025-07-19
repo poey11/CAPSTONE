@@ -425,7 +425,7 @@ export default function EditBarangayAccount() {
                                         </div>
 
                                         <div className="fields-section">
-                                            <p>Sex</p>
+                                            <p>Gender</p>
                                             <select
                                                 name="gender"
                                                 className="editbrgyuser-input-field"
