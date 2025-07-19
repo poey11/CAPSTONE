@@ -1862,18 +1862,6 @@ Functions for Reason for Reject
 
     // BARANGAY CLEARANCE
     if (docType === "Barangay Clearance") {
-      if (purpose === "Bail Bond") {
-        // Secretary only
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Secretary",
-          requestID: id,
-        });
-      } else {
         // Both PB and Secretary
         await addDoc(notificationRef, {
           message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
@@ -1894,7 +1882,6 @@ Functions for Reason for Reject
           recipientRole: "Punong Barangay",
           requestID: id,
         });
-      }
     }
 
     // BARANGAY CERTIFICATE
