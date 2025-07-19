@@ -1712,6 +1712,16 @@ Functions for Reason for Reject
       receivalWhen: new Date(),
     })
 
+
+    useEffect(() => {
+      if (!receival.receivalName && requestData?.requestorFname) {
+        setReceival((prev) => ({
+          ...prev,
+          receivalName: requestData.requestorFname,
+        }));
+      }
+    }, [requestData]);
+
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
     
@@ -1735,7 +1745,7 @@ Functions for Reason for Reject
     
       // Payment validation
       if (!shouldHidePayment) {
-        if (!orNumber || files1.length === 0) {
+        if (!orNumber || Number(orNumber) <= 0) {
           setPopupSection("payment");
           return;
         }
@@ -1755,17 +1765,7 @@ Functions for Reason for Reject
         orNumber: orNumber,
       };
     
-      if (files1.length > 0) {
-        const file = files1[0];
-        const response = await fetch(file.preview);
-        const blob = await response.blob();
-    
-        const storageRef = ref(storage, `ServiceRequests/${file.name}`);
-        await uploadBytes(storageRef, blob);
-        const downloadURL = await getDownloadURL(storageRef);
-    
-        updatedData.orImageUpload = downloadURL;
-      }
+      
     
       await updateDoc(docRef, updatedData);
     
@@ -2107,6 +2107,8 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
     }
 
+    
+
     return (  
         <main className="main-container-services-onlinereq">
 
@@ -2421,9 +2423,9 @@ Functions for Reason for Reject
                               {section === "emergency" && "Emergency Info"}
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
-                              {section === "received" && "Received"}
-                              {section === "or" && "OR Section"}
-                              {section === "photo" && "Photo Section"}
+                              {section === "received" && "Received By"}
+                              {section === "or" && "OR Details"}
+                              {section === "photo" && "Uploaded Photo"}
                               {section === "interview" && "Interview Remarks"}
                             </button>
                           ))}
@@ -2652,36 +2654,6 @@ Functions for Reason for Reject
                                             readOnly
                                           />
                                         </div>
-
-                                        <div className="services-onlinereq-fields-section">
-                                          <div className="services-onlinereq-verification-requirements-section">
-                                            <span className="verification-requirements-label">OR Image</span>
-                                            <div className="services-onlinereq-verification-requirements-container">
-                                              {requestData?.orImageUpload && (
-                                                <a
-                                                  href={
-                                                    requestData.orImageUpload.startsWith("https://")
-                                                      ? requestData.orImageUpload
-                                                      : resolvedImageUrls["orImageUpload"]
-                                                  }
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                >
-                                                  <img
-                                                    src={
-                                                      requestData.orImageUpload.startsWith("https://")
-                                                        ? requestData.orImageUpload
-                                                        : resolvedImageUrls["orImageUpload"]
-                                                    }
-                                                    alt="OR Image"
-                                                    className="verification-reqs-pic uploaded-picture"
-                                                    style={{ cursor: "pointer" }}
-                                                  />
-                                                </a>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </div>
                                       
                                     </div>
                                   </>
@@ -2800,8 +2772,8 @@ Functions for Reason for Reject
                     className={`info-toggle-btn ${popupSection === section ? "active" : ""}`}
                     onClick={() => setPopupSection(section)}
                   >
-                    {section === "receival" && "Receival Section"}
-                    {section === "payment" && "OR Section"}
+                    {section === "receival" && "Received By Details"}
+                    {section === "payment" && "OR Details"}
                   </button>
                 );
               })}
@@ -2813,16 +2785,20 @@ Functions for Reason for Reject
                   <>
                   <div className="doc-receival-content2">
                     <div className="services-onlinereq-doc-receival-form-section">
-                      <p>Name of Person Receiving<span className="required-asterisk">*</span></p>
-                      <select
-                        value={receival.receivalName}
-                        onChange={(e) => setReceival({ ...receival, receivalName: e.target.value })}
+                      <p>
+                        Name of Person Receiving<span className="required-asterisk">*</span>
+                      </p>
+                      <h1>* Please note: Only the requestor can pick up this document. *</h1>
+                      <input
+                        type="text"
+                        value={receival.receivalName || ""}
+                        onChange={(e) =>
+                          setReceival({ ...receival, receivalName: e.target.value })
+                        }
                         className="services-onlinereq-input-field"
                         required
-                      >
-                        <option value="" disabled>Select Name</option>
-                        <option value={requestData?.requestorFname}>{requestData?.requestorFname}</option>
-                      </select>
+                        readOnly
+                      />
                     </div>
                     <div className="services-onlinereq-doc-receival-form-section">
                       <p>Current Date and Time</p>
@@ -2865,59 +2841,17 @@ Functions for Reason for Reject
                           type="number"
                           className="services-onlinereq-input-field"
                           value={orNumber}
-                          onChange={(e) => setOrNumber(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            // Only allow empty or positive numbers
+                            if (value === '' || Number(value) > 0) {
+                              setOrNumber(value);
+                            }
+                          }}
                           required
                         />
                       </div>
-                      <div className="services-onlinereq-doc-receival-form-section">
-                        <p>Upload OR<span className="required-asterisk">*</span></p>
-                        <div className="box-container-OR">
-                          <div className="file-upload-container-OR">
-                            <label htmlFor="file-upload-OR" className="upload-link">Click to Upload File</label>
-                            <input
-                              id="file-upload-OR"
-                              type="file"
-                              className="file-upload-input"
-                              accept=".jpg,.jpeg,.png"
-                              onChange={handleORUpload}
-                              required
-                            />
-                            {files1.length > 0 && (
-                              <div className="file-name-image-display">
-                                {files1.map((file, index) => (
-                                  <div className="file-name-image-display-indiv" key={index}>
-                                    <li className="file-item">
-                                      {file.preview && (
-                                        <div className="filename-image-container">
-                                          <img
-                                            src={file.preview}
-                                            alt={file.name}
-                                            className="file-preview"
-                                          />
-                                        </div>
-                                      )}
-                                      <span className="file-name">{file.name}</span>
-                                      <div className="delete-container">
-                                        <button
-                                          type="button"
-                                          onClick={() => handleORDelete(file.name)}
-                                          className="delete-button"
-                                        >
-                                          <img
-                                            src="/images/trash.png"
-                                            alt="Delete"
-                                            className="delete-icon"
-                                          />
-                                        </button>
-                                      </div>
-                                    </li>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                    
                     </div>
                     
                   </>
