@@ -851,6 +851,14 @@ html, body {
   margin-left: 7%;
 }
 
+.services-onlinereq-doc-receival-form-section h1{
+  font-size: 13px;
+  color: #f44336;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
+  margin-left: 7%;
+}
+
 .services-onlinereq-doc-receival-form-section h2,
 .services-onlinereq-doc-receival-form-section-interview h2{
   font-size: 1.80rem;
