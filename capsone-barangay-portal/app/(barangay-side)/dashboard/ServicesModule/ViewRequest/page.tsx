@@ -1904,15 +1904,7 @@ Functions for Reason for Reject
           requestID: id,
         });
         
-        // await addDoc(collection(db, "Notifications"), {
-        //   residentID: requestData?.accID,
-        //   requestID: id,
-        //   message: `Your document request (${requestData?.requestId}) is now (In - Progress). We will notify you once it progresses.`,
-        //   timestamp: new Date(),
-        //   transactionType: "Online Service Request",
-        //   isRead: false,
-        // });        
-        
+
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
