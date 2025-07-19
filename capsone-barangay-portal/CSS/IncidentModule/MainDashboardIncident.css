@@ -637,10 +637,12 @@ SCROLL FOR CHROME ETC
     z-index: 2000; 
   }
 
+   /* changed this */
   .view-incident-popup {
     display: flex;
     flex-direction: column;
-    height: 550px;
+    /*height: 550px;*/
+    height: 600px;
     width: 65%;
     background-color: #ffffff;
     border-radius: 1rem;
@@ -744,13 +746,14 @@ SCROLL FOR CHROME ETC
   align-items: center;
 }
 
+/* changed this */
 .incident-info-toggle-btn {
   background-color: transparent;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
@@ -766,7 +769,8 @@ SCROLL FOR CHROME ETC
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
 .incident-view-info-main-container{
@@ -774,7 +778,7 @@ SCROLL FOR CHROME ETC
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 390px;
+  height: 440px;
   padding-left: 50px;
   padding-right: 50px;
 }
@@ -783,7 +787,7 @@ SCROLL FOR CHROME ETC
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 320px;
+  height: 350px;
   border-radius: 5px;
   background-color: #F0F2F8;
   border: 1px solid #eaecf2;
@@ -896,7 +900,7 @@ SCROLL FOR CHROME ETC
   flex-direction: column;
   padding-bottom: 10px;
   padding-left: 10px;
-  height: 200px;
+  height: 220px;
   overflow-y: auto;
 }
 
@@ -920,7 +924,7 @@ SCROLL FOR CHROME ETC
 .incident-location-section p,
 .incident-description-section p{
   color: black;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 200;
   text-align: left;
   padding-left: 40px;
@@ -948,6 +952,11 @@ SCROLL FOR CHROME ETC
   width: 80%;
   text-align: left;
 }
+
+.incident-main-details-title-section h1{
+  font-size: 16px;
+}
+
 
 .view-incident-description-icon-loc {
   width: 25px;
@@ -981,6 +990,7 @@ SCROLL FOR CHROME ETC
   margin-left: 15px;
 }
 
+/* changed this */
 .view-user-input-field {
   padding: 8px;
   width: 90%;
@@ -988,7 +998,9 @@ SCROLL FOR CHROME ETC
   border-radius: 5px;
   color: #000000;
   text-align: left;
-  height: 33px;
+  /*height: 33px;*/
+  height: 40px;
+  font-size: 16px;
 }
 
 .view-user-input-field:focus {

@@ -713,10 +713,12 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     animation: slideDownFadeIn 0.4s ease-out;
   }
 
+  /* changed this */
   .view-barangayuser-popup {
     display: flex;
     flex-direction: column;
-    height: 550px;
+    /*height: 550px;*/
+    height: 600px;
     width: 65%;
     background-color: #ffffff;
     border-radius: 1rem;
@@ -1348,6 +1350,7 @@ p .required {
   gap: 20px;
 }
 
+
 .view-user-main-section1{
   display: flex;
   align-items: center;
@@ -1449,6 +1452,8 @@ p .required {
   align-items: center;
 }
 
+
+/* changed this */
 .residentuser-info-toggle-btn,
 .barangayuser-info-toggle-btn {
   background-color: transparent;
@@ -1456,7 +1461,7 @@ p .required {
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
@@ -1470,13 +1475,17 @@ p .required {
   border-bottom: 3px solid #ff6600;
 }
 
+/* changed this */
 .view-user-header-body-bottom-section{
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
+
+/* changed this */
 .user-photo-section {
   display: flex;
   flex-direction: column;
@@ -1484,8 +1493,8 @@ p .required {
   justify-content: center;
   padding-bottom: 20px;
   width: 35%;
-  height: 390px;
-
+  /*height: 390px;*/
+  height: 440px;
 }
 
 .user-uploaded-photo-section {
@@ -1538,12 +1547,14 @@ p .required {
   height: 250px;
 }
 
+/* changed this */
 .view-user-info-main-container{
   width: 65%;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
   padding-right: 55px;
 }
 
@@ -1555,13 +1566,16 @@ p .required {
   height: 390px;
   padding-left: 50px;
   padding-right: 50px;
+  padding-top: 50px;
 }
 
+/* changed this */
 .view-user-info-main-content{
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 320px;
+  /*height: 320px;*/
+  height: 350px;
   border-radius: 5px;
   background-color: #F0F2F8;
   border: 1px solid #eaecf2;
@@ -1615,14 +1629,17 @@ p .required {
   margin-bottom: 13px;
 }
 
+
+/* changed this */
 .view-user-fields-section p{
-  font-size: 15px;
+  font-size: 16px;
   color: #2C3E50;
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 5%;
 }
 
+/* changed this */
 .view-user-input-field {
   padding: 8px;
   width: 90%;
@@ -1630,7 +1647,9 @@ p .required {
   border-radius: 5px;
   color: #000000;
   text-align: left;
-  height: 33px;
+  /*height: 33px;*/
+  height: 40px;
+  font-size: 16px;
 }
 
 .view-user-input-field:focus {
