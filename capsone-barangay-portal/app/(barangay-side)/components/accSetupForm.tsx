@@ -165,9 +165,9 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         </div>      
                         
                         <div className="form-group-accsetup-form">
-                            <label htmlFor="sex">Sex:<span className="required">*</span></label>
+                            <label htmlFor="sex">Gender:<span className="required">*</span></label>
                             <select value={user.sex} onChange={handleChange} id="sex" name="sex" className="form-input-accsetup-form" required>
-                                <option value="" disabled>Select a Sex</option>
+                                <option value="" disabled>Select Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>

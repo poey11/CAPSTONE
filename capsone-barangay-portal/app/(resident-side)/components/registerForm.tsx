@@ -327,14 +327,30 @@ const confirmSubmit = async () => {
 
                        
                         <div className="form-container-left-side">
-                              <div className="form-group-register-form">
-                                    <label htmlFor="sex" className="form-label-register-form">Sex:<span className="required">*</span></label>
-                                    <select value={resident.sex} onChange={handleChange} id="sex" name="sex"  className={`form-input-register-form ${invalidFields.includes("sex") ? "input-error" : ""}`} required>
-                                        <option value="" disabled>Select a Sex</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
+                                <input value={resident.first_name} onChange={handleChange} id="first_name" 
+                                type="text" name="first_name" 
+                                 className={`form-input-register-form ${invalidFields.includes("first_name") ? "input-error" : ""}`}
+                                placeholder= "Enter First Name"
+                                required />
+
                             </div>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
+                                
+
+                                <input value={resident.last_name} onChange={handleChange} id="last_name" 
+                                type="text" name="last_name" 
+                               className={`form-input-register-form ${invalidFields.includes("last_name") ? "input-error" : ""}`}
+                                placeholder="Enter Last Name"
+                                required/>
+
+                            </div>
+
+                              
 
                             <div className="form-group-register-form">
                                 <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
@@ -345,25 +361,17 @@ const confirmSubmit = async () => {
 
                             </div>
 
-                                    
-                            <div className="form-group-register-form">
-                                <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
-                                <input  value={resident.email} onChange={handleChange} id="email" 
-                                type="email" name="email" 
-                               className={`form-input-register-form ${invalidFields.includes("email") ? "input-error" : ""}`}
-                                placeholder="Enter Email"
-                                required />
-                            </div>
+                                
 
                             <div className="form-group-register-form">
-                                <label htmlFor="email" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
-                                <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                                type="date" name="dateOfBirth" 
-                                 className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                placeholder="Enter Email"
-                                max={today}
-                                required />
+                                    <label htmlFor="sex" className="form-label-register-form">Gender:<span className="required">*</span></label>
+                                    <select value={resident.sex} onChange={handleChange} id="sex" name="sex"  className={`form-input-register-form ${invalidFields.includes("sex") ? "input-error" : ""}`} required>
+                                        <option value="" disabled>Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
                             </div>
+
 
                               <div className="form-group-register-form">
                                     <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
@@ -387,28 +395,10 @@ const confirmSubmit = async () => {
                         </div>
 
                          <div className="form-container-right-side">
-                            <div className="form-group-register-form">
-                                <label htmlFor="first_name" className="form-label-register-form">First Name:<span className="required">*</span> </label>
-                                <input value={resident.first_name} onChange={handleChange} id="first_name" 
-                                type="text" name="first_name" 
-                                 className={`form-input-register-form ${invalidFields.includes("first_name") ? "input-error" : ""}`}
-                                placeholder= "Enter First Name"
-                                required />
+                            
+                            
 
-                            </div>
-
-                            <div className="form-group-register-form">
-                                <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
-                                
-
-                                <input value={resident.last_name} onChange={handleChange} id="last_name" 
-                                type="text" name="last_name" 
-                               className={`form-input-register-form ${invalidFields.includes("last_name") ? "input-error" : ""}`}
-                                placeholder="Enter Last Name"
-                                required/>
-
-                            </div>
-
+                            
                             <div className="form-group-register-form">
                                 <label htmlFor="phone" className="form-label-register-form" >Phone Number:<span className="required">*</span> </label>
                                 <input  value={resident.phone} id="phone" 
@@ -428,11 +418,29 @@ const confirmSubmit = async () => {
                             </div>
 
                             <div className="form-group-register-form">
+                                <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
+                                <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                                type="date" name="dateOfBirth" 
+                                 className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                max={today}
+                                required />
+                            </div>
+
+                            <div className="form-group-register-form">
                                 <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
                                 <input value={resident.address} onChange={handleChange} id="address" 
                                 type="text" name="address" 
                                className={`form-input-register-form ${invalidFields.includes("address") ? "input-error" : ""}`}
                                 placeholder="Enter Address"
+                                required />
+                            </div>
+
+                            <div className="form-group-register-form">
+                                <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
+                                <input  value={resident.email} onChange={handleChange} id="email" 
+                                type="email" name="email" 
+                               className={`form-input-register-form ${invalidFields.includes("email") ? "input-error" : ""}`}
+                                placeholder="Enter Email"
                                 required />
                             </div>
 

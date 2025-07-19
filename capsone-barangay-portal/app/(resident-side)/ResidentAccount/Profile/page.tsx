@@ -370,6 +370,18 @@ export default function SettingsPageResident() {
                                         disabled={formData.status === "Verified"}                        />
                                 </div>
 
+                                <div className="form-group-profile-section">
+                                        <label htmlFor="middle_name" className="form-label-profile-section">Middle Name:</label>
+                                        <input 
+                                            id="middle_name" 
+                                            name="middle_name"
+                                            value={formData.middle_name} 
+                                            onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
+                                            className="form-input-profile-section" 
+                                            required
+                                            disabled={formData.status === "Verified"}                        />
+                                    </div>
+
                                 
                                     <div className="form-group-profile-section">
                                         <label htmlFor="last_name" className="form-label-profile-section">Last Name:</label>
@@ -394,21 +406,6 @@ export default function SettingsPageResident() {
                                             disabled={formData.status === "Verified"}
                                         />
                                     </div>
-
-                                    <div className="form-group-profile-section">
-                                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
-                                            <input 
-                                                id="status" 
-                                                name="status"
-                                                value={
-                                                    formData.status === "Rejected" || formData.status === "Resubmission"
-                                                        ? "Unverified"
-                                                        : formData.status
-                                                }
-                                                className="form-input-profile-section" 
-                                                disabled 
-                                            />
-                                        </div>
 
                                 <div className="form-group-profile-section">
                                     <label htmlFor="password" className="form-label-profile-section">New Password:</label>
@@ -436,20 +433,23 @@ export default function SettingsPageResident() {
 
                             <div className="account-details-section-right">
 
-                                    <div className="form-group-profile-section">
-                                        <label htmlFor="middle_name" className="form-label-profile-section">Middle Name:</label>
-                                        <input 
-                                            id="middle_name" 
-                                            name="middle_name"
-                                            value={formData.middle_name} 
-                                            onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
-                                            className="form-input-profile-section" 
-                                            required
-                                            disabled={formData.status === "Verified"}                        />
-                                    </div>
+                                     <div className="form-group-profile-section">
+                                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
+                                            <input 
+                                                id="status" 
+                                                name="status"
+                                                value={
+                                                    formData.status === "Rejected" || formData.status === "Resubmission"
+                                                        ? "Unverified"
+                                                        : formData.status
+                                                }
+                                                className="form-input-profile-section" 
+                                                disabled 
+                                            />
+                                        </div>
 
                                       <div className="form-group-profile-section-dropdown">
-                                            <label htmlFor="sex" className="form-label-profile-section">Sex:</label>
+                                            <label htmlFor="sex" className="form-label-profile-section">Gender:</label>
                                             <select
                                                 id="sex"
                                                 name="sex"

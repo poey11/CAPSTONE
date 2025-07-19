@@ -14,9 +14,15 @@ import { report } from "process";
     const user = session?.user;
     const [requestData, setRequestData] = useState<any[]>([]);
     const [searchType, setSearchType] = useState("");
-    const [dateFrom, setDateFrom] = useState("");
-    const [dateTo, setDateTo] = useState("");
+   {/*} const [dateFrom, setDateFrom] = useState("");
+    const [dateTo, setDateTo] = useState("");*/}
     const [statusFilter, setStatusFilter] = useState("");
+    const [mainSearchRequestId, setMainSearchRequestId] = useState("");
+  const [mainSearchRequestor, setMainSearchRequestor] = useState("");
+const [mainSearchDateString, setMainSearchDateString] = useState("");
+
+
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedDocumentType, setSelectedDocumentType] = useState<string | null>(null);
@@ -61,6 +67,7 @@ const [taskSearchType, setTaskSearchType] = useState("");
 const [filteredTaskRequests, setFilteredTaskRequests] = useState(taskAssignedData);
 const [taskSearchRequestId, setTaskSearchRequestId] = useState("");
 const [taskSearchRequestor, setTaskSearchRequestor] = useState("");
+const [taskSearchDateString, setTaskSearchDateString] = useState("");
 
 
 /*For Names*/
@@ -91,9 +98,17 @@ useEffect(() => {
     );
   }
 
+    if (taskSearchDateString !== "") {
+    const date = new Date(taskSearchDateString);
+    const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    filtered = filtered.filter((req) =>
+      req.createdAt.startsWith(formattedDate)
+    );
+  }
+
   setFilteredTaskRequests(filtered);
   setTaskCurrentPage(1);
-}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter]);
+}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter, taskSearchDateString]);
 
 
 
@@ -215,32 +230,48 @@ const normalizeStatus = (status: string): string =>
   status.toLowerCase().replace(/\s*-\s*/g, "-").trim();
 
 
-      useEffect(() => {
-        let filtered = allRequests;
-      
-        if (searchType !== "" && searchType !== "All") {
-          filtered = filtered.filter((req) =>
-            req.docType.toLowerCase().includes(searchType.toLowerCase())
-          );
-        }
-      
-        if (dateFrom && dateTo) {
-          filtered = filtered.filter((req) => {
-            const requestDate = new Date(req.createdAt);
-            return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
-          });
-        }
-      
-        // Filter by Status
-        if (statusFilter !== "") {
-          filtered = filtered.filter(
-            (req) => normalizeStatus(req.status) === normalizeStatus(statusFilter)
-          );
-        }
-      
-        setFilteredMainRequests(filtered);
-        setMainCurrentPage(1);            
-      }, [searchType, dateFrom, dateTo, statusFilter, allRequests]);
+useEffect(() => {
+  let filtered = allRequests;
+
+  if (searchType !== "" && searchType !== "All") {
+    filtered = filtered.filter((req) =>
+      req.docType.toLowerCase().includes(searchType.toLowerCase())
+    );
+  }
+
+  if (mainSearchRequestId !== "") {
+    filtered = filtered.filter((req) =>
+      req.requestId.toLowerCase().includes(mainSearchRequestId.toLowerCase())
+    );
+  }
+
+  if (mainSearchRequestor !== "") {
+    const normalizedSearch = normalizeString(mainSearchRequestor);
+    filtered = filtered.filter((req) =>
+      normalizeString(req.requestor).includes(normalizedSearch)
+    );
+  }
+
+  if (statusFilter !== "") {
+    filtered = filtered.filter(
+      (req) => normalizeStatus(req.status) === normalizeStatus(statusFilter)
+    );
+  }
+
+      if (mainSearchDateString !== "") {
+      // Convert mainSearchDateString (e.g. '2025-07-17') to '7/17/2025'
+      const date = new Date(mainSearchDateString);
+      const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+
+      filtered = filtered.filter((req) =>
+        req.createdAt.startsWith(formattedDate)
+      );
+    }
+
+
+  setFilteredMainRequests(filtered);
+  setMainCurrentPage(1);
+}, [searchType, mainSearchRequestId, mainSearchRequestor, statusFilter, allRequests,mainSearchDateString]);
 
 
 
@@ -425,32 +456,26 @@ useEffect(() => {
           <>
               <div className={`inbarangayreq-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
                 
-                  <div className="date-input-group">
-                    <label htmlFor="dateFrom">From Date :</label>
-                    <input
-                      id="dateFrom"
-                      type="date"
-                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
-                      value={dateFrom}
-                       max={today}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                    />
-                  </div>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="Search by Request ID (e.g. LPLHOT - 0063)"
+                    className="inbarangay-services-module-filter"
+                    value={mainSearchRequestId}
+                    onChange={(e) => setMainSearchRequestId(e.target.value)}
+                  />
+                </div>
 
-                  <div className="date-input-group">
-                    <label htmlFor="dateTo">To Date :</label>
-                    <input
-                      id="dateTo"
-                      type="date"
-                     className={`inbarangay-services-module-filter ${dateFrom ? 'has-value' : ''}`}
-                      value={dateTo}
-                       max={today}
-                      onChange={(e) => setDateTo(e.target.value)}
-                    />
-                  </div>
-              
+                <div className="input-group">
+                  <input
+                    type="text"
+                    placeholder="Search by Requestor Name (e.g. Juan Dela Cruz)"
+                    className="inbarangay-services-module-filter"
+                    value={mainSearchRequestor}
+                    onChange={(e) => setMainSearchRequestor(e.target.value)}
+                  />
+                </div>
 
-         
 
                    <div className="dropdown-group">
 
@@ -486,10 +511,19 @@ useEffect(() => {
 
                     </div>
 
+                    <div className="input-group">
+                      <input
+                        type="date"
+                        className="inbarangay-services-module-filter"
+                        value={mainSearchDateString}
+                        onChange={(e) => setMainSearchDateString(e.target.value)}
+                        max={today}
+                      />
+                    </div>
+
+
 
             
-
-
 
               </div>
 
@@ -633,6 +667,17 @@ useEffect(() => {
                 </select>
               </div>
               */}
+
+              <div className="input-group">
+                <input
+                    type="date"
+                    className="inbarangay-services-module-filter"
+                    value={taskSearchDateString}
+                    onChange={(e) => setTaskSearchDateString(e.target.value)}
+                    max={today}
+                  />
+              </div>
+
           </div>
 
 

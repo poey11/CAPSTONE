@@ -51,6 +51,12 @@ html, body {
     max-height: 75%;
 }
 
+
+
+
+
+
+
 .expand-when-no-section1-resident-module {
   height: calc(75% + 7%); /* Increase height when section-1 is missing */
   max-height: calc(75% + 7%); /* or 40px pwede din*/
@@ -773,11 +779,12 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     z-index: 2000; 
   }
 
-
+  /* changed this */
   .view-barangayuser-popup {
     display: flex;
     flex-direction: column;
-    height: 550px;
+    /*height: 550px;*/
+    height: 600px;
     width: 65%;
     background-color: #ffffff;
     border-radius: 1rem;
@@ -882,13 +889,14 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   align-items: center;
 }
 
+/* changed this */
 .main-resident-info-toggle-btn {
   background-color: transparent;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
@@ -900,13 +908,16 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   border-bottom: 3px solid #ff6600;
 }
 
+/* changed this */
 .view-user-header-body-bottom-section{
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
+/* changed this */
 .mainresident-photo-section {
   display: flex;
   flex-direction: column;
@@ -914,7 +925,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   justify-content: center;
   padding-bottom: 20px;
   width: 35%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
 .user-details-label {
@@ -943,21 +955,24 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   height: 250px;
 }
 
-
+/* changed this */
 .view-main-resident-info-main-container{
   width: 65%;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
   padding-right: 55px;
 }
 
+/* changed this */
 .view-user-info-main-content{
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 320px;
+  /*height: 320px;*/
+  height: 350px;
   border-radius: 5px;
   background-color: #F0F2F8;
   border: 1px solid #eaecf2;
@@ -965,12 +980,13 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
 }
 
+/* changed this */
 .mainresident-scroll{
   width: 100%;
   padding-top: 22px;
   display: flex;
   flex-direction: row;
-  height:380px;
+  height:420px;
 }
 
 .view-mainresident-content-left-side{
@@ -1018,6 +1034,7 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   margin-left: 15px;
 }
 
+/* changed this */
 .view-user-input-field {
   padding: 8px;
   width: 90%;
@@ -1025,7 +1042,9 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   border-radius: 5px;
   color: #000000;
   text-align: left;
-  height: 33px;
+  /*height: 33px;*/
+  height: 40px;
+  font-size: 16px;
 }
 
 .view-user-input-field:focus {
@@ -1124,3 +1143,147 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   object-fit: cover;
   border-radius: 8px;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+/* Container */
+.records-table-wrapper {
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  height: 100%;
+}
+
+/* No data message */
+.records-message {
+  text-align: center;
+  font-size: 16px;
+  padding: 20px 0;
+}
+
+.records-message p {
+    color: #e22929;
+  font-weight: bold;
+}
+
+/* Table Styles */
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: #333;
+}
+
+
+
+.records-table th,
+.records-table td {
+  padding: 16px 12px;
+  text-align: center;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.records-table th {
+  background-color: #214666;
+  color: #FFFFFF;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+/* Columns */
+.add-new-col-case,
+.add-new-col-date,
+.add-new-col-concern,
+.add-new-col-status,
+.add-new-col-role {
+  width: auto;
+}
+
+/* Hover Row */
+.add-new-clickable-row {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.add-new-clickable-row:hover {
+  background-color: #f0f4ff;
+}
+
+/* Status Badge */
+.add-new-status-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  text-transform: capitalize;
+  width: 100px; /* Just enough to fit 'in-progress' */
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Status Colors */
+.add-new-status-badge.pending {
+  background-color: #d4d64f;
+  color: #FFFFFF;
+}
+
+
+.add-new-status-badge.cfa {
+   background-color: rgb(116, 16, 21);
+    color: #FFFFFF;
+}
+
+.add-new-status-badge.settled {
+  background-color: #1e5128;
+  color: #FFFFFF;
+}
+
+.add-new-status-badge.in-progress{
+  background-color: #dd5312;
+  color: #FFFFFF;
+}
+
+.add-new-status-badge.completed {
+background-color: #4caf50; 
+  color: #FFFFFF;
+}
+
+.add-new-status-badge.rejected {
+  background-color: #e22929;
+  color: #FFFFFF;
+}
+
+.add-new-status-badge.pick-up {
+background-color: #be5cb6;
+color: #FFFFFF;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

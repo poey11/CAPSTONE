@@ -14,6 +14,8 @@ export default function Transactions() {
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState<string>("All");
     const [filterStatus, setFilterStatus] = useState<string>("All");
+    const [filterRequestId, setFilterRequestId] = useState<string>("");
+
     const currentUser = user?.uid;
 
     useEffect(() => {
@@ -42,11 +44,26 @@ export default function Transactions() {
                     ...doc.data(),
                 }));
     
+                {/*}
                 const combined = [...incidents, ...services].sort((a, b) => {
                     const dateA = new Date((a as any).createdAt);
                     const dateB = new Date((b as any).createdAt);
                     return dateB.getTime() - dateA.getTime(); // Latest first
                 });
+                */}
+
+                const combined = [...incidents, ...services].sort((a, b) => {
+                    const isACompleted = (a as any).status === "Completed";
+                    const isBCompleted = (b as any).status === "Completed";
+
+                    if (isACompleted && !isBCompleted) return 1;
+                    if (!isACompleted && isBCompleted) return -1;
+
+                    const dateA = new Date((a as any).createdAt || (a as any).requestDate || 0);
+                    const dateB = new Date((b as any).createdAt || (b as any).requestDate || 0);
+                    return dateB.getTime() - dateA.getTime(); // Newest first
+                });
+
     
                 setTransactionData(combined);
             } catch (error) {
@@ -71,11 +88,17 @@ export default function Transactions() {
         }  
     };
 
-    const filteredTransactions = transactionData.filter((item) => {
-        const matchesType = filterType === "All" || item.type === filterType;
-        const matchesStatus = filterStatus === "All" || item.status === filterStatus;
-        return matchesType && matchesStatus;
-    });
+const filteredTransactions = transactionData.filter((item) => {
+    const matchesType = filterType === "All" || item.type === filterType;
+    const matchesStatus = filterStatus === "All" || item.status === filterStatus;
+
+    const requestId = item.caseNumber || item.requestId || "";
+    const matchesRequestId =
+        filterRequestId.trim() === "" ||
+        requestId.toLowerCase().includes(filterRequestId.trim().toLowerCase());
+
+    return matchesType && matchesStatus && matchesRequestId;
+});
 
     
 
@@ -87,32 +110,51 @@ export default function Transactions() {
             </div>
 
         <div className="transacntions-container fade-in">
-             <div className="filter-section-transactions">
+            <div className="filter-section-transactions">
                 <div className="filter-section-transactions-inner">
+                    <div className="filter-group">
+                    <label>Type</label>
+                    <select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value)}
+                        className="modern-filter-input"
+                    >
+                        <option value="All">All</option>
+                        <option value="IncidentReport">Incident Report</option>
+                        <option value="ServiceRequest">Document Request</option>
+                    </select>
+                    </div>
 
-                    <div className="filter-section-transactions-type">
-                        <p>Type:</p>
-                        <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="resident-module-filter">
-                            <option value="All">All</option>
-                            <option value="IncidentReport">Incident Report</option>
-                            <option value="ServiceRequest">Document Request</option>
-                     </select>
+                    <div className="filter-group">
+                    <label>Status</label>
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="modern-filter-input"
+                    >
+                        <option value="All">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Acknowledged">Acknowledged</option>
+                        <option value="Pick-up">Pick-Up</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="In - Progress">In - Progress</option>
+                    </select>
                     </div>
-                    
-               
-                    <div className="filter-section-transactions-type">
-                        <p>Status:</p>
-                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="resident-module-filter">
-                            <option value="All">All</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Acknowledged">Acknowledged</option>
-                            <option value="Pick-Up">Pick-Up</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Rejected">Rejected</option>
-                        </select>
+
+                    <div className="filter-group">
+                    <label>Request ID</label>
+                    <input
+                        type="text"
+                        placeholder="e.g. BSWOJU - 0018"
+                        value={filterRequestId}
+                        onChange={(e) => setFilterRequestId(e.target.value)}
+                        className="modern-filter-input"
+                    />
                     </div>
-               </div>
-            </div>
+                </div>
+                </div>
+
 
             <div className="transactions-history-transactions">
                 <div className="table-section-transactions">
@@ -149,7 +191,7 @@ export default function Transactions() {
                                         <td>{item.concerns || item.docType || "N/A"}</td>
                                         <td>{item.purpose || "N/A"}</td>
                                         <td>
-                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase() || ""}`}>
+                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
                                                 {item.status || "N/A"}
                                             </span>
                                         </td>

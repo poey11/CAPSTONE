@@ -618,7 +618,7 @@ useEffect(() => {
             </th>
             <th>Official Name</th>
                  <th>Position</th>
-            <th>Sex</th>
+            <th>Gender</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -885,7 +885,7 @@ useEffect(() => {
                                                 <input type="text" className="view-user-input-field" name="firstName"value={`${viewUser.firstName || ""} ${viewUser.middleName || ""} ${viewUser.lastName || ""}`} readOnly/>
                                             </div>
                                             <div className="view-user-fields-section">
-                                                <p>Sex</p>
+                                                <p>Gender</p>
                                                 <input type="input" className="view-user-input-field" name="gender" value={viewUser.sex  || "N/A"} readOnly/>
                                             </div>
                                             <div className="view-user-fields-section">

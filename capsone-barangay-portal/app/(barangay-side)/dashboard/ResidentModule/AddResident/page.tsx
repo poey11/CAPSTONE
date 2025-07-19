@@ -474,22 +474,39 @@ const [activeSection, setActiveSection] = useState("basic");
                           </div>
 
                           <div className="add-main-resident-section-2-right-side">
-                            
-                              <div className="fields-section">
-                                <p>Sex<span className="required">*</span></p>
-                                <select
-                                  name="sex"
-                                  className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
-                                  value={formData.sex}
-                                  onChange={handleChange}
-                                  required>
-                                  <option value="" disabled>Choose Gender</option>
-                                  <option value="Male">Male</option>
-                                  <option value="Female">Female</option>
-                                </select>
-                              </div>
+                          
 
-                              <div className="fields-section">
+                               <div className="fields-section">
+                                          <p>Date of Residency<span className="required">*</span></p>
+                                          <input 
+                                            type="date"
+                                            className={`add-resident-input-field ${invalidFields.includes("dateOfResidency") ? "input-error" : ""}`}
+                                            name="dateOfResidency"
+                                            value={formData.dateOfResidency}
+                                            onChange={handleChange}
+                                            max={new Date().toISOString().split("T")[0]}
+                                            required />
+                                        </div>
+
+                                  <div className="fields-section">
+                                      <p>Contact Number<span className="required">*</span></p>
+                                      <input 
+                                        type="tel" 
+                                        className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
+                                        name="contactNumber"
+                                        value={formData.contactNumber}
+                                        onChange={(e) => {
+                                          const input = e.target.value;
+                                          if (/^\d{0,11}$/.test(input)) {
+                                            setFormData({ ...formData, contactNumber: input });
+                                          }
+                                        }}
+                                        pattern="^[0-9]{11}$" 
+                                        placeholder="Enter 11-digit phone number" 
+                                      />
+                                    </div>
+
+                                    <div className="fields-section">
                                     <p>Address<span className="required">*</span></p>
                                     <input 
                                       type="text"
@@ -500,19 +517,6 @@ const [activeSection, setActiveSection] = useState("basic");
                                       onChange={handleChange}
                                       required />
                               </div>
-
-                              <div className="fields-section">
-                                    <p>Date of Birth<span className="required">*</span></p>
-                                    <input 
-                                      type="date"
-                                      className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                      name="dateOfBirth"
-                                      value={formData.dateOfBirth}
-                                      onChange={handleChange}
-                                      max={new Date().toISOString().split("T")[0]}
-                                      required />
-                                  </div>
-
                               
                           </div>
                         </div>
@@ -526,17 +530,19 @@ const [activeSection, setActiveSection] = useState("basic");
 
                           <div className="add-main-resident-section-2-left-side">
 
-                                <div className="fields-section">
-                                          <p>Date of Residency<span className="required">*</span></p>
-                                          <input 
-                                            type="date"
-                                            className={`add-resident-input-field ${invalidFields.includes("dateOfResidency") ? "input-error" : ""}`}
-                                            name="dateOfResidency"
-                                            value={formData.dateOfResidency}
-                                            onChange={handleChange}
-                                            max={new Date().toISOString().split("T")[0]}
-                                            required />
-                                        </div>
+                            <div className="fields-section">
+                                    <p>Date of Birth<span className="required">*</span></p>
+                                    <input 
+                                      type="date"
+                                      className={`add-resident-input-field ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                      name="dateOfBirth"
+                                      value={formData.dateOfBirth}
+                                      onChange={handleChange}
+                                      max={new Date().toISOString().split("T")[0]}
+                                      required />
+                                  </div>
+
+                              
                                 <div className="fields-section">
                                   <p>Age<span className="required">*</span></p>
                                   <input 
@@ -549,10 +555,21 @@ const [activeSection, setActiveSection] = useState("basic");
                                     readOnly />
                                 </div>
 
-                                    <div className="fields-section">
-                                      <p>Place of Birth</p>
-                                      <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
-                                    </div>
+                                <div className="fields-section">
+                                <p>Gender<span className="required">*</span></p>
+                                <select
+                                  name="sex"
+                                  className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
+                                  value={formData.sex}
+                                  onChange={handleChange}
+                                  required>
+                                  <option value="" disabled>Select Gender</option>
+                                  <option value="Male">Male</option>
+                                  <option value="Female">Female</option>
+                                </select>
+                              </div>
+
+                                
                                   
 
                                     <div className="fields-section">
@@ -652,28 +669,18 @@ const [activeSection, setActiveSection] = useState("basic");
 
 
                               <div className="add-main-resident-section-2-right-side">
+
+                                 <div className="fields-section">
+                                      <p>Place of Birth <span className="required">*</span></p>
+                                      <input type="text" className="add-resident-input-field" placeholder="Enter Place of Birth" name="placeOfBirth" value={formData.placeOfBirth} onChange={handleChange} />
+                                    </div>
+                                    
                                     <div className="fields-section">
                                       <p>Occupation</p>
                                       <input type="text" className="add-resident-input-field" placeholder="Enter Occupation" name="occupation" value={formData.occupation} onChange={handleChange} />
                                     </div>
                                     
-                                    <div className="fields-section">
-                                      <p>Contact Number<span className="required">*</span></p>
-                                      <input 
-                                        type="tel" 
-                                        className={`add-resident-input-field ${invalidFields.includes("contactNumber") ? "input-error" : ""}`}
-                                        name="contactNumber"
-                                        value={formData.contactNumber}
-                                        onChange={(e) => {
-                                          const input = e.target.value;
-                                          if (/^\d{0,11}$/.test(input)) {
-                                            setFormData({ ...formData, contactNumber: input });
-                                          }
-                                        }}
-                                        pattern="^[0-9]{11}$" 
-                                        placeholder="Enter 11-digit phone number" 
-                                      />
-                                    </div>
+                                    
 
                                     <div className="fields-section">
                                       <p>Email Address</p>

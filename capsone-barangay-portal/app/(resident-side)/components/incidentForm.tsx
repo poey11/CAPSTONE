@@ -557,7 +557,7 @@ const confirmSubmit = async () => {
                           name="middlename"
                           className="form-input-incident-report"
                           placeholder="Enter Middle Name"
-                          value={incidentReport.middlename}
+                          value={incidentReport.middlename || "N/A"}
                           onChange={handleFormChange}
                           disabled={isVerified}
                         />

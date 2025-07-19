@@ -819,7 +819,7 @@ if (incidentType) {
                                   /> 
                                 </div>
                                 <div className="view-user-fields-section">
-                                  <p>Sex</p>
+                                  <p>Gender</p>
                                   <input
                                     type="text"
                                     className="view-user-input-field"
@@ -834,7 +834,7 @@ if (incidentType) {
                             <>
                               <div className="view-mainresident-content-left-side">
                                 <div className="view-user-fields-section">
-                                  <p>Complainent's Last Name</p>
+                                  <p>Respondent's Last Name</p>
                                   <input
                                     type="text"
                                     className="view-user-input-field"
@@ -843,7 +843,7 @@ if (incidentType) {
                                   /> 
                                 </div>
                                 <div className="view-user-fields-section">
-                                  <p>Complainent's First Name</p>
+                                  <p>Respondent's First Name</p>
                                   <input
                                     type="text"
                                     className="view-user-input-field"
@@ -890,7 +890,7 @@ if (incidentType) {
                                   /> 
                                 </div>
                                 <div className="view-user-fields-section">
-                                  <p>Sex</p>
+                                  <p>Gender</p>
                                   <input
                                     type="text"
                                     className="view-user-input-field"

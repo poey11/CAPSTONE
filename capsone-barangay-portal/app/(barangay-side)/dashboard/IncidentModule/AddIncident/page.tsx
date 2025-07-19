@@ -834,7 +834,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                  </div>
 
                   <div className="fields-section-add">
-                    <p>Sex<span className="required">*</span></p>
+                    <p>Gender<span className="required">*</span></p>
                       <select 
                       name="sex" 
                       className={`add-incident-input-field ${showFieldErrors && !complainant.sex.trim() ? "input-error" : ""}`}
@@ -844,7 +844,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                       onChange={handleFormChange}
                       disabled={isComplainantResidentSelected}
                       >
-                      <option value="" disabled>Choose A Sex</option>
+                      <option value="" disabled>Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                     </select>
@@ -1022,7 +1022,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                       </div>
 
                       <div className="fields-section-add">
-                         <p>Sex<span className="required">*</span></p>
+                         <p>Gender<span className="required">*</span></p>
                          <select 
                           id="respondent"
                           name="sex" 
@@ -1032,7 +1032,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                           onChange={handleFormChange}
                           disabled={isRespondentResidentSelected}
                           >
-                          <option value="" disabled>Choose A Sex</option>
+                          <option value="" disabled>Select Gender</option>
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
                         </select>
