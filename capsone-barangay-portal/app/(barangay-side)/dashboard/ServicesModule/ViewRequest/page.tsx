@@ -1853,13 +1853,15 @@ Functions for Reason for Reject
         isRead: false,
       });
 
+
+      // part of the notification system for required signatures
         const isOnline = requestData?.accID !== "INBRGY-REQ";
         const messageSuffix = isOnline ? " (Online)" : "";
         const docType = requestData?.docType;
         const purpose = requestData?.purpose;
         const requestorName = requestData?.requestorFname;
 
-        // ========== BARANGAY CLEARANCE ==========
+        //  BARANGAY CLEARANCE 
         if (docType === "Barangay Clearance") {
           if (purpose === "Bail Bond") {
             // Secretary only
@@ -1896,7 +1898,7 @@ Functions for Reason for Reject
           }
         }
 
-        // ========== BARANGAY CERTIFICATE ==========
+        //  BARANGAY CERTIFICATE 
         else if (docType === "Barangay Certificate") {
           // Secretary only for all purposes
           await addDoc(notificationRef, {
@@ -1910,7 +1912,7 @@ Functions for Reason for Reject
           });
         }
 
-        // ========== BARANGAY INDIGENCY ==========
+        //  BARANGAY INDIGENCY 
         else if (docType === "Barangay Indigency") {
           if (
             purpose && ["Philhealth Sponsor", "Medical Assistance"].includes(purpose)
@@ -1939,7 +1941,7 @@ Functions for Reason for Reject
           }
         }
 
-        // ========== BUSINESS PERMITS ==========
+        //  BUSINESS PERMITS 
         else if (
           docType === "Business Permit" ||
           docType === "Temporary Business Permit"
@@ -1966,7 +1968,7 @@ Functions for Reason for Reject
           });
         }
 
-        // ========== CONSTRUCTION ==========
+        //  CONSTRUCTION 
         else if (docType === "Construction") {
           // Both PB and Secretary
           await addDoc(notificationRef, {
@@ -1990,7 +1992,7 @@ Functions for Reason for Reject
           });
         }
 
-        // ========== OTHER DOCUMENTS ==========
+        //  OTHER DOCUMENTS 
         else if (docType === "Other Documents" && purpose === "Barangay ID") {
           // PB only
           await addDoc(notificationRef, {
