@@ -380,7 +380,7 @@ export default function Action() {
         const residentData = residentDocSnap.data();
         const gender = residentData.sex;
         const mrms = gender === "Male" ? "Mr." : "Ms.";
-        const fullName = `${residentData.firstName} ${residentData.middleName} ${residentData.lastName}`;
+        const fullName = `${residentData.firstName||""}${` ${residentData.middleName} `||" "}${residentData.lastName||""}`;
   
         //  Handle age calculation based on death date or today
         const birthDate = new Date(residentData.dateOfBirth);
@@ -425,7 +425,7 @@ export default function Action() {
         //  Fallback for Unverified accounts
         const gender = userData.sex;
         const mrms = gender === "male" ? "Mr." : "Ms.";
-        const fullName = `${userData.first_name} ${userData.middle_name} ${userData.last_name}`;
+        const fullName = `${userData.first_name} ${userData.middle_name} ${userData.last_name||""}`;
   
         setClearanceInput((prev: any) => ({
           ...prev,
@@ -915,8 +915,7 @@ const handleFileChange = (
           requiredFields.push("partnerWifeHusbandFullName","cohabitationRelationship", "cohabitationStartDate");
         }
         if(clearanceInput.purpose === "Guardianship") {
-          requiredFields.push("goodMoralPurpose", );
-        
+          requiredFields.push("guardianshipType","wardRelationship", "fullName" ,"wardFname");
         }
         if(clearanceInput.purpose === "Good Moral and Probation") {
           requiredFields.push("goodMoralPurpose",);
@@ -970,9 +969,8 @@ const handleFileChange = (
           );
         }
         if(clearanceInput.purpose === "First Time Jobseeker") {
-          requiredFields.push("emergencyDetails.fullName","emergencyDetails.address"
-            ,"emergencyDetails.contactNumber", "emergencyDetails.relationship"
-          )
+          requiredFields.push("course","isBeneficiary"
+            ,"educationalAttainment")
         }
       }
       // Barangay Permits
@@ -1033,7 +1031,6 @@ const handleFileChange = (
       }
       if(clearanceInput.purpose === "Barangay ID"){
         requiredImageFields.push("signaturejpg", "validIDjpg");
-
       }
       if (docType === "Temporary Business Permit" || docType === "Business Permit") {
         requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "validIDjpg");
@@ -1048,45 +1045,68 @@ const handleFileChange = (
 
       
 
-      // Check for required image uploads (at least one for ID/letter if needed)
+      const atLeastOneIDRequired =
+        (docType === "Barangay Certificate" ||
+          docType === "Barangay Clearance" ||
+          docType === "Barangay Indigency" ||
+          clearanceInput.purpose === "Barangay ID" ||
+          clearanceInput.purpose === "First Time Jobseeker"
+        );
+      
+      // Step 1: Handle special case: Require at least one of the three
       if (
-      (docType === "Barangay Certificate" ||
-        docType === "Barangay Clearance" ||
-        docType === "Barangay Indigency" ||
-        clearanceInput.purpose === "Barangay ID" ||
-        clearanceInput.purpose === "First Time Jobseeker") &&
-      !clearanceInput.barangayIDjpg &&
-      !clearanceInput.validIDjpg &&
-      !clearanceInput.letterjpg
+        atLeastOneIDRequired &&
+        !clearanceInput.barangayIDjpg &&
+        !clearanceInput.validIDjpg &&
+        !clearanceInput.letterjpg
       ) {
-      setErrorMessage("Please upload at least one of the following documents: Barangay ID, Valid ID, or Endorsement Letter.");
-      setShowErrorPopup(true);
-      return;
-      }
-
-      // Check all other required image fields
-      for (const imgField of requiredImageFields) {
-      if (
-        imgField !== "barangayIDjpg" &&
-        imgField !== "validIDjpg" &&
-        (!clearanceInput[imgField] || !(clearanceInput[imgField] instanceof File))
-      ) {
-        let fieldLabel = "";
-
-        if (imgField === "isCCTV") {
-          fieldLabel = "CCTV Picture";
-        } else {
-          fieldLabel = imgField
-            .replace(/([A-Z])/g, " $1")
-            .replace(/jpg$/, "")
-            .toLowerCase();
-        }
-
-
-        setErrorMessage(`Please upload the required image: ${fieldLabel}.`);
+        setErrorMessage(
+          "Please upload at least one of the following documents: Barangay ID, Valid ID, or Endorsement Letter."
+        );
         setShowErrorPopup(true);
         return;
       }
+
+      // Mapping image field keys to human-readable labels
+      const imageFieldLabels: { [key: string]: string } = {
+        isCCTV: "CCTV Picture",
+        copyOfPropertyTitle: "Copy of Property Title",
+        dtiRegistration: "DTI Registration",
+        approvedBldgPlan: "Approved Building Plan",
+        deathCertificate: "Death Certificate",
+        twoByTwoPicture: "2x2 Picture",
+        signaturejpg: "Signature",
+        letterjpg: "Endorsement Letter",
+        barangayIDjpg: "Barangay ID",
+        validIDjpg: "Valid ID",
+        taxDeclaration: "Tax Declaration",
+      };
+
+
+
+      // Step 2: Check other required image fields
+      for (const imgField of requiredImageFields) {
+        const value = clearanceInput[imgField];
+      
+        if (
+          (!value || !(value instanceof File)) &&
+          !(atLeastOneIDRequired &&
+            (imgField === "barangayIDjpg" ||
+              imgField === "validIDjpg" ||
+              imgField === "letterjpg"))
+        ) {
+          const label =
+            imageFieldLabels[imgField] ||
+            imgField
+              .replace(/([A-Z])/g, " $1")
+              .replace(/jpg$/, "")
+              .toLowerCase()
+              .replace(/\b\w/g, (c) => c.toUpperCase());
+        
+          setErrorMessage(`Please upload the required image: ${label}.`);
+          setShowErrorPopup(true);
+          return;
+        }
       }
 
       // List all file-related keys in an array for easier maintenance
@@ -1265,7 +1285,7 @@ const handleFileChange = (
         requestId: clearanceInput.requestId,
         status: "Pending",
         statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
+        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         dateOfResidency: clearanceInput.dateOfResidency,
         address: clearanceInput.address,
@@ -1383,8 +1403,7 @@ const handleFileChange = (
     };
 
     const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
-
-    for (const key of requiredFields) {
+      for (const key of requiredFields) {
         const fieldValue = clearanceInput[key as keyof ClearanceInput];
         if (
           fieldValue === undefined ||
@@ -1397,12 +1416,25 @@ const handleFileChange = (
           else if(key ==="CYTo") message = "Cohabitation Year To";
           else if(key ==="noIncomePurpose") message = "No Income Purpose";
           else if(key ==="noIncomeChildFName") message = "No Income Child's First Name";
-          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose";
+          else if(key ==="goodMoralOtherPurpose" && (clearanceInput.purpose === "Garage/PUV" || clearanceInput.purpose === "Garage/TRU")) message = "Certificate Purpose";          
+          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose"; 
+          else if(key ==="attestedBy") message = "Attested By";
+          else if(key ==="partnerWifeHusbandFullName") message = "Partner/Wife/Husband Full Name";
           else if(key ==="cohabitationRelationship") message = "Cohabitation Relationship";
           else if(key ==="cohabitationStartDate") message = "Cohabitation Start Date";
+          else if(key ==="guardianshipType" ) message = "Type of Guardianship Certificate";
+          else if(key ==="wardFname") message = "Ward's First Name";
+          else if(key ==="wardRelationship") message = "Ward's Relationship";
+          else if(key ==="fromAddress") message = "From Address";
+          else if(key ==="toAddress") message = "To Address";
+          else if(key ==="dateofdeath") message = "Date of Death";
+          else if(key ==="estateSince") message = "Estate Since";
           else if(key ==="goodMoralPurpose") message = "Good Moral Purpose";
+          else if(key ==="vehicleType" && clearanceInput.purpose === "Garage/PUV") message = "Vehicle Description";
           else if(key ==="vehicleType") message = "Vehicle Type";
           else if(key ==="vehicleMake") message = "Vehicle Make";
+          else if(key ==="noOfVehicles" && clearanceInput.purpose === "Garage/TRU") message = "Nos Of Tricycle/s";
+          else if(key ==="noOfVehicles") message = "Nos Of Vehicle/s";
           else if(key ==="vehiclePlateNo") message = "Vehicle Plate Number";
           else if(key ==="vehicleSerialNo") message = "Vehicle Serial Number";
           else if(key ==="vehicleChassisNo") message = "Vehicle Chassis Number";
@@ -1443,7 +1475,9 @@ const handleFileChange = (
           else if (key === "civilStatus") message = "Civil Status";
           else if (key === "citizenship") message = "Citizenship";
           else if (key === "purpose") message = "Purpose";
-        else message = key
+          else if (key === "educationalAttainment") message = "Educational Attainment";
+          else if (key === "course") message = "Course";
+          else message = key
           .replace(/([A-Z])/g, ' $1')   // Add space before capital letters
           .replace(/[\.\-_]/g, ' ')     // Replace dot (.), dash (-), and underscore (_) with space
           

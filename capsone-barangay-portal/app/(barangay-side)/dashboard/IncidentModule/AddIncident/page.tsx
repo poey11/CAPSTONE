@@ -260,12 +260,6 @@ export default function AddIncident() {
   const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
   const selectedFile = event.target.files?.[0];
   if (selectedFile) {
-    const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
-    
-    if (!validImageTypes.includes(selectedFile.type)) {
-      alert("Only JPG, JPEG, and PNG files are allowed.");
-      return;
-    }
 
     // Replace existing file instead of adding multiple
     const preview = URL.createObjectURL(selectedFile);
@@ -281,6 +275,51 @@ export default function AddIncident() {
     if (fileInput) {
       fileInput.value = "";
     }
+  };
+
+  const handleValidatedFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const input = e.target;
+
+      const isImage = file.type.startsWith("image/");
+      const isAudio = file.type.startsWith("audio/");
+      const isVideo = file.type.startsWith("video/");
+
+      if (isImage) {
+        handleFileChangeContainer1(e);
+        handleFormChange(e);
+        return;
+      }
+    
+      const media = document.createElement(isAudio ? "audio" : "video");
+      media.preload = "metadata";
+    
+      media.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(media.src);
+      
+        const duration = media.duration;
+        if (duration <= 30) {
+          handleFileChangeContainer1(e);
+          handleFormChange(e);
+        } else {
+          setPopupErrorMessage("Only media up to 30 seconds is allowed.");
+          setShowErrorPopup(true);
+          setTimeout(() => {
+            setShowErrorPopup(false);
+          }
+          , 3000);
+          input.value = ""; // reset the file input
+        }
+      };
+    
+      media.onerror = () => {
+        setPopupErrorMessage("Failed to load media file. Please try another one.");
+        input.value = ""; // reset input
+      };
+
+    media.src = URL.createObjectURL(file);
   };
 
   const handleUpload = async () => {
@@ -431,7 +470,14 @@ const handleSubmit = async (event: React.FormEvent) => {
       return;
     }
   }
-  
+  if(filesContainer1.length === 0 && !reportInfo.file) {
+    setPopupErrorMessage("Please upload a audio, video or image as proof of incident.");
+    setShowErrorPopup(true);
+    setTimeout(() => {
+      setShowErrorPopup(false);
+    }, 3000);
+    return;
+  }
   
   
     // Validate Report Info
@@ -1347,10 +1393,11 @@ const handleSubmit = async (event: React.FormEvent) => {
                             id="file-upload1"
                             type="file"
                             className="file-upload-input-add"
-                            accept=".jpg,.jpeg,.png"
+                            accept="image/*,audio/*,video/mp4,video/webm,video/ogg"
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              handleFileChangeContainer1(e);
-                              handleFormChange(e);
+                              handleValidatedFileUpload(e);
+                              // handleFileChangeContainer1(e);
+                              // handleFormChange(e);
                             }} // Handle file selection
                           />
                           <div className="uploadedFiles-container-add">

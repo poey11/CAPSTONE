@@ -963,7 +963,6 @@ export default function action() {
 
      
 
-      /* wala pa ung custom document */
       requiredFields.push("requestorFname",
           "requestorMrMs", "address","dateOfResidency",
           "birthday","age", "gender", "contact", "civilStatus",
@@ -994,8 +993,7 @@ export default function action() {
           requiredFields.push("partnerWifeHusbandFullName","cohabitationRelationship", "cohabitationStartDate");
         }
         if(clearanceInput.purpose === "Guardianship") {
-          requiredFields.push("goodMoralPurpose", );
-        
+          requiredFields.push("guardianshipType","wardRelationship", "fullName" ,"wardFname");
         }
         if(clearanceInput.purpose === "Good Moral and Probation") {
           requiredFields.push("goodMoralPurpose",);
@@ -1036,7 +1034,7 @@ export default function action() {
       }
 
       if(clearanceInput.docType === "Barangay Clearance") {
-        
+        requiredFields.push("purpose");   
         if(clearanceInput.purpose === "Residency"){
           requiredFields.push("CYFrom", "CYTo");
         }
@@ -1049,9 +1047,8 @@ export default function action() {
           );
         }
         if(clearanceInput.purpose === "First Time Jobseeker") {
-          requiredFields.push("emergencyDetails.fullName","emergencyDetails.address"
-            ,"emergencyDetails.contactNumber", "emergencyDetails.relationship"
-          )
+          requiredFields.push("course","isBeneficiary"
+            ,"educationalAttainment")
         }
       }
       // Barangay Permits
@@ -1064,6 +1061,7 @@ export default function action() {
           "homeOrOfficeAddress", "projectName", "projectLocation"
         );
       }
+
 
       const docFields = otherDocFields[clearanceInput.docType || ''];
       const purposeFields = otherDocFields[clearanceInput.purpose || ''];
@@ -1248,9 +1246,8 @@ export default function action() {
       handleConfirmClick();
     };
 
-    const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
-
-    for (const key of requiredFields) {
+     const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
+      for (const key of requiredFields) {
         const fieldValue = clearanceInput[key as keyof ClearanceInput];
         if (
           fieldValue === undefined ||
@@ -1263,12 +1260,25 @@ export default function action() {
           else if(key ==="CYTo") message = "Cohabitation Year To";
           else if(key ==="noIncomePurpose") message = "No Income Purpose";
           else if(key ==="noIncomeChildFName") message = "No Income Child's First Name";
-          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose";
+          else if(key ==="goodMoralOtherPurpose" && (clearanceInput.purpose === "Garage/PUV" || clearanceInput.purpose === "Garage/TRU")) message = "Certificate Purpose";          
+          else if(key ==="goodMoralOtherPurpose") message = "Good Moral Other Purpose"; 
+          else if(key ==="attestedBy") message = "Attested By";
+          else if(key ==="partnerWifeHusbandFullName") message = "Partner/Wife/Husband Full Name";
           else if(key ==="cohabitationRelationship") message = "Cohabitation Relationship";
           else if(key ==="cohabitationStartDate") message = "Cohabitation Start Date";
+          else if(key ==="guardianshipType" ) message = "Type of Guardianship Certificate";
+          else if(key ==="wardFname") message = "Ward's First Name";
+          else if(key ==="wardRelationship") message = "Ward's Relationship";
+          else if(key ==="fromAddress") message = "From Address";
+          else if(key ==="toAddress") message = "To Address";
+          else if(key ==="dateofdeath") message = "Date of Death";
+          else if(key ==="estateSince") message = "Estate Since";
           else if(key ==="goodMoralPurpose") message = "Good Moral Purpose";
+          else if(key ==="vehicleType" && clearanceInput.purpose === "Garage/PUV") message = "Vehicle Description";
           else if(key ==="vehicleType") message = "Vehicle Type";
           else if(key ==="vehicleMake") message = "Vehicle Make";
+          else if(key ==="noOfVehicles" && clearanceInput.purpose === "Garage/TRU") message = "Nos Of Tricycle/s";
+          else if(key ==="noOfVehicles") message = "Nos Of Vehicle/s";
           else if(key ==="vehiclePlateNo") message = "Vehicle Plate Number";
           else if(key ==="vehicleSerialNo") message = "Vehicle Serial Number";
           else if(key ==="vehicleChassisNo") message = "Vehicle Chassis Number";
@@ -1295,7 +1305,7 @@ export default function action() {
           else if (key === "requestorMrMs") message = "Requestor's Mr/Ms";
           else if (key === "address") message = "Address";
           else if (key === "dateOfResidency") message = "Date of Residency";
-          else if (key === "birthday") message = "Birthday";
+          else if (key=== "birthday") message = "Birthday";
           else if (key === "age") message = "Age";
           else if(key === "birthplace") message = "Place of Birth";
           else if(key === "religion") message = "Religion";
@@ -1309,6 +1319,8 @@ export default function action() {
           else if (key === "civilStatus") message = "Civil Status";
           else if (key === "citizenship") message = "Citizenship";
           else if (key === "purpose") message = "Purpose";
+          else if (key === "educationalAttainment") message = "Educational Attainment";
+          else if (key === "course") message = "Course";
           else message = key
           .replace(/([A-Z])/g, ' $1')   // Add space before capital letters
           .replace(/[\.\-_]/g, ' ')     // Replace dot (.), dash (-), and underscore (_) with space
@@ -1320,7 +1332,7 @@ export default function action() {
         }
       }
       return true;
-    }    
+    }   
 
     const confirmCreate = async () => {
         setShowCreatePopup(false);
