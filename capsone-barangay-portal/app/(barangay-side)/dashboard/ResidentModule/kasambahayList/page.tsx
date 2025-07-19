@@ -650,7 +650,7 @@ const hasAnimatedOnce = useRef(false);
                           </div>
                           <div className="view-main-user-content-right-side">
                             <div className="view-user-fields-section">
-                              <p>Sex</p>
+                              <p>Gender</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"

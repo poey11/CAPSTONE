@@ -353,14 +353,14 @@ export default function EditFirstTimeJobSeeker() {
 
                     <div className="add-main-resident-section-2-right-side">
                       <div className="fields-section">
-                        <p>Sex<span className="required">*</span></p>
+                        <p>Gender<span className="required">*</span></p>
                         <select 
                           name="sex" 
                           className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
                           value={formData.sex} 
                           onChange={handleChange} 
                           required>
-                          <option value="" disabled>Choose Gender</option>
+                          <option value="" disabled>Select Gender</option>
                           <option value="M">Male</option>
                           <option value="F">Female</option>
                         </select>

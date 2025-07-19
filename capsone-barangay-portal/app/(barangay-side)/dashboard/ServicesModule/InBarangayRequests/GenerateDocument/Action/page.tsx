@@ -2157,7 +2157,7 @@ const handleChange = (
                               onChange={handleChange} // Handle change to update state
                               disabled={isResidentSelected}
                             >
-                              <option value="" disabled>Select gender</option>
+                              <option value="" disabled>Select Gender</option>
                               <option value="Male">Male</option>
                               <option value="Female">Female</option>
                             </select>

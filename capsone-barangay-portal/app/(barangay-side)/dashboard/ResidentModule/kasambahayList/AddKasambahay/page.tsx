@@ -433,11 +433,13 @@ export default function AddKasambahay() {
     setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const filteredResidents = residents.filter((resident) =>
-  `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase())
-);
+  const filteredResidents = residents
+  .filter((resident) =>
+    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  )
+  .sort((a, b) => a.residentNumber - b.residentNumber);
 
 
   const [activeSection, setActiveSection] = useState("basic");
@@ -497,13 +499,15 @@ export default function AddKasambahay() {
       
 
       <div className="add-resident-bottom-section-scroll">
-        <div className="residents-search-section">
-              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleResidentClick} />
-            </div>
+        
         <form id="addKasambahayForm" onSubmit={handleSubmit} className="add-resident-section-2">
 
         {activeSection === "basic" && (
           <>
+            <div className="kasambahay-residents-search-section">
+              <input type="text"  className="select-resident-input-field" placeholder="Select Resident" onClick={handleResidentClick} />
+            </div>
+            
             <div className="add-main-resident-section-2-full-top">  
               <div className="add-main-resident-section-2-left-side">
                 <div className="fields-section">
@@ -543,14 +547,14 @@ export default function AddKasambahay() {
 
               <div className="add-main-resident-section-2-right-side">
                 <div className="fields-section">
-                  <p>Sex<span className="required">*</span></p>
+                  <p>Gender<span className="required">*</span></p>
                   <select
                     name="sex"
                     className={`add-resident-input-field ${invalidFields.includes("sex") ? "input-error" : ""}`}
                     value={formData.sex}
                     onChange={handleChange}
                     required>
-                    <option value="" disabled>Choose Gender</option>
+                    <option value="" disabled>Select Gender</option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                   </select>
