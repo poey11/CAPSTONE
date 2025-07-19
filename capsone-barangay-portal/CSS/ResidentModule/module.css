@@ -1209,12 +1209,15 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 
 /* Status Badge */
 .add-new-status-badge {
-  padding: 6px 12px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   display: inline-block;
   text-transform: capitalize;
+  width: 100px; /* Just enough to fit 'in-progress' */
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* Status Colors */
@@ -1234,33 +1237,39 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   color: #FFFFFF;
 }
 
-.add-new-status-in-progress {
+.add-new-status-badge.in-progress{
   background-color: #dd5312;
   color: #FFFFFF;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .add-new-status-badge.completed {
-  background-color: #e6ffed;
+background-color: #4caf50; 
   color: #FFFFFF;
 }
 
 .add-new-status-badge.rejected {
-  background-color: #ffeaea;
+  background-color: #e22929;
   color: #FFFFFF;
 }
+
+.add-new-status-badge.pick-up {
+background-color: #be5cb6;
+color: #FFFFFF;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

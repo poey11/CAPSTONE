@@ -403,6 +403,40 @@ CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
 
 
 
+
+
+  /*
+    CODE FOR THE SERVICE RECORDS
+  */
+
+
+    
+const [serviceRequests, setServiceRequests] = useState<any[]>([]);
+
+useEffect(() => {
+  const fetchServiceRequests = async () => {
+    if (!residentId) return;
+
+    try {
+      const requestsRef = collection(db, "ServiceRequests");
+      const q = query(requestsRef, where("residentId", "==", residentId));
+      const snapshot = await getDocs(q);
+
+      const requests: any[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setServiceRequests(requests);
+    } catch (error) {
+      console.error("Error fetching service requests:", error);
+    }
+  };
+
+  fetchServiceRequests();
+}, [residentId]);
+
+
   return (
     <main className="resident-module-main-container" /* edited this class*/>
     
@@ -992,8 +1026,8 @@ CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
                             <th className="add-new-col-concern">
                               {incidentReports.some((i) => i.department === "Online") ? "Concerns" : "Nature"}
                             </th>
-                            <th className="add-new-col-status">Status</th>
                             <th className="add-new-col-role">Role</th>
+                              <th className="add-new-col-status">Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1021,14 +1055,14 @@ CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
                                   </Link>
                                 </td>
                                 <td>
+                                  <Link href={targetUrl}>{incident.role}</Link>
+                                </td>
+                                                                <td>
                                   <Link href={targetUrl}>
-                                    <span className={`add-new-status-badge ${incident.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                    <span className={`add-new-status-badge ${incident.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
                                       {incident.status.charAt(0).toUpperCase() + incident.status.slice(1).toLowerCase()}
                                     </span>
                                   </Link>
-                                </td>
-                                <td>
-                                  <Link href={targetUrl}>{incident.role}</Link>
                                 </td>
                               </tr>
                             );
@@ -1041,6 +1075,65 @@ CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
 
                     </>
                   )}
+
+
+
+                 {viewActiveSection  === "services" && (
+                    <>
+                          <div className="add-new-incident-table-wrapper">
+                  {serviceRequests.length === 0 ? (
+                    <div className="add-new-no-incident">
+                      <p>No service requests found for this resident.</p>
+                    </div>
+                  ) : (
+                    <table className="add-new-incident-table">
+                      <thead>
+                        <tr>
+                          <th className="add-new-col-case">Account ID</th>
+                          <th className="add-new-col-concern">Purpose</th>
+                          <th className="add-new-col-date">Document Type</th>
+                          <th className="add-new-col-status">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {serviceRequests.map((req) => (
+                          <tr key={req.id} className="add-new-clickable-row">
+                            <td>
+                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                                {req.requestId}
+                              </Link>
+                            </td>
+                            <td>
+                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                                {req.purpose}
+                              </Link>
+                            </td>
+                            <td>
+                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                                {req.docType}
+                              </Link>
+                            </td>
+                            <td>
+                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
+                                <span
+                                  className={`add-new-status-badge ${req.status
+                                    ?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
+
+                                  {req.status?.charAt(0).toUpperCase() + req.status?.slice(1).toLowerCase()}
+                                </span>
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+
+
+                    </>
+                  )}
+
 
 
 
