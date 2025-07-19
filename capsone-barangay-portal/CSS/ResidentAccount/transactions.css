@@ -22,11 +22,11 @@
 }
 
   
+/*Inuncomment*/
 
-/*
 .transactions-history-transactions {
-  width: 100%;
-  max-width: 1200px;
+  width: 90%;
+
   height: 500px; 
   border-radius: 16px;
   text-align: center;
@@ -39,7 +39,7 @@
   flex-direction: column;
 
 }
-*/
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
@@ -58,21 +58,24 @@
   align-items: center;
   width: 100%;
   height: 100%;
+ 
 }
 
 
 .table-section-transactions {
   width: 100%;
-   min-width: 1000px;
+  /*min-width: 1150px;*/
   overflow-x: hidden;
   height: 500px;
-  border: 2px solid rgba(36, 53, 76, 0.7);
+
   border-radius: 16px;
   text-align: center;
   background: #FFFFFF;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  margin-top: 2rem;
-  margin-bottom: 2.5rem;
+
+
+     scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 .table-section-transactions table {
@@ -126,7 +129,7 @@
 .table-section-transactions tbody tr:hover {
   background-color: #c9c4c4; 
   cursor: pointer; 
-  transform: scale(1.01);
+
 }
 
 
@@ -181,55 +184,73 @@
   color: #000000; 
 }
 
-.filter-section-transactions{
+
+
+
+
+
+.filter-section-transactions {
   margin-top: 50px;
-  width: 100%;
   display: flex;
   justify-content: center;
-  gap: 15px;
-  
-}
-
-.filter-section-transactions p{
-  margin-top: 15px;
-  color: rgb(106, 106, 106);
+  width: 100%;
+  padding: 0 1rem;
 }
 
 .filter-section-transactions-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+   background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  max-width: 1000px;
   width: 100%;
-  max-width: 500px;
-  border-radius: 10px;
-  display: flex;
-  flex-wrap: wrap; 
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  gap: 2rem;
- background-color: #214666;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  justify-content: space-between;
 }
 
-.filter-section-transactions-type {
+.filter-group {
   display: flex;
-  align-items: center;
-  gap: 10px; 
-  flex: 1 1 200px; 
-  min-width: 150px; 
+  flex-direction: column;
+  min-width: 180px;
+  flex: 1;
 }
 
-@media (max-width: 600px) {
+.filter-group label {
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.modern-filter-input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  background-color: #f1f5f9;
+  color: #333;
+  outline: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.modern-filter-input:focus {
+  box-shadow: 0 0 0 2px #60a5fa;
+}
+
+/* Responsive fallback: stack filters on smaller screens */
+@media (max-width: 768px) {
   .filter-section-transactions-inner {
-    gap: 1rem;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .filter-section-transactions-type {
-    justify-content: center;
+  .filter-group {
+    width: 100%;
   }
-}
-
-.filter-section-transactions-type p {
-  color: #FFFFFF;
-  font-weight: bold;
 }
 
 
@@ -299,15 +320,16 @@
 
 
   .status-dropdown-transactions {
-    padding: 0.6rem;
-    border-radius: 6px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    text-align: center;
-    min-width: 120px;
-    display: inline-block;
-    margin-left: auto;
+  padding: 0.4rem;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  min-width: 110px;
+  font-size: 0.875rem; /* ~14px */
+  display: inline-block;
+  margin-left: auto;
   }
   
   .pending {
@@ -334,22 +356,23 @@
 
 
   .rejected {
-    background-color: red;
+    background-color: #e22929; 
     color: white;
     font-size: 15px;
   }
 
   .pick-up{
-    background-color: #66bec4;
+     background-color: #be5cb6; 
     color: white;
     font-size: 15px;
   }
 
   .completed{
-    background-color: #66c47a;
+    background-color: #4caf50; 
     color: white;
     font-size: 15px;
   }
+  
 
 
   
@@ -789,3 +812,23 @@ Barangay Response
 
 
 
+
+.loading-or-error-container {
+  width: 100%;
+  height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #214666;
+}
+
+.error-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: red;
+}

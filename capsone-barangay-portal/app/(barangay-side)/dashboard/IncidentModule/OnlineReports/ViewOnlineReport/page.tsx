@@ -563,6 +563,8 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                     </div>
 
                     <div className="online-report-section-bottom-side-2">
+
+                      {/*}
                        
                             <div className="fields-section-online">
                                 <p>Barangay Officer<span className="required">*</span></p>
@@ -587,7 +589,35 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 
                             </div>
 
-                          
+                        */}
+
+                        {(user?.position === "LF Staff" || formData.status === "Settled") && (
+                          <div className="fields-section-online">
+                            <p>Barangay Officer<span className="required">*</span></p>
+                            <select
+                              className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
+                              name="respondentName" 
+                              value={respondent.respondentName}
+                              onChange={handleChange}
+                              disabled={
+                                formData.status === "Settled" ||
+                                initialRespondent.respondentName !== "" ||
+                                user?.position !== "LF Staff"
+                              }                                  
+                            >
+                              <option value="" disabled>Select Officer</option>
+                              {listOfStaffs
+                                .filter(staff => !(staff.id === user?.id && respondent.respondentName === ""))
+                                .map((staff, index) => (
+                                  <option key={index} value={staff.id}>
+                                    {staff.firstName} {staff.lastName}
+                                  </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                                             
 
                     </div>
 
