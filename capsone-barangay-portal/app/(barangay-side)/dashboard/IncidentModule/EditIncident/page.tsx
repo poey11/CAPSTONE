@@ -843,7 +843,7 @@ const handleHearingSection = () => {
                                 </div>
 
                                 <div className="edit-incident-fields-section">
-                                  <p>Sex</p>
+                                  <p>Gender</p>
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="complainant.sex" 
@@ -851,7 +851,7 @@ const handleHearingSection = () => {
                                     value={toUpdate.complainant.sex || reportData?.complainant.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
-                                    <option value="" disabled>Choose A Sex</option>
+                                    <option value="" disabled>Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                   </select>
@@ -914,7 +914,7 @@ const handleHearingSection = () => {
                                 </div>
 
                                 <div className="edit-incident-fields-section">
-                                  <p>Sex</p>
+                                  <p>Gender</p>
                                   <select 
                                     className="edit-incident-input-field"                     
                                     name="respondent.sex" 
@@ -922,7 +922,7 @@ const handleHearingSection = () => {
                                     value={toUpdate.respondent.sex || reportData?.respondent.sex || ""} // Show db value or user-updated value
                                     onChange={handleFormChange}
                                     >
-                                    <option value="" disabled>Choose A Sex</option>
+                                    <option value="" disabled>Select Gender</option>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                   </select>
