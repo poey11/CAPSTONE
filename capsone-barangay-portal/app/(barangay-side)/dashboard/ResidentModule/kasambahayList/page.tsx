@@ -311,20 +311,13 @@ const hasAnimatedOnce = useRef(false);
   return (
     <main className="resident-module-main-container">
         <div className="resident-module-section-1">
-          {isAuthorized ? (
+          {isAuthorized && (
             <Link href="/dashboard/ResidentModule/kasambahayList/AddKasambahay">
               <button className="add-announcement-btn add-incident-animated">
                 Add New Kasambahay
               </button>
             </Link>
-          ) : (
-            <button
-              className="add-announcement-btn add-incident-animated"
-              style={{ visibility: "hidden" }}
-              disabled
-            >
-              Add New Kasambahay
-            </button>
+
           )}
         </div>
 
@@ -374,7 +367,13 @@ const hasAnimatedOnce = useRef(false);
         </select>
       </div>
 
-      <div className="resident-module-main-section">
+
+            <div
+              className={`resident-module-main-section ${
+                !isAuthorized ? "expand-when-no-section1-resident-module" : ""
+              }`}
+            >
+
   {loading ? (
     <p>Loading residents...</p>
 

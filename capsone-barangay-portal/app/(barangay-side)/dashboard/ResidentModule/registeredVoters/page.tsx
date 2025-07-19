@@ -482,7 +482,7 @@ export default function RegisteredVotersModule() {
     <main className="resident-module-main-container">
 
       <div className="resident-module-section-1">
-        {isAuthorized ? (
+        {isAuthorized && (
           <>
             <button
               className="add-announcement-btn add-incident-animated"
@@ -500,15 +500,7 @@ export default function RegisteredVotersModule() {
               style={{ display: "none" }}
             />
           </>
-        ) : (
-          <button
-            className="add-announcement-btn add-incident-animated"
-            style={{ visibility: "hidden" }}
-            disabled
-          >
-            Import Voters from Excel
-          </button>
-        )}
+        ) }
       </div>
 
 
@@ -552,97 +544,101 @@ export default function RegisteredVotersModule() {
         </select>
       </div>
 
-      <div className="resident-module-main-section">
-  {loading ? (
-    <p>Loading voters...</p>
-  ) : error ? (
-    <p className="error">{error}</p>
-  ) : currentResidents.length === 0 ? (
-    <div className="no-result-card">
-      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-      <p className="no-results-department">No Results Found</p>
-    </div>
-  ) : (
-    <table>
-      <thead>
-        <tr>
-          <th>
-            Voter Number
-            <button
-              onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              className="sort-button"
-            >
-              {sortOrder === "asc" ? "▲" : "▼"}
-            </button>
-          </th>                
-          <th>Full Name</th>                
-          <th>Home Address</th>
-          <th>Precinct Number</th>
-          <th>Creation At</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {currentResidents.map((resident) => (
-          <tr
-            key={resident.id}
-            data-id={resident.id}
-            className={highlightedId === resident.id ? "highlighted-row" : ""}
-          >
-            <td>{resident.voterNumber}</td>
-            <td>{`${resident.lastName}, ${resident.firstName}${resident.middleName ? ' ' + resident.middleName : ''}`}</td>
-            <td>{resident.homeAddress}</td>
-            <td>{resident.precinctNumber}</td>
-            <td>{resident.createdAt}</td>
-            <td>
-              <div className="residentmodule-actions">
-                <button
-                  className="residentmodule-action-view"
-                  //onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
-                  onClick={() => openPopup(resident)}
-                >
-                   <img src="/Images/view.png" alt="View" />
-                </button>
-                {!isAuthorized ? (
-                <>
-                  <button
-                    className="residentmodule-action-edit hidden"
-                    aria-hidden="true"
-                  >
-                   <img src="/Images/edit.png" alt="View" />
-                  </button>
-                  <button
-                    className="residentmodule-action-delete hidden"
-                    aria-hidden="true"
-                  >
-                     <img src="/Images/delete.png" alt="View" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="residentmodule-action-edit"
-                    onClick={() => handleEditClick(resident.id)}
-                  >
-                    <img src="/Images/edit.png" alt="View" />
-                  </button>
-                  <button
-                    className="residentmodule-action-delete"
-                    onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
-                  >
-                     <img src="/Images/delete.png" alt="View" />
-                  </button>
-                </>
-              )}
-
+         <div
+              className={`resident-module-main-section ${
+                !isAuthorized ? "expand-when-no-section1-resident-module" : ""
+              }`}
+           >
+            {loading ? (
+              <p>Loading voters...</p>
+            ) : error ? (
+              <p className="error">{error}</p>
+            ) : currentResidents.length === 0 ? (
+              <div className="no-result-card">
+                <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+                <p className="no-results-department">No Results Found</p>
               </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )}
-</div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>
+                      Voter Number
+                      <button
+                        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                        className="sort-button"
+                      >
+                        {sortOrder === "asc" ? "▲" : "▼"}
+                      </button>
+                    </th>                
+                    <th>Full Name</th>                
+                    <th>Home Address</th>
+                    <th>Precinct Number</th>
+                    <th>Creation At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentResidents.map((resident) => (
+                    <tr
+                      key={resident.id}
+                      data-id={resident.id}
+                      className={highlightedId === resident.id ? "highlighted-row" : ""}
+                    >
+                      <td>{resident.voterNumber}</td>
+                      <td>{`${resident.lastName}, ${resident.firstName}${resident.middleName ? ' ' + resident.middleName : ''}`}</td>
+                      <td>{resident.homeAddress}</td>
+                      <td>{resident.precinctNumber}</td>
+                      <td>{resident.createdAt}</td>
+                      <td>
+                        <div className="residentmodule-actions">
+                          <button
+                            className="residentmodule-action-view"
+                            //onClick={() => router.push(`/dashboard/ResidentModule/registeredVoters/ViewVoter?id=${resident.id}`)}
+                            onClick={() => openPopup(resident)}
+                          >
+                            <img src="/Images/view.png" alt="View" />
+                          </button>
+                          {!isAuthorized ? (
+                          <>
+                            <button
+                              className="residentmodule-action-edit hidden"
+                              aria-hidden="true"
+                            >
+                            <img src="/Images/edit.png" alt="View" />
+                            </button>
+                            <button
+                              className="residentmodule-action-delete hidden"
+                              aria-hidden="true"
+                            >
+                              <img src="/Images/delete.png" alt="View" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              className="residentmodule-action-edit"
+                              onClick={() => handleEditClick(resident.id)}
+                            >
+                              <img src="/Images/edit.png" alt="View" />
+                            </button>
+                            <button
+                              className="residentmodule-action-delete"
+                              onClick={() => handleDeleteClick(resident.id, resident.voterNumber)}
+                            >
+                              <img src="/Images/delete.png" alt="View" />
+                            </button>
+                          </>
+                        )}
+
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
 
   <div className="redirection-section">
               <button onClick={prevPage} disabled={currentPage === 1}>&laquo;</button>
