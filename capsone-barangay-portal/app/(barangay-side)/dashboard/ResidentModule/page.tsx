@@ -17,6 +17,8 @@ export default function ResidentModule() {
   const isAuthorized = ["Secretary", "Assistant Secretary"].includes(userPosition || "");
 
 
+
+
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,9 @@ export default function ResidentModule() {
 
     const hasAnimatedOnce = useRef(false);
     const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+
+
 
 
     const openPopup = (user: any) => {
@@ -93,6 +98,10 @@ export default function ResidentModule() {
   const searchParams = useSearchParams();
   const highlightResidentId = searchParams.get("highlight");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
+
+
+
+  const residentId = searchParams.get("id");
 
   useEffect(() => {
   if (highlightResidentId && filteredResidents.length > 0) {
@@ -324,6 +333,73 @@ export default function ResidentModule() {
 
     return pageNumbersToShow;
   };
+
+
+
+
+
+/*
+CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
+*/
+
+
+
+  const [incidentReports, setIncidentReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchIncidentReports = async () => {
+      if (!residentId) return;
+  
+      const incidentRef = collection(db, "IncidentReports");
+  
+      // Query where the resident is the complainant
+      const complainantQuery = query(
+        incidentRef,
+        where("complainant.residentId", "==", residentId)
+      );
+  
+      // Query where the resident is the respondent
+      const respondentQuery = query(
+        incidentRef,
+        where("respondent.residentId", "==", residentId)
+      );
+  
+      // Query where the general residentId matches
+      const generalQuery = query(
+        incidentRef,
+        where("residentId", "==", residentId)
+      );
+  
+      const [complainantSnap, respondentSnap, generalSnap] = await Promise.all([
+        getDocs(complainantQuery),
+        getDocs(respondentQuery),
+        getDocs(generalQuery),
+      ]);
+  
+      const reports: any[] = [];
+  
+      complainantSnap.forEach((doc) => {
+        reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
+      });
+  
+      respondentSnap.forEach((doc) => {
+        if (!reports.find((r) => r.id === doc.id)) {
+          reports.push({ id: doc.id, role: "Respondent", ...doc.data() });
+        }
+      });
+  
+      generalSnap.forEach((doc) => {
+        if (!reports.find((r) => r.id === doc.id)) {
+          reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
+        }
+      });
+  
+      setIncidentReports(reports);
+    };
+  
+    fetchIncidentReports();
+  }, [residentId]);
+
 
 
 
@@ -894,6 +970,82 @@ export default function ResidentModule() {
                       </div>
                     </>
                   )}
+
+
+
+                {viewActiveSection  === "incidents" && (
+                    <>
+
+                    <div className="add-new-incident-table-wrapper">
+                    {incidentReports.length === 0 ? (
+                      <div className="add-new-no-incident">
+                        <p>No incident reports found for this resident.</p>
+                      </div>
+                    ) : (
+                      <table className="add-new-incident-table">
+                        <thead>
+                          <tr>
+                            <th className="add-new-col-case">Case No.</th>
+                            <th className="add-new-col-date">
+                              {incidentReports.some((i) => i.department === "Online") ? "Date Filed" : "Date & Time Filed"}
+                            </th>
+                            <th className="add-new-col-concern">
+                              {incidentReports.some((i) => i.department === "Online") ? "Concerns" : "Nature"}
+                            </th>
+                            <th className="add-new-col-status">Status</th>
+                            <th className="add-new-col-role">Role</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {incidentReports.map((incident) => {
+                            const isOnline = incident.department === "Online";
+                            const targetUrl = isOnline
+                              ? `/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${incident.id}`
+                              : `/dashboard/IncidentModule/ViewIncident?id=${incident.id}`;
+
+                            return (
+                              <tr key={incident.id} className="add-new-clickable-row">
+                                <td>
+                                  <Link href={targetUrl}>{incident.caseNumber}</Link>
+                                </td>
+                                <td>
+                                  <Link href={targetUrl}>
+                                    {isOnline ? incident.dateFiled : `${incident.dateFiled} ${incident.timeFiled}`}
+                                  </Link>
+                                </td>
+                                <td>
+                                  <Link href={targetUrl}>
+                                    {isOnline
+                                      ? (incident.concerns || "N/A")
+                                      : (incident.nature === "Others" ? incident.specifyNature : incident.nature)}
+                                  </Link>
+                                </td>
+                                <td>
+                                  <Link href={targetUrl}>
+                                    <span className={`add-new-status-badge ${incident.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                                      {incident.status.charAt(0).toUpperCase() + incident.status.slice(1).toLowerCase()}
+                                    </span>
+                                  </Link>
+                                </td>
+                                <td>
+                                  <Link href={targetUrl}>{incident.role}</Link>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+
+
+                    </>
+                  )}
+
+
+
+
+
                 </div>
               </div>
             </div>
