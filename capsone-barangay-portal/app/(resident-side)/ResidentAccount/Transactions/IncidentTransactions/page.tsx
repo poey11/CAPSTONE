@@ -134,8 +134,7 @@ useEffect(() => {
     router.push("/ResidentAccount/Transactions");
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!transactionData) return <p>Incident report not found.</p>;
+
 
   const incidentFields = [
     { label: "ID", key: "caseNumber" },
@@ -184,10 +183,26 @@ updated
   },
 ];
 
+{/*}
 
+  if (loading) return <p>Loading...</p>;
+  if (!transactionData) return <p>Incident report not found.</p>;
+*/}
 
-
-
+if (loading || !transactionData) {
+  return (
+    <main className="incident-transaction-container">
+      <div className="headerpic-specific-transactions">
+        <p>TRANSACTIONS</p>
+      </div>
+      <div className="incident-content">
+        <div className="loading-or-error-container">
+          {loading ? <p className="loading-text">Loading document details...</p> : <p className="error-text">Document request not found.</p>}
+        </div>
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="incident-transaction-container">
@@ -203,7 +218,7 @@ updated
           </div>
         
           <div className="status-container">
-            <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase() || ""}`}>
+            <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
               {transactionData.status || "N/A"}
             </p> 
           </div>

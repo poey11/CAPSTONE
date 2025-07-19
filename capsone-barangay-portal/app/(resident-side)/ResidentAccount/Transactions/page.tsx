@@ -149,7 +149,7 @@ export default function Transactions() {
                                         <td>{item.concerns || item.docType || "N/A"}</td>
                                         <td>{item.purpose || "N/A"}</td>
                                         <td>
-                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase() || ""}`}>
+                                            <span className={`status-dropdown-transactions ${item.status?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
                                                 {item.status || "N/A"}
                                             </span>
                                         </td>
