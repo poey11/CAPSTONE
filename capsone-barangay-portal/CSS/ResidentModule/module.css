@@ -773,11 +773,12 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     z-index: 2000; 
   }
 
-
+  /* changed this */
   .view-barangayuser-popup {
     display: flex;
     flex-direction: column;
-    height: 550px;
+    /*height: 550px;*/
+    height: 600px;
     width: 65%;
     background-color: #ffffff;
     border-radius: 1rem;
@@ -882,13 +883,14 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   align-items: center;
 }
 
+/* changed this */
 .main-resident-info-toggle-btn {
   background-color: transparent;
   border: none;
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
@@ -900,13 +902,16 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   border-bottom: 3px solid #ff6600;
 }
 
+/* changed this */
 .view-user-header-body-bottom-section{
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
+/* changed this */
 .mainresident-photo-section {
   display: flex;
   flex-direction: column;
@@ -914,7 +919,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   justify-content: center;
   padding-bottom: 20px;
   width: 35%;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
 }
 
 .user-details-label {
@@ -943,21 +949,24 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   height: 250px;
 }
 
-
+/* changed this */
 .view-main-resident-info-main-container{
   width: 65%;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 390px;
+  /*height: 390px;*/
+  height: 440px;
   padding-right: 55px;
 }
 
+/* changed this */
 .view-user-info-main-content{
   width: 100%;
   display: flex;
   flex-direction: row;
-  height: 320px;
+  /*height: 320px;*/
+  height: 350px;
   border-radius: 5px;
   background-color: #F0F2F8;
   border: 1px solid #eaecf2;
@@ -965,12 +974,13 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   overflow-y: auto;
 }
 
+/* changed this */
 .mainresident-scroll{
   width: 100%;
   padding-top: 22px;
   display: flex;
   flex-direction: row;
-  height:380px;
+  height:420px;
 }
 
 .view-mainresident-content-left-side{
@@ -1018,6 +1028,7 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   margin-left: 15px;
 }
 
+/* changed this */
 .view-user-input-field {
   padding: 8px;
   width: 90%;
@@ -1025,7 +1036,9 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   border-radius: 5px;
   color: #000000;
   text-align: left;
-  height: 33px;
+  /*height: 33px;*/
+  height: 40px;
+  font-size: 16px;
 }
 
 .view-user-input-field:focus {
