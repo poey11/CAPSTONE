@@ -320,6 +320,7 @@ box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
 }
 
+/*
 .message-section {
   width: 100%;
   text-align: left;
@@ -329,15 +330,30 @@ box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   line-height: 1.5em;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3; /* Limit to two lines */
-  line-clamp: 3; /* Non-standard, but future-proof */
+  -webkit-line-clamp: 3;
+  line-clamp: 3; 
   overflow: hidden;
-  /*max-height: 90px; /* Approximate height for two lines */
-   max-height: 7em;
+
+   max-height: 8em;
   text-overflow: ellipsis;
   white-space: normal;
-  word-break: break-word; /* Ensures words wrap properly */;
+  word-break: break-word; 
 }
+*/
+
+.message-section {
+    width: 100%;
+  text-align: left;
+  padding: 10px;
+  box-sizing: border-box;
+  line-height: 1.5em;
+  word-break: break-word;
+  white-space: pre-wrap;
+  overflow: visible;
+  max-height: none;
+  display: block;
+}
+
 
 .notification-badge {
   position: absolute;
