@@ -1854,157 +1854,184 @@ Functions for Reason for Reject
       });
 
 
-      // part of the notification system for required signatures
-        const isOnline = requestData?.accID !== "INBRGY-REQ";
-        const messageSuffix = isOnline ? " (Online)" : "";
-        const docType = requestData?.docType;
-        const purpose = requestData?.purpose;
-        const requestorName = requestData?.requestorFname;
+    const isOnline = requestData?.accID !== "INBRGY-REQ";
+    const messageSuffix = isOnline ? " (Online)" : "";
+    const docType = requestData?.docType;
+    const purpose = requestData?.purpose;
+    const requestorName = requestData?.requestorFname;
 
-        //  BARANGAY CLEARANCE 
-        if (docType === "Barangay Clearance") {
-          if (purpose === "Bail Bond") {
-            // Secretary only
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData?.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Secretary",
-              requestID: id,
-            });
-          } else {
-            // Both PB and Secretary
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData?.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Secretary",
-              requestID: id,
-            });
+    // BARANGAY CLEARANCE
+    if (docType === "Barangay Clearance") {
+      if (purpose === "Bail Bond") {
+        // Secretary only
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Secretary",
+          requestID: id,
+        });
+      } else {
+        // Both PB and Secretary
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Secretary",
+          requestID: id,
+        });
 
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData?.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Punong Barangay",
-              requestID: id,
-            });
-          }
-        }
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Punong Barangay",
+          requestID: id,
+        });
+      }
+    }
 
-        //  BARANGAY CERTIFICATE 
-        else if (docType === "Barangay Certificate") {
-          // Secretary only for all purposes
-          await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Secretary",
-            requestID: id,
-          });
-        }
+    // BARANGAY CERTIFICATE
+    else if (docType === "Barangay Certificate") {
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Secretary",
+        requestID: id,
+      });
+    }
 
-        //  BARANGAY INDIGENCY 
-        else if (docType === "Barangay Indigency") {
-          if (
-            purpose && ["Philhealth Sponsor", "Medical Assistance"].includes(purpose)
-          ) {
-            // PB only
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData?.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Punong Barangay",
-              requestID: id,
-            });
-          } else {
-            // Secretary only
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData?.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Secretary",
-              requestID: id,
-            });
-          }
-        }
+    // BARANGAY INDIGENCY
+    else if (docType === "Barangay Indigency") {
+      if (purpose && ["Philhealth Sponsor", "Medical Assistance"].includes(purpose)) {
+        // PB only
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Punong Barangay",
+          requestID: id,
+        });
+      } else {
+        // Secretary only
+        await addDoc(notificationRef, {
+          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+          timestamp: new Date(),
+          requestorId: requestData!.accID,
+          isRead: false,
+          transactionType: "Online Assigned Service Request",
+          recipientRole: "Secretary",
+          requestID: id,
+        });
+      }
+    }
 
-        //  BUSINESS PERMITS 
-        else if (
-          docType === "Business Permit" ||
-          docType === "Temporary Business Permit"
-        ) {
-          // Both PB and Secretary
-          await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Secretary",
-            requestID: id,
-          });
+    // BUSINESS PERMITS
+    else if (
+      docType === "Business Permit" ||
+      docType === "Temporary Business Permit"
+    ) {
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Secretary",
+        requestID: id,
+      });
 
-          await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Punong Barangay",
-            requestID: id,
-          });
-        }
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Punong Barangay",
+        requestID: id,
+      });
+    }
 
-        //  CONSTRUCTION 
-        else if (docType === "Construction") {
-          // Both PB and Secretary
-          await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Secretary",
-            requestID: id,
-          });
+    // CONSTRUCTION
+    else if (docType === "Construction") {
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Secretary",
+        requestID: id,
+      });
 
-          await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Punong Barangay",
-            requestID: id,
-          });
-        }
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Punong Barangay",
+        requestID: id,
+      });
+    }
 
-        //  OTHER DOCUMENTS 
-        else if (docType === "Other Documents" && purpose === "Barangay ID") {
-          // PB only
-          await addDoc(notificationRef, {
-            message: `A document for ${purpose} requires your signature.${messageSuffix}`,
-            timestamp: new Date(),
-            requestorId: requestData?.accID,
-            isRead: false,
-            transactionType: "Online Assigned Service Request",
-            recipientRole: "Punong Barangay",
-            requestID: id,
-          });
-        }
+    // OTHER DOCUMENTS
+    else if (docType === "Other Documents" && purpose === "Barangay ID") {
+      // PB only
+      await addDoc(notificationRef, {
+        message: `A document for ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Punong Barangay",
+        requestID: id,
+      });
+    }
+
+    else if (docType === "Other Documents" && purpose !== "Barangay ID") {
+      // Secretary only
+      await addDoc(notificationRef, {
+        message: `A document for ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Secretary",
+        requestID: id,
+      });
+    } else if (
+      docType !== "Other Documents" &&
+      docType !== "Barangay Clearance" &&
+      docType !== "Barangay Indigency" &&
+      docType !== "Barangay Certificate" &&
+      docType !== "Business Permit" &&
+      docType !== "Temporary Business Permit" &&
+      docType !== "Construction"
+    ) {
+      // Fallback Secretary only
+      await addDoc(notificationRef, {
+        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData!.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Secretary",
+        requestID: id,
+      });
+    }
+
 
     
       setShowDocumentGeneratedPopup(true);
