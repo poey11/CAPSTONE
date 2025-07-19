@@ -751,7 +751,7 @@ export default function ResidentModule() {
                                 /> 
                               </div>
                               <div className="view-user-fields-section">
-                                <p>Sex</p>
+                                <p>Gender</p>
                                 <input
                                   type="text"
                                   className="view-user-input-field"
