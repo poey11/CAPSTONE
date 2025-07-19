@@ -24,6 +24,13 @@ import { useSession } from "next-auth/react";
     const [allOnlineRequests, setAllOnlineRequests] = useState<any[]>([]);
     const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
 
+    const [mainSearchRequestId, setMainSearchRequestId] = useState("");
+const [mainSearchRequestor, setMainSearchRequestor] = useState("");
+const [mainCreatedAt, setMainCreatedAt] = useState("");
+
+
+    
+
      const isAuthorized = ["Assistant Secretary", "Secretary", "Admin Staff"].includes(user?.position || "");
 
 
@@ -40,6 +47,7 @@ const [taskSearchType, setTaskSearchType] = useState("");
 const [filteredTaskRequests, setFilteredTaskRequests] = useState(taskAssignedData);
 const [taskSearchRequestId, setTaskSearchRequestId] = useState("");
 const [taskSearchRequestor, setTaskSearchRequestor] = useState("");
+const [taskSearchDateString, setTaskSearchDateString] = useState("");
 
 
 useEffect(() => {
@@ -79,9 +87,17 @@ useEffect(() => {
     );
   }
 
+      if (taskSearchDateString !== "") {
+    const date = new Date(taskSearchDateString);
+    const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    filtered = filtered.filter((req) =>
+      req.createdAt.startsWith(formattedDate)
+    );
+  }
+
   setFilteredTaskRequests(filtered);
   setTaskCurrentPage(1);
-}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter]);
+}, [taskAssignedData, taskSearchRequestId, taskSearchRequestor, taskStatusFilter, taskSearchDateString]);
 
 
 
@@ -208,6 +224,9 @@ useEffect(() => {
     }, [user]);
 
     
+
+
+    
 const normalizeStatus = (status: string): string =>
   status.toLowerCase().replace(/\s*-\s*/g, "-").trim();
 
@@ -221,13 +240,33 @@ useEffect(() => {
     );
   }
 
-  // Filter by Date Range
-  if (dateFrom && dateTo) {
-    filtered = filtered.filter((req) => {
-      const requestDate = new Date(req.createdAt);
-      return requestDate >= new Date(dateFrom) && requestDate <= new Date(dateTo);
-    });
+
+  // Filter by Request ID
+  if (mainSearchRequestId !== "") {
+    filtered = filtered.filter((req) =>
+      req.requestId.toLowerCase().includes(mainSearchRequestId.toLowerCase())
+    );
   }
+
+  // Filter by Requestor Name
+  if (mainSearchRequestor !== "") {
+    const normalizedSearch = normalizeString(mainSearchRequestor);
+    filtered = filtered.filter((req) =>
+      normalizeString(req.requestor).includes(normalizedSearch)
+    );
+  }
+
+
+      if (mainCreatedAt !== "") {
+      // Convert mainSearchDateString (e.g. '2025-07-17') to '7/17/2025'
+      const date = new Date(mainCreatedAt);
+      const formattedDate = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+
+      filtered = filtered.filter((req) =>
+        req.createdAt.startsWith(formattedDate)
+      );
+    }
+
 
   // Filter by Status
   if (statusFilter !== "") {
@@ -238,7 +277,7 @@ useEffect(() => {
 
   setFilteredOnlineRequests(filtered);
   setMainCurrentPage(1);
-}, [searchType, dateFrom, dateTo, statusFilter, allOnlineRequests]);
+}, [searchType, mainSearchRequestId, mainSearchRequestor,mainCreatedAt, ,statusFilter, allOnlineRequests]);
 
 
 
@@ -410,35 +449,25 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
          <div className={`onlinereq-section-2 ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
 
      
+                <div className="input-group-online">
+                  <input
+                    type="text"
+                    placeholder="Search by Request ID (e.g. LPLHOT - 0063)"
+                    className="online-services-module-filter"
+                    value={mainSearchRequestId}
+                    onChange={(e) => setMainSearchRequestId(e.target.value)}
+                  />
+                </div>
 
-            <div className="data-input-group-onlinereq">
-              <label htmlFor="dateFrom">From Date :</label>
-              <input
-                type="date"
-                 className={`online-services-module-filter ${dateFrom ? 'has-value' : ''}`}
-                value={dateFrom}
-                 max={today}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
-
-
-            </div>
-
-            <div className="data-input-group-onlinereq">
-                <label htmlFor="dateTo">To Date :</label>
-                
-                <input
-                  type="date"
-                   className={`online-services-module-filter ${dateFrom ? 'has-value' : ''}`}
-                  value={dateTo}
-                   max={today}
-                  onChange={(e) => setDateTo(e.target.value)}
-                />
-
-            </div>
-
-
-
+                <div className="input-group-online">
+                  <input
+                    type="text"
+                    placeholder="Search by Requestor Name (e.g. Juan Dela Cruz)"
+                    className="online-services-module-filter"
+                    value={mainSearchRequestor}
+                    onChange={(e) => setMainSearchRequestor(e.target.value)}
+                  />
+                </div>
 
 
 
@@ -475,6 +504,17 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                 </select>
 
             </div>
+
+            <div className="dropdown-group-onlinereq">
+              <input
+                type="date"
+                className={`online-services-module-filter-dropdown ${mainCreatedAt ? "has-value" : ""}`}
+                value={mainCreatedAt}
+                max={today}
+                onChange={(e) => setMainCreatedAt(e.target.value)}
+              />
+            </div>
+
 
               
          </div>
@@ -614,6 +654,15 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                   />
                 </div>
 
+              <div className="input-group-online">
+                <input
+                    type="date"
+                    className="online-services-module-filter"
+                    value={taskSearchDateString}
+                    onChange={(e) => setTaskSearchDateString(e.target.value)}
+                    max={today}
+                  />
+              </div>
           </div>
 
 
