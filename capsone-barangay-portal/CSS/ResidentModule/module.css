@@ -1146,7 +1146,7 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 /*
 
 /* Container */
-.add-new-incident-table-wrapper {
+.records-table-wrapper {
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
   width: 100%;
@@ -1154,16 +1154,19 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
 /* No data message */
-.add-new-no-incident {
+.records-message {
   text-align: center;
-  color: #777;
   font-size: 16px;
   padding: 20px 0;
-  font-weight: 500;
+}
+
+.records-message p {
+    color: #e22929;
+  font-weight: bold;
 }
 
 /* Table Styles */
-.add-new-incident-table {
+.records-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
@@ -1172,14 +1175,14 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 
 
 
-.add-new-incident-table th,
-.add-new-incident-table td {
+.records-table th,
+.records-table td {
   padding: 16px 12px;
   text-align: center;
   border-bottom: 1px solid #eaeaea;
 }
 
-.add-new-incident-table th {
+.records-table th {
   background-color: #214666;
   color: #FFFFFF;
   font-weight: 600;
@@ -1256,7 +1259,6 @@ background-color: #4caf50;
 background-color: #be5cb6;
 color: #FFFFFF;
 }
-
 
 
 

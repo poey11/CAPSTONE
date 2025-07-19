@@ -1010,13 +1010,13 @@ useEffect(() => {
                 {viewActiveSection  === "incidents" && (
                     <>
 
-                    <div className="add-new-incident-table-wrapper">
+                    <div className="records-table-wrapper ">
                     {incidentReports.length === 0 ? (
-                      <div className="add-new-no-incident">
+                      <div className="records-message">
                         <p>No incident reports found for this resident.</p>
                       </div>
                     ) : (
-                      <table className="add-new-incident-table">
+                      <table className="records-table">
                         <thead>
                           <tr>
                             <th className="add-new-col-case">Case No.</th>
@@ -1080,13 +1080,13 @@ useEffect(() => {
 
                  {viewActiveSection  === "services" && (
                     <>
-                          <div className="add-new-incident-table-wrapper">
+                          <div className="records-table-wrapper ">
                   {serviceRequests.length === 0 ? (
-                    <div className="add-new-no-incident">
+                    <div className="records-message">
                       <p>No service requests found for this resident.</p>
                     </div>
                   ) : (
-                    <table className="add-new-incident-table">
+                    <table className="records-table">
                       <thead>
                         <tr>
                           <th className="add-new-col-case">Account ID</th>
