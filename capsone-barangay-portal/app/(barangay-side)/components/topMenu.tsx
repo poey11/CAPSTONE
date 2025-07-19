@@ -152,7 +152,7 @@ export default function TopMenu() {
           return notifDate >= createdDate || sameDay;
         });
 
-        if (userPosition === "Assistant Secretary" || userPosition === "Admin Staff") {
+        if (userPosition === "Assistant Secretary" || userPosition === "Admin Staff" || userPosition === "Punong Barangay" || userPosition === "Secretary") {
           setTasks(prev => {
             const merged = [...prev, ...afterCreated];
             const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
