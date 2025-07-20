@@ -17,8 +17,6 @@ export default function ResidentModule() {
   const isAuthorized = ["Secretary", "Assistant Secretary"].includes(userPosition || "");
 
 
-
-
   const [residents, setResidents] = useState<any[]>([]);
   const [filteredResidents, setFilteredResidents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,9 +52,6 @@ export default function ResidentModule() {
 
     const hasAnimatedOnce = useRef(false);
     const [filtersLoaded, setFiltersLoaded] = useState(false);
-
-
-
 
 
     const openPopup = (user: any) => {
@@ -98,10 +93,6 @@ export default function ResidentModule() {
   const searchParams = useSearchParams();
   const highlightResidentId = searchParams.get("highlight");
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
-
-
-
-  const residentId = searchParams.get("id");
 
   useEffect(() => {
   if (highlightResidentId && filteredResidents.length > 0) {
@@ -334,107 +325,6 @@ export default function ResidentModule() {
     return pageNumbersToShow;
   };
 
-
-
-
-
-/*
-CODE FOR INCIDENT RECORDS OF FOR THE VIEW PAGE
-*/
-
-
-
-  const [incidentReports, setIncidentReports] = useState<any[]>([]);
-
-  useEffect(() => {
-    const fetchIncidentReports = async () => {
-      if (!residentId) return;
-  
-      const incidentRef = collection(db, "IncidentReports");
-  
-      // Query where the resident is the complainant
-      const complainantQuery = query(
-        incidentRef,
-        where("complainant.residentId", "==", residentId)
-      );
-  
-      // Query where the resident is the respondent
-      const respondentQuery = query(
-        incidentRef,
-        where("respondent.residentId", "==", residentId)
-      );
-  
-      // Query where the general residentId matches
-      const generalQuery = query(
-        incidentRef,
-        where("residentId", "==", residentId)
-      );
-  
-      const [complainantSnap, respondentSnap, generalSnap] = await Promise.all([
-        getDocs(complainantQuery),
-        getDocs(respondentQuery),
-        getDocs(generalQuery),
-      ]);
-  
-      const reports: any[] = [];
-  
-      complainantSnap.forEach((doc) => {
-        reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
-      });
-  
-      respondentSnap.forEach((doc) => {
-        if (!reports.find((r) => r.id === doc.id)) {
-          reports.push({ id: doc.id, role: "Respondent", ...doc.data() });
-        }
-      });
-  
-      generalSnap.forEach((doc) => {
-        if (!reports.find((r) => r.id === doc.id)) {
-          reports.push({ id: doc.id, role: "Complainant", ...doc.data() });
-        }
-      });
-  
-      setIncidentReports(reports);
-    };
-  
-    fetchIncidentReports();
-  }, [residentId]);
-
-
-
-
-
-
-  /*
-    CODE FOR THE SERVICE RECORDS
-  */
-
-
-    
-const [serviceRequests, setServiceRequests] = useState<any[]>([]);
-
-useEffect(() => {
-  const fetchServiceRequests = async () => {
-    if (!residentId) return;
-
-    try {
-      const requestsRef = collection(db, "ServiceRequests");
-      const q = query(requestsRef, where("residentId", "==", residentId));
-      const snapshot = await getDocs(q);
-
-      const requests: any[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setServiceRequests(requests);
-    } catch (error) {
-      console.error("Error fetching service requests:", error);
-    }
-  };
-
-  fetchServiceRequests();
-}, [residentId]);
 
 
   return (
@@ -715,35 +605,6 @@ useEffect(() => {
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>Date of Residency</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={selectedUser.dateOfResidency || "N/A"}
-                                readOnly
-                              /> 
-                            </div>
-                            <div className="view-user-fields-section">
-                              <p>Address</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={selectedUser.address || "N/A"}
-                                readOnly
-                              /> 
-                            </div>
-                            <div className="view-user-fields-section">
-                              <p>Location</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={selectedUser.generalLocation || "N/A"}
-                                readOnly
-                              /> 
-                            </div>
-                          </div>
-                          <div className="view-mainresident-content-right-side">
-                            <div className="view-user-fields-section">
                               <p>Last Name</p>
                               <input
                                 type="text"
@@ -770,6 +631,38 @@ useEffect(() => {
                                 readOnly
                               /> 
                             </div>
+                            
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            
+<div className="view-user-fields-section">
+                              <p>Date of Residency</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.dateOfResidency || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.address || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Location</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.generalLocation || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
+
                             <div className="view-user-fields-section">
                               <p>Cluster</p>
                               <input
@@ -822,15 +715,17 @@ useEffect(() => {
                                 readOnly
                               /> 
                             </div>
+
                             <div className="view-user-fields-section">
-                              <p>Precinct Number</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={selectedUser.precinctNumber || "N/A"}
-                                readOnly
-                              /> 
-                            </div>
+                                <p>Gender</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  value={selectedUser.sex || "N/A"}
+                                  readOnly
+                                /> 
+                              </div>
+                            
                           </div>
                           <div className="view-main-user-content-right-side">
                               <div className="view-user-fields-section">
@@ -857,15 +752,6 @@ useEffect(() => {
                                   type="text"
                                   className="view-user-input-field"
                                   value={selectedUser.age || "N/A"}
-                                  readOnly
-                                /> 
-                              </div>
-                              <div className="view-user-fields-section">
-                                <p>Gender</p>
-                                <input
-                                  type="text"
-                                  className="view-user-input-field"
-                                  value={selectedUser.sex || "N/A"}
                                   readOnly
                                 /> 
                               </div>
@@ -1004,141 +890,6 @@ useEffect(() => {
                       </div>
                     </>
                   )}
-
-
-
-                {viewActiveSection  === "incidents" && (
-                    <>
-
-                    <div className="records-table-wrapper ">
-                    {incidentReports.length === 0 ? (
-                      <div className="records-message">
-                        <p>No incident reports found for this resident.</p>
-                      </div>
-                    ) : (
-                      <table className="records-table">
-                        <thead>
-                          <tr>
-                            <th className="add-new-col-case">Case No.</th>
-                            <th className="add-new-col-date">
-                              {incidentReports.some((i) => i.department === "Online") ? "Date Filed" : "Date & Time Filed"}
-                            </th>
-                            <th className="add-new-col-concern">
-                              {incidentReports.some((i) => i.department === "Online") ? "Concerns" : "Nature"}
-                            </th>
-                            <th className="add-new-col-role">Role</th>
-                              <th className="add-new-col-status">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {incidentReports.map((incident) => {
-                            const isOnline = incident.department === "Online";
-                            const targetUrl = isOnline
-                              ? `/dashboard/IncidentModule/OnlineReports/ViewOnlineReport?id=${incident.id}`
-                              : `/dashboard/IncidentModule/ViewIncident?id=${incident.id}`;
-
-                            return (
-                              <tr key={incident.id} className="add-new-clickable-row">
-                                <td>
-                                  <Link href={targetUrl}>{incident.caseNumber}</Link>
-                                </td>
-                                <td>
-                                  <Link href={targetUrl}>
-                                    {isOnline ? incident.dateFiled : `${incident.dateFiled} ${incident.timeFiled}`}
-                                  </Link>
-                                </td>
-                                <td>
-                                  <Link href={targetUrl}>
-                                    {isOnline
-                                      ? (incident.concerns || "N/A")
-                                      : (incident.nature === "Others" ? incident.specifyNature : incident.nature)}
-                                  </Link>
-                                </td>
-                                <td>
-                                  <Link href={targetUrl}>{incident.role}</Link>
-                                </td>
-                                                                <td>
-                                  <Link href={targetUrl}>
-                                    <span className={`add-new-status-badge ${incident.status.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
-                                      {incident.status.charAt(0).toUpperCase() + incident.status.slice(1).toLowerCase()}
-                                    </span>
-                                  </Link>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-
-
-                    </>
-                  )}
-
-
-
-                 {viewActiveSection  === "services" && (
-                    <>
-                          <div className="records-table-wrapper ">
-                  {serviceRequests.length === 0 ? (
-                    <div className="records-message">
-                      <p>No service requests found for this resident.</p>
-                    </div>
-                  ) : (
-                    <table className="records-table">
-                      <thead>
-                        <tr>
-                          <th className="add-new-col-case">Account ID</th>
-                          <th className="add-new-col-concern">Purpose</th>
-                          <th className="add-new-col-date">Document Type</th>
-                          <th className="add-new-col-status">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {serviceRequests.map((req) => (
-                          <tr key={req.id} className="add-new-clickable-row">
-                            <td>
-                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
-                                {req.requestId}
-                              </Link>
-                            </td>
-                            <td>
-                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
-                                {req.purpose}
-                              </Link>
-                            </td>
-                            <td>
-                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
-                                {req.docType}
-                              </Link>
-                            </td>
-                            <td>
-                              <Link href={`/dashboard/ServicesModule/ViewRequest?id=${req.id}`}>
-                                <span
-                                  className={`add-new-status-badge ${req.status
-                                    ?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
-
-                                  {req.status?.charAt(0).toUpperCase() + req.status?.slice(1).toLowerCase()}
-                                </span>
-                              </Link>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-
-
-                    </>
-                  )}
-
-
-
-
-
-
                 </div>
               </div>
             </div>
