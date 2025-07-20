@@ -25,6 +25,7 @@ interface dbBarangayUser{
     lastName: string;
     birthDate: string;
     sex: string;
+    department: string;
 }
 
 
@@ -877,7 +878,7 @@ useEffect(() => {
                                     <>
                                         <div className="view-main-user-content-left-side">
                                             <div className="view-user-fields-section">
-                                                <p>User Id</p>
+                                                <p>User ID</p>
                                                 <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.userid} readOnly/>
                                             </div>
                                             <div className="view-user-fields-section">
@@ -898,6 +899,25 @@ useEffect(() => {
                                                 <p>Position</p>
                                                 <input type="text" className="view-user-input-field" name="position" value={viewUser.position} readOnly/>
                                             </div>
+                                            {viewUser.position === "LF Staff" && (
+                                            <div className="view-user-fields-section">
+                                                <p>Department:</p>
+
+                                                <select 
+                                                    name="department" 
+                                                    value={viewUser.department} 
+                                                    onChange={handleChange}
+                                                    className="view-user-input-field"
+                                                    required
+                                                >
+                                                    <option value="">Select a Department</option>
+                                                    <option value="GAD">GAD</option>
+                                                    <option value="Lupon">Lupon</option>
+                                                    <option value="VAWC">VAWC</option>
+                                                    <option value="BCPC">BCPC</option>
+                                                </select>
+                                            </div>
+                                        )}
                                             <div className="view-user-fields-section">
                                                 <p>Contact Number</p>
                                                 <input type="input" className="view-user-input-field" name="phone" value={viewUser.phone || "N/A"} readOnly/>
