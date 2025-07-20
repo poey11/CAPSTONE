@@ -340,6 +340,18 @@ export default function EditBarangayAccount() {
                                         </div>
 
                                         <div className="fields-section">
+                                            <p>Official Last Name</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Official Last Name"
+                                                name="lastName"
+                                                value={formData.lastName}
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
                                             <p>Official First Name</p>
                                             <input
                                                 type="text"
@@ -363,19 +375,27 @@ export default function EditBarangayAccount() {
                                             />
                                         </div>
 
-                                        <div className="fields-section">
-                                            <p>Birthday</p>
-                                            <input
-                                                type="date"
-                                                className="editbrgyuser-input-field"
-                                                placeholder="Birthday"
-                                                name="birthDate"
-                                                value={formData.birthDate}
-                                                onChange={handleChange}
-                                                max={new Date().toISOString().split("T")[0]}
-                                            />
-                                        </div>
+                                       
 
+                                        <div className="fields-section">
+                                            <p>Gender</p>
+                                            <select
+                                                name="gender"
+                                                className="editbrgyuser-input-field"
+                                                required
+                                                value={formData.sex}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="" disabled>Select gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div> 
+
+                                    </div>
+
+                                    <div className="editbrgyuser-section-2-left-side">
+                                        
                                         <div className="fields-section">
                                             <p>Position</p>
 
@@ -395,20 +415,26 @@ export default function EditBarangayAccount() {
                                                 <option value="LF Staff">LF Staff</option>
                                             </select>
                                         </div>
-                                    </div>
 
-                                    <div className="editbrgyuser-section-2-left-side">
-                                        <div className="fields-section">
-                                            <p>Official Last Name</p>
-                                            <input
-                                                type="text"
-                                                className="editbrgyuser-input-field"
-                                                placeholder="Official Last Name"
-                                                name="lastName"
-                                                value={formData.lastName}
-                                                onChange={handleChange}
-                                            />
-                                        </div>
+                                        {formData.position === "LF Staff" && (
+                                            <div className="fields-section">
+                                                <p>Department:</p>
+
+                                                <select 
+                                                    name="department" 
+                                                    value={formData.department} 
+                                                    onChange={handleChange}
+                                                    className="editbrgyuser-input-field"
+                                                    required
+                                                >
+                                                    <option value="">Select a Department</option>
+                                                    <option value="GAD">GAD</option>
+                                                    <option value="Lupon">Lupon</option>
+                                                    <option value="VAWC">VAWC</option>
+                                                    <option value="BCPC">BCPC</option>
+                                                </select>
+                                            </div>
+                                        )}
 
                                         <div className="editbrgyacc-fields-container">
                                             <div className="fields-section">
@@ -424,20 +450,7 @@ export default function EditBarangayAccount() {
                                             </div>
                                         </div>
 
-                                        <div className="fields-section">
-                                            <p>Gender</p>
-                                            <select
-                                                name="gender"
-                                                className="editbrgyuser-input-field"
-                                                required
-                                                value={formData.sex}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="" disabled>Select gender</option>
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
-                                            </select>
-                                        </div> 
+                                        
 
                                         <div className="fields-section">
                                             <p>Contact Number</p>
@@ -461,25 +474,20 @@ export default function EditBarangayAccount() {
                                             />
                                         </div>  
 
-                                        {formData.position === "LF Staff" && (
-                                            <div className="fields-section">
-                                                <p>Department:</p>
+                                         <div className="fields-section">
+                                            <p>Birthday</p>
+                                            <input
+                                                type="date"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Birthday"
+                                                name="birthDate"
+                                                value={formData.birthDate}
+                                                onChange={handleChange}
+                                                max={new Date().toISOString().split("T")[0]}
+                                            />
+                                        </div>
 
-                                                <select 
-                                                    name="department" 
-                                                    value={formData.department} 
-                                                    onChange={handleChange}
-                                                    className="editbrgyuser-input-field"
-                                                    required
-                                                >
-                                                    <option value="">Select a Department</option>
-                                                    <option value="GAD">GAD</option>
-                                                    <option value="Lupon">Lupon</option>
-                                                    <option value="VAWC">VAWC</option>
-                                                    <option value="BCPC">BCPC</option>
-                                                </select>
-                                            </div>
-                                        )}
+                                        
 
                                     </div>
                                 </div>
