@@ -1711,6 +1711,7 @@ Functions for Reason for Reject
     const [receival, setReceival] = useState({
       receivalName: "",
       receivalWhen: new Date(),
+      jobseekerRemarks: "",
     })
 
 
@@ -1723,6 +1724,7 @@ Functions for Reason for Reject
       }
     }, [requestData]);
 
+    
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
     
@@ -1765,7 +1767,12 @@ Functions for Reason for Reject
         statusPriority: 3,
         orNumber: orNumber,
       };
-    
+
+      // Only add remarks if First Time Jobseeker
+      if (requestData?.purpose === "First Time Jobseeker" && receival.jobseekerRemarks) {
+        updatedData.jobseekerRemarks = receival.jobseekerRemarks;
+      }
+          
       
     
       await updateDoc(docRef, updatedData);
@@ -1774,31 +1781,56 @@ Functions for Reason for Reject
       if (requestData?.purpose === "First Time Jobseeker") {
         try {
           const jobSeekerRef = collection(db, "JobSeekerList");
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
+          const byResidentIdQuery = query(
+            jobSeekerRef,
+            where("residentId", "==", requestData.residentId)
+          );
           const byResidentIdSnap = await getDocs(byResidentIdQuery);
-    
+
           if (!byResidentIdSnap.empty) {
             const jobDoc = byResidentIdSnap.docs[0];
             const data = jobDoc.data();
+
+            // Update firstTimeClaimed if still false
             if (!data.firstTimeClaimed) {
               await updateDoc(jobDoc.ref, { firstTimeClaimed: true });
             }
+
+            // Update remarks if input is non-empty
+            if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
+              await updateDoc(jobDoc.ref, { remarks: receival.jobseekerRemarks.trim() });
+            }
+
           } else {
             const snapshot = await getDocs(jobSeekerRef);
-            const match = snapshot.docs.find(doc => {
+            const match = snapshot.docs.find((doc) => {
               const data = doc.data();
-              return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
-                     data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
-                     data.dateOfBirth === requestData.birthday;
+              return (
+                data.firstName?.toLowerCase() ===
+                  requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                data.lastName?.toLowerCase() ===
+                  requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                data.dateOfBirth === requestData.birthday
+              );
             });
-            if (match && !match.data().firstTimeClaimed) {
-              await updateDoc(match.ref, { firstTimeClaimed: true });
+
+            if (match) {
+              const data = match.data();
+
+              if (!data.firstTimeClaimed) {
+                await updateDoc(match.ref, { firstTimeClaimed: true });
+              }
+
+              if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
+                await updateDoc(match.ref, { remarks: receival.jobseekerRemarks.trim() });
+              }
             }
           }
         } catch (err) {
-          console.error("Failed to update firstTimeClaimed:", err);
+          console.error("Failed to update JobSeekerList record:", err);
         }
       }
+
     
       await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
@@ -2094,6 +2126,7 @@ Functions for Reason for Reject
             receivalWhen: data.receivalWhen?.seconds
               ? new Date(data.receivalWhen.seconds * 1000) // Convert Firestore Timestamp to JS Date
               : data.receivalWhen || "", // fallback
+              jobseekerRemarks: receival.jobseekerRemarks,
           });
         }
       };
@@ -3073,7 +3106,21 @@ Functions for Reason for Reject
                     <p className="jobseeker-note-payment">
                       * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
                     </p>
-                  )}                  
+                  )}
+                  {requestData?.purpose === "First Time Jobseeker" && (
+                    <div className="services-onlinereq-doc-receival-form-section">
+                      <p>Remarks for First Time Jobseeker</p>
+                      <textarea
+                        className="services-onlinereq-input-field"
+                        value={receival.jobseekerRemarks || ""}
+                        onChange={(e) =>
+                          setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
+                        }
+                        placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
+                        rows={2}
+                      />
+                    </div>  
+                  )}                                   
                 </>
                )}
 
