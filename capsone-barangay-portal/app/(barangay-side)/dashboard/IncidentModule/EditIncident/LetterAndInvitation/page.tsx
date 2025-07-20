@@ -35,6 +35,10 @@ export default function GenerateDialogueLetter() {
     const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
 
 
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    
+
   
     const [isLoading, setIsLoading] = useState(false);
 
@@ -932,6 +936,15 @@ export default function GenerateDialogueLetter() {
               </div>
         )}
 
+                {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
+
 
 
                 {showSubmitPopup.show && (
@@ -946,48 +959,61 @@ export default function GenerateDialogueLetter() {
                     <h2>{showSubmitPopup.message2}</h2>
 
                     {showSubmitPopup.letterType === "summon" ? (
-                        <button
-                        onClick={() => {
-                            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                            if (showSubmitPopup.letterType === "summon") {
+                            <button
+                            onClick={() => {
+                                setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+
+                                // Show the success popup message immediately
+                                setPopupMessage("SMS sent successfully!!");
+                                setShowPopup(true);
+
+                                if (showSubmitPopup.letterType === "summon") {
+                                // Redirect to HearingSection after 3 seconds
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
-                                    //sendSMSForSummons();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                                }, 3000); // wait 3 seconds
-                              } else {
+                                }, 3000);
+                                } else {
+                                // Go back after 2 seconds
                                 setTimeout(() => {
-                                  router.back();
-                                }, 2000); // wait 2 seconds
-                              }
+                                    setShowPopup(false);
+                                    router.back();
+                                }, 2000);
+                                }
                             }}
-                        className="send-sms-btn"
-                        >
-                        Send SMS
-                        </button>
+                            className="send-sms-btn"
+                            >
+                            Send SMS
+                            </button>
+
                     ) : (
                         // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
                         <button
-                        onClick={() => {
-                            setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                            onClick={() => {
+                                setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
 
-                            if (showSubmitPopup.letterType === "dialogue") {
+                                // Show popup immediately
+                                setPopupMessage("SMS sent successfully!!");
+                                setShowPopup(true);
+
+                                if (showSubmitPopup.letterType === "dialogue") {
+                                // Redirect after 3 seconds
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
-                                    //sendSMSForDialogue();
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
-                                }, 3000); // wait 3 seconds
-                              } else {
+                                }, 3000);
+                                } else {
+                                // Redirect after 2 seconds
                                 setTimeout(() => {
-                                  router.back();
-                                }, 2000); // wait 2 seconds
-                              }
+                                    setShowPopup(false);
+                                    router.back();
+                                }, 2000);
+                                }
                             }}
-                        className="send-sms-btn"
-                        >
-                        Send SMS
-                        </button>
-                 
+                            className="send-sms-btn"
+                            >
+                            Send SMS
+                        </button> 
                     )}
                     </div>
                 </div>

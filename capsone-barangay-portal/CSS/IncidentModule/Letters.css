@@ -1242,3 +1242,60 @@ POP UPS
   color: #2C3E50;
   margin-left: 6px;
 }
+
+
+
+
+
+
+
+.popup-overlay-add,
+.error-popup-overlay-add{
+    position: fixed;
+    top: 13%;
+    right: -3px;
+    color: white;
+    width: 450px;
+    height: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .popup-overlay-add{
+    background: #777575;
+    border-left: 10px solid #403f3e;
+  }
+
+
+  .popup-add{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.popup-overlay-add.show,
+.error-popup-overlay-add.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.popup-overlay-add.hide,
+.error-popup-overlay-add.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+
+
