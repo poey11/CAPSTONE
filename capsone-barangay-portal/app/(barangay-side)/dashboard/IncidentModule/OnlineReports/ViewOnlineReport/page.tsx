@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/IncidentModule/OnlineReporting.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
@@ -51,6 +51,7 @@ export default function ViewOnlineReports() {
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);  
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<string | null>(null);
   const [files, setFiles] = useState<{ file: File; name: string; preview: string | undefined }[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -140,7 +141,33 @@ export default function ViewOnlineReports() {
       console.error("Error fetching incident data:", error);
     }
   };
-  
+
+ useEffect(() => {
+  let type = "";
+
+  if (imageUrl) {
+    // Try to extract file name with extension from Firebase URL
+    const match = imageUrl.match(/\/o\/(.*?)\?/); // get path after /o/ and before ?
+    const decodedPath = match ? decodeURIComponent(match[1]) : "";
+    const fileExtension = decodedPath.split('.').pop()?.toLowerCase();
+
+    console.log("Decoded filename:", decodedPath);
+    console.log("File Extension:", fileExtension);
+
+    if (fileExtension?.match(/(jpg|jpeg|png|gif|webp)$/)) {
+      type = "image";
+    } else if (fileExtension?.match(/(mp3|wav|ogg)$/)) {
+      type = "audio";
+    } else if (fileExtension?.match(/(mp4|webm|ogg)$/)) {
+      type = "video";
+    } else {
+      type = "unsupported";
+    }
+  }
+
+    setMediaType(type);
+  }, [imageUrl]);
+
   
   const hasRespondentChanged = () => {
     return (
@@ -563,34 +590,6 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                     </div>
 
                     <div className="online-report-section-bottom-side-2">
-
-                      {/*}
-                       
-                            <div className="fields-section-online">
-                                <p>Barangay Officer<span className="required">*</span></p>
-                                <select
-                                  className={`online-incident-input-field ${invalidFields.includes("respondentName") ? "input-error" : ""}`}
-                                  name="respondentName" 
-                                  value={respondent.respondentName}
-                                  onChange={handleChange}
-                                  disabled = {formData.status === "Settled" || initialRespondent.respondentName !== "" ||user?.position !== "LF Staff"}                                  
-                                >
-                                  <option value="" disabled>Select Officer</option>
-                                  {listOfStaffs.filter(staff => !(staff.id == user?.id && respondent.respondentName =="") ) 
-                                  .map((staff,index) => (
-                                    <option key={index} 
-                                      value={staff.id}
-                                      >
-                                      {staff.firstName} {staff.lastName}
-                                    </option>
-                                  ))}
-
-                                </select>
-                                
-                            </div>
-
-                        */}
-
                         {(user?.position === "LF Staff" || formData.status === "Settled") && (
                           <div className="fields-section-online">
                             <p>Barangay Officer<span className="required">*</span></p>
@@ -686,15 +685,30 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                           <div className="online-report-top">
                             <div className="online-report-box-container">
                               <div className="box-container-outer-image">
-                                <div className="title-image">Incident Image</div>
+                                <div className="title-image">Incident Evidence</div>
                                 <div className="box-container-incidentimage-online">
                                   {imageUrl ? (
-                                    <a href={imageUrl} target="_blank" rel="noopener noreferrer">
-                                      <img src={imageUrl} alt="Incident Image" className="incident-img" />
-                                    </a>
+                                    mediaType === "image" ? (
+                                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                                        <img src={imageUrl} alt="Incident Image" className="incident-img" />
+                                      </a>
+                                    ) : mediaType === "audio" ? (
+                                      <audio controls className="incident-audio">
+                                        <source src={imageUrl} />
+                                        Your browser does not support the audio element.
+                                      </audio>
+                                    ) : mediaType === "video" ? (
+                                      <video controls className="incident-video" width="100%">
+                                        <source src={imageUrl} />
+                                        Your browser does not support the video element.
+                                      </video>
+                                    ) : (
+                                      <p className="unsupported-text">Unsupported media type</p>
+                                    )
                                   ) : (
-                                    <p className="no-image-text">No image available</p>
+                                    <p className="no-image-text">No media available</p>
                                   )}
+
                                 </div>
                               </div>
                             </div>
@@ -737,15 +751,31 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                           <div className="online-report-bottom">
                             <div className="online-report-box-container">
                               <div className="box-container-outer-image">
-                                <div className="title-image">Incident Image</div>
+                                <div className="title-image">Incident Evidence</div>
                                 <div className="box-container-incidentimage-online">
                                   {imageUrl ? (
-                                    <a href={imageUrl} target="_blank" rel="noopener noreferrer">
-                                      <img src={imageUrl} alt="Incident Image" className="incident-img" />
-                                    </a>
+                                    mediaType === "image" ? (
+                                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+                                        <img src={imageUrl} alt="Incident Image" className="incident-img" />
+                                      </a>
+                                    ) : mediaType === "audio" ? (
+                                      <audio controls className="incident-audio">
+                                        <source src={imageUrl} />
+                                        Your browser does not support the audio element.
+                                      </audio>
+                                    ) : mediaType === "video" ? (
+                                      <video controls className="incident-video" width="100%">
+                                        <source src={imageUrl} />
+                                        Your browser does not support the video element.
+                                      </video>
+                                    ) : (
+                                      <p className="unsupported-text">Unsupported media type</p>
+                                    )
                                   ) : (
-                                    <p className="no-image-text">No image available</p>
+                                    <p className="no-image-text">No media available</p>
                                   )}
+
+
                                 </div>
                               </div>
                             </div>

@@ -291,6 +291,35 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
       [index]: !prev[index],
     }));
   };
+
+  
+    const [mediaType, setMediaType] = useState<string>("");
+  
+   useEffect(() => {
+    let type = "";
+  
+    if (concernImageUrl) {
+      // Try to extract file name with extension from Firebase URL
+      const match = concernImageUrl.match(/\/o\/(.*?)\?/); // get path after /o/ and before ?
+      const decodedPath = match ? decodeURIComponent(match[1]) : "";
+      const fileExtension = decodedPath.split('.').pop()?.toLowerCase();
+  
+      console.log("Decoded filename:", decodedPath);
+      console.log("File Extension:", fileExtension);
+  
+      if (fileExtension?.match(/(jpg|jpeg|png|gif|webp)$/)) {
+        type = "image";
+      } else if (fileExtension?.match(/(mp3|wav|ogg)$/)) {
+        type = "audio";
+      } else if (fileExtension?.match(/(mp4|webm|ogg)$/)) {
+        type = "video";
+      } else {
+        type = "unsupported";
+      }
+    }
+  
+      setMediaType(type);
+    }, [concernImageUrl]);
   console.log(reportData)
   return (
     <main className="main-container-view">
@@ -666,21 +695,30 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
                           <div className="view-incident-partyA-container">
                             <div className="box-container-outer-natureoffacts">
                               <div className="title-remarks-partyA">
-                                Incident Image
+                                Incident Evidence
                               </div>
                               <div className="box-container-incidentimage-2">
-                                {otherinformation.image ? (
-                                   <a href={otherinformation.image} target="_blank" rel="noopener noreferrer">
-                                        <img
-                                        src={otherinformation.image}
-                                        alt="Incident Image"
-                                        className="incident-img-view uploaded-pic"
-                                      />
-                                   </a>
-                                  
-                                ) : (
-                                  <p className="no-image-text-view">No image available</p>
-                                )}
+                                 {concernImageUrl ? (
+                                    mediaType === "image" ? (
+                                      <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
+                                        <img src={concernImageUrl} alt="Incident Image" className="incident-img" />
+                                      </a>
+                                    ) : mediaType === "audio" ? (
+                                      <audio controls className="incident-audio">
+                                        <source src={concernImageUrl} />
+                                        Your browser does not support the audio element.
+                                      </audio>
+                                    ) : mediaType === "video" ? (
+                                      <video controls className="" width="58%" > 
+                                        <source src={concernImageUrl} />
+                                        Your browser does not support the video element.
+                                      </video>
+                                    ) : (
+                                      <p className="unsupported-text">Unsupported media type</p>
+                                    )
+                                  ) : (
+                                    <p className="no-image-text">No media available</p>
+                                  )}
                               </div>
                             </div>
                           </div>
