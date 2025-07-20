@@ -1021,25 +1021,30 @@ const handleFileChange = (
   return requiredFields;
 };
 
+console.log("appointment map:", appointmentsMap);
 
   
     // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
       const selectedDate = new Date(clearanceInput.appointmentDate).toDateString();
+      const selectedPurpose = clearanceInput.purpose?.trim().toLowerCase();
 
       const existingAppointments = userAppointmentsMap[clearanceInput.docType] || [];
 
-      const isSameDayAppointment = existingAppointments.some((appt: any) => {
+      const isSameDayAndPurpose = existingAppointments.some((appt: any) => {
         const apptDate = new Date(appt.appointmentDate).toDateString();
-        return apptDate === selectedDate;
+        const apptPurpose = appt.purpose?.trim().toLowerCase();
+      
+        return apptDate === selectedDate && apptPurpose === selectedPurpose;
       });
 
-      if (isSameDayAppointment) {
-        setErrorMessage("You already have an appointment for this document type on the selected date.");
+      if (isSameDayAndPurpose) {
+        setErrorMessage("You already have an appointment for this document type, purpose, and date.");
         setShowErrorPopup(true);
         return;
       }
+
 
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
