@@ -490,6 +490,7 @@ useEffect(() => {
                         <option value="Barangay Certificate">Barangay Certificate</option>
                         <option value="Barangay Indigency">Barangay Indigency</option>
                         <option value="Business Permit">Barangay Business Permits</option>
+                        <option value="Construction">Construction Permits</option>
                         <option value="Barangay Clearance">Barangay Clearance</option>
                         <option value="Other">Other Documents</option>
                       </select>

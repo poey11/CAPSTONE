@@ -229,8 +229,28 @@ export default function TopMenu() {
     } else if (
       ["Online Service Request", "Online Assigned Service Request", "Service Request", "Assigned Service Request"].includes(transactionType)
     ) {
-      router.push(`/dashboard/ServicesModule/ViewRequest?id=${requestID}`);
+      try {
+        const requestRef = doc(db, "ServiceRequests", requestID);
+        const requestSnap = await getDoc(requestRef);
+
+        if (requestSnap.exists()) {
+          const requestData = requestSnap.data();
+          const hasAppointment = Boolean(requestData.appointmentDate);
+          const isApproved = requestData.approvedBySAS === true;
+
+          if (hasAppointment && isApproved) {
+            router.push(`/dashboard/ServicesModule/Appointments`);
+          } else {
+            router.push(`/dashboard/ServicesModule/ViewRequest?id=${requestID}`);
+          }
+        } else {
+          console.warn("Service request not found:", requestID);
+        }
+      } catch (err) {
+        console.error("Error fetching service request for redirection:", err);
+      }
     }
+
   };
   
 

@@ -1598,6 +1598,10 @@ Functions for Reason for Reject
         if (key === "isBeneficiary") {
           value = value === true ? "Yes" : value === false ? "No" : "";
         }
+
+        if (key === "educationalAttainment") {
+          value = educationalAttainmentMap[value as keyof typeof educationalAttainmentMap] || value;
+        }
       
         if (!value) return null;
       
@@ -1711,6 +1715,7 @@ Functions for Reason for Reject
     const [receival, setReceival] = useState({
       receivalName: "",
       receivalWhen: new Date(),
+      jobseekerRemarks: "",
     })
 
 
@@ -1723,6 +1728,7 @@ Functions for Reason for Reject
       }
     }, [requestData]);
 
+    
     const handleReceivalSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
     
@@ -1765,7 +1771,12 @@ Functions for Reason for Reject
         statusPriority: 3,
         orNumber: orNumber,
       };
-    
+
+      // Only add remarks if First Time Jobseeker
+      if (requestData?.purpose === "First Time Jobseeker" && receival.jobseekerRemarks) {
+        updatedData.jobseekerRemarks = receival.jobseekerRemarks;
+      }
+          
       
     
       await updateDoc(docRef, updatedData);
@@ -1774,31 +1785,56 @@ Functions for Reason for Reject
       if (requestData?.purpose === "First Time Jobseeker") {
         try {
           const jobSeekerRef = collection(db, "JobSeekerList");
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
+          const byResidentIdQuery = query(
+            jobSeekerRef,
+            where("residentId", "==", requestData.residentId)
+          );
           const byResidentIdSnap = await getDocs(byResidentIdQuery);
-    
+
           if (!byResidentIdSnap.empty) {
             const jobDoc = byResidentIdSnap.docs[0];
             const data = jobDoc.data();
+
+            // Update firstTimeClaimed if still false
             if (!data.firstTimeClaimed) {
               await updateDoc(jobDoc.ref, { firstTimeClaimed: true });
             }
+
+            // Update remarks if input is non-empty
+            if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
+              await updateDoc(jobDoc.ref, { remarks: receival.jobseekerRemarks.trim() });
+            }
+
           } else {
             const snapshot = await getDocs(jobSeekerRef);
-            const match = snapshot.docs.find(doc => {
+            const match = snapshot.docs.find((doc) => {
               const data = doc.data();
-              return data.firstName?.toLowerCase() === requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
-                     data.lastName?.toLowerCase() === requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
-                     data.dateOfBirth === requestData.birthday;
+              return (
+                data.firstName?.toLowerCase() ===
+                  requestData.requestorFname?.split(" ")[0]?.toLowerCase() &&
+                data.lastName?.toLowerCase() ===
+                  requestData.requestorFname?.split(" ").slice(-1)[0]?.toLowerCase() &&
+                data.dateOfBirth === requestData.birthday
+              );
             });
-            if (match && !match.data().firstTimeClaimed) {
-              await updateDoc(match.ref, { firstTimeClaimed: true });
+
+            if (match) {
+              const data = match.data();
+
+              if (!data.firstTimeClaimed) {
+                await updateDoc(match.ref, { firstTimeClaimed: true });
+              }
+
+              if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
+                await updateDoc(match.ref, { remarks: receival.jobseekerRemarks.trim() });
+              }
             }
           }
         } catch (err) {
-          console.error("Failed to update firstTimeClaimed:", err);
+          console.error("Failed to update JobSeekerList record:", err);
         }
       }
+
     
       await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
@@ -1844,7 +1880,6 @@ Functions for Reason for Reject
     
       await updateDoc(docRef, updatedData);
     
-      const notificationRef = collection(db, "BarangayNotifications");
        await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
         requestID: id,
@@ -1854,182 +1889,226 @@ Functions for Reason for Reject
         isRead: false,
       });
 
+        const notificationRef = collection(db, "BarangayNotifications");
 
-    const isOnline = requestData?.accID !== "INBRGY-REQ";
-    const messageSuffix = isOnline ? " (Online)" : "";
-    const docType = requestData?.docType;
-    const purpose = requestData?.purpose;
-    const requestorName = requestData?.requestorFname;
+        const isOnline = requestData?.accID !== "INBRGY-REQ";
+        const messageSuffix = isOnline ? " (Online)" : "";
+        const docType = requestData?.docType;
+        const purpose = requestData?.purpose;
 
-    // BARANGAY CLEARANCE need else if for residency(only needs secretary)
-    if (docType === "Barangay Clearance") {
-        // Both PB and Secretary
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Secretary",
-          requestID: id,
-        });
+        // BARANGAY CLEARANCE
+        if (docType === "Barangay Clearance") {
+          const validDualPurposes = [
+            "Bail Bond", "Bank Transaction", "Loan",
+            "Local Employment", "Maynilad", "Meralco", "Residency"
+          ];
 
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Punong Barangay",
-          requestID: id,
-        });
-    }
+          if (validDualPurposes.includes(purpose || "")) {
+            // Both Secretary and PB
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
 
-    // BARANGAY CERTIFICATE
-    else if (docType === "Barangay Certificate") {
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Secretary",
-        requestID: id,
-      });
-    }
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Punong Barangay",
+              requestID: id,
+            });
+          } else {
+            // Fallback: Secretary only
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          }
+        }
 
-    // BARANGAY INDIGENCY
-    else if (docType === "Barangay Indigency") {
-      if (purpose && ["Philhealth Sponsor", "Medical Assistance"].includes(purpose)) {
-        // PB only
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Punong Barangay",
-          requestID: id,
-        });
+        // BARANGAY CERTIFICATE
+        else if (docType === "Barangay Certificate") {
+          const validPurposes = [
+            "Residency", "Occupancy /  Moving Out", "Estate Tax",
+            "Death Residency", "No Income", "Guardianship",
+            "Cohabitation", "Good Moral and Probation", "Garage/PUV", "Garage/TRU"
+          ];
 
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Secretary",
-          requestID: id,
-        });
-                
-      } else {
-        // Secretary only
-        await addDoc(notificationRef, {
-          message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData!.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Secretary",
-          requestID: id,
-        });
-      }
-    }
+          if (validPurposes.includes(purpose || "")) {
+            // Secretary only
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          } else {
+            // Fallback: Secretary only
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          }
+        }
 
-    // BUSINESS PERMITS
-    else if (
-      docType === "Business Permit" ||
-      docType === "Temporary Business Permit"
-    ) {
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Secretary",
-        requestID: id,
-      });
+        // BARANGAY INDIGENCY
+        else if (docType === "Barangay Indigency") {
+          const pbOnlyPurposes = ["Philhealth Sponsor", "Medical Assistance"];
+          const secOnlyPurposes = [
+            "No Income", "Public Attorneys Office",
+            "Financial Subsidy of Solo Parent", "Fire Victims", "Flood Victims"
+          ];
 
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Punong Barangay",
-        requestID: id,
-      });
-    }
+          if (pbOnlyPurposes.includes(purpose || "")) {
+            // Both PB and Secretary
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Punong Barangay",
+              requestID: id,
+            });
 
-    // CONSTRUCTION
-    else if (docType === "Construction") {
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Secretary",
-        requestID: id,
-      });
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          } else if (secOnlyPurposes.includes(purpose || "")) {
+            // Secretary only
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          } else {
+            // Fallback: Secretary only
+            await addDoc(notificationRef, {
+              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+              timestamp: new Date(),
+              requestorId: requestData!.accID,
+              isRead: false,
+              transactionType: "Online Assigned Service Request",
+              recipientRole: "Secretary",
+              requestID: id,
+            });
+          }
+        }
 
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Punong Barangay",
-        requestID: id,
-      });
-    }
+        // BUSINESS PERMITS
+        else if (docType === "Business Permit" || docType === "Temporary Business Permit") {
+          await addDoc(notificationRef, {
+            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Secretary",
+            requestID: id,
+          });
 
-    // OTHER DOCUMENTS
-    else if (docType === "Other Documents" && purpose === "Barangay ID") {
-      // PB only
-      await addDoc(notificationRef, {
-        message: `A document for ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Punong Barangay",
-        requestID: id,
-      });
-    }
+          await addDoc(notificationRef, {
+            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Punong Barangay",
+            requestID: id,
+          });
+        }
 
-    else if (docType === "Other Documents" && purpose !== "Barangay ID") {
-      // Secretary only
-      await addDoc(notificationRef, {
-        message: `A document for ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Secretary",
-        requestID: id,
-      });
-    } else if (
-      docType !== "Other Documents" &&
-      docType !== "Barangay Clearance" &&
-      docType !== "Barangay Indigency" &&
-      docType !== "Barangay Certificate" &&
-      docType !== "Business Permit" &&
-      docType !== "Temporary Business Permit" &&
-      docType !== "Construction"
-    ) {
-      // Fallback Secretary only
-      await addDoc(notificationRef, {
-        message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-        timestamp: new Date(),
-        requestorId: requestData!.accID,
-        isRead: false,
-        transactionType: "Online Assigned Service Request",
-        recipientRole: "Secretary",
-        requestID: id,
-      });
-    }
+        // CONSTRUCTION
+        else if (docType === "Construction") {
+          await addDoc(notificationRef, {
+            message: `A Construction Permit requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Secretary",
+            requestID: id,
+          });
+
+          await addDoc(notificationRef, {
+            message: `A Construction Permit requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Punong Barangay",
+            requestID: id,
+          });
+        }
+
+        // OTHER DOCUMENTS
+        else if (docType === "Other Documents" && purpose === "Barangay ID") {
+          await addDoc(notificationRef, {
+            message: `A document for ${purpose} requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Punong Barangay",
+            requestID: id,
+          });
+        }
+        else if (docType === "Other Documents") {
+          // Fallback for any other "Other Documents" purposes
+          await addDoc(notificationRef, {
+            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Secretary",
+            requestID: id,
+          });
+        }
+
+        // FINAL fallback: unknown docType
+        else {
+          await addDoc(notificationRef, {
+            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            timestamp: new Date(),
+            requestorId: requestData!.accID,
+            isRead: false,
+            transactionType: "Online Assigned Service Request",
+            recipientRole: "Secretary",
+            requestID: id,
+          });
+        }
+
 
 
     
@@ -2051,6 +2130,7 @@ Functions for Reason for Reject
             receivalWhen: data.receivalWhen?.seconds
               ? new Date(data.receivalWhen.seconds * 1000) // Convert Firestore Timestamp to JS Date
               : data.receivalWhen || "", // fallback
+              jobseekerRemarks: receival.jobseekerRemarks,
           });
         }
       };
@@ -2075,7 +2155,11 @@ Functions for Reason for Reject
         const messageSuffix = isOnline ? " (Online)" : "";
         
         await addDoc(notificationRef, {
-          message: `You have been assigned a new task for ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
+          message: 
+            requestData.docType === "Construction"
+              ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
+              : `You have been assigned a new task for ${requestData?.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
+          
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -2083,6 +2167,7 @@ Functions for Reason for Reject
           recipientRole: "Admin Staff",
           requestID: id,
         });
+
 
 
       }else{
@@ -2141,7 +2226,7 @@ Functions for Reason for Reject
 
       if ( requestData?.docType === "Barangay Certificate" && requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
-          message: `You have been assigned an appointment for picture taking for ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          message: `You have been assigned an appointment for picture taking for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}. Request ID: ${requestData?.requestId}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -2151,7 +2236,7 @@ Functions for Reason for Reject
         });
       } else if (requestData?.docType === "Barangay Indigency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
-          message: `You have been assigned an appointment for interview for ${requestData?.docType} ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          message: `You have been assigned an appointment for interview for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}. Request ID: ${requestData?.requestId}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -2278,7 +2363,17 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
     }
 
-    
+    const educationalAttainmentMap: { [key: string]: string } = {
+      "1": "Elem Under Grad",
+      "2": "Elem Grad",
+      "3": "HS Grad",
+      "4": "HS Under Grad",
+      "5": "COL Grad",
+      "6": "COL Under Grad",
+      "7": "Educational",
+      "8": "Vocational",
+    };
+
 
     return (  
         <main className="main-container-services-onlinereq">
@@ -2593,11 +2688,11 @@ Functions for Reason for Reject
                             >
                               {section === "basic" && "Basic Info"}
                               {section === "full" && "Full Info"}
-                              {section === "emergency" && "Emergency Info"}
+                              {section === "emergency" && "Emergency"}
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
                               {section === "received" && "Received By"}
-                              {section === "generateddocs" && "Generated Documents"}
+                              {section === "generateddocs" && "Generated Document"}
                               {section === "or" && "OR Details"}
                               {section === "photo" && "Uploaded Photo"}
                               {section === "interview" && "Interview Remarks"}
@@ -3025,7 +3120,21 @@ Functions for Reason for Reject
                     <p className="jobseeker-note-payment">
                       * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
                     </p>
-                  )}                  
+                  )}
+                  {requestData?.purpose === "First Time Jobseeker" && (
+                    <div className="services-onlinereq-doc-receival-form-section">
+                      <p>Remarks for First Time Jobseeker</p>
+                      <textarea
+                        className="services-onlinereq-input-field"
+                        value={receival.jobseekerRemarks || ""}
+                        onChange={(e) =>
+                          setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
+                        }
+                        placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
+                        rows={2}
+                      />
+                    </div>  
+                  )}                                   
                 </>
                )}
 

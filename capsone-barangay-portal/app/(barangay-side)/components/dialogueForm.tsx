@@ -233,17 +233,18 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
               filled:true,
             });
 
-            const mainDocRef = doc(db, "IncidentReports", id); 
-            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
-                await updateDoc(mainDocRef, 
-                {
-                    status: "archived",
-                    statusPriority: 2
-                });
-            else{
-                setShowDoneIncidentPopup(true);
+            const mainDocRef = doc(db, "IncidentReports", id);
 
+            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+              await updateDoc(mainDocRef, {
+                status: "archived",
+                statusPriority: 2,
+              });
+
+            } else {
+              setShowDoneIncidentPopup(true);
             }
+
             
         //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
 

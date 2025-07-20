@@ -247,15 +247,21 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         
 
             const mainDocRef = doc(db, "IncidentReports", id); 
-            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
-                await updateDoc(mainDocRef, 
-                {
-                    status: "archived",
-                    statusPriority: 2,
-                    hearingId:  success.id,
-                })
-            else{
-                setShowDoneIncidentPopup(true);
+            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+              await updateDoc(mainDocRef, {
+                status: "archived",
+                statusPriority: 2,
+                hearingId: success.id,
+              });
+
+             
+           setTimeout(() => {
+              setShowPopup(false);
+              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            }, 3000);
+
+            } else {
+              setShowDoneIncidentPopup(true);
             }
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -392,16 +398,18 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             status: "settled",
             statusPriority: 3,
           });
-          setTimeout(() => {
-            setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          if(department !== "Lupon"){
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-          }else{
-            setShowSubmitPopupB(true);
-          }
+
+
+    setTimeout(() => {
+      setShowPopup(false);
+
+      // ✅ Only redirect if not "Lupon"
+      if (department !== "Lupon") {
+        router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+      } else {
+        setShowSubmitPopupB(true);
+      }
+    }, 3000); // Wait 3 seconds before redirecting or showing next popup
 
         }
         else{
@@ -412,12 +420,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             status: "CFA",
             statusPriority: 4,
           });
+
           setTimeout(() => {
             setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }, 3000); // ✅ Delay redirect
+
         }
       }
 
