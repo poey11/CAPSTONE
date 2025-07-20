@@ -1356,18 +1356,20 @@ export default function action() {
         
         await addDoc(notificationRef, {
           message: 
-            clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate"
+            clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
               ? `New Certificate of Residency requested by ${clearanceInput.requestorFname}.`
               : clearanceInput.docType === "Barangay Indigency"
                 ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`
-                : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-          
+                : clearanceInput.docType === "Construction"
+                  ? `New Construction Permit requested by ${clearanceInput.requestorFname}.`
+                  : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+
           timestamp: new Date(),
           requestorId: clearanceInput.residentId,
           isRead: false,
           transactionType: "Online Service Request",
           recipientRole: (
-            (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency")
+            clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
               ? "Admin Staff"
               : (
                 clearanceInput.purpose === "First Time Jobseeker" ||
@@ -1382,8 +1384,7 @@ export default function action() {
           ),
           requestID: id,
         });
-        
-              
+
                 
     };
 console.log("otherDocFields", otherDocFields);
