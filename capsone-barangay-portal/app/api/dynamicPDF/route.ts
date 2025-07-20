@@ -26,27 +26,37 @@ export async function POST(req: NextRequest, res:NextResponse) {
 
         const titleX = (pageWidth - titleWidth) / 2;
         
+        
+        const normalizedBody = body.replace(/\r\n/g, '\n');
+        
 
         page.drawText(title, {
             x: titleX,
-            y: 550,
+            y: 570,
             size:25,
             font: font,
             color: rgb(0, 0, 0),
             lineHeight: 14,
             maxWidth: 500,
         })
-
-        page.drawText(body, {
-            x: 55,
-            y: 460,
-            size:fontSize,
-            font: font,
+        // Left-aligned body
+        const lineHeight = 20;
+        let yPosition = 465;
+        const marginLeft = 25;
+            
+        const bodyLines = normalizedBody.split('\n');
+            
+        for (const line of bodyLines) {
+          page.drawText(line, {
+            x: marginLeft,
+            y: yPosition,
+            size: fontSize,
+            font,
             color: rgb(0, 0, 0),
-            lineHeight: 14,
-            maxWidth: 500,
-        });
-
+          });
+      
+          yPosition -= lineHeight;
+        }
         const pdfBytes = await pdfDoc.save();
         return new NextResponse(pdfBytes, {
             status: 200,
