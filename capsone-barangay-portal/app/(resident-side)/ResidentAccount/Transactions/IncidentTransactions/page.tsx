@@ -237,7 +237,7 @@ if (loading || !transactionData) {
                 Report Info
               </button>
 
-              {transactionData?.status === "Acknowledged" && (
+              {transactionData?.status === "Settled" && (
                 <button
                   type="button"
                   className={`info-toggle-btn ${activeSection === "barangay" ? "active" : ""}`}
@@ -328,7 +328,7 @@ if (loading || !transactionData) {
               {activeSection === "barangay" && (
                 <>
                   <div className="incident-main-container-incident-response">
-                    {transactionData?.status === "Acknowledged" && (
+                    {transactionData?.status === "Settled" && (
                       <>
                         {respondentFields
                           .filter((field) => field.key !== "file")
