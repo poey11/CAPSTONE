@@ -247,15 +247,16 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         
 
             const mainDocRef = doc(db, "IncidentReports", id); 
-            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
-                await updateDoc(mainDocRef, 
-                {
-                    status: "archived",
-                    statusPriority: 2,
-                    hearingId:  success.id,
-                })
-            else{
-                setShowDoneIncidentPopup(true);
+            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+              await updateDoc(mainDocRef, {
+                status: "archived",
+                statusPriority: 2,
+                hearingId: success.id,
+              });
+
+              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            } else {
+              setShowDoneIncidentPopup(true);
             }
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -762,11 +763,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               setShowDoneIncidentPopup(false);
               setPopupMessage("If case is reopened, generate a letter again.");
               setShowPopup(true);
-              // setTimeout(() => setShowPopup(false), 3000);
-              setTimeout(() => {
-                setShowPopup(false);
-                router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-              }, 3000);              
+              setTimeout(() => setShowPopup(false), 3000);
             }}
             className="no-button-add"
           >

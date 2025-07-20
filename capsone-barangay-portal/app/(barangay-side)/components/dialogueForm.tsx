@@ -240,7 +240,6 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 status: "archived",
                 statusPriority: 2,
               });
-                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
 
             } else {
               setShowDoneIncidentPopup(true);
