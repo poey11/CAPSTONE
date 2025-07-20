@@ -28,7 +28,7 @@ const ReportsPage = () => {
 
   // file upload rbac
   const canSelectFolder = ["Secretary", "Assistant Secretary", "Punong Barangay"].includes(session?.user?.position || "");
-  const canUpload = session?.user?.position === "Assistant Secretary";
+  const canUpload = session?.user?.position === "Assistant Secretary" || session?.user?.position === "Secretary";
 
 
   // for residents
@@ -5789,12 +5789,14 @@ const generateDepartmentalReport = async (
                             >
                               Download
                             </button>
-                            <button
-                              className="delete-btn"
-                              onClick={() => handleDeleteClick(file.name)}
-                            >
-                              Delete
-                            </button>
+                            {canUpload && (
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteClick(file.name)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}
