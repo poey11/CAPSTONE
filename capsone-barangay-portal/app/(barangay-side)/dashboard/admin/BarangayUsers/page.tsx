@@ -307,9 +307,19 @@ useEffect(() => {
   
     // Filter by name (partial match)
     if (nameSearch.trim()) {
-      filtered = filtered.filter((user) =>
-        user.firstName?.toLowerCase().includes(nameSearch.toLowerCase())
-      );
+    const searchTerm = nameSearch.toLowerCase().trim();
+    filtered = filtered.filter((user) => {
+        const fullName = [
+        user.firstName,
+        user.middleName,
+        user.lastName
+        ]
+        .filter(Boolean) // remove undefined/null
+        .join(" ")
+        .toLowerCase();
+        
+        return fullName.includes(searchTerm);
+    });
     }
   
     // Filter by User ID (partial match)
