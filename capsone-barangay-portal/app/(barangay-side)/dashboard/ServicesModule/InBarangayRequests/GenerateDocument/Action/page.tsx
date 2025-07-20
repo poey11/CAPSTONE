@@ -254,7 +254,7 @@ export default function action() {
       reqType: "In Barangay",
       docType: docType || "",
       status: "Pending",
-      createdAt: formatDateMMDDYYYY(new Date()),
+      createdAt: new Date().toLocaleString(),
       createdBy: user?.id || "",
       statusPriority: 1,
       signaturejpg: null,
@@ -940,7 +940,6 @@ export default function action() {
             photoUploaded: "",
           }),
           ...uploadedFileUrls,
-          createdAt2: new Date().toLocaleString(),
         };
 
         const doc = await addDoc(docRef, docData);

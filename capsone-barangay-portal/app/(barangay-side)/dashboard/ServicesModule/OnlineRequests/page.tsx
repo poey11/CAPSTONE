@@ -142,7 +142,7 @@ useEffect(() => {
         const Collection = query(
           collection(db, "ServiceRequests"),
           where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
-          orderBy("createdAt2", "desc") // First, sort by latest
+          orderBy("createdAt", "desc") // First, sort by latest
         );
 
         const viewed = getViewedRequests();
@@ -164,7 +164,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt2);
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setRequestData(filteredReports);
@@ -189,7 +189,7 @@ useEffect(() => {
         const Collection = query(
           collection(db, "ServiceRequests"),
           where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
-          orderBy("createdAt2", "desc") // First, sort by latest
+          orderBy("createdAt", "desc") // First, sort by latest
         );
 
         const viewed = getViewedRequests();
@@ -209,7 +209,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt2);
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setAllOnlineRequests(reports);
@@ -559,7 +559,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
-                <td>{request.createdAt2}</td>
+                <td>{request.createdAt}</td>
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
@@ -700,7 +700,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
                 <td /* edited this class */>{request.docType}</td>
                 <td>{request.requestId}</td>
-                <td>{request.createdAt2}</td>
+                <td>{request.createdAt}</td>
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>

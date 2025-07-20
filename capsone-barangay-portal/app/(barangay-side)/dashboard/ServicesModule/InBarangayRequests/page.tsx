@@ -137,7 +137,7 @@ useEffect(() => {
           const Collection = query(
             collection(db,"ServiceRequests"),
             where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
-            orderBy("createdAt2", "desc") // First, sort by latest
+            orderBy("createdAt", "desc") // First, sort by latest
           );      
           const unsubscribe = onSnapshot(Collection, (snapshot) => {
             let reports: any[] = snapshot.docs.map((doc) => ({
@@ -156,7 +156,7 @@ useEffect(() => {
                 return a.statusPriority - b.statusPriority;
               }
             
-            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt);
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
             });
           
             setRequestData(filterReports);
@@ -189,7 +189,7 @@ useEffect(() => {
         const Collection = query(
           collection(db,"ServiceRequests"),
           where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
-          orderBy("createdAt2", "desc") // First, sort by latest
+          orderBy("createdAt", "desc") // First, sort by latest
         );      
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
@@ -202,7 +202,7 @@ useEffect(() => {
               return a.statusPriority - b.statusPriority;
             }
           
-            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt);
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setAllRequests(reports);
@@ -569,7 +569,7 @@ useEffect(() => {
 
                         <td /* edited this class */>{request.docType}</td>
                         <td>{request.requestId}</td>
-                        <td>{request.createdAt2}</td>
+                        <td>{request.createdAt}</td>
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
@@ -716,7 +716,7 @@ useEffect(() => {
                       <tr key={index}>
                         <td>{request.docType}</td>
                         <td>{request.requestId}</td>
-                        <td>{request.createdAt2}</td>
+                        <td>{request.createdAt}</td>
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>

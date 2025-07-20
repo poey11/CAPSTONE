@@ -55,31 +55,12 @@ export default function Transactions() {
                 const combined = [...incidents, ...services].sort((a, b) => {
                     const isACompleted = (a as any).status === "Completed";
                     const isBCompleted = (b as any).status === "Completed";
-                
+
                     if (isACompleted && !isBCompleted) return 1;
                     if (!isACompleted && isBCompleted) return -1;
-                
-                    let dateA: Date;
-                    let dateB: Date;
-                
-                    // Assign dateA
-                    if (a.type === "IncidentReport") {
-                        dateA = new Date((a as any).createdAt || (a as any).requestDate || 0);
-                    } else if (a.type === "ServiceRequest") {
-                        dateA = new Date((a as any).createdAt2 || (a as any).requestDate || 0);
-                    } else {
-                        dateA = new Date(0);
-                    }
-                
-                    // Assign dateB
-                    if (b.type === "IncidentReport") {
-                        dateB = new Date((b as any).createdAt || (b as any).requestDate || 0);
-                    } else if (b.type === "ServiceRequest") {
-                        dateB = new Date((b as any).createdAt2 || (b as any).requestDate || 0);
-                    } else {
-                        dateB = new Date(0);
-                    }
-                
+
+                    const dateA = new Date((a as any).createdAt || (a as any).requestDate || 0);
+                    const dateB = new Date((b as any).createdAt || (b as any).requestDate || 0);
                     return dateB.getTime() - dateA.getTime(); // Newest first
                 });
 
@@ -198,7 +179,7 @@ const filteredTransactions = transactionData.filter((item) => {
                             <tbody>
                                 {filteredTransactions.map((item) => (
                                     <tr key={item.id} onClick={() => handleTransactionClick(item)}>
-                                        <td>{item.createdAt2 ||item.createdAt ||"N/A"}</td>
+                                        <td>{item.createdAt || item.requestDate ||"N/A"}</td>
                                         <td>
                                             {item.caseNumber && item.caseNumber.split(" - ").length >= 3
                                                 ? `${item.caseNumber.split(" - ")[1]} - ${item.caseNumber.split(" - ")[2]}`

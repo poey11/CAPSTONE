@@ -138,7 +138,7 @@ export default function Action() {
     isViewed: false,
     requestId: "",
     purpose: docPurpose || "",
-    dateRequested: formatDateMMDDYYYY(new Date()),
+    dateRequested: new Date().toLocaleString(),
     fullName: "",
     appointmentDate: "",
     dateOfResidency: "",
@@ -795,7 +795,6 @@ const handleFileChange = (
       }),
       requestorMrMs: clearanceInput.requestorMrMs,
       requestorFname: clearanceInput.requestorFname,
-      createdAt2: new Date().toLocaleString(),
     };
     
     // Only go to notification if addDoc is 
