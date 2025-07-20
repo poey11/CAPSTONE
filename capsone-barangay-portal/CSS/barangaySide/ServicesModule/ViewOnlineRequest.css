@@ -561,7 +561,7 @@ html, body {
 .services-onlinereq-header-body-top-section{
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: center;
   padding-top: 20px;
 }
 

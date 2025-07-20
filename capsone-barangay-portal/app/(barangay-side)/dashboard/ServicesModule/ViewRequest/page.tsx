@@ -2641,11 +2641,11 @@ Functions for Reason for Reject
                             >
                               {section === "basic" && "Basic Info"}
                               {section === "full" && "Full Info"}
-                              {section === "emergency" && "Emergency Info"}
+                              {section === "emergency" && "Emergency"}
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
                               {section === "received" && "Received By"}
-                              {section === "generateddocs" && "Generated Documents"}
+                              {section === "generateddocs" && "Generated Document"}
                               {section === "or" && "OR Details"}
                               {section === "photo" && "Uploaded Photo"}
                               {section === "interview" && "Interview Remarks"}
