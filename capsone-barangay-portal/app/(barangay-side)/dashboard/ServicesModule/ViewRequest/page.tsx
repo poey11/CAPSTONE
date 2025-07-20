@@ -2189,7 +2189,7 @@ Functions for Reason for Reject
 
       if ( requestData?.docType === "Barangay Certificate" && requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
-          message: `You have been assigned an appointment for picture taking for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          message: `You have been assigned an appointment for picture taking for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}. Request ID: ${requestData?.requestId}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -2199,7 +2199,7 @@ Functions for Reason for Reject
         });
       } else if (requestData?.docType === "Barangay Indigency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
-          message: `You have been assigned an appointment for interview for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}.`,
+          message: `You have been assigned an appointment for interview for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}. Request ID: ${requestData?.requestId}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
