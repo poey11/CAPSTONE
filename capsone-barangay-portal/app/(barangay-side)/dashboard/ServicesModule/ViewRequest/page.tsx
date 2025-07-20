@@ -114,6 +114,7 @@ interface EmergencyDetails {
     photoUploaded: string; // For Residency purpose
     interviewRemarks: string; // For Barangay Indigency
     residentId: string;
+    listOfPDFs: string[]; // Array to hold generated PDF file names
 }
 
 interface File {
@@ -1820,9 +1821,9 @@ Functions for Reason for Reject
     const print = async () => {
        /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
       if (!requestData?.documentTypeIs) {
-        handlePrint(requestData);
+        handlePrint(requestData,id);
       } else {//if existing ung documentTypeIs, it will use the other generate document function
-        handleGenerateDocument(requestData);
+        handleGenerateDocument(requestData,id);
         console.log("Existing documentTypeIs, using other generate document function");
       }
     
@@ -2423,7 +2424,8 @@ Functions for Reason for Reject
                             </button>
                             ):(
                               <>
-                                {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) &&(
+                                {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) 
+                                &&(requestData?.photoUploaded)&&(
                                   <>
                                     <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
@@ -2571,6 +2573,7 @@ Functions for Reason for Reject
                             "others",
                             ...(requestData?.status === "Rejected" ? ["rejected"] : []),
                             ...(requestData?.status === "Completed" ? ["received"] : []),
+                            ...(requestData?.status === "Completed" ? ["generateddocs"] : []),
                             ...(requestData?.status === "Completed" &&
                               !["Barangay Clearance", "Barangay Certificate", "Barangay Indigency", "Other Documents"].includes(requestData?.docType || "")
                               ? ["or"]
@@ -2594,6 +2597,7 @@ Functions for Reason for Reject
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
                               {section === "received" && "Received By"}
+                              {section === "generateddocs" && "Generated Documents"}
                               {section === "or" && "OR Details"}
                               {section === "photo" && "Uploaded Photo"}
                               {section === "interview" && "Interview Remarks"}
@@ -2801,12 +2805,10 @@ Functions for Reason for Reject
                                                 })
                                               : ""
                                           }
-                                          
                                           readOnly
                                         />
                                       </div>
                                     </div>
-                                  
                                   </>
                                 )}  
 
@@ -2880,6 +2882,31 @@ Functions for Reason for Reject
                                   </>
                                 )}
                                 </div>
+
+                                {activeSection === "generateddocs" && (
+                                  <>
+                                    <div className="services-onlinereq-content">
+                                      <div className="services-onlinereq-fields-section">
+                                        <h1>Document Generated</h1>
+                                        {requestData?.listOfPDFs &&requestData.listOfPDFs.length > 0 && (
+                                          <>
+                                            {requestData.listOfPDFs.map((pdf, index) => (
+                                              <iframe
+                                                className="services-onlinereq-input-field"
+                                                key={index}
+                                                src={pdf}
+                                                width="100%"
+                                                height="1000px"
+                                                style={{ border: "1px solid #ccc" }}
+                                                title={`PDF-${index}`}
+                                              />
+                                            ))}
+                                          </>
+                                          )}
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                             </div>
                         </div>
 

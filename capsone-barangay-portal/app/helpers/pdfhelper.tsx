@@ -1,8 +1,9 @@
 import { getLocalDateString } from "./helpers";
 import { toWords } from 'number-to-words';
-import {db} from "@/app/db/firebase";
-import { collection,getDocs, query, where } from "firebase/firestore";
+import {db, storage} from "@/app/db/firebase";
+import { collection,getDocs, query, where,addDoc, doc, onSnapshot, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore";
 import {customAlphabet} from "nanoid";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 
@@ -28,7 +29,7 @@ function getOrdinal(n: number): string {
 }
 
 
-const handlePrint = async(requestData:any) => {
+const handlePrint = async(requestData:any, id:any) => {
     const dateToday = getLocalDateString(new Date());
     const dayToday = getOrdinal(parseInt(dateToday.split("-")[2]));
     const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
@@ -38,7 +39,7 @@ const handlePrint = async(requestData:any) => {
     if(requestData?.purpose === "Death Residency"){
         locationPath = "DeathResidency.pdf";
         reqData = {
-                "Text1":`${(requestData?.requestorFname || requestData?.requestor || "")
+                "Text1":`${(requestData?.fullName|| "")
             .replace(/^Mr\.?\s*/i, "")
             .replace(/^Ms\.?\s*/i, "")
             .toUpperCase()} (Deceased)`,
@@ -95,7 +96,7 @@ const handlePrint = async(requestData:any) => {
             "Text7": `${monthToday} ${yearToday}`,
         };
     }
-    else if(requestData?.purpose === "Residency"){
+    else if(requestData?.purpose === "Residency" && !(requestData?.docType === "Barangay Clearance")){
         locationPath = "certificate of residency.pdf";
         reqData = {
             "Text1":`${(requestData?.requestorFname || requestData?.requestor || "")
@@ -134,9 +135,10 @@ const handlePrint = async(requestData:any) => {
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
+    
+        const file = new File([blobB], `${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+        await uploadPDFToFirebase(file, requestData,id);
         return;
-
-
     }
     else if(requestData?.purpose === "Good Moral and Probation"){
         if(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
@@ -306,6 +308,8 @@ const handlePrint = async(requestData:any) => {
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
+        const file = new File([blobB], `${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+        await uploadPDFToFirebase(file, requestData,id);
         return;
     }
 
@@ -351,10 +355,12 @@ const handlePrint = async(requestData:any) => {
         const urlB = URL.createObjectURL(blobB);
         const linkB = document.createElement("a");
         linkB.href = urlB;
-        linkB.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
+        linkB.download=`${requestData?.docType}_Oath Of Undertaking_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
         linkB.click();
         URL.revokeObjectURL(urlB);
         linkB.remove();
+        const file = new File([blobB], `${requestData?.docType}_Oath Of Undertaking_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+        await uploadPDFToFirebase(file, requestData,id);
     }
 
     if(requestData?.docType ==="Temporary Business Permit"){
@@ -510,8 +516,39 @@ const handlePrint = async(requestData:any) => {
     link.click();
     URL.revokeObjectURL(url);
     link.remove();
+
+    
+    const file = new File([blob], `${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+    await uploadPDFToFirebase(file, requestData,id);
+    
+
     return;
 }
+
+const uploadPDFToFirebase = async (file: File, data:any, id:any) => {
+    console.log(data);
+    try {
+        const storageRef = ref(storage, `GeneratedDocuments/${id}/${file.name}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        
+        const docRef = doc(db, "ServiceRequests",id);
+
+        const docSnapshot = await getDoc(docRef);
+        if (!docSnapshot.exists()) {
+            await setDoc(docRef, {
+                listOfPDFs:[]
+            }, {merge:true});
+        }
+        
+        await updateDoc(docRef, {
+            listOfPDFs: arrayUnion(downloadURL),
+        });
+    } catch (error) {
+        console.error("Upload failed:", error);
+        throw error;
+    }
+};
 
 
 const today = new Date();
@@ -523,7 +560,7 @@ const extraData = {
     year:   "",
 }
 
-const handleGenerateDocument = async(documentB:any) => {
+const handleGenerateDocument = async(documentB:any, id:any) => {
     function replacePlaceholders(body: string, values: Record<string, string>) {
         return body.replace(/\{(\w+)\}/g, (_, key) => values[key] || `{${key}}`);
     }
@@ -605,6 +642,10 @@ const handleGenerateDocument = async(documentB:any) => {
     link.click();
     URL.revokeObjectURL(url);
     link.remove();        
+
+    const file = new File([blob], `${documentB.docType}${`_${documentB.purpose}` || ""}.pdf`, { type: "application/pdf" });
+    await uploadPDFToFirebase(file, documentB, id);
+
 }
 
 

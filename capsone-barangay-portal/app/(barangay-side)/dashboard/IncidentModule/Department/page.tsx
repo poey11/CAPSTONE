@@ -451,6 +451,33 @@ if (incidentType) {
     return pageNumbersToShow;
   };
 
+  const [mediaType, setMediaType] = useState<string>("");
+  
+  useEffect(() => {
+   let type = "";
+
+   if (concernImageUrl) {
+     // Try to extract file name with extension from Firebase URL
+     const match = concernImageUrl.match(/\/o\/(.*?)\?/); // get path after /o/ and before ?
+     const decodedPath = match ? decodeURIComponent(match[1]) : "";
+     const fileExtension = decodedPath.split('.').pop()?.toLowerCase();
+
+     console.log("Decoded filename:", decodedPath);
+     console.log("File Extension:", fileExtension);
+
+     if (fileExtension?.match(/(jpg|jpeg|png|gif|webp)$/)) {
+       type = "image";
+     } else if (fileExtension?.match(/(mp3|wav|ogg)$/)) {
+       type = "audio";
+     } else if (fileExtension?.match(/(mp4|webm|ogg)$/)) {
+       type = "video";
+     } else {
+       type = "unsupported";
+     }
+   }
+
+     setMediaType(type);
+   }, [concernImageUrl]);
 
   return (
     <main className="main-container-departments"  /* edited this class*/>
@@ -997,38 +1024,50 @@ if (incidentType) {
                                       </div>
                                     </div>
                                   </div>
+                                    {concernImageUrl ? (
+                                      <div className="services-onlinereq-verification-requirements-section">
+                                        <span className="verification-requirements-label">Incident Evidence</span>
+                                    
+                                        <div className="services-onlinereq-verification-requirements-container">
+                                          <div className="file-name-image-display">
+                                    
+                                            {mediaType === "image" ? (
+                                              <a href={concernImageUrl} target="_blank" rel="noopener noreferrer">
+                                                <img
+                                                  src={concernImageUrl}
+                                                  alt="Incident Image"
+                                                  className="verification-reqs-pic uploaded-pic"
+                                                  style={{ cursor: 'pointer' }}
+                                                />
+                                              </a>
+                                            ) : mediaType === "audio" ? (
+                                              <audio controls className="incident-audio" style={{ width: '100%' }}>
+                                                <source src={concernImageUrl} />
+                                                Your browser does not support the audio element.
+                                              </audio>
+                                            ) : mediaType === "video" ? (
+                                              <video controls className="incident-video" width="65%">
+                                                <source src={concernImageUrl} />
+                                                Your browser does not support the video element.
+                                              </video>
+                                            ) : (
+                                              <p className="unsupported-text">Unsupported media type</p>
+                                            )}
 
-                                  {concernImageUrl ? (
-                                    <div className="services-onlinereq-verification-requirements-section">
-                                      <span className="verification-requirements-label">Incident Image</span>
-
-                                      <div className="services-onlinereq-verification-requirements-container">
-                                        <div className="file-name-image-display">
-                                          <a
-                                            href={concernImageUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                          >
-                                            <img
-                                              src={concernImageUrl}
-                                              alt="Incident Image"
-                                              className="verification-reqs-pic uploaded-pic"
-                                              style={{ cursor: 'pointer' }}
-                                            />
-                                          </a>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  ) : (
-                                    <div className="services-onlinereq-verification-requirements-section">
-                                      <span className="verification-requirements-label">Incident Image</span>
-                                      <div className="services-onlinereq-verification-requirements-container">
-                                        <div className="no-verification-files-text">
-                                          <p>No image available</p>
+                                    ) : (
+                                      <div className="services-onlinereq-verification-requirements-section">
+                                        <span className="verification-requirements-label">Incident Evidence</span>
+                                        <div className="services-onlinereq-verification-requirements-container">
+                                          <div className="no-verification-files-text">
+                                            <p>No media available</p>
+                                          </div>
                                         </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+
                                 </div>
                               </div>
                             </>

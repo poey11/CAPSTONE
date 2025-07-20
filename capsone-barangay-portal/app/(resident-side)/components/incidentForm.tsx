@@ -32,7 +32,7 @@ const formRef = useRef<HTMLFormElement>(null);
 
 
     const [invalidFields, setInvalidFields] = useState<string[]>([]);
-const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
+  const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
 
 
 
@@ -181,6 +181,53 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
       
     }
 
+    const handleValidatedFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const input = e.target;
+
+      const isImage = file.type.startsWith("image/");
+      const isAudio = file.type.startsWith("audio/");
+      const isVideo = file.type.startsWith("video/");
+
+      if (isImage) {
+        handleFileChangeContainer1(e);
+        handleFormChange(e);
+        return;
+      }
+    
+      const media = document.createElement(isAudio ? "audio" : "video");
+      media.preload = "metadata";
+    
+      media.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(media.src);
+      
+        const duration = media.duration;
+        if (duration <= 30) {
+          handleFileChangeContainer1(e);
+          handleFormChange(e);
+        } else {
+          setPopupErrorMessage("Only media up to 30 seconds is allowed.");
+          setShowErrorPopup(true);
+          setTimeout(() => {
+            setShowErrorPopup(false);
+          }
+          , 3000);
+          input.value = ""; // reset the file input
+        }
+      };
+    
+      media.onerror = () => {
+        setPopupErrorMessage("Failed to load media file. Please try another one.");
+        input.value = ""; // reset input
+      };
+
+    media.src = URL.createObjectURL(file);
+    };
+
+
+
     const handleFormChange = (e:ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const {name, value, type} = e.target;
       
@@ -203,13 +250,7 @@ const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
     const handleFileChangeContainer1 = (event: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files?.[0];
       if (selectedFile) {
-        const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
-        
-        if (!validImageTypes.includes(selectedFile.type)) {
-          alert("Only JPG, JPEG, and PNG files are allowed.");
-          return;
-        }
-    
+       
         // Replace existing file instead of adding multiple
         const preview = URL.createObjectURL(selectedFile);
         setFilesContainer1([{ name: selectedFile.name, preview }]);
@@ -366,7 +407,12 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
   if (!incidentReport.dateFiled.trim()) invalidFields.push("dateFiled");
   if (!incidentReport.address.trim()) invalidFields.push("address");
   if (!incidentReport.addInfo.trim()) invalidFields.push("addInfo");
-
+  if (isIncidentLate && !incidentReport.reasonForLateFiling.trim()) {
+    invalidFields.push("reasonForLateFiling");
+  }
+  if (incidentReport.concerns === "Other" && !incidentReport.otherConcern.trim()) {
+    invalidFields.push("otherConcern");
+  }
 
   if (invalidFields.length > 0) {
     setInvalidFields(invalidFields);
@@ -375,6 +421,15 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       setShowErrorPopup(false);
     }, 3000);
+    return;
+  }
+  if(filesContainer1.length === 0 && !incidentReport.file) {
+    setPopupErrorMessage("Please upload a audio, video or image as proof of incident.");
+    setShowErrorPopup(true);
+    setTimeout(() => {
+      setShowErrorPopup(false);
+    }
+    , 3000);
     return;
   }
 
@@ -557,7 +612,7 @@ const confirmSubmit = async () => {
                           name="middlename"
                           className="form-input-incident-report"
                           placeholder="Enter Middle Name"
-                          value={incidentReport.middlename || "N/A"}
+                          value={incidentReport.middlename}
                           onChange={handleFormChange}
                           disabled={isVerified}
                         />
@@ -616,7 +671,7 @@ const confirmSubmit = async () => {
                             onChange={handleFormChange}
                             required
                           >
-                            <option value="">Incident Type</option>
+                            <option value="" disabled>Incident Type</option>
                             <option value="Noise Complaint">Noise Complaint</option>
                             <option value="Pet-Related Issues">Pet-Related Issues</option>
                             <option value="Littering">Littering</option>
@@ -777,7 +832,7 @@ const confirmSubmit = async () => {
                     <div className="incident-report-form-container">
 
                        <div className="signatureprintedname-container">
-                          <label className="form-label-incident-report-file">Upload Proof of Incident (If Applicable)</label>
+                          <label className="form-label-incident-report-file">Upload Proof of Incident</label>
                     
                           <div className="file-upload-container-incident-report">
                             <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
@@ -785,10 +840,9 @@ const confirmSubmit = async () => {
                               id="file-upload1"
                               type="file"
                               className="file-upload-input-incident-report"
-                              accept=".jpg,.jpeg,.png"
+                              accept="image/*,audio/*,video/mp4,video/webm,video/ogg"
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleFileChangeContainer1(e);
-                                handleFormChange(e);
+                                handleValidatedFileUpload(e);
                               }} // Handle file selection
                             />
                             <div className="uploadedFiles-container-incident-report">
