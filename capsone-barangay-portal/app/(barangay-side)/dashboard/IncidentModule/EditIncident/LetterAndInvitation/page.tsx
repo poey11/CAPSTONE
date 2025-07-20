@@ -700,7 +700,6 @@ export default function GenerateDialogueLetter() {
                 const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
                 await setDoc(barangayNotificationRef, {
                     recipientRole: "Punong Barangay",
-                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
                     message: `Summons letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
                     timestamp: new Date(),
                     isRead: false,
@@ -714,7 +713,6 @@ export default function GenerateDialogueLetter() {
                 const barangayNotificationRef = doc(collection(db, "BarangayNotifications"));
                 await setDoc(barangayNotificationRef, {
                     recipientRole: "Secretary",
-                    respondentID: otherInfo.LuponStaffId, // store hidden staffId
                     message: `Summons letter for Case #${userInfo.caseNumber || docId} requires your signature. Please be advised.`,  
                     timestamp: new Date(),
                     isRead: false,
