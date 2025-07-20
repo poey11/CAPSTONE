@@ -525,9 +525,15 @@ export default function JobSeekerListModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
-                                value={selectedUser.sex || "N/A"}
+                                value={
+                                  selectedUser.sex === "F"
+                                    ? "Female"
+                                    : selectedUser.sex === "M"
+                                    ? "Male"
+                                    : "N/A"
+                                }
                                 readOnly
-                              /> 
+                              />
                             </div>
                             <div className="view-user-fields-section">
                               <p>Age</p>
