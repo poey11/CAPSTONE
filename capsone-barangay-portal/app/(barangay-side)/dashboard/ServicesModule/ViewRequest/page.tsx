@@ -1598,6 +1598,10 @@ Functions for Reason for Reject
         if (key === "isBeneficiary") {
           value = value === true ? "Yes" : value === false ? "No" : "";
         }
+
+        if (key === "educationalAttainment") {
+          value = educationalAttainmentMap[value as keyof typeof educationalAttainmentMap] || value;
+        }
       
         if (!value) return null;
       
@@ -2326,7 +2330,17 @@ Functions for Reason for Reject
       await updateDoc(docRef, updatedData);
     }
 
-    
+    const educationalAttainmentMap: { [key: string]: string } = {
+      "1": "Elem Under Grad",
+      "2": "Elem Grad",
+      "3": "HS Grad",
+      "4": "HS Under Grad",
+      "5": "COL Grad",
+      "6": "COL Under Grad",
+      "7": "Educational",
+      "8": "Vocational",
+    };
+
 
     return (  
         <main className="main-container-services-onlinereq">

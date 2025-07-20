@@ -2514,16 +2514,24 @@ const handleChange = (
                             <>
                               <div className="fields-section">
                                 <h1>Educational Attainment<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
+                                <select 
+                                  name="educationalAttainment" 
                                   id="educationalAttainment"  
-                                  name="educationalAttainment"  
-                                  value={clearanceInput.educationalAttainment  || ""}
-                                  onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Educational Attainment"  
-                                />
+                                  className="createRequest-input-field" 
+                                  value={clearanceInput.educationalAttainment}
+                                  onChange={handleChange} 
+                                  required
+                                >
+                                  <option value="" disabled>Choose educational attainment</option>
+                                  <option value="1">Elem Under Grad</option>
+                                  <option value="2">Elem Grad</option>
+                                  <option value="3">HS Grad</option>
+                                  <option value="4">HS Under Grad</option>
+                                  <option value="5">COL Grad</option>
+                                  <option value="6">COL Under Grad</option>
+                                  <option value="7">Educational</option>
+                                  <option value="8">Vocational</option>
+                                </select>
                               </div>
                             </>
                           )}
