@@ -7,11 +7,12 @@ import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, que
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
 import { useRouter } from "next/navigation";
-import {getLocalDateString} from "@/app/helpers/helpers";
+import {getLocalDateString,formatDateMMDDYYYY} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { set } from "date-fns";
 
 interface EmergencyDetails {
   fullName: string;
@@ -137,7 +138,7 @@ export default function Action() {
     isViewed: false,
     requestId: "",
     purpose: docPurpose || "",
-    dateRequested: new Date().toLocaleString(),
+    dateRequested: formatDateMMDDYYYY(new Date()),
     fullName: "",
     appointmentDate: "",
     dateOfResidency: "",
@@ -555,34 +556,33 @@ const [files11, setFiles11] = useState<{ name: string, preview: string | undefin
 // const minDate = new Date().toISOString().split("T")[0]; 
 const [lastSelectedDateOnly, setLastSelectedDateOnly] = useState<string | null>(null);
 const [minDate, setMinDate] = useState<any>(null);
-const [appointmentsMap, setAppointmentsMap] = useState<Record<string, number>>({});
 const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
+
+const [appointmentsMap, setAppointmentsMap] = useState<any>({});
 useEffect(() => {
   const collectionRef = query(
     collection(db, "ServiceRequests"),
-    where("appointmentDate", "!=", null),
+    where("appointmentDate", "!=", null)
   );
+
   const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
-    const map: any = {};
+    const map: Record<string, number> = {};
+
     snapshot.forEach((doc) => {
       const data = doc.data();
       const time = toPHISOString(new Date(data.appointmentDate));
-      if(map[time]){
-        map[time]++;
-      }
-      else{
-        map[time] = 1;
+      if (data.docType === clearanceInput.docType && data.purpose === clearanceInput.purpose) {
+        map[time] = (map[time] || 0) + 1;
       }
     });
+
     setAppointmentsMap(map);
   });
 
   return () => unsubscribe();
+}, [clearanceInput.docType, clearanceInput.purpose]);
 
-},[])
-
-console.log("Appointments Map:", appointmentsMap);
 
 function toPHISOString(date: Date): string {
   // Shift time to UTC+8
@@ -599,6 +599,7 @@ function toPHISOString(date: Date): string {
 
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+08:00`;
 }
+
 
 
 
@@ -620,7 +621,7 @@ const filterDate = (date: Date) => {
 };
 
 
-// Disable if that specific time slot already has 3 appointments
+//Disable if that specific time slot already has 3 appointments
 const filterTime = (time: Date) => {
   if(!selectedDate) return true; // If no date is selected, allow all times
   
@@ -631,6 +632,7 @@ const filterTime = (time: Date) => {
 
   return (appointmentsMap[key] || 0) < 3;
 };
+
 
 
 useEffect(() => {
@@ -674,6 +676,36 @@ useEffect(() => {
     setMinDate(firstAvailable);
   }
 }, [appointmentsMap]);
+
+const [userAppointmentsMap, setUserAppointmentsMap] = useState<any>([]);
+useEffect(() => {
+  if (!user?.uid ) return; // replace with actual logged-in user ID
+
+  const q = query(
+    collection(db, "ServiceRequests"),
+    where("accID", "==", user?.uid ),
+  );
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const map: any = {};
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.appointmentDate) {
+        if (!map[data.docType]) map[data.docType] = [];
+        map[data.docType].push({
+          docId: doc.id,
+          purpose: data.purpose,
+          appointmentDate: data.appointmentDate,
+        });
+      }
+    });;
+    setUserAppointmentsMap(map);
+
+  });
+
+  return () => unsubscribe();
+}, [user?.uid]);
+
 
 
 
@@ -720,6 +752,7 @@ const handleFileChange = (
   
  const handleReportUpload = async (key: any, storageRefs: Record<string, any>) => {
   try {
+  
     const docRef = collection(db, "ServiceRequests"); // Reference to the collection
     let updates = { ...key };  // No filtering, just spread the object
 
@@ -761,7 +794,8 @@ const handleFileChange = (
       documentTypeIs: documentTypeIs,
       }),
       requestorMrMs: clearanceInput.requestorMrMs,
-      requestorFname: clearanceInput.requestorFname
+      requestorFname: clearanceInput.requestorFname,
+      createdAt2: new Date().toLocaleString(),
     };
     
     // Only go to notification if addDoc is 
@@ -992,6 +1026,21 @@ const handleFileChange = (
     // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
+      const selectedDate = new Date(clearanceInput.appointmentDate).toDateString();
+
+      const existingAppointments = userAppointmentsMap[clearanceInput.docType] || [];
+
+      const isSameDayAppointment = existingAppointments.some((appt: any) => {
+        const apptDate = new Date(appt.appointmentDate).toDateString();
+        return apptDate === selectedDate;
+      });
+
+      if (isSameDayAppointment) {
+        setErrorMessage("You already have an appointment for this document type on the selected date.");
+        setShowErrorPopup(true);
+        return;
+      }
+
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
       if (!contactPattern.test(clearanceInput.contact)) {
@@ -1172,7 +1221,7 @@ const handleFileChange = (
         ...(clearanceInput.purpose === "Garage/TRU" && {
         businessName: clearanceInput.businessName,
         businessLocation: clearanceInput.businessLocation,
-        noOfVechicles: clearanceInput.noOfVechicles,
+        noOfVehicles: clearanceInput.noOfVehicles,
         businessNature: clearanceInput.businessNature,
         vehicleMake: clearanceInput.vehicleMake,
         vehicleType: clearanceInput.vehicleType,
@@ -1184,7 +1233,8 @@ const handleFileChange = (
         }),
         ...(clearanceInput.purpose === "Garage/PUV" && {
         vehicleType: clearanceInput.vehicleType,
-        noOfVechicles: clearanceInput.noOfVechicles,
+        vehicleMake: clearanceInput.vehicleMake,
+        noOfVehicles: clearanceInput.noOfVehicles,
         puvPurpose: clearanceInput.goodMoralOtherPurpose,
         }),
         birthday: clearanceInput.birthday,
@@ -2046,7 +2096,7 @@ const handleFileChange = (
                         />
                       </div>
                       <div className="form-group-document-req">
-                        <label htmlFor="noOfVechicles" className="form-label-document-req">Nos of Tricycle<span className="required">*</span></label>
+                        <label htmlFor="noOfVehicles" className="form-label-document-req">Nos of Tricycle<span className="required">*</span></label>
                         <input 
                           type="number"  
                           id="noOfVehicles"  

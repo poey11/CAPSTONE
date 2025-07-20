@@ -5,6 +5,7 @@ import { useEffect, useState, useRef} from "react";
 import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
+import {normalizeToTimestamp} from "@/app/helpers/helpers";
 
 
 
@@ -141,7 +142,7 @@ useEffect(() => {
         const Collection = query(
           collection(db, "ServiceRequests"),
           where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
-          orderBy("createdAt", "desc") // First, sort by latest
+          orderBy("createdAt2", "desc") // First, sort by latest
         );
 
         const viewed = getViewedRequests();
@@ -163,7 +164,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt2);
           });
         
           setRequestData(filteredReports);
@@ -188,7 +189,7 @@ useEffect(() => {
         const Collection = query(
           collection(db, "ServiceRequests"),
           where("accID", "!=", "INBRGY-REQ"), // Filter for Online requests
-          orderBy("createdAt", "desc") // First, sort by latest
+          orderBy("createdAt2", "desc") // First, sort by latest
         );
 
         const viewed = getViewedRequests();
@@ -208,7 +209,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt2);
           });
         
           setAllOnlineRequests(reports);
@@ -221,7 +222,7 @@ useEffect(() => {
       } catch (error: any) {
         console.log(error.message);
       }
-    }, [user]);
+    }, []);
 
     
 
@@ -557,7 +558,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
                 <td>{request.docType}</td>
                 <td>{request.requestId}</td>
-                <td>{request.createdAt}</td>
+                <td>{request.createdAt2}</td>
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>
@@ -698,7 +699,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
                 <td /* edited this class */>{request.docType}</td>
                 <td>{request.requestId}</td>
-                <td>{request.createdAt}</td>
+                <td>{request.createdAt2}</td>
                 <td>{request.requestor}</td>
                 <td>{request.purpose}</td>
                 <td>

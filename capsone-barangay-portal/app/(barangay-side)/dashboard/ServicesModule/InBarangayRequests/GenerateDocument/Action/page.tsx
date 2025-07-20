@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
-import { getLocalDateString } from "@/app/helpers/helpers";
+import { getLocalDateString,formatDateMMDDYYYY } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { addDoc, collection, doc, getDocs, onSnapshot} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
@@ -248,12 +248,13 @@ export default function action() {
         return cleaned;
       };
 
+    
       const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
       accID: "INBRGY-REQ",
       reqType: "In Barangay",
       docType: docType || "",
       status: "Pending",
-      createdAt: new Date().toLocaleString(),
+      createdAt: formatDateMMDDYYYY(new Date()),
       createdBy: user?.id || "",
       statusPriority: 1,
       signaturejpg: null,
@@ -940,6 +941,7 @@ export default function action() {
             photoUploaded: "",
           }),
           ...uploadedFileUrls,
+          createdAt2: new Date().toLocaleString(),
         };
 
         const doc = await addDoc(docRef, docData);
@@ -951,6 +953,7 @@ export default function action() {
         console.error("Error:", error);
       }
     };
+    console.log("clearanceInput", clearanceInput);
 
     const handleConfirmClick = async() => {
         setShowCreatePopup(true);
@@ -2345,7 +2348,7 @@ const handleChange = (
                                   name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVehicles||1}
+                                  value={clearanceInput.noOfVehicles}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {

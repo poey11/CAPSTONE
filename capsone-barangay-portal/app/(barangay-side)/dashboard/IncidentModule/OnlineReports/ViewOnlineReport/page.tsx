@@ -156,7 +156,7 @@ export default function ViewOnlineReports() {
 
     if (fileExtension?.match(/(jpg|jpeg|png|gif|webp)$/)) {
       type = "image";
-    } else if (fileExtension?.match(/(mp3|wav|ogg)$/)) {
+    } else if (fileExtension?.match(/(mp3|wav|ogg|m4a)$/)) {
       type = "audio";
     } else if (fileExtension?.match(/(mp4|webm|ogg)$/)) {
       type = "video";

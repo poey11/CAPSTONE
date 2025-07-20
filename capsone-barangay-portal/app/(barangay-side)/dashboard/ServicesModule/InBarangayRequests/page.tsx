@@ -1,11 +1,12 @@
 "use client"
 import { useRouter, useSearchParams } from "next/navigation";
-import { use, useEffect, useState, useRef } from "react";
+import {  useEffect, useState, useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/InBarangayRequests.css";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
-import { report } from "process";
+import {normalizeToTimestamp} from "@/app/helpers/helpers";
+
 
 
   export default function InBarangayRequests() { 
@@ -136,7 +137,7 @@ useEffect(() => {
           const Collection = query(
             collection(db,"ServiceRequests"),
             where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
-            orderBy("createdAt", "desc") // First, sort by latest
+            orderBy("createdAt2", "desc") // First, sort by latest
           );      
           const unsubscribe = onSnapshot(Collection, (snapshot) => {
             let reports: any[] = snapshot.docs.map((doc) => ({
@@ -155,7 +156,7 @@ useEffect(() => {
                 return a.statusPriority - b.statusPriority;
               }
             
-              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt);
             });
           
             setRequestData(filterReports);
@@ -181,26 +182,27 @@ useEffect(() => {
 
     
       const [allRequests, setAllRequests] = useState<any[]>([]);
+      
 
       useEffect(() => {
         try {
         const Collection = query(
           collection(db,"ServiceRequests"),
           where("accID", "==", "INBRGY-REQ"), // Filter for In Barangay requests
-          orderBy("createdAt", "desc") // First, sort by latest
+          orderBy("createdAt2", "desc") // First, sort by latest
         );      
         const unsubscribe = onSnapshot(Collection, (snapshot) => {
           let reports: any[] = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
-          
+
           reports.sort((a, b) => {
             if (a.statusPriority !== b.statusPriority) {
               return a.statusPriority - b.statusPriority;
             }
           
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return normalizeToTimestamp(b.createdAt2) - normalizeToTimestamp(a.createdAt);
           });
         
           setAllRequests(reports);
@@ -566,7 +568,7 @@ useEffect(() => {
 
                         <td /* edited this class */>{request.docType}</td>
                         <td>{request.requestId}</td>
-                        <td>{request.createdAt}</td>
+                        <td>{request.createdAt2}</td>
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
@@ -713,7 +715,7 @@ useEffect(() => {
                       <tr key={index}>
                         <td>{request.docType}</td>
                         <td>{request.requestId}</td>
-                        <td>{request.createdAt}</td>
+                        <td>{request.createdAt2}</td>
                         <td>{request.requestor}</td>
                         <td>{request.purpose}</td>
                         <td>
