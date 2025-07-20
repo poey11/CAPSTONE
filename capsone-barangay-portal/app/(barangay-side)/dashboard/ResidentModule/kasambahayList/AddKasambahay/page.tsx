@@ -288,7 +288,33 @@ export default function AddKasambahay() {
       }
     
       setInvalidFields([]);
+
+    try {
+      const kasambahaySnapshot = await getDocs(collection(db, "KasambahayList"));
+      const isExactDuplicate = kasambahaySnapshot.docs.some((doc) => {
+        const data = doc.data();
+        return (
+          data.residentId === formData.residentId &&
+          data.employerId === formData.employerId &&
+          data.natureOfWork === formData.natureOfWork
+        );
+      });
+
+      if (isExactDuplicate) {
+        setPopupErrorMessage("This resident is already assigned to this employer for the same job.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+      }
+
       setShowSubmitPopup(true);
+    } catch (error) {
+      console.error("Error validating Kasambahay entry:", error);
+      setPopupErrorMessage("An error occurred during validation.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+    }
+
   };
 
 
@@ -921,7 +947,9 @@ export default function AddKasambahay() {
                     homeAddress: resident.address ||'',
                     dateOfBirth: resident.dateOfBirth || '',
                     age: resident.age || '',
+                    civilStatus: resident.civilStatus || '',
                     identificationFileURL: resident.identificationFileURL || '',
+                    placeOfBirth: resident.placeOfBirth || '',
                   });
                   setShowResidentsPopup(false);
                 } catch (error) {
