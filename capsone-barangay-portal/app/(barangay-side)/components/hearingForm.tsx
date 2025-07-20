@@ -748,62 +748,66 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 </div>
             </div>
             )}
-                    {showDoneIncidentPopup && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
-              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
-              <p>Has the incident case been settled?</p>
-              <div className="yesno-container-add">
-                {/*}
-                {hearing !==3 ? (
-                  <button
-                    onClick={() => {
-                      setShowDoneIncidentPopup(false)
-                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-                    }
-                  }
-                    className="no-button-add"
-                  >
-                    No
-                  */}
+{showDoneIncidentPopup && (
+  <div className="confirmation-popup-overlay-add">
+    <div className="confirmation-popup-add">
+      <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+      <p>Has the incident case been settled?</p>
+      <div className="yesno-container-add">
 
-                   {hearing !== 3 ? (
-                    <button
-                      onClick={() => {
-                        setShowDoneIncidentPopup(false);
-                        setPopupMessage("If case is reopened, generate a letter again.");
-                        setShowPopup(true);
-
-                        // Auto-hide popup after 3 seconds (optional)
-                        setTimeout(() => {
-                          setShowPopup(false);
-                        }, 3000);
-                      }}
-                      className="no-button-add"
-                    >
-                      No
-                    </button>
-
-                ): hearing === 3  && (
-                  <button
-                    onClick={() => handleClosingCase(false)}
-                    className="no-button-add bg-gray-600"
-                  >
-                    CFA
-                  </button>  
-                )}
-                <button  
-                  onClick={() => {
-                    handleClosingCase(true)
-                  }}
-                  className="yes-button-add"
-                >
-                  Yes
-                </button>
-              </div>
-            </div>
-          </div>    
+        {/* Case 1: hearing !== 3 && archived */}
+        {hearing !== 3 && data?.status === "archived" && (
+          <button
+            onClick={() => {
+              setShowDoneIncidentPopup(false);
+              setPopupMessage("If case is reopened, generate a letter again.");
+              setShowPopup(true);
+              setTimeout(() => setShowPopup(false), 3000);
+            }}
+            className="no-button-add"
+          >
+            No
+          </button>
         )}
+
+        {/* Case 2: hearing !== 3 && NOT archived */}
+        {hearing !== 3 && data?.status !== "archived" && (
+          <button
+            onClick={() => {
+              setShowDoneIncidentPopup(false);
+              setPopupMessage("Incident has been updated successfully.");
+              setShowPopup(true);
+              setTimeout(() => setShowPopup(false), 3000);            }}
+            className="no-button-add"
+          >
+            No
+          </button>
+        )}
+
+        {/* Case 3: hearing === 3 */}
+        {hearing === 3 && (
+          <button
+            onClick={() => handleClosingCase(false)}
+            className="no-button-add bg-gray-600"
+          >
+            CFA
+          </button>
+        )}
+
+        {/* YES button (shared by all) */}
+        <button
+          onClick={() => {
+            handleClosingCase(true);
+          }}
+          className="yes-button-add"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
 
