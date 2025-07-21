@@ -38,7 +38,7 @@ export default function RegisteredVotersModule() {
 
   const [missingVoters, setMissingVoters] = useState<any[]>([]);
   const [showMissingPopup, setShowMissingPopup] = useState(false);
-  const [selectedToAdd, setSelectedToAdd] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(false);
 
   // Highlighting Logic based on the URL parameter
   const searchParams = useSearchParams();
@@ -265,7 +265,8 @@ export default function RegisteredVotersModule() {
           homeAddress: address || "",
           precinctNumber: precinct || "",
           dateOfBirth: birthdateString || "",
-          createdAt: createdAt
+          createdAt: createdAt,
+          createdBy: session?.user?.position
         });
   
         if (!residentSnapshot.empty) {
@@ -317,22 +318,27 @@ export default function RegisteredVotersModule() {
   
   
 
-  const getNextResidentNumber = async () => {
+  const getNextResidentNumber = async (): Promise<number> => {
     const querySnapshot = await getDocs(collection(db, "Residents"));
-    let highest = 0;
+    const numbers: number[] = [];
   
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.residentNumber) {
-        const num = parseInt(data.residentNumber, 10);
-        if (!isNaN(num) && num > highest) {
-          highest = num;
-        }
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const rawNumber = data.residentNumber;
+  
+      const num = typeof rawNumber === "number"
+        ? rawNumber
+        : parseInt(String(rawNumber), 10);
+  
+      if (!isNaN(num)) {
+        numbers.push(num);
       }
     });
   
+    const highest = numbers.length > 0 ? Math.max(...numbers) : 0;
     return highest + 1;
   };
+  
 
   const getNextVoterNumber = async () => {
     const querySnapshot = await getDocs(collection(db, "VotersList"));
@@ -355,61 +361,66 @@ export default function RegisteredVotersModule() {
   }
   
   const handleAddSelectedResidents = async () => {
+    setIsLoading(true); // 🔹 Start loading
     let addedCount = 0;
   
     for (const voter of missingVoters) {
-      if (selectedToAdd.has(voter.voterId)) {
-        const newNumber = await getNextResidentNumber();
+      const newNumber = await getNextResidentNumber();
   
-        // Safely parse birthDate
-        let birthDate = "";
-        if (typeof voter.dateOfBirth === "number") {
-          birthDate = excelDateToISO(voter.dateOfBirth);
-        } else if (typeof voter.dateOfBirth === "string") {
-          birthDate = voter.dateOfBirth;
-        }
-  
-        // Calculate age
-        let age = "";
-        if (birthDate) {
-          const birthDateObj = new Date(birthDate);
-          const today = new Date();
-          let ageNum = today.getFullYear() - birthDateObj.getFullYear();
-          const m = today.getMonth() - birthDateObj.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
-            ageNum--;
-          }
-          age = ageNum.toString();
-        }
-  
-        // Add resident
-        const residentDocRef = await addDoc(collection(db, "Residents"), {
-          residentNumber: newNumber,
-          firstName: voter.firstName,
-          middleName: voter.middleName,
-          lastName: voter.lastName,
-          address: voter.address,
-          precinctNumber: voter.precinctNumber,
-          voterId: voter.voterId,
-          dateOfBirth: birthDate,
-          age: Number(age)
-        });
-  
-        // Update Voter with new residentId
-        await updateDoc(doc(db, "VotersList", voter.voterId), {
-          residentId: residentDocRef.id
-        });
-  
-        addedCount++;
+      // Safely parse birthDate
+      let birthDate = "";
+      if (typeof voter.dateOfBirth === "number") {
+        birthDate = excelDateToISO(voter.dateOfBirth);
+      } else if (typeof voter.dateOfBirth === "string") {
+        birthDate = voter.dateOfBirth;
       }
-    }
   
+      // Calculate age
+      let age = "";
+      if (birthDate) {
+        const birthDateObj = new Date(birthDate);
+        const today = new Date();
+        let ageNum = today.getFullYear() - birthDateObj.getFullYear();
+        const m = today.getMonth() - birthDateObj.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDateObj.getDate())) {
+          ageNum--;
+        }
+        age = ageNum.toString();
+      }
+
+      const today = new Date();
+      const createdAt = today.toISOString().split("T")[0];
+
+      // Add resident
+      const residentDocRef = await addDoc(collection(db, "Residents"), {
+        residentNumber: newNumber,
+        firstName: voter.firstName,
+        middleName: voter.middleName,
+        lastName: voter.lastName,
+        address: voter.address,
+        precinctNumber: voter.precinctNumber,
+        voterId: voter.voterId,
+        dateOfBirth: birthDate,
+        age: Number(age),
+        createdAt: createdAt,
+        createdBy: session?.user?.position
+      });
+  
+      // Update Voter with new residentId
+      await updateDoc(doc(db, "VotersList", voter.voterId), {
+        residentId: residentDocRef.id
+      });
+  
+      addedCount++;
+    }
+
+    setIsLoading(false); // 🔹 End loading
     setShowMissingPopup(false);
-    setSelectedToAdd(new Set());
     setPopupMessage(`${addedCount} voter${addedCount !== 1 ? 's' : ''} successfully added to Residents.`);
     setShowPopup(true);
     setTimeout(() => setShowPopup(false), 3000);
   };
+  
   
   
   
@@ -694,34 +705,53 @@ export default function RegisteredVotersModule() {
         <div className="confirmation-popup-overlay-voter-confirmation">
           <div className="confirmation-popup-module-voter-confirmation">
             <h3 className="missing-title">{missingVoters.length} voter{missingVoters.length !== 1 ? "s" : ""} not found in Resident{missingVoters.length !== 1 ? "s" : ""}</h3>
-            <p>Select which voters to add as new residents:</p>
-            <div className="missing-voter-list">
+            <p>Do you want to add all of them as new residents?</p>
+            <ul className="missing-voter-list">
               {missingVoters.map((voter) => (
-                <label key={voter.voterId} >
-                  <input
-                    type="checkbox"
-                    checked={selectedToAdd.has(voter.voterId)}
-                    onChange={(e) => {
-                      const newSet = new Set(selectedToAdd);
-                      e.target.checked ? newSet.add(voter.voterId) : newSet.delete(voter.voterId);
-                      setSelectedToAdd(newSet);
-                    }}
-                  />
+                <li key={voter.voterId}>
                   {`${voter.firstName} ${voter.middleName} ${voter.lastName}, ${voter.address} (${voter.precinctNumber})`}
-                </label>
+                </li>
               ))}
-            </div>
+            </ul>
             <div className="yesno-container-module-confirmation">
-              <button onClick={handleAddSelectedResidents} className="add-all-button-module-confirmation">Add Selected</button>
-              <button onClick={() => {
-                setSelectedToAdd(new Set(missingVoters.map(v => v.voterId)));
-                handleAddSelectedResidents();
-              }} className="yes-button-module-confirmation">Add All</button>
-              <button onClick={() => setShowMissingPopup(false)} className="no-button-module-confirmation">Cancel</button>
+              <button onClick={handleAddSelectedResidents} className="yes-button-module-confirmation">
+                Add All
+              </button>
+              <button
+                onClick={async () => {
+                  setShowMissingPopup(false);
+
+                  // Delete the voters that weren't added to Residents
+                  for (const voter of missingVoters) {
+                    try {
+                      await deleteDoc(doc(db, "VotersList", voter.voterId));
+                    } catch (err) {
+                      console.error(`Failed to delete voterId ${voter.voterId}:`, err);
+                    }
+                  }
+
+                  setPopupMessage("Voter records discarded. No residents added.");
+                  setShowPopup(true);
+                  setTimeout(() => setShowPopup(false), 3000);
+                  setMissingVoters([]); // Clear the list
+                }}
+                className="no-button-module-confirmation"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
       )}
+
+          {isLoading && (
+          <div className="popup-backdrop-download">
+            <div className="popup-content-download">
+                <div className="spinner"/>
+                <p>Adding residents, please wait...</p>             
+              </div>
+            </div>
+          )}
 
       {isPopupOpen && selectedUser && (
         <div className="user-roles-view-popup-overlay add-incident-animated">
@@ -842,9 +872,6 @@ export default function RegisteredVotersModule() {
           </div>
         </div>
       )}
-
-                 
-
     </main>
   );
 }
