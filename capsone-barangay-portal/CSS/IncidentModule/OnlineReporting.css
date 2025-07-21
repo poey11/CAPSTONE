@@ -641,10 +641,31 @@ FOR ONLINE INCIDENT REPORTING CSS
  justify-content: center;
 }
 
-.online-report-box-container{
+.online-report-latefiling {
+  width: 70%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+ justify-content: center;
+}
+
+.online-report-box-container-image{
+width: 50%;
+margin-top: 2rem;
+padding: 20px;
+}
+
+.online-report-box-container-text{
 width: 100%;
 margin-top: 2rem;
+padding: 20px;
 }
+
+.online-report-box-container-latefiling{
+width: 100%;
+padding: 20px;
+}
+
 
 .box-container-outer-image {
      position: relative; 
