@@ -454,10 +454,13 @@ useEffect(() => {
   
   documentRequestsSnapshots.docs.forEach((doc) => {
     const data = doc.data();
-    if (data.appointmentDate && data.approvedBySAS === true) {
-      if (data.status === "Pending") pendingAppointments++;
-      else if (data.status === "Completed") completedAppointments++;
-      else if (data.status === "In - Progress") inprogressAppointments++;
+if (data.appointmentDate) {
+      if (data.approvedBySAS === false && data.status === "Pending") {
+        pendingAppointments++;
+      } else if (data.approvedBySAS === true) {
+        if (data.status === "Completed") completedAppointments++;
+        else if (data.status === "In - Progress") inprogressAppointments++;
+      }
     }
   });
   
@@ -505,7 +508,7 @@ useEffect(() => {
       { name: "In - Progress", value: inprogressAppointmentsCount },
       { name: "Completed", value: completedAppointmentsCount },
     ],
-    colors: ["#FF9800", "#4CAF50", "#2196F3"],
+    colors: ["#d4d64f", "#dd5312", "#4caf50"],
   };
   
   const barangayDemographicsChart = {
@@ -547,7 +550,7 @@ useEffect(() => {
           { name: "Rejected", value: documentRequestRejectedCount },
         ],
     
-    colors: ["#4CAF50", "#2196F3", "#FF9800", "#D32F2F"],
+    colors: ["#d4d64f","#dd5312" ,"#be5cb6", "#4caf50", "#e22929"],
   };
   
   const incidentReportsByDepartmentChart = {
@@ -573,7 +576,7 @@ useEffect(() => {
         { name: "Archived", value: archivedIncidentReportsCount },
         { name: "CFA", value: CFAIncidentReportsCount },
       ],
-      colors: ["#FF9800", "#4CAF50", "#03A9F4", "#9E9E9E"],
+      colors: ["#d4d64f", "#1e5128", "#7f7f7f", "rgb(116, 16, 21)"],
     }
   : {
       title: "Statuses of Online Incident Reports",
@@ -583,7 +586,7 @@ useEffect(() => {
         { name: "In-Progress", value: onlineIncidentReportsInProgressCount },
         { name: "Settled", value: onlineIncidentReportsSettledCount },
       ],
-      colors: ["#FF9800", "#03A9F4"],
+      colors: ["#d4d64f", "#dd5312", "#1e5128"],
     };
   const barangayDemographics = [
     { name: "Senior Citizens", value: seniorCitizensCount },
