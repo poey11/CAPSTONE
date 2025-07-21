@@ -469,15 +469,29 @@ if (data.appointmentDate) {
   setCompletedAppointmentsCount(completedAppointments);
   
 
-  const formattedMonthlyData = Object.keys(incidentMonthlyCounts).map((month) => ({
+      const currentYear = new Date().getFullYear();
+
+      const formattedMonthlyData = Object.keys(incidentMonthlyCounts)
+      .filter((month) => {
+      const [, year] = month.split(" ");
+      return parseInt(year) === currentYear;
+      })
+      .map((month) => ({
       month,
       VAWC: incidentMonthlyCounts[month].VAWC || 0,
       GAD: incidentMonthlyCounts[month].GAD || 0,
       Lupon: incidentMonthlyCounts[month].Lupon || 0,
       BCPC: incidentMonthlyCounts[month].BCPC || 0,
       Online: incidentMonthlyCounts[month].Online || 0,
-    })).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
-    
+      }))
+      .sort((a, b) => {
+      const [aMonth, aYear] = a.month.split(" ");
+      const [bMonth, bYear] = b.month.split(" ");
+      const aDate = new Date(`${aYear}-${aMonth}-01`);
+      const bDate = new Date(`${bYear}-${bMonth}-01`);
+      return aDate.getTime() - bDate.getTime();
+      });
+
     setIncidentReportsByMonth(formattedMonthlyData);
     
     } catch (error) {
