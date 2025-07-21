@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
-import { getLocalDateString } from "@/app/helpers/helpers";
+import { getLocalDateString,formatDateMMDDYYYY } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { addDoc, collection, doc, getDocs, onSnapshot} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
@@ -99,7 +99,7 @@ interface ClearanceInput {
 
     signaturejpg: File | null;
     barangayIDjpg: File | null;
-    validIDjpg: File | null;
+    validIDjpg: File| string | null;
     letterjpg: File | null;
     copyOfPropertyTitle: File | null;
     dtiRegistration: File | null;
@@ -248,6 +248,7 @@ export default function action() {
         return cleaned;
       };
 
+    
       const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
       accID: "INBRGY-REQ",
       reqType: "In Barangay",
@@ -346,7 +347,8 @@ export default function action() {
     
       
     const [maxDate, setMaxDate] = useState<any>()
-    
+      
+
 
    const filteredResidents = residents
   .slice()
@@ -581,25 +583,21 @@ export default function action() {
     }
 
     const handleValidIDUpload = (
-      e: React.ChangeEvent<HTMLInputElement> |string
+      e: React.ChangeEvent<HTMLInputElement> | string
     ) => {
-      // If a string is passed (URL from resident DB)
+      // If a string is passed (e.g. image URL from DB)
       if (typeof e === "string") {
         setFiles3([{ name: "Uploaded ID from Resident List", preview: e }]);
-
-        setClearanceInput((prev: any) => ({
-          ...prev,
-          validIDjpg: e, // URL string
-        }));
-
+  
         return;
       }
+    
       const file = e.target.files?.[0];
       if (!file) return;
     
       const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (!validImageTypes.includes(file.type)) {
-        alert("Only JPG, JPEG, and PNG files are allowed.");
+        alert("Only JPG, JPEG, and PNG files are allowed."); // Optional: replace with a custom error handler
         return;
       }
     
@@ -610,12 +608,14 @@ export default function action() {
         ...prev,
         validIDjpg: file,
       }));
-
+    
+      // Reset input value so user can upload the same file again if needed
       e.target.value = "";
     
-      // Optional: revoke URL after timeout
+      // Cleanup the preview URL
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
+
 
     const handleEndorsementUpload = (
       e: React.ChangeEvent<HTMLInputElement>
@@ -951,6 +951,7 @@ export default function action() {
         console.error("Error:", error);
       }
     };
+    console.log("clearanceInput", clearanceInput);
 
     const handleConfirmClick = async() => {
         setShowCreatePopup(true);
@@ -2335,7 +2336,7 @@ const handleChange = (
                                   name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVehicles||1}
+                                  value={clearanceInput.noOfVehicles}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -4467,10 +4468,12 @@ const handleChange = (
                                               precinctnumber: resident.precinctNumber || '',
                                               dateOfResidency: resident.dateOfResidency || '',
                                               citizenship: resident.citizenship || '',
+                                              validIDjpg: resident.verificationFilesURLs[0] || '',
                                             };
-                                            
                                             handleValidIDUpload(resident.verificationFilesURLs[0] || '');
                                             
+                                            console.log("Valid ID URL:", clearanceInput.validIDjpg);
+
                                             // Only clear fromAddress if purpose is NOT Occupancy
                                             if (purpose !== "Occupancy /  Moving Out") {
                                               update.fromAddress = "";

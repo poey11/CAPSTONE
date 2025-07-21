@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { db } from "@/app/db/firebase";
-import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, getDocs, setDoc, query, where, onSnapshot } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, uploadBytes, list } from "firebase/storage";
 
 
@@ -25,7 +25,7 @@ export default function ViewOnlineReports() {
     caseNumber: "",
     time: "",
     isReportLate:false,
-    reasonForLateFiling:""
+    reasonForLateFiling:"",
   });
   
   const user = useSession().data?.user;
@@ -91,11 +91,10 @@ export default function ViewOnlineReports() {
   const fetchIncidentData = async (id: string) => {
     try {
       const docRef = doc(db, "IncidentReports", id);
-      const docSnap = await getDoc(docRef);
-  
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-  
+      const unsubscribe = onSnapshot(docRef, async(doc) => {
+        let data = doc.data();
+        if (!data) return
+        
         // Set form data
         setFormData({
           id,
@@ -134,14 +133,15 @@ export default function ViewOnlineReports() {
           const url = await getDownloadURL(fileRef);
           setImageUrl(url);
         }
-      } else {
-        console.error("No such document!");
-      }
+        
+      })
+      return () => {
+        unsubscribe(); // Clean up the listener
+      };
     } catch (error) {
       console.error("Error fetching incident data:", error);
     }
   };
-
  useEffect(() => {
   let type = "";
 
@@ -156,7 +156,7 @@ export default function ViewOnlineReports() {
 
     if (fileExtension?.match(/(jpg|jpeg|png|gif|webp)$/)) {
       type = "image";
-    } else if (fileExtension?.match(/(mp3|wav|ogg)$/)) {
+    } else if (fileExtension?.match(/(mp3|wav|ogg|m4a)$/)) {
       type = "audio";
     } else if (fileExtension?.match(/(mp4|webm|ogg)$/)) {
       type = "video";
@@ -227,33 +227,33 @@ export default function ViewOnlineReports() {
 
 
 
-  // const handleSMSToAssignedOfficer = async () => {
-  //   //sends an sms to the assigned officer regarding the incident report to conduct an investigation 
+  const handleSMSToAssignedOfficer = async () => {
+    //sends an sms to the assigned officer regarding the incident report to conduct an investigation 
 
-  //   let respondentContact = listOfStaffs.find(staff => staff.id === respondent.respondentName)?.phone;
-  //   console.log("Respondent Contact:", respondentContact);
-  //   try {
-  //     const response = await fetch("/api/clickSendApi", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         to: respondentContact,
-  //         message: `You have been assigned to an incident report (${formData.caseNumber}). Please check the Barangay Portal for details.`,
-  //       }),
-  //     });
+    let respondentContact = listOfStaffs.find(staff => staff.id === respondent.respondentName)?.phone;
+    console.log("Respondent Contact:", respondentContact);
+    try {
+      const response = await fetch("/api/clickSendApi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: respondentContact,
+          message: `You have been assigned to an incident report (${formData.caseNumber}). Please check the Barangay Portal for details.`,
+        }),
+      });
 
-  //     if (!response.ok) {
-  //       throw new Error("Failed to send SMS to assigned officer.");
-  //     }
+      if (!response.ok) {
+        throw new Error("Failed to send SMS to assigned officer.");
+      }
       
-  //   } catch (error) {
+    } catch (error) {
       
-  //   }
+    }
 
 
-  // }
+  }
 
 const handleSubmitClick = async () => {
   const { respondentName, investigationReport  } = respondent;
@@ -315,8 +315,13 @@ const handleSubmitClick = async () => {
 
 
       const fakeEvent = new Event("submit", { bubbles: true, cancelable: true });
-      const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
+
+      setPopupMessage("Online Report Submitted Succesfuly!!");
+      setShowPopup(true);
+      await handleSMSToAssignedOfficer(); // Send SMS to assigned officer
+      
+      const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
       if (!docId) {
         setPopupErrorMessage("Failed to save record.");
@@ -324,9 +329,6 @@ const handleSubmitClick = async () => {
         return;
       }
 
-      setPopupMessage("Online Report Submitted Succesfuly!!");
-      setShowPopup(true);
-      //handleSMSToAssignedOfficer(); // Call the SMS function
       // Hide the popup after 3 seconds
       setTimeout(() => {
         setShowPopup(false);

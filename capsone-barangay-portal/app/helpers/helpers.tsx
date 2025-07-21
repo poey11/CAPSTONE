@@ -5,6 +5,26 @@ const getLocalDateString = (d: Date) =>{
         String(d.getDate()).padStart(2, '0');
 }
 
+function normalizeToTimestamp(value: any): number {
+  try {
+    if (value instanceof Date) return value.getTime();
+    if (typeof value?.toDate === "function") return value.toDate().getTime(); // Firestore Timestamp
+    if (typeof value === "string") return new Date(value).getTime();
+  } catch (err) {
+    console.warn("Invalid date format:", value);
+  }
+  return 0; // fallback for undefined or invalid values
+}
+
+
+
+const formatDateMMDDYYYY = (date: Date) => {
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
+};
+
 
 const isPastDate = (date: string) => {
     const getLocalDateString = (d: Date) =>
@@ -71,4 +91,5 @@ const isValidPhilippineMobileNumber = (number: string) => {
 export {isPastDate,isToday,isPastOrCurrentTime,
     getLocalTimeString,getLocalDateTimeString,
     isValidPhilippineMobileNumber,
-    isFutureDate,getLocalDateString }
+    isFutureDate,getLocalDateString,formatDateMMDDYYYY,
+normalizeToTimestamp }

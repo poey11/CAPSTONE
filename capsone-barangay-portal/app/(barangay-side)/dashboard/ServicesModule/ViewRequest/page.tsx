@@ -2172,7 +2172,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        //handleSMS();//Admin Staff will handle the sending of SMS to the resident
+        handleSMS();//Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
@@ -2499,7 +2499,7 @@ Functions for Reason for Reject
                                 </button>
                               </>
                             )}
-                            {!requestData?.appointmentDate && !(requestData?.purpose ==="Residency" || requestData?.docType === "Barangay Indigency") && (
+                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" || requestData?.docType !== "Barangay Indigency") && (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
@@ -2530,7 +2530,7 @@ Functions for Reason for Reject
                                     </button>
                                   </>
                                 )}
-                                {!requestData?.appointmentDate && !(requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (
+                                {!requestData?.appointmentDate && (requestData?.docType !== "Barangay Indigency" || requestData?.purpose!=="Residency") && (
                                   <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2544,7 +2544,7 @@ Functions for Reason for Reject
                           </>
                         )}
 
-                        {(requestData?.purpose==="Residency") && (requestData?.photoUploaded === "") &&( 
+                        {(requestData?.docType === "Barangay Certificate"&&requestData?.purpose==="Residency") && (requestData?.photoUploaded === "") &&( 
                           <>
                              <button className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">

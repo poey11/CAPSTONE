@@ -84,7 +84,7 @@ const handlePrint = async(requestData:any, id:any) => {
         if(requestData?.guardianshipType === "Legal Purpose") locationPath = "certifiacte of guardianship_legal.pdf";
         else locationPath = "certifiacte of guardianship_school.pdf";
         reqData = {
-            "Text1":`${(requestData?.requestorFname || requestData?.requestor || "")
+            "Text1":`${(requestData?.fullName || "")
             .replace(/^Mr\.?\s*/i, "")
             .replace(/^Ms\.?\s*/i, "")
             .toUpperCase()}`,
@@ -178,14 +178,14 @@ const handlePrint = async(requestData:any, id:any) => {
     else if(requestData?.purpose === "Estate Tax"){
         locationPath = "certificate of estate tax.pdf";
         reqData = {
-            "Text1":`${(requestData?.requestorFname || requestData?.requestor || "")
+            "Text1":`${(requestData?.fullName || "")
             .replace(/^Mr\.?\s*/i, "")
             .replace(/^Ms\.?\s*/i, "")
             .toUpperCase()}`,
             "Text2": requestData?.address,
             "Text3": requestData?.dateOfResidency.split("-")[0],
-            "Text4": requestData?.requestorFname.toUpperCase(),
-            "Text5": `${getMonthName(parseInt(requestData?.dateOfResidency.split("-")[1]))} ${requestData?.dateOfResidency.split("-")[2]}, ${requestData?.dateOfResidency.split("-")[0]}`,
+            "Text4": requestData?.fullName.toUpperCase(),
+            "Text5": `${getMonthName(parseInt(requestData?.dateofdeath.split("-")[1]))} ${requestData?.dateofdeath.split("-")[2]}, ${requestData?.dateofdeath.split("-")[0]}`,
             "Text6": requestData?.estateSince.toUpperCase(),
             "Text7": requestData?.requestor.toUpperCase(),
             "Text8": dayToday,

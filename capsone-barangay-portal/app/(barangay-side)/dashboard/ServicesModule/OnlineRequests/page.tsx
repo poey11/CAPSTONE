@@ -5,6 +5,7 @@ import { useEffect, useState, useRef} from "react";
 import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
+import {normalizeToTimestamp} from "@/app/helpers/helpers";
 
 
 
@@ -163,7 +164,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setRequestData(filteredReports);
@@ -208,7 +209,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setAllOnlineRequests(reports);
@@ -221,7 +222,7 @@ useEffect(() => {
       } catch (error: any) {
         console.log(error.message);
       }
-    }, [user]);
+    }, []);
 
     
 
