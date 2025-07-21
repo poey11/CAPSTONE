@@ -785,7 +785,7 @@ export default function RegisteredVotersModule() {
                         className={`main-resident-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
                         onClick={() => setViewActiveSection(section)}
                       >
-                        {section === "full" && "Details"}
+                        {section === "full" && "Voter Details"}
                       </button>
                     ))}
                   </div>
