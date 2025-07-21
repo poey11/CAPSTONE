@@ -2498,7 +2498,7 @@ Functions for Reason for Reject
                                 </button>
                               </>
                             )}
-                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" || requestData?.docType !== "Barangay Indigency") && (
+                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") && (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
