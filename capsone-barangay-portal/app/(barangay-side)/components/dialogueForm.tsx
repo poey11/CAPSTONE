@@ -270,7 +270,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
             // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-            
+             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
           }, 3000);
 
 
@@ -338,17 +338,17 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             status: "settled",
             statusPriority: 3,
           });
+
           setTimeout(() => {
             setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          if(department !== "Lupon"){
+                      if(department !== "Lupon"){
             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
           }
           else{
             setShowSubmitPopupB(true);
           }
+          }, 3000);
+
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -835,7 +835,10 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 <button
                   onClick={() => {
                     setShowDoneIncidentPopup(false);
+                     setPopupMessage("Dialogue Successfully Saved!");
+                     setShowPopup(true);
                     setTimeout(() => {
+                       setShowPopup(false);
                       router.push(`/dashboard/IncidentModule/Department?id=${department}`);
                     }, 2000); 
                   }}
@@ -843,6 +846,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 >
                   No
                 </button>
+
+
                 
                 <button  
                   onClick={() => {
