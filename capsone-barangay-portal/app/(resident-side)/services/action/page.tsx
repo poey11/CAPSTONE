@@ -3011,7 +3011,7 @@ console.log("appointment map:", appointmentsMap);
                   {clearanceInput.purpose === "Garage/PUV" && (
                     <>
                       <div className="form-group-document-req">
-                        <label htmlFor="noOfVechicles" className="form-label-document-req">Nos Of Vehicle/s<span className="required">*</span></label>
+                        <label htmlFor="noOfVechicles" className="form-label-document-req">No. of Vehicle/s<span className="required">*</span></label>
                         <input 
                           type="number"  
                           id="noOfVehicles"  
