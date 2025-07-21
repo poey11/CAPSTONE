@@ -1169,7 +1169,9 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 .records-message {
   text-align: center;
   font-size: 16px;
-  padding: 20px 0;
+  /*padding: 20px 0;*/
+  padding-top: 140px;
+
 }
 
 .records-message p {
