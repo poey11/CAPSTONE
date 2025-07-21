@@ -241,6 +241,12 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 statusPriority: 2,
               });
 
+              // try added for redirection to main page archive in dialogue
+              setTimeout(() => {
+                setShowPopup(false);
+                router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+              }, 3000);
+
             } else {
               setShowDoneIncidentPopup(true);
             }
@@ -270,7 +276,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
             // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-            
+          //   router.push(`/dashboard/IncidentModule/Department?id=${department}`);
           }, 3000);
 
 
@@ -338,17 +344,17 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             status: "settled",
             statusPriority: 3,
           });
+
           setTimeout(() => {
             setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          if(department !== "Lupon"){
+                      if(department !== "Lupon"){
             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
           }
           else{
             setShowSubmitPopupB(true);
           }
+          }, 3000);
+
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -834,14 +840,20 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 
                 <button
                   onClick={() => {
-                    setShowDoneIncidentPopup(false)
-                    router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-                  }
-                }
+                    setShowDoneIncidentPopup(false);
+                     setPopupMessage("Dialogue Successfully Saved!");
+                     setShowPopup(true);
+                    setTimeout(() => {
+                       setShowPopup(false);
+                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                    }, 2000); 
+                  }}
                   className="no-button-add"
                 >
                   No
                 </button>
+
+
                 
                 <button  
                   onClick={() => {
@@ -859,74 +871,72 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
 
         
-        {showSubmitPopupB && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
-
+          {showSubmitPopupB && (
+            <div className="confirmation-popup-overlay-add-section">
+              <div className="confirmation-popup-add-section">
                 <>
-                  <p>How was the case settled?</p>
-                  <div className="settlement-options">
-                    <label>
+                  <p className="popup-title-section">How was the case settled?</p>
+                  <div className="settlement-options-modern-section">
+                    <label className={`settlement-card-section ${toUpdate?.isMediation ? "selected-section" : ""}`}>
                       <input
                         type="radio"
                         name="settlementMethod"
                         checked={toUpdate?.isMediation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: true,
-                          isConciliation: false,
-                          isArbitration: false,
-                        }))}
+                        onChange={() =>
+                          setToUpdate((prev: any) => ({
+                            ...prev,
+                            isMediation: true,
+                            isConciliation: false,
+                            isArbitration: false,
+                          }))
+                        }
                       />
-                      Mediation
+                      <span>Mediation</span>
                     </label>
-                    <label>
+                    <label className={`settlement-card-section ${toUpdate?.isConciliation ? "selected-section" : ""}`}>
                       <input
                         type="radio"
                         name="settlementMethod"
                         checked={toUpdate?.isConciliation === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: true,
-                          isArbitration: false,
-                        }))}
+                        onChange={() =>
+                          setToUpdate((prev: any) => ({
+                            ...prev,
+                            isMediation: false,
+                            isConciliation: true,
+                            isArbitration: false,
+                          }))
+                        }
                       />
-                      Conciliation
+                      <span>Conciliation</span>
                     </label>
-                    <label>
+                    <label className={`settlement-card-section ${toUpdate?.isArbitration ? "selected-section" : ""}`}>
                       <input
                         type="radio"
                         name="settlementMethod"
                         checked={toUpdate?.isArbitration === true}
-                        onChange={() => setToUpdate((prev: any) => ({
-                          ...prev,
-                          isMediation: false,
-                          isConciliation: false,
-                          isArbitration: true,
-                        }))}
+                        onChange={() =>
+                          setToUpdate((prev: any) => ({
+                            ...prev,
+                            isMediation: false,
+                            isConciliation: false,
+                            isArbitration: true,
+                          }))
+                        }
                       />
-                      Arbitration
+                      <span>Arbitration</span>
                     </label>
                   </div>
 
-                  <div className="yesno-container-add">
-                    {/* <button
-                      onClick={() => setShowSubmitPopupB(false)}
-                      className="no-button-add"
-                    >
-                      Cancel
-                    </button> */}
-                    <button onClick={confirmSubmitB} className="yes-button-add">
+                  <div className="yesno-container-add-section">
+                    <button onClick={confirmSubmitB} className="yes-button-add-section">
                       Submit
                     </button>
                   </div>
                 </>
-        
-
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
 
         {showPopup && (
                 <div className={`popup-overlay-add show`}>

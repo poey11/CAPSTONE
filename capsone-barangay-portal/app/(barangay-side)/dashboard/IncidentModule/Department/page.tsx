@@ -781,6 +781,26 @@ if (incidentType) {
                               </div>
                               <p>{selectedIncident?.nature || "N/A"}</p>
                             </div>
+
+                                {selectedIncident?.status === "settled" && selectedIncident.department === "Lupon" && (
+                                  <div className="incident-description-section">
+                                    <div className="incident-desc-topsection">
+                                      <div className="incident-main-details-icons-section">
+                                        <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
+                                      </div>
+                                      <div className="incident-main-details-title-section">
+                                        <h1>Action taken:</h1>
+                                      </div>
+                                    </div>
+                                    <ul className="incident-settlement-options">
+                                      {selectedIncident?.isMediation && <li>Mediation</li>}
+                                      {selectedIncident?.isConciliation && <li>Conciliation</li>}
+                                      {selectedIncident?.isArbitration && <li>Arbitration</li>}
+                                    </ul>
+                                  </div>
+                                )}
+
+
                           </div>
                         </div>
                       </div>

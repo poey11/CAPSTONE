@@ -3,8 +3,9 @@
     width: 100%;
 }
 
+
 .headerpic-abtus {
-  position: relative;
+ position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -13,49 +14,38 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
 }
-  
-  .headerpic-abtus::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('/images/brgyheaderpic.JPG');
-    background-size: cover;
-    background-position: 50% 60%;
-    background-repeat: no-repeat;
-    filter: blur(1.2px); 
-    z-index: 1;
+
+@keyframes fadeInSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .headerpic-abtus::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.150); 
-    z-index: 2; 
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .headerpic-abtus > * {
-    position: relative;
-    z-index: 3;
-  }
+}
+
+
 
 .aboutus-main-container{
+     background-image: url('/Images/bghome.jpg');
     display: flex;
-    flex-direction:column;
+    flex-direction: column;  
     justify-content: center;
     align-items: center;
-    background-color: #d8dfe5;
+    height: 100%;
+    width: 100%;
+    animation: fadeInSlideUp 1s ease-out;
 }
 
 .container{
-    background-color: rgba(255, 255, 255, 0.7);
+    background: #FFFFFF;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     width: 75%;
     border-radius: 10px;
     margin-top: 50px;
