@@ -155,7 +155,7 @@ export default function EditResident() {
             address: docSnap.data().address || "",
             dateOfBirth: docSnap.data().dateOfBirth || "",
             placeOfBirth: docSnap.data().placeOfBirth || "",
-            dateOfResidency: docSnap.data().placeOfBirth || "",
+            dateOfResidency: docSnap.data().dateOfResidency || "",
             age: docSnap.data().age || 0,
             sex: docSnap.data().sex || "",
             civilStatus: docSnap.data().civilStatus || "",
