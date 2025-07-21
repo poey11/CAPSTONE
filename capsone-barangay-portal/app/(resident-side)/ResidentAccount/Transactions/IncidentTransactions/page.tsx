@@ -41,6 +41,7 @@ export default function IncidentTransactionsDetails() {
   const [loading, setLoading] = useState(true);
   const [fileURL, setFileURL] = useState<string | null>(null);
   const [respondentFileURLs, setRespondentFileURLs] = useState<string[]>([]);
+  const [respondentUserDetails, setRespondentUserDetails] = useState<{ firstName: string; lastName: string } | null>(null);
 
 
    const [activeSection, setActiveSection] = useState("info");
@@ -58,6 +59,22 @@ export default function IncidentTransactionsDetails() {
         if (docSnap.exists()) {
           const data = docSnap.data() as IncidentReport;
           setTransactionData({ ...data, id: docSnap.id });
+
+          if (data.respondent?.respondentName) {
+            const userRef = doc(db, "BarangayUsers", data.respondent.respondentName);
+            const userSnap = await getDoc(userRef);
+          
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+              setRespondentUserDetails({
+                firstName: userData.firstName || "N/A",
+                lastName: userData.lastName || "N/A"
+              });
+            } else {
+              setRespondentUserDetails(null);
+            }
+          }
+          
 
           if (data.file) {
             const storage = getStorage();
@@ -148,6 +165,7 @@ useEffect(() => {
   ];
 
 
+  
 
 
   /*
@@ -155,7 +173,12 @@ updated
   */
  
   const respondentFields = [
-  { label: "Respondent Name", key: "respondentName" },
+    { label: "Respondent Name", key: "respondentName", render: () => {
+      return respondentUserDetails
+        ? `${respondentUserDetails.firstName} ${respondentUserDetails.lastName}`
+        : transactionData?.respondent?.respondentName || "N/A"; 
+      }
+  },
   { label: "Investigation Report", key: "investigationReport" },
   {
     label: "Uploaded Investigation Files",
@@ -237,7 +260,7 @@ if (loading || !transactionData) {
                 Report Info
               </button>
 
-              {transactionData?.status === "Acknowledged" && (
+              {transactionData?.status === "Settled" && (
                 <button
                   type="button"
                   className={`info-toggle-btn ${activeSection === "barangay" ? "active" : ""}`}
@@ -328,20 +351,23 @@ if (loading || !transactionData) {
               {activeSection === "barangay" && (
                 <>
                   <div className="incident-main-container-incident-response">
-                    {transactionData?.status === "Acknowledged" && (
+                    {transactionData?.status === "Settled" && (
                       <>
-                        {respondentFields
-                          .filter((field) => field.key !== "file")
-                          .map((field) => (
-                            <div className="details-section-response" key={field.key}>
-                              <div className="title">
-                                <p>{field.label}</p>
+                          {respondentFields
+                            .filter((field) => field.key !== "file")
+                            .map((field) => (
+                              <div className="details-section-response" key={field.key}>
+                                <div className="title">
+                                  <p>{field.label}</p>
+                                </div>
+                                <div className="description">
+                                  {field.render
+                                    ? field.render()
+                                    : transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
+                                </div>
                               </div>
-                              <div className="description">
-                                {transactionData?.respondent?.[field.key as keyof Respondent] || "N/A"}
-                              </div>
-                            </div>
-                        ))}
+                          ))}
+
 
                         <div className="details-section-response-upload">
                           <div className="title">

@@ -5,6 +5,7 @@ import { useEffect, useState, useRef} from "react";
 import { collection, onSnapshot, orderBy, query, where, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
+import {normalizeToTimestamp} from "@/app/helpers/helpers";
 
 
 
@@ -163,7 +164,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setRequestData(filteredReports);
@@ -208,7 +209,7 @@ useEffect(() => {
             }
           
             // Convert string dates to timestamps
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            return new Date (b.createdAt).getTime()  - new Date(a.createdAt).getTime();
           });
         
           setAllOnlineRequests(reports);
@@ -221,7 +222,7 @@ useEffect(() => {
       } catch (error: any) {
         console.log(error.message);
       }
-    }, [user]);
+    }, []);
 
     
 
@@ -481,7 +482,8 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         <option value="All">All Document Types</option>
                         <option value="Barangay Certificate">Barangay Certificate</option>
                         <option value="Barangay Indigency">Barangay Indigency</option>
-                        <option value="Business Permit">Barangay Business Permits</option>
+                        <option value="Business Permit">Business Permits</option>
+                        <option value="Construction">Construction Permits</option>
                         <option value="Barangay Clearance">Barangay Clearance</option>
                         <option value="Other">Other Documents</option>
                 </select>

@@ -247,15 +247,21 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         
 
             const mainDocRef = doc(db, "IncidentReports", id); 
-            if(details.Cstatus === "Absent" || details.Rstatus === "Absent")
-                await updateDoc(mainDocRef, 
-                {
-                    status: "archived",
-                    statusPriority: 2,
-                    hearingId:  success.id,
-                })
-            else{
-                setShowDoneIncidentPopup(true);
+            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+              await updateDoc(mainDocRef, {
+                status: "archived",
+                statusPriority: 2,
+                hearingId: success.id,
+              });
+
+             
+           setTimeout(() => {
+              setShowPopup(false);
+              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            }, 3000);
+
+            } else {
+              setShowDoneIncidentPopup(true);
             }
         } catch (error:any) {
             console.error("Error saving data:", error.message);
@@ -392,16 +398,18 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             status: "settled",
             statusPriority: 3,
           });
-          setTimeout(() => {
-            setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          if(department !== "Lupon"){
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-          }else{
-            setShowSubmitPopupB(true);
-          }
+
+
+    setTimeout(() => {
+      setShowPopup(false);
+
+      // ✅ Only redirect if not "Lupon"
+      if (department !== "Lupon") {
+        router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+      } else {
+        setShowSubmitPopupB(true);
+      }
+    }, 3000); // Wait 3 seconds before redirecting or showing next popup
 
         }
         else{
@@ -412,12 +420,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             status: "CFA",
             statusPriority: 4,
           });
+
           setTimeout(() => {
             setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          }, 3000); // ✅ Delay redirect
+
         }
       }
 
@@ -748,62 +756,66 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 </div>
             </div>
             )}
-                    {showDoneIncidentPopup && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
-              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
-              <p>Has the incident case been settled?</p>
-              <div className="yesno-container-add">
-                {/*}
-                {hearing !==3 ? (
-                  <button
-                    onClick={() => {
-                      setShowDoneIncidentPopup(false)
-                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-                    }
-                  }
-                    className="no-button-add"
-                  >
-                    No
-                  */}
+{showDoneIncidentPopup && (
+  <div className="confirmation-popup-overlay-add">
+    <div className="confirmation-popup-add">
+      <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+      <p>Has the incident case been settled?</p>
+      <div className="yesno-container-add">
 
-                   {hearing !== 3 ? (
-                    <button
-                      onClick={() => {
-                        setShowDoneIncidentPopup(false);
-                        setPopupMessage("If case is reopened, generate a letter again.");
-                        setShowPopup(true);
-
-                        // Auto-hide popup after 3 seconds (optional)
-                        setTimeout(() => {
-                          setShowPopup(false);
-                        }, 3000);
-                      }}
-                      className="no-button-add"
-                    >
-                      No
-                    </button>
-
-                ): hearing === 3  && (
-                  <button
-                    onClick={() => handleClosingCase(false)}
-                    className="no-button-add bg-gray-600"
-                  >
-                    CFA
-                  </button>  
-                )}
-                <button  
-                  onClick={() => {
-                    handleClosingCase(true)
-                  }}
-                  className="yes-button-add"
-                >
-                  Yes
-                </button>
-              </div>
-            </div>
-          </div>    
+        {/* Case 1: hearing !== 3 && archived */}
+        {hearing !== 3 && data?.status === "archived" && (
+          <button
+            onClick={() => {
+              setShowDoneIncidentPopup(false);
+              setPopupMessage("If case is reopened, generate a letter again.");
+              setShowPopup(true);
+              setTimeout(() => setShowPopup(false), 3000);
+            }}
+            className="no-button-add"
+          >
+            No
+          </button>
         )}
+
+        {/* Case 2: hearing !== 3 && NOT archived */}
+        {hearing !== 3 && data?.status !== "archived" && (
+          <button
+            onClick={() => {
+              setShowDoneIncidentPopup(false);
+              setPopupMessage("Incident has been updated successfully.");
+              setShowPopup(true);
+              setTimeout(() => setShowPopup(false), 3000);            }}
+            className="no-button-add"
+          >
+            No
+          </button>
+        )}
+
+        {/* Case 3: hearing === 3 */}
+        {hearing === 3 && (
+          <button
+            onClick={() => handleClosingCase(false)}
+            className="no-button-add bg-gray-600"
+          >
+            CFA
+          </button>
+        )}
+
+        {/* YES button (shared by all) */}
+        <button
+          onClick={() => {
+            handleClosingCase(true);
+          }}
+          className="yes-button-add"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
 

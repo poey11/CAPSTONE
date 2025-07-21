@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
-import { getLocalDateString } from "@/app/helpers/helpers";
+import { getLocalDateString,formatDateMMDDYYYY } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
 import { addDoc, collection, doc, getDocs, onSnapshot} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
@@ -99,7 +99,7 @@ interface ClearanceInput {
 
     signaturejpg: File | null;
     barangayIDjpg: File | null;
-    validIDjpg: File | null;
+    validIDjpg: File| string | null;
     letterjpg: File | null;
     copyOfPropertyTitle: File | null;
     dtiRegistration: File | null;
@@ -248,6 +248,7 @@ export default function action() {
         return cleaned;
       };
 
+    
       const [clearanceInput, setClearanceInput] = useState<ClearanceInput>({
       accID: "INBRGY-REQ",
       reqType: "In Barangay",
@@ -346,7 +347,8 @@ export default function action() {
     
       
     const [maxDate, setMaxDate] = useState<any>()
-    
+      
+
 
    const filteredResidents = residents
   .slice()
@@ -581,25 +583,21 @@ export default function action() {
     }
 
     const handleValidIDUpload = (
-      e: React.ChangeEvent<HTMLInputElement> |string
+      e: React.ChangeEvent<HTMLInputElement> | string
     ) => {
-      // If a string is passed (URL from resident DB)
+      // If a string is passed (e.g. image URL from DB)
       if (typeof e === "string") {
         setFiles3([{ name: "Uploaded ID from Resident List", preview: e }]);
-
-        setClearanceInput((prev: any) => ({
-          ...prev,
-          validIDjpg: e, // URL string
-        }));
-
+  
         return;
       }
+    
       const file = e.target.files?.[0];
       if (!file) return;
     
       const validImageTypes = ["image/jpeg", "image/png", "image/jpg"];
       if (!validImageTypes.includes(file.type)) {
-        alert("Only JPG, JPEG, and PNG files are allowed.");
+        alert("Only JPG, JPEG, and PNG files are allowed."); // Optional: replace with a custom error handler
         return;
       }
     
@@ -610,12 +608,14 @@ export default function action() {
         ...prev,
         validIDjpg: file,
       }));
-
+    
+      // Reset input value so user can upload the same file again if needed
       e.target.value = "";
     
-      // Optional: revoke URL after timeout
+      // Cleanup the preview URL
       setTimeout(() => URL.revokeObjectURL(preview), 10000);
     };
+
 
     const handleEndorsementUpload = (
       e: React.ChangeEvent<HTMLInputElement>
@@ -951,6 +951,7 @@ export default function action() {
         console.error("Error:", error);
       }
     };
+    console.log("clearanceInput", clearanceInput);
 
     const handleConfirmClick = async() => {
         setShowCreatePopup(true);
@@ -1090,17 +1091,6 @@ export default function action() {
         }
       }
 
-    if (
-      clearanceInput.docType === "Barangay Certificate" &&
-      ["Residency"].includes(clearanceInput.purpose || "")
-    ) {
-      if (!files11 || files11.length === 0) {
-        setPopupErrorMessage("Please upload Identification Picture.");
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-    }
     
       // Signature
       if (!files1 || files1.length === 0) {
@@ -1356,18 +1346,20 @@ export default function action() {
         
         await addDoc(notificationRef, {
           message: 
-            clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate"
+            clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
               ? `New Certificate of Residency requested by ${clearanceInput.requestorFname}.`
               : clearanceInput.docType === "Barangay Indigency"
                 ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`
-                : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
-          
+                : clearanceInput.docType === "Construction"
+                  ? `New Construction Permit requested by ${clearanceInput.requestorFname}.`
+                  : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
+
           timestamp: new Date(),
           requestorId: clearanceInput.residentId,
           isRead: false,
           transactionType: "Online Service Request",
           recipientRole: (
-            (clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency")
+            clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
               ? "Admin Staff"
               : (
                 clearanceInput.purpose === "First Time Jobseeker" ||
@@ -1382,8 +1374,7 @@ export default function action() {
           ),
           requestID: id,
         });
-        
-              
+
                 
     };
 console.log("otherDocFields", otherDocFields);
@@ -2345,7 +2336,7 @@ const handleChange = (
                                   name="noOfVehicles"  
                                   className="createRequest-input-field"  
                                   required 
-                                  value={clearanceInput.noOfVehicles||1}
+                                  value={clearanceInput.noOfVehicles}
                                   onChange={handleChange}
                                   min={1}
                                   onKeyDown={(e)=> {
@@ -2513,16 +2504,24 @@ const handleChange = (
                             <>
                               <div className="fields-section">
                                 <h1>Educational Attainment<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
+                                <select 
+                                  name="educationalAttainment" 
                                   id="educationalAttainment"  
-                                  name="educationalAttainment"  
-                                  value={clearanceInput.educationalAttainment  || ""}
-                                  onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Educational Attainment"  
-                                />
+                                  className="createRequest-input-field" 
+                                  value={clearanceInput.educationalAttainment}
+                                  onChange={handleChange} 
+                                  required
+                                >
+                                  <option value="" disabled>Choose educational attainment</option>
+                                  <option value="1">Elem Under Grad</option>
+                                  <option value="2">Elem Grad</option>
+                                  <option value="3">HS Grad</option>
+                                  <option value="4">HS Under Grad</option>
+                                  <option value="5">COL Grad</option>
+                                  <option value="6">COL Under Grad</option>
+                                  <option value="7">Educational</option>
+                                  <option value="8">Vocational</option>
+                                </select>
                               </div>
                             </>
                           )}
@@ -3523,71 +3522,7 @@ const handleChange = (
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
-                        {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
-                          <>
-                            <div className="box-container-outer-inbrgy">
-                              <div className="title-verificationdocs-signature">
-                                Identification Picture
-                              </div>
-
-                              <div className="box-container-inbrgy">
-                                <span className="required-asterisk">*</span>
-
-                                {/* File Upload Section */}
-                                <div className="file-upload-container-inbrgy">
-                                  <label htmlFor="file-upload11"  className="upload-link">Click to Upload File</label>
-                                    <input
-                                      id="file-upload11"
-                                      type="file"
-                                      className="file-upload-input" 
-                                      multiple
-                                      accept=".jpg,.jpeg,.png"
-                                      onChange={handleIdentificationPicUpload}
-                                    />
-
-                                    {/* Display the file names with image previews */}
-                                    {files11.length > 0 && (
-                                      <div className="file-name-image-display">
-                                        {files11.map((file, index) => (
-                                          <div className="file-name-image-display-indiv" key={index}>
-                                            <li className="file-item"> 
-                                              {/* Display the image preview */}
-                                              {file.preview && (
-                                                <div className="filename-image-container">
-                                                  <img
-                                                    src={file.preview}
-                                                    alt={file.name}
-                                                    className="file-preview"
-                                                  />
-                                                </div>
-                                              )}
-                                              <span className="file-name">{file.name}</span>  
-                                              <div className="delete-container">
-                                                {/* Delete button with image */}
-                                                <button
-                                                  type="button"
-                                                  onClick={() => handleIdentificationPicDelete(file.name)}
-                                                  className="delete-button"
-                                                >
-                                                <img
-                                                  src="/images/trash.png"  
-                                                  alt="Delete"
-                                                  className="delete-icon"
-                                                />
-                                                </button>
-                                              </div>
-                                            </li>
-                                          </div>
-                                        ))}           
-                                      </div>
-                                    )}
-                                </div>
-                              </div>
-                            </div>
-                          </>
-                        )}
-                          
-
+  
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-signature">
                             Signature Over Printed Name
@@ -4533,10 +4468,12 @@ const handleChange = (
                                               precinctnumber: resident.precinctNumber || '',
                                               dateOfResidency: resident.dateOfResidency || '',
                                               citizenship: resident.citizenship || '',
+                                              validIDjpg: resident.verificationFilesURLs[0] || '',
                                             };
-                                            
                                             handleValidIDUpload(resident.verificationFilesURLs[0] || '');
                                             
+                                            console.log("Valid ID URL:", clearanceInput.validIDjpg);
+
                                             // Only clear fromAddress if purpose is NOT Occupancy
                                             if (purpose !== "Occupancy /  Moving Out") {
                                               update.fromAddress = "";

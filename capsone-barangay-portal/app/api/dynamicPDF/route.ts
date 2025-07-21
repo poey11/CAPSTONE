@@ -4,72 +4,92 @@ import { storage } from '@/app/db/firebase';
 import { ref, getDownloadURL } from 'firebase/storage';
 
 
-export async function POST(req: NextRequest, res:NextResponse) {
-    const data = await req.json();
-    const {title, body} = data;
+export async function POST(req: NextRequest, res: NextResponse) {
+  const data = await req.json();
+  const { title, body } = data;
 
-    try{
-        
-        const pdfRef = ref(storage, `/ServiceRequests/templates/otherdoc/template.pdf`);
-        const pdfUrl = await getDownloadURL(pdfRef);
-        const pdfResponse = await fetch(pdfUrl);
-        const pdfData = await pdfResponse.arrayBuffer();
+  try {
+    const pdfRef = ref(storage, `/ServiceRequests/templates/otherdoc/template.pdf`);
+    const pdfUrl = await getDownloadURL(pdfRef);
+    const pdfResponse = await fetch(pdfUrl);
+    const pdfData = await pdfResponse.arrayBuffer();
 
-        const pdfDoc = await PDFDocument.load(pdfData);
-        const page = pdfDoc.getPage(0);
-        
-        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        const fontSize = 12;
-        const titleWidth = font.widthOfTextAtSize(title, 30);
+    const pdfDoc = await PDFDocument.load(pdfData);
+    const page = pdfDoc.getPage(0);
 
-        const pageWidth = page.getWidth();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontSize = 12;
+    const titleWidth = font.widthOfTextAtSize(title, 30);
 
-        const titleX = (pageWidth - titleWidth) / 2;
-        
-        
-        const normalizedBody = body.replace(/\r\n/g, '\n');
-        
+    const pageWidth = page.getWidth();
+    const titleX = (pageWidth - titleWidth) / 2;
 
-        page.drawText(title, {
-            x: titleX,
-            y: 570,
-            size:25,
-            font: font,
-            color: rgb(0, 0, 0),
-            lineHeight: 14,
-            maxWidth: 500,
-        })
-        // Left-aligned body
-        const lineHeight = 20;
-        let yPosition = 465;
-        const marginLeft = 25;
-            
-        const bodyLines = normalizedBody.split('\n');
-            
-        for (const line of bodyLines) {
-          page.drawText(line, {
+    const normalizedBody = body.replace(/\r\n/g, '\n');
+
+    // Draw centered title
+    page.drawText(title, {
+      x: titleX,
+      y: 570,
+      size: 25,
+      font: font,
+      color: rgb(0, 0, 0),
+      lineHeight: 14,
+      maxWidth: 500,
+    });
+
+    // Left-aligned wrapped body text
+    const lineHeight = 20;
+    let yPosition = 465;
+    const marginLeft = 25;
+    const maxWidth = 500;
+
+    const bodyLines = normalizedBody.split('\n');
+
+    for (const line of bodyLines) {
+      const words = line.split(' ');
+      let currentLine = '';
+
+      for (const word of words) {
+        const testLine = currentLine ? currentLine + ' ' + word : word;
+        const testLineWidth = font.widthOfTextAtSize(testLine, fontSize);
+
+        if (testLineWidth < maxWidth) {
+          currentLine = testLine;
+        } else {
+          page.drawText(currentLine, {
             x: marginLeft,
             y: yPosition,
             size: fontSize,
             font,
             color: rgb(0, 0, 0),
           });
-      
           yPosition -= lineHeight;
+          currentLine = word;
         }
-        const pdfBytes = await pdfDoc.save();
-        return new NextResponse(pdfBytes, {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/pdf',
-                'Content-Disposition': 'attachment; filename=document.pdf',
-            },
+      }
+
+      if (currentLine) {
+        page.drawText(currentLine, {
+          x: marginLeft,
+          y: yPosition,
+          size: fontSize,
+          font,
+          color: rgb(0, 0, 0),
         });
-    }
-    catch (error) {
-        console.error("Error in PDF generation:", error);
-        return NextResponse.json({ success: false, message: "Error generating PDF" }, { status: 500 });
+        yPosition -= lineHeight;
+      }
     }
 
-
+    const pdfBytes = await pdfDoc.save();
+    return new NextResponse(pdfBytes, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=document.pdf',
+      },
+    });
+  } catch (error) {
+    console.error("Error in PDF generation:", error);
+    return NextResponse.json({ success: false, message: "Error generating PDF" }, { status: 500 });
+  }
 }

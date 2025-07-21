@@ -28,7 +28,7 @@ const ReportsPage = () => {
 
   // file upload rbac
   const canSelectFolder = ["Secretary", "Assistant Secretary", "Punong Barangay"].includes(session?.user?.position || "");
-  const canUpload = session?.user?.position === "Assistant Secretary";
+  const canUpload = session?.user?.position === "Assistant Secretary" || session?.user?.position === "Secretary";
 
 
   // for residents
@@ -2512,12 +2512,33 @@ const uploadForms = async (url: string): Promise<void> => {
       let residents = querySnapshot.docs.map((doc) => doc.data());
   
       const addressGroups = {
-        "RINA": residents.filter((r) => r.cluster?.toUpperCase().includes("RINA")),
-        "SAMAFA": residents.filter((r) => r.cluster?.toUpperCase().includes("SAMAFA")),
-        "SAMAPLI": residents.filter((r) => r.cluster?.toUpperCase().includes("SAMAPLI")),
-        "SITIO KISLAP": residents.filter((r) => r.cluster?.toUpperCase().includes("SITIO KISLAP")),
-        "EFHAI": residents.filter((r) => r.cluster?.toUpperCase().includes("EFHAI")),
+        "RINA": residents.filter(
+          (r) =>
+            r.generalLocation === "East Fairview" &&
+            r.cluster?.toUpperCase().includes("RINA")
+        ),
+        "SAMAFA": residents.filter(
+          (r) =>
+            r.generalLocation === "East Fairview" &&
+            r.cluster?.toUpperCase().includes("SAMAFA")
+        ),
+        "SAMAPLI": residents.filter(
+          (r) =>
+            r.generalLocation === "East Fairview" &&
+            r.cluster?.toUpperCase().includes("SAMAPLI")
+        ),
+        "SITIO KISLAP": residents.filter(
+          (r) =>
+            r.generalLocation === "East Fairview" &&
+            r.cluster?.toUpperCase().includes("SITIO KISLAP")
+        ),
+        "EFHAI": residents.filter(
+          (r) =>
+            r.generalLocation === "East Fairview" &&
+            r.cluster?.toUpperCase().includes("EFHAI")
+        ),
       };
+
   
       const filteredGroups = Object.entries(addressGroups).filter(([_, members]) => members.length > 0);
       if (filteredGroups.length === 0) {
@@ -2765,37 +2786,58 @@ const uploadForms = async (url: string): Promise<void> => {
       let residents = querySnapshot.docs.map((doc) => doc.data());
   
       const addressGroups = {
-        AUSTIN: residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("AUSTIN")
+        AUSTIN: residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("AUSTIN")
         ),
-        "BASILIO 1": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("BASILIO 1")
+        "BASILIO 1": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("BASILIO 1")
         ),
-        DARISNAI: residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("DARISNAI")
+        DARISNAI: residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("DARISNAI")
         ),
-        "MUSTANG BENZ": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("MUSTANG BENZ")
+        "MUSTANG BENZ": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("MUSTANG BENZ")
         ),
-        ULNA: residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("ULNA")
+        ULNA: residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("ULNA")
         ),
-        "UNITED FAIRLANE": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("UNITED FAIRLANE")
+        "UNITED FAIRLANE": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("UNITED FAIRLANE")
         ),
-        URLINA: residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("URLINA")
+        URLINA: residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("URLINA")
         ),
-        "VERBENA 1": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("VERBENA 1")
+        "VERBENA 1": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("VERBENA 1")
         ),
-        "WEST FAIRVIEW HOA": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("WEST FAIRVIEW HOA")
+        "WEST FAIRVIEW HOA": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("WEST FAIRVIEW HOA")
         ),
-        "TULIP RESIDENCES HOA": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("TULIP RESIDENCES HOA")
+        "TULIP RESIDENCES HOA": residents.filter(
+          (resident) =>
+            resident.generalLocation === "West Fairview" &&
+            resident.cluster?.includes("TULIP RESIDENCES HOA")
         ),
       };
+
   
       const filteredGroups = Object.entries(addressGroups).filter(([_, members]) => members.length > 0);
   
@@ -3065,23 +3107,29 @@ const uploadForms = async (url: string): Promise<void> => {
   
       let residents = querySnapshot.docs.map((doc) => doc.data());
   
-      const addressGroups = {
-        "AKAP": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("AKAP")
-        ),
-        "ARNAI": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("ARNAI")
-        ),
-        "F.L.N.A": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("F.L.N.A")
-        ),
-        "FEWRANO": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("FEWRANO")
-        ),
-        "UPPER CORVETTE HOA": residents.filter((resident) =>
-          resident.cluster && resident.cluster.includes("UPPER CORVETTE HOA")
-        ),
-      };
+const addressGroups = {
+  "AKAP": residents.filter((resident) =>
+    resident.generalLocation === "South Fairview" &&
+    resident.cluster && resident.cluster.includes("AKAP")
+  ),
+  "ARNAI": residents.filter((resident) =>
+    resident.generalLocation === "South Fairview" &&
+    resident.cluster && resident.cluster.includes("ARNAI")
+  ),
+  "F.L.N.A": residents.filter((resident) =>
+    resident.generalLocation === "South Fairview" &&
+    resident.cluster && resident.cluster.includes("F.L.N.A")
+  ),
+  "FEWRANO": residents.filter((resident) =>
+    resident.generalLocation === "South Fairview" &&
+    resident.cluster && resident.cluster.includes("FEWRANO")
+  ),
+  "UPPER CORVETTE HOA": residents.filter((resident) =>
+    resident.generalLocation === "South Fairview" &&
+    resident.cluster && resident.cluster.includes("UPPER CORVETTE HOA")
+  ),
+};
+
   
       const filteredGroups = Object.entries(addressGroups).filter(
         ([, value]) => value.length > 0
@@ -5789,12 +5837,14 @@ const generateDepartmentalReport = async (
                             >
                               Download
                             </button>
-                            <button
-                              className="delete-btn"
-                              onClick={() => handleDeleteClick(file.name)}
-                            >
-                              Delete
-                            </button>
+                            {canUpload && (
+                              <button
+                                className="delete-btn"
+                                onClick={() => handleDeleteClick(file.name)}
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}

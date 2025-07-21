@@ -250,54 +250,43 @@ case "document":
   }
 
 
-  const handleNotificationClick = async (notification: Notification) => {
-   // alert("Notification clicked!"); /
-    console.log("Notification clicked:", notification);
-  
-    // Check if the notification is unread
-    if (!notification.isRead) {
-      try {
-        const notificationRef = doc(db, "Notifications", notification.id);
-        await updateDoc(notificationRef, { isRead: true });
-  
-        setNotifications((prevNotifications) =>
-          prevNotifications.map((notif) =>
-            notif.id === notification.id ? { ...notif, isRead: true } : notif
-          )
-        );
-        console.log("Notification marked as read!");
-      } catch (error) {
-        console.error("Error marking notification as read:", error);
-      }
-    }
-  
-    // NAVIGATION for INCIDENT
-    if (notification.transactionType === "Online Incident") {
-      const targetUrl = `/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`;
-      router.push(targetUrl);
-    } else {
-      console.log("Transaction is not an Online Incident. No navigation performed.");
-    }
+const handleNotificationClick = async (notification: Notification) => {
+  console.log("Notification clicked:", notification);
 
-     // NAVIGATION for Documents
-    if (notification.transactionType === "Online Request" || "Online Service Request") {
-      const targetUrl = `/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`;
-      router.push(targetUrl);
-    } else {
-      console.log("Transaction is not an Document Request. No navigation performed.");
-    }
-  
-  
-    // NAVIGATION for VERIFICATION
-    if (
-      notification.transactionType === "Verification" &&
-      notification.message?.toLowerCase().includes("update")
-    ) {
-      router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
-    }
+  // Mark as read if unread
+  if (!notification.isRead) {
+    try {
+      const notificationRef = doc(db, "Notifications", notification.id);
+      await updateDoc(notificationRef, { isRead: true });
 
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif.id === notification.id ? { ...notif, isRead: true } : notif
+        )
+      );
+      console.log("Notification marked as read!");
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  }
 
-  };
+  // Navigation logic
+  const type = notification.transactionType;
+
+  if (type === "Online Incident") {
+    router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`);
+  } 
+  else if (type === "Online Request" || type === "Online Service Request") {
+    router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
+  }
+  else if (type === "Verification" && notification.message?.toLowerCase().includes("update")) {
+    router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
+  }
+  else {
+    console.log("No navigation triggered for this notification type.");
+  }
+};
+
 
 const handleDeleteNotification = async (notificationId: string) => {
   try {

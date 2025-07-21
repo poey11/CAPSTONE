@@ -685,6 +685,15 @@ const hasAnimatedOnce = useRef(false);
                                 readOnly
                               /> 
                             </div>
+                            <div className="view-user-fields-section">
+                              <p>Age</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedUser.age || "N/A"}
+                                readOnly
+                              /> 
+                            </div>
                           </div>
                         </div>
                         </>
@@ -711,27 +720,17 @@ const hasAnimatedOnce = useRef(false);
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>Employment Arrangement</p>
+                              <p>Educational Attainment</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
                                 value={
-                                  employeeArrangementMap[Number(selectedUser.employmentArrangement)] || "N/A"
+                                  educationalAttainmentMap[Number(selectedUser.educationalAttainment)] || "N/A"
                                 }
                                 readOnly
                               />
                             </div>
-                            <div className="view-user-fields-section">
-                              <p>Range of Salary</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={
-                                  rangeOfSalaryMap[Number(selectedUser.salary)] || "N/A"
-                                }
-                                readOnly
-                              /> 
-                            </div>
+                            
                           </div>
                           <div className="view-mainresident-content-right-side">
                             <div className="view-user-fields-section">
@@ -755,6 +754,17 @@ const hasAnimatedOnce = useRef(false);
                                 }
                                 readOnly
                               />
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Range of Salary</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={
+                                  rangeOfSalaryMap[Number(selectedUser.salary)] || "N/A"
+                                }
+                                readOnly
+                              /> 
                             </div>
                           </div>
                         </>

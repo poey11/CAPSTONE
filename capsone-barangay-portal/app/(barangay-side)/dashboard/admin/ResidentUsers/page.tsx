@@ -294,6 +294,7 @@ const confirmAccept = async () => {
       if (searchTerm) {
         filtered = filtered.filter(user =>
           user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.middle_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.last_name.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
