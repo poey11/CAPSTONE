@@ -143,7 +143,7 @@ const filteredTransactions = transactionData.filter((item) => {
                     </div>
 
                     <div className="filter-group">
-                    <label>Request ID</label>
+                    <label>Reference ID</label>
                     <input
                         type="text"
                         placeholder="e.g. BSWOJU - 0018"
