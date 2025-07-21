@@ -727,14 +727,18 @@ const confirmAccept = async () => {
                         <>
                           <div className="view-main-user-content-left-side">
                             <div className="view-user-fields-section">
-                              <p>Created At</p>
-                              <input
-                                type="text"
-                                className="view-user-input-field"
-                                value={selectedUser.createdAt || "N/A"}
-                                readOnly
-                              />
-                            </div>
+  <p>Created At</p>
+  <input
+    type="text"
+    className="view-user-input-field"
+    value={
+      selectedUser.createdAt
+        ? new Date(selectedUser.createdAt).toISOString().split("T")[0]
+        : "N/A"
+    }
+    readOnly
+  />
+</div>
                             <div className="view-user-fields-section">
                               <p>Role</p>
                               <input

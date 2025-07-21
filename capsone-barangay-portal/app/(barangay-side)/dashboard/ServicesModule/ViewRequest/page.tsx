@@ -926,7 +926,6 @@ Functions for Reason for Reject
                 "dateOfResidency", 
                 "purpose", 
                 "address", 
-                "appointmentDate",
               ],
               full: [
                 "birthday",
@@ -2780,7 +2779,19 @@ Functions for Reason for Reject
                                                         <h1>Appointment Date</h1>
                                                     </div>
                                                 </div>
-                                                <p>{requestData?.appointmentDate || "N/A"}</p>
+                                                <p>
+                                                  {requestData?.appointmentDate
+                                                    ? new Date(requestData.appointmentDate).toLocaleString("en-US", {
+                                                        month: "numeric",
+                                                        day: "numeric",
+                                                        year: "numeric",
+                                                        hour: "numeric",
+                                                        minute: "numeric",
+                                                        second: "numeric",
+                                                        hour12: true,
+                                                      })
+                                                    : "N/A"}
+                                                </p>
                                             </div>
                                         </>
                                     )}
@@ -3423,7 +3434,7 @@ Functions for Reason for Reject
                 alt="success icon"
                 className="successful-icon-popup"
               />
-              <p>Requestor has been notified that the document is for Pick-up.</p>
+              <p>Requestor notified via SMS for Pick-up.</p>
               <h2>Next: Click the "Document Received" button once the requestor has pick-up the document.</h2>
               <div className="yesno-container-add">
                 <button
