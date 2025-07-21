@@ -727,18 +727,30 @@ const confirmAccept = async () => {
                         <>
                           <div className="view-main-user-content-left-side">
                             <div className="view-user-fields-section">
-  <p>Created At</p>
-  <input
-    type="text"
-    className="view-user-input-field"
-    value={
-      selectedUser.createdAt
-        ? new Date(selectedUser.createdAt).toISOString().split("T")[0]
+                              <p>Created At</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={
+  selectedUser.createdAt
+    ? typeof selectedUser.createdAt === "string"
+      ? /^\d{4}-\d{2}-\d{2}$/.test(selectedUser.createdAt)
+        ? selectedUser.createdAt
+        : new Date(
+            selectedUser.createdAt
+              .replace(" at", "")
+              .replace("UTC+8", "GMT+0800")
+          )
+            .toISOString()
+            .split("T")[0]
+      : (selectedUser.createdAt as any).toDate
+        ? (selectedUser.createdAt as any).toDate().toISOString().split("T")[0]
         : "N/A"
-    }
-    readOnly
-  />
-</div>
+    : "N/A"
+}
+                                readOnly
+                              />
+                            </div>
                             <div className="view-user-fields-section">
                               <p>Role</p>
                               <input
