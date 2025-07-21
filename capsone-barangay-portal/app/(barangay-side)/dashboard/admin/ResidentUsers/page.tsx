@@ -556,7 +556,7 @@ const confirmAccept = async () => {
                                 openPopup(user);
                               }}
                             >
-                              <img src="/Images/view.png" alt="View" />
+                               <img src="/Images/edit.png" alt="Edit" />
                             </button>
                           </div>
                         </td>

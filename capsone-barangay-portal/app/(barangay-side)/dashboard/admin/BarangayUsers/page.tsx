@@ -42,7 +42,7 @@ const BarangayUsers = () => {
 
     const { data: session } = useSession();
     const userPosition = session?.user?.position;
-    const isAuthorized = ["Assistant Secretary"].includes(userPosition || "");
+    const isAuthorized = ["Secretary","Assistant Secretary"].includes(userPosition || "");
     const [barangayUsers, setBarangayUsers] = useState<dbBarangayUser[]>([]);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); 
     const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
