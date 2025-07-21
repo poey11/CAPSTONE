@@ -2842,7 +2842,7 @@ console.log("appointment map:", appointmentsMap);
 
                   {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
                     <div className="form-group-document-req">
-                      <label htmlFor="dateofdeath" className="form-label-document-req">Date Of Death<span className="required">*</span></label>
+                      <label htmlFor="dateofdeath" className="form-label-document-req">Date of Death<span className="required">*</span></label>
                       <input 
                         type="date" 
                         id="dateofdeath" 
