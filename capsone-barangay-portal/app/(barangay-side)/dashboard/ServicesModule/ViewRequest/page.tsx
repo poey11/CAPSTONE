@@ -3202,7 +3202,7 @@ Functions for Reason for Reject
                   <div className="doc-receival-content">
                     <div className="services-onlinereq-doc-receival-form-section-interview">
                       <h2>Interview Remarks</h2>
-                      <h3>Upload remarks from the interview appointment</h3>
+                      <h3>* Upload interview remarks from the appointment *</h3>
                       <textarea
                         className="interview-remarks-field-section"
                         placeholder="Enter Remarks"
@@ -3246,7 +3246,7 @@ Functions for Reason for Reject
                   <div className="services-onlinereq-doc-receival-form-section">
                     
                       <h2>Identification Photo</h2>
-                      <h3>Upload picture taken from the picture appointment</h3>
+                      <h3>* Upload photo taken from the appointment *</h3>
                       <div className="box-container-OR">
                         <div>
                           <label htmlFor="file-upload-photo" className="upload-link cursor-pointer text-blue-600 hover:underline">
