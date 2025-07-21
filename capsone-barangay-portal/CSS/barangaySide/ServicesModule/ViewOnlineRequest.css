@@ -799,7 +799,7 @@ html, body {
 
 .doc-receival-content2 {
   width: 100%;
-  height: 220px;
+  height: 270px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -881,15 +881,16 @@ html, body {
 .jobseeker-note-payment {
   color: #f44336;
  margin-bottom: 20px;
-  font-size: 15px;
+  font-size: 13px;
   text-align: center;
   width: 100%;
+  font-weight: bold;
 }
 
 .jobseeker-note-nopayment {
   color: #0c8332;
  margin-bottom: 20px;
-  font-size: 15px;
+  font-size: 13px;
   text-align: center;
   width: 100%;
   font-weight: bold;
@@ -898,6 +899,17 @@ html, body {
 .services-onlinereq-input-field {
   padding: 8px;
   width: 85%;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+}
+
+.services-onlinereq-input-field-remarks-jobseeker {
+  padding: 8px;
+  width: 85%;
+  height: 228px;
   margin-top: 10px;
   border: 1px solid rgba(36, 53, 76, 0.7);
   border-radius: 5px;
@@ -1260,7 +1272,7 @@ html, body {
 }
 
 .doc-receivalform-buttons-section{
-  margin-top: 30px;
+  margin-top: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;

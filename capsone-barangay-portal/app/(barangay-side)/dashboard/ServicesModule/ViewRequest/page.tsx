@@ -3064,7 +3064,7 @@ Functions for Reason for Reject
           <div className="view-doc-receival-form-popup-overlay">
             <div className="doc-receival-popup">
               <div className="services-onlinereq-info-toggle-wrapper">
-              {["receival", "payment"].map((section) => {
+              {["receival", "payment", "remarks"].map((section) => {
                 const excludedDocTypes = [
                   "Barangay Clearance",
                   "Barangay Certificate",
@@ -3074,6 +3074,8 @@ Functions for Reason for Reject
 
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
+                const isRemarks = section === "remarks";
+
                 const shouldHidePayment =
                 isPayment &&
                 (
@@ -3081,9 +3083,16 @@ Functions for Reason for Reject
                    requestData?.purpose !== "First Time Jobseeker") ||
                   (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false)
                 );
+
+                const shouldHideRemarks =
+                isRemarks && 
+                (
+                  (excludedDocTypes.includes(requestData?.docType || "") &&
+                    requestData?.purpose !== "First Time Jobseeker")
+                );
               
 
-                if (shouldHidePayment) return null;
+                if (shouldHidePayment || shouldHideRemarks) return null;
 
                 return (
                   <button
@@ -3092,7 +3101,8 @@ Functions for Reason for Reject
                     className={`info-toggle-btn ${popupSection === section ? "active" : ""}`}
                     onClick={() => setPopupSection(section)}
                   >
-                    {section === "receival" && "Received By Details"}
+                    {section === "receival" && "Received By"}
+                    {section === "remarks" && "Remarks"}
                     {section === "payment" && "OR Details"}
                   </button>
                 );
@@ -3137,23 +3147,32 @@ Functions for Reason for Reject
                         readOnly
                       />
                     </div>
-                  </div>
 
-                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
+                    {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
                       <p className="jobseeker-note-nopayment">
-                        * This request will not require payment as per RA 11261 (First Time Jobseeker).
+                        * This request will not require payment as per RA 11261 (First Time Jobseeker). *
                       </p>
                     )}                       
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
                     <p className="jobseeker-note-payment">
-                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
+                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker). *
                     </p>
                   )}
+                  </div>
+
+                  
+                                                 
+                </>
+               )}
+
+
+               {popupSection === "remarks" && (
+                <>
                   {requestData?.purpose === "First Time Jobseeker" && (
                     <div className="services-onlinereq-doc-receival-form-section">
                       <p>Remarks for First Time Jobseeker</p>
                       <textarea
-                        className="services-onlinereq-input-field"
+                        className="services-onlinereq-input-field-remarks-jobseeker"
                         value={receival.jobseekerRemarks || ""}
                         onChange={(e) =>
                           setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
@@ -3162,7 +3181,7 @@ Functions for Reason for Reject
                         rows={2}
                       />
                     </div>  
-                  )}                                   
+                  )}    
                 </>
                )}
 
