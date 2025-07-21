@@ -203,7 +203,7 @@ export default function GenerateDialogueLetter() {
  
     const sendSMSForDialogue = async () => {
      //dont forget to add the assing staff contact number
-       setIsLoading(true); // Start loading
+     /*  setIsLoading(true); // Start loading*/
         try{
         const response = await fetch("/api/clickSendApi", {
             method: "POST",
@@ -264,6 +264,7 @@ export default function GenerateDialogueLetter() {
         const dataC = await responseC.json();
         console.log(dataC);
     
+        {/*}
         setShowSubmitPopup({
              show: true,
              message: "SMS message for both parties sent succesfully!",
@@ -271,7 +272,7 @@ export default function GenerateDialogueLetter() {
              letterType: "dialogue",
          });
 
-            
+            */}
 
       }
       catch(err) {
@@ -283,8 +284,11 @@ export default function GenerateDialogueLetter() {
        }
       
     }
+
+
     console.log("otherInfo", otherInfo);
     console.log("filteredStaffs", filteredStaffs);
+
     const sendSMSForSummons = async () => {
         try{
           const response = await fetch("/api/clickSendApi", {
@@ -347,7 +351,7 @@ export default function GenerateDialogueLetter() {
         console.log(dataC);
         if (!responseC.ok) throw new Error("Failed to send SMS")
 
-
+    {/*}
           setShowSubmitPopup({
             show: true,
             message: "SMS message for both parties sent succesfuly!",
@@ -355,7 +359,7 @@ export default function GenerateDialogueLetter() {
             letterType: "summon",
         });
 
-        
+      */}  
         
         }
         catch(err) {
@@ -1008,7 +1012,7 @@ export default function GenerateDialogueLetter() {
                                 setShowPopup(true);
 
                                 if (showSubmitPopup.letterType === "dialogue") {
-                                sendSMSForDialogue();
+                                sendSMSForDialogue(); 
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
