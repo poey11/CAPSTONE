@@ -338,7 +338,27 @@ const rLoginForm:React.FC = () => {
 
             */}
 
-             {showPopup && (
+            {showVerifyPopup && (
+                <div className="popup-overlay-login">
+                    <div className = "popup-login modern">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>Please verify your email first.</p>
+                        <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
+            {showErrorPopup && (
+                <div className="popup-overlay-login">
+                    <div className="popup-login modern">
+                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
+                        <p>{errorMessage}</p>
+                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
+                    </div>
+                </div>
+            )}
+
+
+                         {showPopup && (
              <div className="popup-overlay-login">
                 <div className="popup-login modern">
                     <img
@@ -351,24 +371,6 @@ const rLoginForm:React.FC = () => {
                 </div>
                 </div>
 
-            )}
-            {showVerifyPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>Please verify your email first.</p>
-                        <button onClick={() => setShowVerifyPopup(false)} className="continue-button">Continue</button>
-                    </div>
-                </div>
-            )}
-            {showErrorPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>{errorMessage}</p>
-                        <button onClick={() => setShowErrorPopup(false)} className="continue-button">Continue</button>
-                    </div>
-                </div>
             )}
         </div>
 
