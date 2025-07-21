@@ -681,11 +681,9 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
 
                       </div>
 
-                      {formData?.isReportLate ? (
-                        <>
-                          {/* TOP: Incident Image only */}
-                          <div className="online-report-top">
-                            <div className="online-report-box-container">
+
+                      <div className="online-report-bottom">
+                            <div className="online-report-box-container-image">
                               <div className="box-container-outer-image">
                                 <div className="title-image">Incident Evidence</div>
                                 <div className="box-container-incidentimage-online">
@@ -711,14 +709,12 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                     <p className="no-image-text">No media available</p>
                                   )}
 
+
                                 </div>
                               </div>
                             </div>
-                          </div>
 
-                          {/* BOTTOM: Summary + Reason for Late Filing */}
-                          <div className="online-report-bottom">
-                            <div className="online-report-box-container">
+                            <div className="online-report-box-container-text">
                               <div className="box-container-outer-image">
                                 <div className="title-image">Summary of Concern</div>
                                 <div className="box-container-investigation-report">
@@ -730,8 +726,13 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
                               </div>
                             </div>
+                          </div>
 
-                            <div className="online-report-box-container">
+
+                      {formData?.isReportLate && 
+                          <>
+                           <div className="online-report-latefiling">
+                              <div className="online-report-box-container-latefiling">
                               <div className="box-container-outer-image">
                                 <div className="title-image">Reason For Late Filing/Reporting</div>
                                 <div className="box-container-investigation-report">
@@ -743,60 +744,13 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {/* TOP: wala */}
+                           </div>
+                            
+                          </>
+                         }
 
-                          {/* BOTTOM: Incident Image + Summary */}
-                          <div className="online-report-bottom">
-                            <div className="online-report-box-container">
-                              <div className="box-container-outer-image">
-                                <div className="title-image">Incident Evidence</div>
-                                <div className="box-container-incidentimage-online">
-                                  {imageUrl ? (
-                                    mediaType === "image" ? (
-                                      <a href={imageUrl} target="_blank" rel="noopener noreferrer">
-                                        <img src={imageUrl} alt="Incident Image" className="incident-img" />
-                                      </a>
-                                    ) : mediaType === "audio" ? (
-                                      <audio controls className="incident-audio">
-                                        <source src={imageUrl} />
-                                        Your browser does not support the audio element.
-                                      </audio>
-                                    ) : mediaType === "video" ? (
-                                      <video controls className="incident-video" width="100%">
-                                        <source src={imageUrl} />
-                                        Your browser does not support the video element.
-                                      </video>
-                                    ) : (
-                                      <p className="unsupported-text">Unsupported media type</p>
-                                    )
-                                  ) : (
-                                    <p className="no-image-text">No media available</p>
-                                  )}
-
-
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="online-report-box-container">
-                              <div className="box-container-outer-image">
-                                <div className="title-image">Summary of Concern</div>
-                                <div className="box-container-investigation-report">
-                                  <textarea
-                                    className="investigation-report-input-field"
-                                    value={formData.addInfo}
-                                    disabled
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
+                        
+                      
 
                     </>
                     )}
