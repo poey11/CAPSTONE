@@ -241,6 +241,12 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 statusPriority: 2,
               });
 
+              // try added for redirection to main page archive in dialogue
+              setTimeout(() => {
+                setShowPopup(false);
+                router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+              }, 3000);
+
             } else {
               setShowDoneIncidentPopup(true);
             }
