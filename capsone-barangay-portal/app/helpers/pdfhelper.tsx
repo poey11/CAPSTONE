@@ -314,6 +314,15 @@ const handlePrint = async(requestData:any, id:any) => {
     }
 
     if(requestData?.purpose === "First Time Jobseeker"){
+        const yearOfResidency = parseInt(requestData?.dateOfResidency.split("-")[0]);
+        const yearOfRequest = parseInt(requestData?.createdAt.split("/")[2]);
+        let yearNos = 0;
+        if(yearOfRequest === yearOfResidency){
+            yearNos = 1;
+        }
+        else{
+            yearNos = yearOfRequest - yearOfResidency;
+        }
         locationPath = "FIRST TIME JOB SEEKERS.pdf";
         reqData = {
             "Text1": `${(requestData?.requestorFname || requestData?.requestor || "")
@@ -325,6 +334,7 @@ const handlePrint = async(requestData:any, id:any) => {
             "Text4": `${monthToday} ${yearToday}`,
             "Text5": `${monthToday} ${dateToday.split("-")[2]}, ${nextYear}`,
             "Text6": `${monthToday} ${dateToday.split("-")[2]}, ${yearToday}`,
+            "Text7":yearNos.toString(),
         }
 
         let locationPath2 = "OATH OF UNDERTAKING.pdf";
@@ -334,9 +344,9 @@ const handlePrint = async(requestData:any, id:any) => {
                 .replace(/^Ms\.?\s*/i, "")
                 .toUpperCase()}`,
             "Text2": parseInt(requestData?.age).toString(),
-            "Text3": `${requestData?.requestorFname.toUpperCase()}`,
-            "Text4": `${monthToday} ${dateToday.split("-")[2]}, ${yearToday}`,
-
+            "Text3": yearNos.toString(),
+            "Text4": `${requestData?.requestorFname.toUpperCase()}`,
+            "Text5": `${monthToday} ${dateToday.split("-")[2]}, ${yearToday}`,
         };
         const responseB = await fetch("/api/fillPDF", {
             method: "POST",

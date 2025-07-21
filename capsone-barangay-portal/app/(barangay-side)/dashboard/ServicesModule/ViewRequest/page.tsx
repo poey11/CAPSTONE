@@ -2519,7 +2519,7 @@ Functions for Reason for Reject
                             ):(
                               <>
                                 {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) 
-                                &&(requestData?.photoUploaded)&&(
+                                &&(requestData?.photoUploaded || requestData?.interviewRemarks )&&(
                                   <>
                                     <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
@@ -2529,7 +2529,7 @@ Functions for Reason for Reject
                                     </button>
                                   </>
                                 )}
-                                {!requestData?.appointmentDate && (requestData?.docType !== "Barangay Indigency" || requestData?.purpose!=="Residency") && (
+                                {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
                                   <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
