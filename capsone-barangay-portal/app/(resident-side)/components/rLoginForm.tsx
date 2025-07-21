@@ -182,7 +182,7 @@ const rLoginForm:React.FC = () => {
               setTimeout(() => {
                 setShowPopup(false);
                 router.push("/");
-              }, 2000);
+              }, 3000);
             } catch (error: string | any) {
               const result = await signIn("credentials", {
                 userid: resident.email,
@@ -339,14 +339,18 @@ const rLoginForm:React.FC = () => {
             */}
 
              {showPopup && (
-                <div className="popup-overlay-login">
-                    <div className="popup-login">
-                    <img src="/Images/successful.png" alt="warning icon" className="successful-icon-popup" />
-                        <h1>Welcome, {firstName} {lastName}!</h1>
-                        <br/>
-                        <p>Redirecting to the Home Page...</p>
-                    </div>
+             <div className="popup-overlay-login">
+                <div className="popup-login modern">
+                    <img
+                    src="/Images/successful.png"
+                    alt="Success icon"
+                    className="successful-icon-popup"
+                    />
+                    <h1>Welcome, {firstName} {lastName}!</h1>
+                    <p>Redirecting to the Home Page...</p>
                 </div>
+                </div>
+
             )}
             {showVerifyPopup && (
                 <div className="popup-overlay-login">
