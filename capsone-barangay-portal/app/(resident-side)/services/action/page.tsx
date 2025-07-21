@@ -572,9 +572,7 @@ useEffect(() => {
     snapshot.forEach((doc) => {
       const data = doc.data();
       const time = toPHISOString(new Date(data.appointmentDate));
-      if (data.docType === clearanceInput.docType && data.purpose === clearanceInput.purpose) {
         map[time] = (map[time] || 0) + 1;
-      }
     });
 
     setAppointmentsMap(map);
@@ -589,15 +587,17 @@ function toPHISOString(date: Date): string {
   const utc = date.getTime() + (8 * 60 * 60 * 1000);
   const phDate = new Date(utc);
 
+  // Zero out seconds and milliseconds
+  phDate.setUTCSeconds(0, 0);
+
   // Format manually: yyyy-MM-ddTHH:mm:ss+08:00
   const yyyy = phDate.getUTCFullYear();
   const mm = String(phDate.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(phDate.getUTCDate()).padStart(2, '0');
   const hh = String(phDate.getUTCHours()).padStart(2, '0');
   const min = String(phDate.getUTCMinutes()).padStart(2, '0');
-  const ss = String(phDate.getUTCSeconds()).padStart(2, '0');
 
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}+08:00`;
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}:00+08:00`;
 }
 
 
@@ -1021,29 +1021,35 @@ const handleFileChange = (
 };
 
 console.log("appointment map:", appointmentsMap);
+console.log("userAppointmentsMap:", userAppointmentsMap);
 
-  
-    // Handle form submission
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-      const selectedDate = new Date(clearanceInput.appointmentDate).toDateString();
-      const selectedPurpose = clearanceInput.purpose?.trim().toLowerCase();
-
-      const existingAppointments = userAppointmentsMap[clearanceInput.docType] || [];
-
-      const isSameDayAndPurpose = existingAppointments.some((appt: any) => {
-        const apptDate = new Date(appt.appointmentDate).toDateString();
-        const apptPurpose = appt.purpose?.trim().toLowerCase();
+      const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
       
-        return apptDate === selectedDate && apptPurpose === selectedPurpose;
+      // check if the user has an existing appointment for this docType and purpose on the selected date
+      const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
+      const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
+        const appDateOnly = new Date(app.appointmentDate).toDateString();
+        console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
+        return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
       });
 
-      if (isSameDayAndPurpose) {
-        setErrorMessage("You already have an appointment for this document type, purpose, and date.");
+      if (userAppointment) {
+        setErrorMessage("You already have an appointment for this document type on the selected date.");
         setShowErrorPopup(true);
         return;
       }
 
+      // Check if the selected date is already booked for this user in any doctype and purpose
+      const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
+      const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
+      
+      if(appointments ){
+        setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
+        setShowErrorPopup(true);
+        return
+      }                  
 
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
