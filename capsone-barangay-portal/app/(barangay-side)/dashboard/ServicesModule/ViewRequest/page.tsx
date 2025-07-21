@@ -3434,7 +3434,7 @@ Functions for Reason for Reject
                 alt="success icon"
                 className="successful-icon-popup"
               />
-              <p>Requestor has been notified that the document is for Pick-up.</p>
+              <p>Requestor notified via SMS for Pick-up.</p>
               <h2>Next: Click the "Document Received" button once the requestor has pick-up the document.</h2>
               <div className="yesno-container-add">
                 <button
