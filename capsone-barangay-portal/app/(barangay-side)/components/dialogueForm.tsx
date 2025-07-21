@@ -270,7 +270,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
             // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+          //   router.push(`/dashboard/IncidentModule/Department?id=${department}`);
           }, 3000);
 
 
