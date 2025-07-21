@@ -1892,44 +1892,6 @@ console.log("appointment map:", appointmentsMap);
                         </select>
                       </div>
 
-                      <div className="form-group-document-req">
-                        <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
-                        <select
-                          id="CYTo"
-                          name="CYTo"
-                          value={clearanceInput.CYTo}
-                          onChange={handleChange}
-                          className="form-input-document-req"
-                          required
-                        >
-                         <option value="" disabled>Select Year</option>
-                                  {(() => {
-                                    const currentYear = new Date().getFullYear();
-                                    const cyFrom = parseInt(clearanceInput.CYFrom || "");
-
-                                    if (cyFrom === currentYear) {
-                                      // Only show current year
-                                      return (
-                                        <option key={currentYear} value={currentYear}>
-                                          {currentYear}
-                                        </option>
-                                      );
-                                    }
-
-                                    // Default behavior if Year From is not current year
-                                    return [...Array(100)].map((_, i) => {
-                                      const year = currentYear - i;
-                                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
-                                      return (
-                                        <option key={year} value={year} disabled={isDisabled}>
-                                          {year}
-                                        </option>
-                                      );
-                                    });
-                                  })()}
-                        </select>
-                      </div>
-
                     </>
                   )}
 
@@ -2880,7 +2842,7 @@ console.log("appointment map:", appointmentsMap);
 
                   {(clearanceInput.purpose === "Death Residency"|| clearanceInput.purpose === "Estate Tax") && (
                     <div className="form-group-document-req">
-                      <label htmlFor="dateofdeath" className="form-label-document-req">Date Of Death<span className="required">*</span></label>
+                      <label htmlFor="dateofdeath" className="form-label-document-req">Date of Death<span className="required">*</span></label>
                       <input 
                         type="date" 
                         id="dateofdeath" 
@@ -2894,6 +2856,49 @@ console.log("appointment map:", appointmentsMap);
                         max={getLocalDateString(new Date())} // Set max date to today
                       />
                     </div>
+                  )}
+
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                    <>
+                      <div className="form-group-document-req">
+                        <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
+                        <select
+                          id="CYTo"
+                          name="CYTo"
+                          value={clearanceInput.CYTo}
+                          onChange={handleChange}
+                          className="form-input-document-req"
+                          required
+                        >
+                         <option value="" disabled>Select Year</option>
+                                  {(() => {
+                                    const currentYear = new Date().getFullYear();
+                                    const cyFrom = parseInt(clearanceInput.CYFrom || "");
+
+                                    if (cyFrom === currentYear) {
+                                      // Only show current year
+                                      return (
+                                        <option key={currentYear} value={currentYear}>
+                                          {currentYear}
+                                        </option>
+                                      );
+                                    }
+
+                                    // Default behavior if Year From is not current year
+                                    return [...Array(100)].map((_, i) => {
+                                      const year = currentYear - i;
+                                      const isDisabled = !isNaN(cyFrom) && year <= cyFrom;
+                                      return (
+                                        <option key={year} value={year} disabled={isDisabled}>
+                                          {year}
+                                        </option>
+                                      );
+                                    });
+                                  })()}
+                        </select>
+                      </div>
+
+                    </>
                   )}
 
                   {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Clearance") && (
@@ -3006,7 +3011,7 @@ console.log("appointment map:", appointmentsMap);
                   {clearanceInput.purpose === "Garage/PUV" && (
                     <>
                       <div className="form-group-document-req">
-                        <label htmlFor="noOfVechicles" className="form-label-document-req">Nos Of Vehicle/s<span className="required">*</span></label>
+                        <label htmlFor="noOfVechicles" className="form-label-document-req">No. of Vehicle/s<span className="required">*</span></label>
                         <input 
                           type="number"  
                           id="noOfVehicles"  

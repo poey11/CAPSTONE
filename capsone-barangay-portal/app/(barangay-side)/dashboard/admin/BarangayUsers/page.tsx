@@ -954,7 +954,13 @@ useEffect(() => {
                                         <div className="view-main-user-content-right-side">
                                             <div className="view-user-fields-section">
                                                 <p>Updated By</p>
-                                                <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.updatedBy} readOnly/>
+                                                <input
+                                                    type="text"
+                                                    className="view-user-input-field"
+                                                    name="residentNumber"
+                                                    value={viewUser?.updatedBy || "N/A"}
+                                                    readOnly
+                                                    />
                                             </div>
                                         </div>
                                     </>
