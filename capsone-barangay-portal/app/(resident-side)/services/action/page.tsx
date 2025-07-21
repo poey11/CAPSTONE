@@ -817,14 +817,25 @@ const handleFileChange = (
     const useDocTypeAsMessage = 
       clearanceInput.docType === "Business Permit" || 
       clearanceInput.docType === "Temporary Business Permit";
-    
+
+      const rawDate = new Date(clearanceInput.appointmentDate);
+      const formattedAppointmentDate = rawDate.toLocaleString("en-US", {
+        month: "numeric",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+      
     // Determine message
     let notificationMessage = "";
     
     if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
-      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
     } else if (clearanceInput.docType === "Barangay Indigency") {
-      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
+      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
     } else {
       notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
     }

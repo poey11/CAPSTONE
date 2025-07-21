@@ -2212,10 +2212,27 @@ Functions for Reason for Reject
       };
       await updateDoc(docRef, updatedData);
 
+
+      let formattedAppointmentDate = "";
+
+      if (requestData?.appointmentDate) {
+        const rawDate = new Date(requestData.appointmentDate);
+        formattedAppointmentDate = rawDate.toLocaleString("en-US", {
+          month: "numeric",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+      }
+      
+
       await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
         requestID: id,
-        message: `Your proposed appointment for (${requestData?.requestId}) has been approved. Please arrive to the barangay hall on time.`,
+        message: `Your proposed appointment for (${requestData?.requestId}) on ${formattedAppointmentDate} has been approved. Please arrive to the barangay hall on time.`,
         timestamp: new Date(),
         transactionType: "Online Service Request",
         isRead: false,
