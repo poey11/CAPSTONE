@@ -1345,3 +1345,91 @@ color: #FFFFFF;
 
 
 
+
+
+
+
+
+
+.resident-module-main-section-kasambahay {
+  flex: 1; /* Makes it take up remaining space */
+    display: flex; /* Ensures proper alignment */
+    flex-direction: column;
+    padding: 0;
+    margin: 0; /* Remove default margin */
+    overflow: auto; /* Allow scrolling if content overflows */
+    width: 100%;
+    
+
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-radius: 6px;
+    scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+    margin-top: 1.5rem; /* edited this line */
+    height: 82%; /* edited this line */
+    max-height: 82%;
+}
+
+
+
+.resident-module-main-section-kasambahay  table {
+    width: 100%; /* Ensures the table spans the full width */
+    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+.resident-module-main-section-kasambahay  tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  transition: background-color 0.2s ease;
+}
+
+/* NEW UPDATED */
+.resident-module-main-section-kasambahay  td {
+  padding: 1rem; 
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+  color: rgb(44, 42, 42);
+  font-weight: normal;
+  
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.resident-module-main-section-kasambahay  th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+    
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.resident-module-main-section-kasambahay  thead {
+  position: sticky;
+  top: 0;
+  background-color: #214666;
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  
+  height: 50px; /* edited this line */
+}
+
+/* NEW UPDATED ADDED THIS */
+.resident-module-main-section-kasambahay  tbody tr {
+  height: 50px; 
+}
+
+
+
+.resident-module-main-section tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.resident-module-main-section tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
