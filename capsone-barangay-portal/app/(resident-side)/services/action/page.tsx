@@ -832,16 +832,17 @@ const handleFileChange = (
     // Determine message
     let notificationMessage = "";
     
-    if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
-      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
-    } else if (clearanceInput.docType === "Barangay Indigency") {
-      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
-    } else {
-      notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
-    }
+
     
     await addDoc(notificationRef, {
-      message: notificationMessage,
+          message: 
+            clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+              ? `New Certificate of Residency requested by ${clearanceInput.requestorFname}.`
+              : clearanceInput.docType === "Barangay Indigency"
+                ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`
+                : clearanceInput.docType === "Construction"
+                  ? `New Construction Permit requested by ${clearanceInput.requestorFname}.`
+                  : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname}.`,
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,
