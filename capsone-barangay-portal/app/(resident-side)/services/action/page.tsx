@@ -813,7 +813,7 @@ const handleFileChange = (
     console.log("Request data to upload:", updates);
     
     const notificationRef = collection(db, "BarangayNotifications");
-
+    
     const useDocTypeAsMessage = 
       clearanceInput.docType === "Business Permit" || 
       clearanceInput.docType === "Temporary Business Permit";
@@ -829,19 +829,18 @@ const handleFileChange = (
         hour12: true,
       });
       
-    // Determine message
-    let notificationMessage = "";
-    
-    if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
-      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
-    } else if (clearanceInput.docType === "Barangay Indigency") {
-      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`;
-    } else {
-      notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
-    }
-    
     await addDoc(notificationRef, {
-      message: notificationMessage,
+    message: 
+      clearanceInput.purpose === "First Time Jobseeker"
+        ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
+        : clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+          ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+          : clearanceInput.docType === "Barangay Indigency"
+            ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+            : clearanceInput.docType === "Construction"
+              ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
+              : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
+
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,

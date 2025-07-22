@@ -1821,11 +1821,10 @@ Functions for Reason for Reject
               const data = match.data();
 
               if (!data.firstTimeClaimed) {
-                await updateDoc(match.ref, { firstTimeClaimed: true });
-              }
-
-              if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
-                await updateDoc(match.ref, { remarks: receival.jobseekerRemarks.trim() });
+                await updateDoc(match.ref, { 
+                  firstTimeClaimed: true,
+                  remarks: receival.jobseekerRemarks.trim
+                });
               }
             }
           }
@@ -1990,15 +1989,6 @@ Functions for Reason for Reject
               requestID: id,
             });
 
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData!.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Secretary",
-              requestID: id,
-            });
           } else if (secOnlyPurposes.includes(purpose || "")) {
             // Secretary only
             await addDoc(notificationRef, {
@@ -2084,8 +2074,12 @@ Functions for Reason for Reject
         }
         else if (docType === "Other Documents") {
           // Fallback for any other "Other Documents" purposes
+          const isFirstTimeJobseeker = purpose === "First Time Jobseeker";
+
           await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            message: isFirstTimeJobseeker
+              ? "A Jobseeker Certificate requires your signature.${messageSuffix}"
+              : `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
             timestamp: new Date(),
             requestorId: requestData!.accID,
             isRead: false,
@@ -2287,8 +2281,12 @@ Functions for Reason for Reject
       const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
+      const isJobseeker = requestData?.purpose === "First Time Jobseeker";
+
       await addDoc(notificationRef, {
-        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
+        message: isJobseeker
+          ? "You have been assigned a new task for a Jobseeker Certificate requested by ${requestData?.requestorFname}.${messageSuffix}"
+          : `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
@@ -2349,7 +2347,7 @@ Functions for Reason for Reject
       const messageSuffix = isOnline ? " (Online)" : "";
       
       await addDoc(notificationRef, {
-        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}`,
+        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}. Request ID: ${requestData?.requestId}`,
         timestamp: new Date(),
         requestorId: requestData?.accID || "",
         isRead: false,
@@ -2515,7 +2513,7 @@ Functions for Reason for Reject
                                 </button>
                               </>
                             )}
-                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" || requestData?.docType !== "Barangay Indigency") && (
+                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") && (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
@@ -3064,7 +3062,7 @@ Functions for Reason for Reject
           <div className="view-doc-receival-form-popup-overlay">
             <div className="doc-receival-popup">
               <div className="services-onlinereq-info-toggle-wrapper">
-              {["receival", "payment"].map((section) => {
+              {["receival", "payment", "remarks"].map((section) => {
                 const excludedDocTypes = [
                   "Barangay Clearance",
                   "Barangay Certificate",
@@ -3074,6 +3072,8 @@ Functions for Reason for Reject
 
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
+                const isRemarks = section === "remarks";
+
                 const shouldHidePayment =
                 isPayment &&
                 (
@@ -3081,9 +3081,17 @@ Functions for Reason for Reject
                    requestData?.purpose !== "First Time Jobseeker") ||
                   (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false)
                 );
-              
 
-                if (shouldHidePayment) return null;
+                const shouldHideRemarks =
+                  isRemarks &&
+                  (
+                    (excludedDocTypes.includes(requestData?.docType || "") &&
+                      requestData?.purpose !== "First Time Jobseeker") ||
+                    (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true)
+                  );
+                              
+
+                if (shouldHidePayment || shouldHideRemarks) return null;
 
                 return (
                   <button
@@ -3092,7 +3100,8 @@ Functions for Reason for Reject
                     className={`info-toggle-btn ${popupSection === section ? "active" : ""}`}
                     onClick={() => setPopupSection(section)}
                   >
-                    {section === "receival" && "Received By Details"}
+                    {section === "receival" && "Received By"}
+                    {section === "remarks" && "Remarks"}
                     {section === "payment" && "OR Details"}
                   </button>
                 );
@@ -3137,34 +3146,42 @@ Functions for Reason for Reject
                         readOnly
                       />
                     </div>
-                  </div>
 
-                  {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
+                    {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === false && (
                       <p className="jobseeker-note-nopayment">
-                        * This request will not require payment as per RA 11261 (First Time Jobseeker).
+                        * This request will not require payment as per RA 11261 (First Time Jobseeker). *
                       </p>
                     )}                       
                   {requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true && (
                     <p className="jobseeker-note-payment">
-                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker).
+                      * This request will require payment as they have already claimed their RA 11261 (First Time Jobseeker). *
                     </p>
                   )}
-                  {requestData?.purpose === "First Time Jobseeker" && (
-                    <div className="services-onlinereq-doc-receival-form-section">
-                      <p>Remarks for First Time Jobseeker</p>
-                      <textarea
-                        className="services-onlinereq-input-field"
-                        value={receival.jobseekerRemarks || ""}
-                        onChange={(e) =>
-                          setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
-                        }
-                        placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
-                        rows={2}
-                      />
-                    </div>  
-                  )}                                   
+                  </div>
+
+                  
+                                                 
                 </>
                )}
+
+
+              {popupSection === "remarks" &&
+                requestData?.purpose === "First Time Jobseeker" &&
+                firstTimeClaimed === false && (
+                  <div className="services-onlinereq-doc-receival-form-section">
+                    <p>Remarks for First Time Jobseeker</p>
+                    <textarea
+                      className="services-onlinereq-input-field-remarks-jobseeker"
+                      value={receival.jobseekerRemarks || ""}
+                      onChange={(e) =>
+                        setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
+                      }
+                      placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
+                      rows={2}
+                    />
+                  </div>
+              )}
+
 
                 {popupSection === "payment" && (
                   <>
