@@ -410,7 +410,7 @@ const handlePrint = async(requestData:any, id:any) => {
         }
     }
 
-    if(requestData?.docType === "Construction"){
+    if(requestData?.purpose === "Construction"){
         locationPath = "CONSTRUCTION PERMIT.pdf";
         reqData = {
             "Text1": `${(requestData?.requestorFname || requestData?.requestor || "")
