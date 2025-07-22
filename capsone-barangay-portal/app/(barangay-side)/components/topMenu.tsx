@@ -228,8 +228,7 @@ export default function TopMenu() {
       router.push(`/dashboard/admin/viewResidentUser?id=${accID}`);
     } else if (
       ["Online Service Request", "Online Assigned Service Request", "Service Request", "Assigned Service Request"].includes(transactionType)
-    ) {
-      try {
+    ) try {
         const requestRef = doc(db, "ServiceRequests", requestID);
         const requestSnap = await getDoc(requestRef);
 
@@ -238,7 +237,16 @@ export default function TopMenu() {
           const hasAppointment = Boolean(requestData.appointmentDate);
           const isApproved = requestData.approvedBySAS === true;
 
-          if (hasAppointment && isApproved) {
+          const isCertificateWithMissingPhoto =
+            requestData.docType === "Barangay Certificate" &&
+            requestData.purpose === "Residency" &&
+            (!requestData.photoUploaded || requestData.photoUploaded.trim() === "");
+
+          const isIndigencyWithMissingRemarks =
+            requestData.docType === "Barangay Indigency" &&
+            (!requestData.interviewRemarks || requestData.interviewRemarks.trim() === "");
+
+          if (hasAppointment && isApproved && (isCertificateWithMissingPhoto || isIndigencyWithMissingRemarks)) {
             router.push(`/dashboard/ServicesModule/Appointments`);
           } else {
             router.push(`/dashboard/ServicesModule/ViewRequest?id=${requestID}`);
@@ -249,7 +257,6 @@ export default function TopMenu() {
       } catch (err) {
         console.error("Error fetching service request for redirection:", err);
       }
-    }
 
   };
   
