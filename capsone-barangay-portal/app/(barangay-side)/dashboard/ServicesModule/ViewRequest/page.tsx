@@ -1821,11 +1821,10 @@ Functions for Reason for Reject
               const data = match.data();
 
               if (!data.firstTimeClaimed) {
-                await updateDoc(match.ref, { firstTimeClaimed: true });
-              }
-
-              if (receival.jobseekerRemarks && receival.jobseekerRemarks.trim() !== "") {
-                await updateDoc(match.ref, { remarks: receival.jobseekerRemarks.trim() });
+                await updateDoc(match.ref, { 
+                  firstTimeClaimed: true,
+                  remarks: receival.jobseekerRemarks.trim
+                });
               }
             }
           }
@@ -1990,15 +1989,6 @@ Functions for Reason for Reject
               requestID: id,
             });
 
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData!.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Secretary",
-              requestID: id,
-            });
           } else if (secOnlyPurposes.includes(purpose || "")) {
             // Secretary only
             await addDoc(notificationRef, {
@@ -2084,8 +2074,12 @@ Functions for Reason for Reject
         }
         else if (docType === "Other Documents") {
           // Fallback for any other "Other Documents" purposes
+          const isFirstTimeJobseeker = purpose === "First Time Jobseeker";
+
           await addDoc(notificationRef, {
-            message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
+            message: isFirstTimeJobseeker
+              ? "A Jobseeker Certificate requires your signature.${messageSuffix}"
+              : `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
             timestamp: new Date(),
             requestorId: requestData!.accID,
             isRead: false,
@@ -2287,8 +2281,12 @@ Functions for Reason for Reject
       const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
+      const isJobseeker = requestData?.purpose === "First Time Jobseeker";
+
       await addDoc(notificationRef, {
-        message: `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
+        message: isJobseeker
+          ? "You have been assigned a new task for a Jobseeker Certificate requested by ${requestData?.requestorFname}.${messageSuffix}"
+          : `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
@@ -2349,7 +2347,7 @@ Functions for Reason for Reject
       const messageSuffix = isOnline ? " (Online)" : "";
       
       await addDoc(notificationRef, {
-        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}`,
+        message: `A picture has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}. Request ID: ${requestData?.requestId}`,
         timestamp: new Date(),
         requestorId: requestData?.accID || "",
         isRead: false,
@@ -3085,12 +3083,13 @@ Functions for Reason for Reject
                 );
 
                 const shouldHideRemarks =
-                isRemarks && 
-                (
-                  (excludedDocTypes.includes(requestData?.docType || "") &&
-                    requestData?.purpose !== "First Time Jobseeker")
-                );
-              
+                  isRemarks &&
+                  (
+                    (excludedDocTypes.includes(requestData?.docType || "") &&
+                      requestData?.purpose !== "First Time Jobseeker") ||
+                    (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true)
+                  );
+                              
 
                 if (shouldHidePayment || shouldHideRemarks) return null;
 
@@ -3166,24 +3165,23 @@ Functions for Reason for Reject
                )}
 
 
-               {popupSection === "remarks" && (
-                <>
-                  {requestData?.purpose === "First Time Jobseeker" && (
-                    <div className="services-onlinereq-doc-receival-form-section">
-                      <p>Remarks for First Time Jobseeker</p>
-                      <textarea
-                        className="services-onlinereq-input-field-remarks-jobseeker"
-                        value={receival.jobseekerRemarks || ""}
-                        onChange={(e) =>
-                          setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
-                        }
-                        placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
-                        rows={2}
-                      />
-                    </div>  
-                  )}    
-                </>
-               )}
+              {popupSection === "remarks" &&
+                requestData?.purpose === "First Time Jobseeker" &&
+                firstTimeClaimed === false && (
+                  <div className="services-onlinereq-doc-receival-form-section">
+                    <p>Remarks for First Time Jobseeker</p>
+                    <textarea
+                      className="services-onlinereq-input-field-remarks-jobseeker"
+                      value={receival.jobseekerRemarks || ""}
+                      onChange={(e) =>
+                        setReceival((prev) => ({ ...prev, jobseekerRemarks: e.target.value }))
+                      }
+                      placeholder="Optional remarks related to RA 11261. Leave empty if not applicable."
+                      rows={2}
+                    />
+                  </div>
+              )}
+
 
                 {popupSection === "payment" && (
                   <>
