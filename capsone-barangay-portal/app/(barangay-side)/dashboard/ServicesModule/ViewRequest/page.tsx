@@ -2147,20 +2147,21 @@ Functions for Reason for Reject
         const isOnline = requestData?.accID !== "INBRGY-REQ";
         const messageSuffix = isOnline ? " (Online)" : "";
         
-        await addDoc(notificationRef, {
-          message: 
-            requestData.purpose === "First Time Jobseeker"
-              ? "You have been assigned a new task for a Jobseeker Certificate requested by ${requestData.requestorFname}.${messageSuffix}"
-              : requestData.docType === "Construction"
-                ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
-                : `You have been assigned a new task for ${requestData.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
-          timestamp: new Date(),
-          requestorId: requestData?.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Admin Staff",
-          requestID: id,
-        });
+      await addDoc(notificationRef, {
+        message: 
+          requestData.purpose === "First Time Jobseeker"
+            ? `You have been assigned a new task for a Jobseeker Certificate requested by ${requestData.requestorFname}.${messageSuffix}`
+            : requestData.docType === "Construction"
+              ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
+              : `You have been assigned a new task for ${requestData.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData?.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Assistant Secretary",
+        requestID: id,
+      });
+
 
 
 
