@@ -736,10 +736,9 @@ input[type="checkbox"] {
   height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: flex-end; 
+  justify-content: center; 
   z-index: 9999;
   background: rgba(0, 0, 0, 0.4);
-  padding-right: 200px; 
 }
 
 .kasambahay-employer-popup {
