@@ -942,8 +942,10 @@ html, body {
 .kasambahay-employer-popup h2 {
   margin-top: 1rem;
   font-size: 1.80rem;
+  font-weight: bolder;
   text-align: center;
   font-weight: bold;
+  color: #214666;
 }
 
 .kasambahay-employer-popup h1 {
