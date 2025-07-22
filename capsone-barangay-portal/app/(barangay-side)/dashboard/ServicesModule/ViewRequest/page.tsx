@@ -2078,7 +2078,7 @@ Functions for Reason for Reject
 
           await addDoc(notificationRef, {
             message: isFirstTimeJobseeker
-              ? "A Jobseeker Certificate requires your signature.${messageSuffix}"
+              ? `A Jobseeker Certificate requires your signature.${messageSuffix}`
               : `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
             timestamp: new Date(),
             requestorId: requestData!.accID,
