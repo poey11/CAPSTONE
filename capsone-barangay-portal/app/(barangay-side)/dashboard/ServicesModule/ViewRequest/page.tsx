@@ -2149,10 +2149,11 @@ Functions for Reason for Reject
         
         await addDoc(notificationRef, {
           message: 
-            requestData.docType === "Construction"
-              ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
-              : `You have been assigned a new task for ${requestData?.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
-          
+            requestData.purpose === "First Time Jobseeker"
+              ? "A Jobseeker Certificate request requires your attention."
+              : requestData.docType === "Construction"
+                ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
+                : `You have been assigned a new task for ${requestData.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
@@ -2281,12 +2282,9 @@ Functions for Reason for Reject
       const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
-      const isJobseeker = requestData?.purpose === "First Time Jobseeker";
 
       await addDoc(notificationRef, {
-        message: isJobseeker
-          ? "You have been assigned a new task for a Jobseeker Certificate requested by ${requestData?.requestorFname}.${messageSuffix}"
-          : `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
+        message: `Interview remarks has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}. Request ID: ${requestData?.requestId}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
