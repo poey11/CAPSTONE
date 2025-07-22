@@ -15,7 +15,11 @@ export default function GenerateDocument() {
 
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
-        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
+        if(action === "Construction"){
+            
+            router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=Barangay Permits&purpose=${action}`);
+        } 
+        else router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
     }
 
     const handleSubmitOther = (e: any) => {
@@ -27,12 +31,7 @@ export default function GenerateDocument() {
     const handleAddNewDocument = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/addNewDoc");
     }
-    const handleOtherNewDocument = () => {
-        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument");
-    }
-      const handleEditNewDocument = () => {
-        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/EditDoc");
-    }
+    
 
     const handleBack = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests");
@@ -159,7 +158,7 @@ export default function GenerateDocument() {
                                     <div className="generate-documents-dropdown">
                                         <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
                                         <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
-                                        <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
+                                        <p className="dropdown-item" onClick={handleSubmit} id="Construction">Construction Permit</p>
                                         
                                         {/* Add dynamic permit titles */}
                                         

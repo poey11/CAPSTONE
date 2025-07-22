@@ -1679,7 +1679,7 @@ const handleChange = (
                           />
                         </div>
 
-                        {docType !== "Construction" && !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
+                        { !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
                         <>
                         <div className="fields-section">
                           <h1>Purpose<span className="required">*</span></h1>

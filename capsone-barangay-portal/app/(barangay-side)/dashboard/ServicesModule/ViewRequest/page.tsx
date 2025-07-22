@@ -2498,7 +2498,8 @@ Functions for Reason for Reject
                                 </button>
                               </>
                             )}
-                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" || requestData?.docType !== "Barangay Indigency") && (
+                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") || 
+                            (requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") ? (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
@@ -2507,7 +2508,20 @@ Functions for Reason for Reject
                                   <h1>Reject Request</h1>
                                 </button>
                               </>
-                            )}
+                            ): !requestData?.appointmentDate && (
+                              <>
+                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                  <div className="services-onlinereq-redirection-icons-section">
+                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                  </div>
+                                  <h1>Reject Request</h1>
+                                </button>
+                              </>
+                            )
+                             
+                            }
+
+
                         
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
                               <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
@@ -2531,6 +2545,14 @@ Functions for Reason for Reject
                                 )}
                                 {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
                                   <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <div className="services-onlinereq-redirection-icons-section">
+                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    </div>
+                                      <h1>Generate Document</h1>
+                                  </button>
+                                )}
+                                {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
+                                    <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
