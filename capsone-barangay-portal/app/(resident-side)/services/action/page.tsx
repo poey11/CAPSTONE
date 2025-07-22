@@ -1255,7 +1255,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
         vehicleType: clearanceInput.vehicleType,
         vehicleMake: clearanceInput.vehicleMake,
         noOfVehicles: clearanceInput.noOfVehicles,
-        puvPurpose: clearanceInput.goodMoralOtherPurpose,
+        goodMoralOtherPurpose: clearanceInput.goodMoralOtherPurpose,
         }),
         birthday: clearanceInput.birthday,
         age: clearanceInput.age,
