@@ -741,14 +741,29 @@ const handleFileChange = (
 
 
   // Handle file deletion for any container
-  const handleFileDelete = (fileName: string, setFile: React.Dispatch<React.SetStateAction<{ name: string, preview: string | undefined }[]>>) => {
-    setFile([]); // Reset the file list state
-  
-    const fileInput = document.getElementById(fileName) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = ""; // Clear the file input field
-    }
-  };
+  const handleFileDelete = (
+  fieldName: string, // this should be "signaturejpg"
+  inputId: string,   // this should be "file-upload1"
+  setFile: React.Dispatch<React.SetStateAction<{ name: string, preview: string | undefined }[]>>,
+  setClearanceInput: React.Dispatch<React.SetStateAction<any>>
+) => {
+  // Clear preview files
+  setFile([]);
+
+  // Clear file from clearanceInput state
+  setClearanceInput((prev: any) => {
+    const updated = { ...prev };
+    delete updated[fieldName];
+    return updated;
+  });
+
+  // Clear actual <input type="file"> field
+  const fileInput = document.getElementById(inputId) as HTMLInputElement;
+  if (fileInput) {
+    fileInput.value = "";
+  }
+};
+
   
  const handleReportUpload = async (key: any, storageRefs: Record<string, any>) => {
   try {
@@ -1030,8 +1045,7 @@ const handleFileChange = (
   return requiredFields;
 };
 
-console.log("appointment map:", appointmentsMap);
-console.log("userAppointmentsMap:", userAppointmentsMap);
+
 
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
@@ -1152,6 +1166,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
       };
 
 
+      requiredImageFields.push(...dynamicImageFields); // Ensure signature is always required
 
       // Step 2: Check other required image fields
       for (const imgField of requiredImageFields) {
@@ -1164,13 +1179,16 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
               imgField === "validIDjpg" ||
               imgField === "letterjpg"))
         ) {
-          const label =
+            const label =
             imageFieldLabels[imgField] ||
             imgField
-              .replace(/([A-Z])/g, " $1")
-              .replace(/jpg$/, "")
+              .replace(/_/g, " ") // Replace underscores with spaces
+              .replace(/(?!^)([A-Z])/g, " $1")
+              .replace(/\.[^/.]+$/, "")
               .toLowerCase()
-              .replace(/\b\w/g, (c) => c.toUpperCase());
+              .replace(/\b\w/g, (c) => c.toUpperCase())
+              .replace(/\b(Id|ID|id)\b/g, "ID")
+              .replace(/\b(Ph|PH|ph)\b/g, "PH");
         
           setErrorMessage(`Please upload the required image: ${label}.`);
           setShowErrorPopup(true);
@@ -1621,13 +1639,14 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
       ...purposeFields,
       ...(clearanceInput.docType && matchedPermitFields)
     ])].filter((fieldName) => !excludedDynamicFields.includes(fieldName));
-
+    console.log("Filtered Dynamic Fields:", filteredDynamicFields);
     const matchedImageFieldsRaw = [
       ...(otherDocImageFields[clearanceInput.purpose] || []),
       ...(otherDocPurposes["Barangay Permit"]?.includes(docType || "")
         ? otherDocImageFields[docType || ""] || []
         : []),
     ];
+    
 
     // Normalize: support both [{ name: "..." }] and ["..."]
     const matchedImageFields: string[] = matchedImageFieldsRaw.map((field: any) =>
@@ -1643,6 +1662,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
         !!field &&
         !existingImageFields.includes(field)
     );
+    console.log("Dynamic Image Fields:", dynamicImageFields);
 
    
 
@@ -3519,7 +3539,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                     {/* Delete button with image */}
                                     <button
                                         type="button"
-                                        onClick={() => handleFileDelete('file-upload1', setFiles)}
+                                        onClick={() => handleFileDelete('signaturejpg','file-upload1', setFiles, setClearanceInput)}
                                         className="delete-button"
                                       >
                                         <img
@@ -3592,7 +3612,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload2', setFiles2)}
+                                            onClick={() => handleFileDelete('barangayIDjpg','file-upload2', setFiles2,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -3683,7 +3703,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       <div className="delete-container">
                                         <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                          onClick={() => handleFileDelete('validIDjpg','file-upload3', setFiles3,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img
@@ -3751,7 +3771,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       {/* Delete button with image */}
                                       <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload4', setFiles4)}
+                                          onClick={() => handleFileDelete('letterjpg','file-upload4', setFiles4,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img
@@ -3817,7 +3837,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                           {/* Delete button with image */}
                                           <button
                                               type="button"
-                                              onClick={() => handleFileDelete('file-upload5', setFiles5)}
+                                              onClick={() => handleFileDelete('copyOfPropertyTitle','file-upload5', setFiles5, setClearanceInput)}
                                               className="delete-button"
                                             >
                                               <img
@@ -3881,7 +3901,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload6', setFiles6)}
+                                            onClick={() => handleFileDelete('dtiRegistration','file-upload6', setFiles6,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -3941,7 +3961,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload7', setFiles7)}
+                                            onClick={() => handleFileDelete('isCCTV','file-upload7', setFiles7,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4004,7 +4024,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload8',setFiles8)}
+                                            onClick={() => handleFileDelete('taxDeclaration','file-upload8',setFiles8, setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4063,7 +4083,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload9',setFiles9)}
+                                            onClick={() => handleFileDelete('approvedBldgPlan','file-upload9',setFiles9, setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4124,7 +4144,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload10',setFiles10)}
+                                            onClick={() => handleFileDelete('deathCertificate','file-upload10',setFiles10,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4191,7 +4211,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       {/* Delete button with image */}
                                       <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload11', setFiles11)}
+                                          onClick={() => handleFileDelete('twoByTwoPicture','file-upload11', setFiles11,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img
