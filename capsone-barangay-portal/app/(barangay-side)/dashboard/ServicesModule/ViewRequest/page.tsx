@@ -3068,6 +3068,17 @@ Functions for Reason for Reject
                   "Other Documents",
                 ];
 
+                const excludedDocTypesRemarks = [
+                  "Barangay Clearance",
+                  "Barangay Certificate",
+                  "Barangay Indigency",
+                  "Business Permit",
+                  "Temporary Business Permit",
+                  "Construction",
+                  "Barangay Permit",
+                  "Other Documents",
+                ];
+
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
                 const isRemarks = section === "remarks";
@@ -3083,7 +3094,7 @@ Functions for Reason for Reject
                 const shouldHideRemarks =
                   isRemarks &&
                   (
-                    (excludedDocTypes.includes(requestData?.docType || "") &&
+                    (excludedDocTypesRemarks.includes(requestData?.docType || "") &&
                       requestData?.purpose !== "First Time Jobseeker") ||
                     (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true)
                   );
