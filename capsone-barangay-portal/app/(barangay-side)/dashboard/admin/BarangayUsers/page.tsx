@@ -479,6 +479,32 @@ useEffect(() => {
             setTimeout(() => setShowErrorPopup(false), 3000);
             return;
         }
+
+
+        // ✅ Check for existing roles
+        const roleCounts = barangayUsers.reduce(
+            (acc, user) => {
+            const pos = user.position.toLowerCase();
+            if (pos === "punong barangay") acc.punongBarangay += 1;
+            if (pos === "secretary") acc.secretary += 1;
+            if (pos === "assistant secretary") acc.assistantSecretary += 1;
+            return acc;
+            },
+            { punongBarangay: 0, secretary: 0, assistantSecretary: 0 }
+        );
+
+        const pos = position.toLowerCase();
+        if (
+            (pos === "punong barangay" && roleCounts.punongBarangay >= 1) ||
+            (pos === "secretary" && roleCounts.secretary >= 1) ||
+            (pos === "assistant secretary" && roleCounts.assistantSecretary >= 1)
+        ) {
+            setPopupErrorMessage(`Maximum ${position} role already exists.`);
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+        }
+
         
         setInvalidFields([]);
         setShowSubmitPopup(true);

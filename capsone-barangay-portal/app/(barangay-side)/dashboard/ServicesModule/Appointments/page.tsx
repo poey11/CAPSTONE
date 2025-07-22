@@ -153,35 +153,6 @@ const searchParams = useSearchParams();
     return (
 
         <main className="appointments-main-container" /* edited this class*/>
-        
-         <div className={`appointments-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
-          <input 
-              type="text" 
-              className="appointments-module-filter" 
-              placeholder="Enter Appointment Type" 
-          />
-          <input 
-                type="date" 
-                className="appointments-module-filter" 
-                placeholder="Select Date From" 
-            />
-            <input 
-                type="date" 
-                className="appointments-module-filter" 
-                placeholder="Select Date To" 
-            />
-          <select 
-            id="featuredStatus" 
-            name="featuredStatus" 
-            className="appointments-module-filter" 
-            required
-            defaultValue=""  
-          >
-            <option value="" disabled>Select Status</option>
-            <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
-          </select>
-         </div>
 
          <div className="appointment-calendar-container">
          <div className="custom-calendar-wrapper">

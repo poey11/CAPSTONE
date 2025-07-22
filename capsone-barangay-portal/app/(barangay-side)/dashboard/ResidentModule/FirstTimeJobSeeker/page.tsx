@@ -46,6 +46,8 @@ export default function JobSeekerListModule() {
     const [viewActiveSection, setViewActiveSection] = useState("basic");
   const hasAnimatedOnce = useRef(false);
     const [filtersLoaded, setFiltersLoaded] = useState(false);
+    const [searchDate, setSearchDate] = useState<string>("");
+
   
     const openPopup = (user: any) => {
       setSelectedUser(user);
@@ -150,14 +152,17 @@ export default function JobSeekerListModule() {
       return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
     });
 
-    if (showCount) {
-      filtered = filtered.slice(0, showCount);
-    }
+if (searchDate) {
+  filtered = filtered.filter((seeker) => {
+    return seeker.dateApplied?.startsWith(searchDate);
+  });
+}
+
 
     setCurrentPage(1);
     
     setFilteredJobSeekers(filtered);
-  }, [searchName, jobSeekers, sortOrder,showCount]);
+  }, [searchName, jobSeekers, sortOrder,searchDate]);
 
   const formatDateToMMDDYYYY = (dateString: string) => {
     if (!dateString) return "";
@@ -269,18 +274,19 @@ export default function JobSeekerListModule() {
         />
 
 
-      <select
+        <input
+          type="date"
           className="resident-module-filter"
-          value={showCount}
-          onChange={(e) => setShowCount(Number(e.target.value))}
-        >
-          <option value="0">Show All</option>
-          <option value="5">Show 5</option>
-          <option value="10">Show 10</option>
-        </select>
+          value={searchDate}
+          onChange={(e) => setSearchDate(e.target.value)}
+          placeholder="Filter by Date Applied"
+        />
+
+
+
       </div>
 
-      <div className="resident-module-main-section">
+      <div className="resident-module-main-section-kasambahay">
   {loading ? (
     <p>Loading job seekers...</p>
   ) : error ? (

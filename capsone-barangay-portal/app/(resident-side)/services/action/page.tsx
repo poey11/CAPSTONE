@@ -813,24 +813,34 @@ const handleFileChange = (
     console.log("Request data to upload:", updates);
     
     const notificationRef = collection(db, "BarangayNotifications");
-
+    
     const useDocTypeAsMessage = 
       clearanceInput.docType === "Business Permit" || 
       clearanceInput.docType === "Temporary Business Permit";
-    
-    // Determine message
-    let notificationMessage = "";
-    
-    if (clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") {
-      notificationMessage = `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
-    } else if (clearanceInput.docType === "Barangay Indigency") {
-      notificationMessage = `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${clearanceInput.appointmentDate} (Online).`;
-    } else {
-      notificationMessage = `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`;
-    }
-    
+
+      const rawDate = new Date(clearanceInput.appointmentDate);
+      const formattedAppointmentDate = rawDate.toLocaleString("en-US", {
+        month: "numeric",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+      
     await addDoc(notificationRef, {
-      message: notificationMessage,
+    message: 
+      clearanceInput.purpose === "First Time Jobseeker"
+        ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
+        : clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+          ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+          : clearanceInput.docType === "Barangay Indigency"
+            ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+            : clearanceInput.docType === "Construction"
+              ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
+              : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
+
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,

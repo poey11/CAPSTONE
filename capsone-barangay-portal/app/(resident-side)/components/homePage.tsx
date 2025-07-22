@@ -11,17 +11,17 @@ import Cookies from 'js-cookie';
 const homePage:React.FC = () => {    
     const facilities = [
         {
-        image: "/Images/feeding2.jpg",
+        image: "/Images/barangayhall.jpg",
         facility: "Barangay Hall",
         location: "Dahlia Avenue",
         },
         {
-        image: "/Images/feeding2.jpg",
+        image: "/Images/seniorcitizen.jpg",
         facility: "Senior Citizen Building",
         location: "Complex, Dahlia Avenue",
         },
         {
-        image: "/Images/feeding2.jpg",
+        image: "/Images/multi.jpg",
         facility: "Multi-purpose Center",
         location: "Sitio Ruby",
         },

@@ -344,9 +344,12 @@ const handlePrint = async(requestData:any, id:any) => {
                 .replace(/^Ms\.?\s*/i, "")
                 .toUpperCase()}`,
             "Text2": parseInt(requestData?.age).toString(),
-            "Text3": yearNos.toString(),
-            "Text4": `${requestData?.requestorFname.toUpperCase()}`,
-            "Text5": `${monthToday} ${dateToday.split("-")[2]}, ${yearToday}`,
+            "Text3": requestData?.address,
+            "Text4": yearNos.toString(),
+            "Text5": dayToday,
+            "Text6":`${monthToday} ${yearToday}`,
+            "Text7": `${requestData?.requestorFname.toUpperCase()}`,
+            "Text8": `${monthToday} ${dateToday.split("-")[2]}, ${yearToday}`,
         };
         const responseB = await fetch("/api/fillPDF", {
             method: "POST",

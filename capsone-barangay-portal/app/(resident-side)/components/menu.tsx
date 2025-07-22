@@ -121,7 +121,7 @@ const Menu = () => {
   
 
   const [isOpen, setIsOpen] = useState(false);
- const [filter, setFilter] = useState<"all" | "unread" | "incident" | "document">("all");
+  const [filter, setFilter] = useState<"all" | "unread" | "incident" | "document">("all");
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const toggleNotificationSection = () => setIsOpen((prev) => !prev);
@@ -229,7 +229,9 @@ const filteredMessages = notifications.filter((msg) => {
       return msg.transactionType.toLowerCase().includes("incident");
 case "document":
   return msg.transactionType.toLowerCase().includes("document") || 
-         msg.message.toLowerCase().includes("document request");
+         msg.transactionType.toLowerCase().includes("service") || 
+         msg.message.toLowerCase().includes("document request") || 
+         msg.message.toLowerCase().includes("appointment");
 
     default:
       return true;

@@ -2,6 +2,7 @@
     background-color: #D8DFE5;
     height: 100%;
     width: 100%;
+    
   }
 
   /*
@@ -421,6 +422,8 @@ TRY NEW
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
   height: 100vh;
+      scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
 
 
@@ -435,6 +438,7 @@ TRY NEW
   align-items: center;
   text-align: center;
   color: white;
+  
 }
 
 
@@ -442,6 +446,7 @@ TRY NEW
   max-width: 800px;
   padding: 0 20px;
    opacity: 0;
+   
  
 }
 
