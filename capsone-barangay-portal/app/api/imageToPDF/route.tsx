@@ -8,14 +8,20 @@ export async function POST(req: NextRequest, res: NextResponse) {
         const body = await req.json();
         const { location, pdfTemplate, data, imageUrl, centerField =[], imageX, imageY, imageWidth,imageHeight} = body;
 
-        if (!location || !pdfTemplate || !data) {
+        if ( !pdfTemplate || !data) {
             return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
         }
 
         try {
             // Load PDF
-            const pdfRef = ref(storage, `${location}/${pdfTemplate}`);
-            const pdfUrl = await getDownloadURL(pdfRef);
+            let pdfUrl = "";
+            if(location){
+              const pdfRef = ref(storage, `${location}/${pdfTemplate}`);
+              pdfUrl = await getDownloadURL(pdfRef);
+            }
+            else{
+              pdfUrl = pdfTemplate;
+            }
             const pdfResponse = await fetch(pdfUrl);
             const pdfData = await pdfResponse.arrayBuffer();
             const pdfDoc = await PDFDocument.load(pdfData);

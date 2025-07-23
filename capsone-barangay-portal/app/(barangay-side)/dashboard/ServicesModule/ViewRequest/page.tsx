@@ -8,7 +8,7 @@ import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
-import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
+import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 import { set } from "date-fns";
 import { request } from "http";
@@ -1854,13 +1854,21 @@ Functions for Reason for Reject
     
     const print = async () => {
        /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
-      if (!requestData?.documentTypeIs) {
+      
+      if(!requestData?.documentTypeIs&&(requestData?.docType === "Barangay Clearance" ||
+        requestData?.docType === "Barangay Certificate"  ||
+        requestData?.docType === "Barangay Indigency"  
+        ||(requestData?.docType === "Other Documents" && requestData?.purpose === "First Time Jobseeker"))) {
+        handleGenerateDocumentTypeB(requestData, id);
+        
+      }
+      else if(!requestData?.documentTypeIs) {
         handlePrint(requestData,id);
-      } else {//if existing ung documentTypeIs, it will use the other generate document function
-        handleGenerateDocument(requestData,id);
         console.log("Existing documentTypeIs, using other generate document function");
       }
-    
+      else{
+        handleGenerateDocument(requestData,id);
+      }
       // Automatically add to Jobseeker List if needed
       if (requestData?.purpose === "First Time Jobseeker") {
         await handleJobseekerAutoAdd();
@@ -1876,7 +1884,7 @@ Functions for Reason for Reject
         docPrinted: true,
       };
     
-      await updateDoc(docRef, updatedData);
+      //await updateDoc(docRef, updatedData);
     
        await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,

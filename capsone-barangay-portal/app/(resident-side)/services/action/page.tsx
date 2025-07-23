@@ -26,6 +26,7 @@ interface ClearanceInput {
   accountId: string;
   residentId: string;
   docType: string;
+  typhoonSignal?: string;
   requestId: string;
   purpose: string;
   dateRequested: string;
@@ -810,6 +811,9 @@ const handleFileChange = (
       }),
       requestorMrMs: clearanceInput.requestorMrMs,
       requestorFname: clearanceInput.requestorFname,
+      ...(clearanceInput.purpose === "Flood Victims"&&{
+        typhoonSignal: clearanceInput.typhoonSignal,
+      })
     };
     
     // Only go to notification if addDoc is 
@@ -1009,7 +1013,7 @@ const handleFileChange = (
           requiredFields.push("dateOfFireIncident")
         }
         if(clearanceInput.purpose === "Flood Victims") {
-          requiredFields.push("nameOfTyphoon", "dateOfTyphoon");
+          requiredFields.push("nameOfTyphoon", "dateOfTyphoon", "typhoonSignal");
         }
       }
 
@@ -1021,6 +1025,7 @@ const handleFileChange = (
       }
 
       if(clearanceInput.docType === "Other Documents") {
+        requiredFields.push("purpose");
         if(clearanceInput.purpose === "Barangay ID") {
           requiredFields.push("birthplace","religion","nationality","precinctnumber"
             ,"occupation","height","weight","bloodtype"
@@ -1201,7 +1206,7 @@ const handleFileChange = (
       ...Object.keys(dynamicFileStates), // Add dynamic image fields
       "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
       "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
-      "taxDeclaration", "approvedBldgPlan", "deathCertificate", "twoByTwoPicture"
+      "taxDeclaration", "approvedBldgPlan", "deathCertificate", 
       ];
 
       const filenames: Record<string, string> = {};
@@ -1539,6 +1544,7 @@ const handleFileChange = (
           else if(key ==="projectLocation") message = "Project Location";
           else if(key ==="dateOfFireIncident") message = "Date of Fire Incident";
           else if(key ==="nameOfTyphoon") message = "Name of Typhoon";
+          else if(key ==="typhoonSignal") message = "Typhoon Signal";
           else if(key ==="dateOfTyphoon") message = "Date of Typhoon";
           else if(key ==="fullName") message = `${addOn}Full Name`;
           else if (key === "emergencyDetails.fullName") message = "Emergency Contact Full Name";
@@ -2167,7 +2173,25 @@ const handleFileChange = (
                           required
                           placeholder="Enter Typhoon Name"
                         />    
-                      </div>            
+                      </div> 
+                      <div className="form-group-document-req">
+                        <label htmlFor="typhoonSignal" className="form-label-document-req">Typhoon Signal<span className="required">*</span></label>
+                        <select 
+                          className="form-input-document-req" 
+                          id="typhoonSignal"
+                          name="typhoonSignal"
+                          value={clearanceInput?.typhoonSignal || ""}
+                          onChange={handleChange}
+                          required
+                        >    
+                          <option value="" disabled>Select Typhoon Signal</option>
+                          <option value="1">Signal 1</option>
+                          <option value="2">Signal 2</option>
+                          <option value="3">Signal 3</option>
+                          <option value="4">Signal 4</option>
+                          <option value="5">Signal 5</option>
+                        </select>
+                      </div>           
                     </>
                   )}
 

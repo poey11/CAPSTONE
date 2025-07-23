@@ -24,6 +24,7 @@ interface ClearanceInput {
     accID?: string;
     createdBy?: string;
     docType?: string;
+    typhoonSignal?: string;
     requestType?: string;
     requestId?: string;
     purpose?: string;
@@ -866,7 +867,6 @@ export default function action() {
           "approvedBldgPlan",
           "deathCertificate",
           "identificationPic",
-          "twoByTwoPicture"
         ];
     
         for (const key of fileKeys) {
@@ -1030,7 +1030,7 @@ export default function action() {
           requiredFields.push("dateOfFireIncident")
         }
         if(clearanceInput.purpose === "Flood Victims") {
-          requiredFields.push("nameOfTyphoon", "dateOfTyphoon");
+          requiredFields.push("nameOfTyphoon", "dateOfTyphoon","typhoonSignal");
         }
       }
 
@@ -1121,16 +1121,7 @@ export default function action() {
       } 
       
       
-      if(clearanceInput.docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") {
-        if(!files12 || files12.length === 0) {
-          setPopupErrorMessage("Please upload 2x2 ID Picture.");
-          setShowErrorPopup(true);
-          setTimeout(() => setShowErrorPopup(false), 3000);
-          return;
-        }
-        requiredFields.push("Endorsement Letter");
-      }
-
+   
       if (clearanceInput.docType !== "Barangay Clearance" && clearanceInput.docType !== "Barangay Certificate" && clearanceInput.docType !== "Barangay Indigency"
       ) {
         if (!files3 || files3.length === 0) {
@@ -1285,6 +1276,7 @@ export default function action() {
           else if(key ==="projectLocation") message = "Project Location";
           else if(key ==="dateOfFireIncident") message = "Date of Fire Incident";
           else if(key ==="nameOfTyphoon") message = "Name of Typhoon";
+          else if(key ==="typhoonSignal") message = "Typhoon Signal";
           else if(key ==="dateOfTyphoon") message = "Date of Typhoon";
           else if(key ==="fullName") message = `${addOn}Full Name`;
           else if (key === "emergencyDetails.fullName") message = "Emergency Contact Full Name";
@@ -2666,6 +2658,24 @@ const handleChange = (
                                   placeholder={`Enter Typhoon Name`}
                                 />
                               </div>           
+                              <div className="fields-section">
+                                <h1>Typhoon Signal<span className="required">*</span></h1>
+                                <select 
+                                  id="typhoonSignal"  
+                                  name="typhoonSignal"  
+                                  value={clearanceInput.typhoonSignal}
+                                  onChange={handleChange}
+                                  className="createRequest-input-field"  
+                                  required 
+                                >
+                                  <option value="" disabled>Select Typhoon Signal</option>
+                                  <option value="Signal No. 1">Signal No. 1</option>
+                                  <option value="Signal No. 2">Signal No. 2</option>
+                                  <option value="Signal No. 3">Signal No. 3</option>
+                                  <option value="Signal No. 4">Signal No. 4</option>
+                                  <option value="Signal No. 5">Signal No. 5</option>
+                                </select>
+                              </div>
                             </>
                           )}
 
