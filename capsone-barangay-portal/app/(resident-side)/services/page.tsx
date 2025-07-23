@@ -105,13 +105,8 @@ export default function Services() {
   const goToServices = (e: any) => {
     const action = e.currentTarget.id;
     if (isGuest && !isAllowedForGuest(action)) return;
-    if(action === "Construction"){
-
-        router.push(`/services/action?doc=Barangay Permits&purpose=${action}`);
-    }
-    else{
-      router.push(`/services/action?doc=${action}`);
-    }
+    router.push(`/services/action?doc=${action}`);
+ 
   };
 
   const handleSubmitOther = (e: any) => {

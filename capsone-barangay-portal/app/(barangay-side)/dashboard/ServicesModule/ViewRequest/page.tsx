@@ -102,7 +102,7 @@ interface EmergencyDetails {
     docsRequired: File[]; // Changed to File[] to match the file structure
     fromAddress: string;
     goodMoralOtherPurpose: string;
-    noOfVechicles: string;
+    noOfVehicles: string;
     dateOfFireIncident: string;
     nameOfTyphoon: string;
     dateOfTyphoon: string;
@@ -762,7 +762,8 @@ Functions for Reason for Reject
         { key: "religion", label: "Religion" },
         { key: "fromAddress", label: "From Address"},
         { key: "goodMoralOtherPurpose", label: "Certificate Purpose"}, // for Garage/PUV purpose iba lang kasi yung field name sa db
-        { key: "noOfVechicles", label: "No of Vehicles"},
+        { key: "noOfVehicles", label: "No of Vehicles"},
+        { key:"typhoonSignal" , label: "Typhoon Signal"},
         
         // Emergency Details Fields
         { key: "emergencyDetails.firstName", label: "Emergency Contact First Name" },
@@ -1047,7 +1048,7 @@ Functions for Reason for Reject
                 "vehicleSerialNo",
                 "businessLocation",
                 "vehicleChassisNo",
-                "noOfVechicles",
+                "noOfVehicles",
                 "vehicleEngineNo",
                 "vehicleMake",
                 "vehicleFileNo",   
@@ -1078,7 +1079,7 @@ Functions for Reason for Reject
                 "gender", 
                 "citizenship", 
                 "vehicleType",
-                "noOfVechicles",
+                "noOfVehicles",
    
               ],
               others: [
@@ -1157,6 +1158,7 @@ Functions for Reason for Reject
                 "citizenship", 
                 "nameOfTyphoon",
                 "dateOfTyphoon",
+                "typhoonSignal"
               ],
               others: [
                 "signaturejpg",
@@ -1855,16 +1857,22 @@ Functions for Reason for Reject
     const print = async () => {
        /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
       
-      if(!requestData?.documentTypeIs&&(requestData?.docType === "Barangay Clearance" ||
-        requestData?.docType === "Barangay Certificate"  ||
+      if(!requestData?.documentTypeIs && 
+        (requestData?.docType === "Barangay Certificate"  ||
         requestData?.docType === "Barangay Indigency"  
-        ||(requestData?.docType === "Other Documents" && requestData?.purpose === "First Time Jobseeker"))) {
+        ||(requestData?.docType === "Other Documents" && requestData?.purpose === "First Time Jobseeker")||
+          (requestData?.docType === "Barangay Clearance" && requestData?.purpose === "Residency")
+      )) {
         handleGenerateDocumentTypeB(requestData, id);
         
       }
-      else if(!requestData?.documentTypeIs) {
+      else if(!requestData?.documentTypeIs && 
+        ((requestData?.docType === "Barangay Clearance" && requestData?.purpose !== "Residency")
+        || requestData?.purpose === "Barangay ID"
+        ||  requestData?.docType === "Temporary Business Permit" 
+        || requestData?.docType === "Business Permit" 
+        || requestData?.docType === "Construction")) {
         handlePrint(requestData,id);
-        console.log("Existing documentTypeIs, using other generate document function");
       }
       else{
         handleGenerateDocument(requestData,id);
@@ -1884,7 +1892,7 @@ Functions for Reason for Reject
         docPrinted: true,
       };
     
-      //await updateDoc(docRef, updatedData);
+      await updateDoc(docRef, updatedData);
     
        await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
