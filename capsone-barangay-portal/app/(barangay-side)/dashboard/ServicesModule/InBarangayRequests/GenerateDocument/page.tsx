@@ -15,11 +15,7 @@ export default function GenerateDocument() {
 
     const handleSubmit = (e: any) => {
         const action = e.currentTarget.id;
-        if(action === "Construction"){
-            
-            router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=Barangay Permits&purpose=${action}`);
-        } 
-        else router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
+        router.push(`/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/Action?docType=${action}`);
     }
 
     const handleSubmitOther = (e: any) => {

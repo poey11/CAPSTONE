@@ -13,6 +13,7 @@ import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { set } from "date-fns";
+import { clear } from "console";
 
 interface EmergencyDetails {
   fullName: string;
@@ -119,7 +120,7 @@ export default function Action() {
   const docType = searchParam.get("doc") || "";
   const docPurpose = searchParam.get("purpose") || "";
   const router = useRouter();
-  const [nos, setNos] = useState(1);
+  const [nos, setNos] = useState(0);
 
   const [userData, setUserData] = useState<any>(null); // moved UP here
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
@@ -242,7 +243,7 @@ export default function Action() {
       const fetchCount = async () => {
         try {
           const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
-          setNos(count || 1);
+          setNos(count || 0);
         } catch (error) {
           console.error("Error fetching count:", error);
         }
@@ -253,7 +254,7 @@ export default function Action() {
       const fetchCount = async () => {
         try {
           const count = await getSpecificCountofCollection("ServiceRequests", "accID", "Guest");
-          setNos(count || 1);
+          setNos(count || 0);
         } catch (error) {
           console.error("Error fetching count:", error);
         }
@@ -1018,7 +1019,6 @@ const handleFileChange = (
       }
 
       if(clearanceInput.docType === "Barangay Clearance") {
-        
         if(clearanceInput.purpose === "Residency"){
           requiredFields.push("CYFrom", "CYTo");
         }
@@ -1054,31 +1054,34 @@ const handleFileChange = (
 
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-      const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
+      if((clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docType === "Barangay Indigency") {
+        const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
       
-      // check if the user has an existing appointment for this docType and purpose on the selected date
-      const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
-      const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
-        const appDateOnly = new Date(app.appointmentDate).toDateString();
-        console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
-        return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
-      });
+        // check if the user has an existing appointment for this docType and purpose on the selected date
+        const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
+        const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
+          const appDateOnly = new Date(app.appointmentDate).toDateString();
+          console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
+          return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
+        });
 
-      if (userAppointment) {
-        setErrorMessage("You already have an appointment for this document type on the selected date.");
-        setShowErrorPopup(true);
-        return;
+        if (userAppointment) {
+          setErrorMessage("You already have an appointment for this document type on the selected date.");
+          setShowErrorPopup(true);
+          return;
+        }
+
+        // Check if the selected date is already booked for this user in any doctype and purpose
+        const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
+        const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
+
+        if(appointments ){
+          setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
+          setShowErrorPopup(true);
+          return
+        }  
       }
-
-      // Check if the selected date is already booked for this user in any doctype and purpose
-      const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
-      const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
-      
-      if(appointments ){
-        setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
-        setShowErrorPopup(true);
-        return
-      }                  
+                      
 
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
@@ -1316,8 +1319,8 @@ const handleFileChange = (
         ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
         ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
         ...(((clearanceInput.purpose === "Residency" && docType === "Barangay Certificate") || docType === "Barangay Indigency") && {
-        appointmentDate: clearanceInput.appointmentDate,
-        purpose: clearanceInput.purpose,
+          appointmentDate: clearanceInput.appointmentDate,
+          purpose: clearanceInput.purpose,
         }),
         ...(clearanceInput.purpose === "Financial Subsidy of Solo Parent" && {
         noIncomeChildFName: clearanceInput.noIncomeChildFName,

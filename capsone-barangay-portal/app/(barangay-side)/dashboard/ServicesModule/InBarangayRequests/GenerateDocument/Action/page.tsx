@@ -926,9 +926,7 @@ export default function action() {
           requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
           sendTo: sendTo,
           docPrinted: false,
-          ...(clearanceInput.purpose ==="Garage/PUV" && {
-            noOfVehicles: clearanceInput.noOfVehicles,
-          }),
+        
           ...(documentTypeIs !== "" && {
             documentTypeIs: documentTypeIs,
           }),
@@ -1671,7 +1669,7 @@ const handleChange = (
                           />
                         </div>
 
-                        { !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
+                        { docType !== "Construction" && !docPurpose && !otherDocPurposes["Barangay Permit"]?.includes(docType || "") && (
                         <>
                         <div className="fields-section">
                           <h1>Purpose<span className="required">*</span></h1>
@@ -2669,11 +2667,11 @@ const handleChange = (
                                   required 
                                 >
                                   <option value="" disabled>Select Typhoon Signal</option>
-                                  <option value="Signal No. 1">Signal No. 1</option>
-                                  <option value="Signal No. 2">Signal No. 2</option>
-                                  <option value="Signal No. 3">Signal No. 3</option>
-                                  <option value="Signal No. 4">Signal No. 4</option>
-                                  <option value="Signal No. 5">Signal No. 5</option>
+                                  <option value="1">Signal No. 1</option>
+                                  <option value="2">Signal No. 2</option>
+                                  <option value="3">Signal No. 3</option>
+                                  <option value="4">Signal No. 4</option>
+                                  <option value="5">Signal No. 5</option>
                                 </select>
                               </div>
                             </>
