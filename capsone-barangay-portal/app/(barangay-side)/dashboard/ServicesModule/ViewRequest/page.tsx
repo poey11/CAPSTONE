@@ -1987,25 +1987,13 @@ Functions for Reason for Reject
 
         // BARANGAY INDIGENCY
         else if (docType === "Barangay Indigency") {
-          const pbOnlyPurposes = ["Philhealth Sponsor", "Medical Assistance"];
+          // const pbOnlyPurposes = ["Philhealth Sponsor", "Medical Assistance"];
           const secOnlyPurposes = [
             "No Income", "Public Attorneys Office",
-            "Financial Subsidy of Solo Parent", "Fire Victims", "Flood Victims"
-          ];
+            "Financial Subsidy of Solo Parent", "Fire Victims", "Flood Victims",
+            "Philhealth Sponsor", "Medical Assistance"];
 
-          if (pbOnlyPurposes.includes(purpose || "")) {
-            // Both PB and Secretary
-            await addDoc(notificationRef, {
-              message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
-              timestamp: new Date(),
-              requestorId: requestData!.accID,
-              isRead: false,
-              transactionType: "Online Assigned Service Request",
-              recipientRole: "Punong Barangay",
-              requestID: id,
-            });
-
-          } else if (secOnlyPurposes.includes(purpose || "")) {
+          if (secOnlyPurposes.includes(purpose || "")) {
             // Secretary only
             await addDoc(notificationRef, {
               message: `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
