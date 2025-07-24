@@ -2183,7 +2183,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        handleSMS();//Admin Staff will handle the sending of SMS to the resident
+        /*handleSMS();*///Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
@@ -2780,7 +2780,38 @@ Functions for Reason for Reject
                                     </div> 
                                 </div>
 
+                                
+
                                 <div className="services-onlinereq-main-details-description">
+
+                                  {requestData?.appointmentDate && (
+                                        <>
+                                            <div className="onlinereq-date-section">
+                                                <div className="onlinereq-date-topsection">
+                                                    <div className="onlinereq-main-details-icons-section">
+                                                        <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
+                                                    </div>
+                                                    <div className="onlinereq-main-details-title-section">
+                                                        <h1>Appointment Date</h1>
+                                                    </div>
+                                                </div>
+                                                <p>
+                                                  {requestData?.appointmentDate
+                                                    ? new Date(requestData.appointmentDate).toLocaleString("en-US", {
+                                                        month: "numeric",
+                                                        day: "numeric",
+                                                        year: "numeric",
+                                                        hour: "numeric",
+                                                        minute: "numeric",
+                                                        second: "numeric",
+                                                        hour12: true,
+                                                      })
+                                                    : "N/A"}
+                                                </p>
+                                            </div>
+                                        </>
+                                    )}
+                                    
                                     <div className="onlinereq-purpose-section">
                                         <div className="onlinereq-purpose-topsection">
                                             <div className="onlinereq-main-details-icons-section">
@@ -2820,33 +2851,7 @@ Functions for Reason for Reject
                                       
                                    
 
-                                    {requestData?.appointmentDate && (
-                                        <>
-                                            <div className="onlinereq-date-section">
-                                                <div className="onlinereq-date-topsection">
-                                                    <div className="onlinereq-main-details-icons-section">
-                                                        <img src="/Images/calendar.png" alt="calendar icon" className="onlinereq-calendar-section-icon" />
-                                                    </div>
-                                                    <div className="onlinereq-main-details-title-section">
-                                                        <h1>Appointment Date</h1>
-                                                    </div>
-                                                </div>
-                                                <p>
-                                                  {requestData?.appointmentDate
-                                                    ? new Date(requestData.appointmentDate).toLocaleString("en-US", {
-                                                        month: "numeric",
-                                                        day: "numeric",
-                                                        year: "numeric",
-                                                        hour: "numeric",
-                                                        minute: "numeric",
-                                                        second: "numeric",
-                                                        hour12: true,
-                                                      })
-                                                    : "N/A"}
-                                                </p>
-                                            </div>
-                                        </>
-                                    )}
+                                    
 
                                 </div>
                             </div>
