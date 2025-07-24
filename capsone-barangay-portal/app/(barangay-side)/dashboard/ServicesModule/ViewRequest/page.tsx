@@ -2737,8 +2737,8 @@ Functions for Reason for Reject
                               className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
                               onClick={() => setActiveSection(section)}
                             >
-                              {section === "basic" && "Basic Info"}
-                              {section === "full" && "Full Info"}
+                              {section === "basic" && "Basic"}
+                              {section === "full" && "Full"}
                               {section === "emergency" && "Emergency"}
                               {section === "others" && "Others"}
                               {section === "rejected" && "Rejected"}
@@ -2811,7 +2811,7 @@ Functions for Reason for Reject
                                             </div>
                                         </>
                                     )}
-                                    
+
                                     <div className="onlinereq-purpose-section">
                                         <div className="onlinereq-purpose-topsection">
                                             <div className="onlinereq-main-details-icons-section">
