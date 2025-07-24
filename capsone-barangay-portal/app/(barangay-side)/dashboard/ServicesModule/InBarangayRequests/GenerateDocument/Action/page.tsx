@@ -1357,6 +1357,7 @@ export default function action() {
                 clearanceInput.docType === "Barangay Clearance" ||
                 clearanceInput.docType === "Temporary Business Permit" ||
                 clearanceInput.docType === "Construction" ||
+                clearanceInput.docType === "Barangay Permit" ||                
                 (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
               )
                 ? "Assistant Secretary"
