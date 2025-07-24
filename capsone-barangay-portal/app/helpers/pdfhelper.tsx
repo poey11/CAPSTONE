@@ -1,9 +1,10 @@
 import { getLocalDateString } from "./helpers";
 import { toWords } from 'number-to-words';
 import {db, storage} from "@/app/db/firebase";
-import { collection,getDocs, query, where,addDoc, doc, onSnapshot, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore";
+import { collection,getDocs, query, where,addDoc, doc, onSnapshot, updateDoc, arrayUnion, getDoc, setDoc, arrayRemove } from "firebase/firestore";
 import {customAlphabet} from "nanoid";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import next from "next";
 
 
 
@@ -141,7 +142,7 @@ const handlePrint = async(requestData:any, id:any) => {
         return;
     }
     else if(requestData?.purpose === "Good Moral and Probation"){
-        if(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
+        if(requestData?.goodMoralPurpose === "Legal Purpose and Intent") locationPath = "certificate of goodmoral_a.pdf";
         else locationPath = "certificate of goodmoral_b.pdf";
         reqData = {
             "Text1":`${(requestData?.requestorFname || requestData?.requestor || "")
@@ -149,7 +150,7 @@ const handlePrint = async(requestData:any, id:any) => {
             .replace(/^Ms\.?\s*/i, "")
             .toUpperCase()}`,
             "Text2": requestData?.address,
-            ...(requestData?.goodMoralPurpose === "Other Legal Purpose and Intent" ? {
+            ...(requestData?.goodMoralPurpose === "Legal Purpose and Intent" ? {
                 "Text3": dayToday,
                 "Text4": `${monthToday} ${yearToday}`,
             }:{
@@ -292,7 +293,7 @@ const handlePrint = async(requestData:any, id:any) => {
                 location: "/ServiceRequests/templates",
                 pdfTemplate: locationPath,
                 data: reqData,
-                imageUrl: requestData?.twoByTwoPicture,
+                imageUrl: requestData?.twoByTwoPicture || "",
                 imageX:25,
                 imageY:108,
                 imageWidth:130,
@@ -557,6 +558,7 @@ const uploadPDFToFirebase = async (file: File, data:any, id:any) => {
         await updateDoc(docRef, {
             listOfPDFs: arrayUnion(downloadURL),
         });
+    return downloadURL;
     } catch (error) {
         console.error("Upload failed:", error);
         throw error;
@@ -573,13 +575,10 @@ const extraData = {
     year:   "",
 }
 
+function replacePlaceholders(body: string, values: Record<string, string>) {
+    return body.replace(/\{(\w+)\}/g, (_, key) => values[key] || `{${key}}`);
+}
 const handleGenerateDocument = async(documentB:any, id:any) => {
-    function replacePlaceholders(body: string, values: Record<string, string>) {
-        return body.replace(/\{(\w+)\}/g, (_, key) => values[key] || `{${key}}`);
-    }
-
-
-
     const docRef = query(
       collection(db, "OtherDocuments"),
       where("type", "==", documentB?.docType),
@@ -661,6 +660,247 @@ const handleGenerateDocument = async(documentB:any, id:any) => {
 
 }
 
+const deleteOldestPDF = async (docId: string) => {
+  try {
+    const docRef = doc(db, "ServiceRequests", docId);
+    const snapshot = await getDoc(docRef);
+
+    const data = snapshot.data();
+    const listOfPDFs: string[] = data?.listOfPDFs || [];
+
+    if (listOfPDFs.length === 0) {
+      console.log("No PDFs to delete.");
+      return;
+    }
+
+    const oldestURL = listOfPDFs[0];
+
+    // 🔁 Convert download URL to storage path
+    const match = oldestURL.match(/\/o\/(.*?)\?/);
+    const fullPath = match ? decodeURIComponent(match[1]) : null;
+
+    if (!fullPath) {
+      console.error("❌ Could not extract storage path from URL.");
+      return;
+    }
+
+    const fileRef = ref(storage, fullPath);
+
+    await deleteObject(fileRef);
+
+    // 🔄 Remove from Firestore
+    await updateDoc(docRef, {
+      listOfPDFs: arrayRemove(oldestURL),
+    });
+
+    console.log("✅ Oldest PDF deleted successfully.");
+  } catch (error) {
+    console.error("❌ Failed to delete oldest PDF:", error);
+  }
+}
+
+
+
+const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
+    console.log("Document Type B:", documentB);
+    const dateToday = getLocalDateString(new Date());
+    const dayToday = getOrdinal(parseInt(dateToday.split("-")[2]));
+    const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
+    const yearToday = dateToday.split("-")[0];
+    
+    const docRef = query(
+        collection(db, "DocumentBody"),
+        where("docType", "==", documentB?.docType),
+    );
+
+    const docSnapshot = await getDocs(docRef);
+    if (docSnapshot.empty) return;
+
+    let documentData: any[] = [];
+    docSnapshot.forEach((doc) => {
+      const data = doc.data();
+      documentData.push({
+        id: doc.id,
+        ...data,
+      });
+    });
+    console.log("Document Data:", documentData);
+
+    if(documentB?.docType === "Barangay Certificate" && documentB?.purpose === "No Income"){
+        documentB = {
+            ...documentB,
+            ...(documentB?.noIncomePurpose === "ESC Voucher" && {
+                purpose: "No Income B",
+            })
+        }
+    }
+    if(documentB?.docType === "Barangay Certificate" && documentB?.purpose === "Guardianship"){
+        documentB = {
+            ...documentB,
+            ...(documentB?.guardianshipType === "Legal Purpose" && {
+                purpose: "Guardianship B",
+            }),
+        }
+    }
+    if(documentB?.docType === "Barangay Certificate" && documentB?.purpose === "Good Moral and Probation"){
+        documentB = {
+            ...documentB,
+            ...(documentB?.goodMoralPurpose === "Others" &&{
+                purpose: "Good Moral and Probation B",
+            })
+        }    
+        
+    }
+    if(documentB?.docType === "Barangay Indigency" && documentB?.purpose === "No Income"){
+        documentB = {
+            ...documentB,
+            ...(documentB?.noIncomePurpose === "ESC Voucher" && {
+                purpose: "No Income B",
+            })
+        }
+    }
+    console.log("Document B:", documentB.purpose);
+    
+    const matchedDoc = documentData.find((doc) => doc.purpose === documentB?.purpose);
+    console.log("Matched Document:", matchedDoc);
+    console.log("Document Data:", documentB);
+    documentB = {
+        ...documentB,
+        dayToday: dayToday,
+        monthToday: monthToday,
+        yearToday: yearToday,
+        ...(documentB?.docType === "Barangay Certificate" && {
+            ...(documentB?.purpose === "Estate Tax" && {
+                dateOfResidencyYear: documentB?.dateOfResidency.split("-")[0],
+                dateofdeath: `${getMonthName(parseInt(documentB?.dateofdeath.split("-")[1]))} ${documentB?.dateofdeath.split("-")[2]}, ${documentB?.dateofdeath.split("-")[0]}`,
+            }),
+            ...(documentB?.purpose === "Death Residency" && {
+                dateofdeath: `${getMonthName(parseInt(documentB?.dateofdeath.split("-")[1]))} ${documentB?.dateofdeath.split("-")[2]}, ${documentB?.dateofdeath.split("-")[0]}`,
+            }),
+            ...(documentB?.purpose === "Cohabitation" && {
+                cohabitationStartDate: `${getMonthName(parseInt(documentB?.cohabitationStartDate.split("-")[1]))} ${documentB?.cohabitationStartDate.split("-")[2]}, ${documentB?.cohabitationStartDate.split("-")[0]}`,
+            }),
+            ...(documentB?.purpose === "Good Moral and Probation B" && {
+               goodMoralPurpose: documentB?.goodMoralOtherPurpose
+            }),
+            ...((documentB?.purpose === "Garage/TRU" || documentB?.purpose === "Garage/PUV")  && {
+                noOfVehicles: toWords(parseInt(documentB?.noOfVehicles)).toUpperCase() + ` (${documentB?.noOfVehicles})`,
+            }),
+            
+        }),
+        ...(documentB?.docType === "Barangay Indigency" && {
+            ...(documentB?.purpose === "Fire Victims" && {
+                dateOfFireIncident: `${getMonthName(parseInt(documentB?.dateOfFireIncident.split("-")[1]))} ${documentB?.dateOfFireIncident.split("-")[2]}, ${documentB?.dateOfFireIncident.split("-")[0]}`,
+            }),
+            ...(documentB?.purpose === "Flood Victims" && {
+                dateOfTyphoon: `${getMonthName(parseInt(documentB?.dateOfTyphoon.split("-")[1]))} ${documentB?.dateOfTyphoon.split("-")[2]}, ${documentB?.dateOfTyphoon.split("-")[0]}`,
+                 nameOfTyphoon: documentB?.nameOfTyphoon.toUpperCase(),
+                typhoonSignal: documentB?.typhoonSignal
+            }),
+        }),
+        ...(documentB?.docType === "Other Documents"&& {
+            ...(documentB?.purpose === "First Time Jobseeker" && {
+                yearNos: (() => {
+                    const yearOfResidency = parseInt(documentB?.dateOfResidency.split("-")[0]);
+                    const yearOfRequest = parseInt(documentB?.createdAt.split("/")[2]);
+                    return yearOfRequest === yearOfResidency ? 1 : yearOfRequest - yearOfResidency;
+                })(),
+                nextYear: (parseInt(yearToday) + 1).toString(),
+            })
+        }),
+    }
 
     
-export {handlePrint, handleGenerateDocument};
+    let location = "";
+
+    if(documentB?.docType === "Barangay Certificate"){
+        location = "CERTIFICATE_template.pdf"
+    }
+    else if(documentB?.docType === "Barangay Indigency"){
+        location = "INDIGENCY_template.pdf";
+    }
+    else if(documentB?.purpose === "Oath Of Undertaking" ){
+        location = "OATH OF UNDERTAKING templates.pdf";
+    }
+    else{
+        location = "CERTIFICATE_template.pdf";
+    }
+    console.log("Matched Document Body:", matchedDoc?.Body);
+
+    const newBody = replacePlaceholders(matchedDoc?.Body, documentB);
+    console.log("Replaced Body:", newBody);
+     
+    const response = await fetch('/api/swapTextPDF', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            location: location,
+            body: newBody,
+            purpose: documentB?.purpose,
+        }),
+    });
+    if (!response.ok) {
+        console.error("Failed to generate PDF");
+        return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download=`${documentB?.docType}${`_${documentB?.purpose}` || ""}_${documentB?.requestor.toUpperCase() || documentB?.requestorFname.toUpperCase()}.pdf`;
+    if(!(documentB?.docType == "Barangay Certificate" && documentB?.purpose == "Residency")){
+        link.click();
+        URL.revokeObjectURL(url);
+        link.remove();   
+    }     
+    const file = new File([blob], `${documentB.docType}${`_${documentB.purpose}` || ""}.pdf`, { type: "application/pdf" });
+    const pdfURL = await uploadPDFToFirebase(file, documentB, id);
+    
+    if(documentB?.docType === "Barangay Certificate" && documentB?.purpose === "Residency"){
+        const responseB = await fetch("/api/imageToPDF", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                pdfTemplate: pdfURL,
+                data: documentB,
+                imageUrl: documentB?.photoUploaded,
+                imageX:10,
+                imageY:570,
+                imageWidth:130,
+                imageHeight:105,
+            })
+        });
+        if(!responseB.ok)throw new Error("Failed to generate PDF");
+        const blobB = await responseB.blob();
+        const urlB = URL.createObjectURL(blobB);
+        const linkB = document.createElement("a");
+        linkB.href = urlB;
+        linkB.download=`${documentB?.docType}${`_${documentB?.purpose}` || ""}_${documentB?.requestor.toUpperCase() || documentB?.requestorFname.toUpperCase()}.pdf`;
+        linkB.click();
+        URL.revokeObjectURL(urlB);
+        linkB.remove();
+        const file = new File([blobB], `${documentB?.docType}${`_${documentB?.purpose}` || ""}_${documentB?.requestor.toUpperCase() || documentB?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+        await deleteOldestPDF(id);
+        await uploadPDFToFirebase(file, documentB, id);
+        return;
+    }
+
+    if(documentB?.purpose === "First Time Jobseeker"){  
+        const newData = {
+            ...documentB,
+            purpose: "Oath Of Undertaking",
+        }
+        handleGenerateDocumentTypeB(newData, id);
+        return;
+    }
+
+}
+
+    
+export {handlePrint, handleGenerateDocument, handleGenerateDocumentTypeB};
+
+

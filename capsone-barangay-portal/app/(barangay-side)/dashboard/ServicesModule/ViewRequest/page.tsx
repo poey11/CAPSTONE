@@ -8,7 +8,7 @@ import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
-import { handlePrint,handleGenerateDocument } from "@/app/helpers/pdfhelper";
+import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 import { set } from "date-fns";
 import { request } from "http";
@@ -102,7 +102,7 @@ interface EmergencyDetails {
     docsRequired: File[]; // Changed to File[] to match the file structure
     fromAddress: string;
     goodMoralOtherPurpose: string;
-    noOfVechicles: string;
+    noOfVehicles: string;
     dateOfFireIncident: string;
     nameOfTyphoon: string;
     dateOfTyphoon: string;
@@ -762,7 +762,8 @@ Functions for Reason for Reject
         { key: "religion", label: "Religion" },
         { key: "fromAddress", label: "From Address"},
         { key: "goodMoralOtherPurpose", label: "Certificate Purpose"}, // for Garage/PUV purpose iba lang kasi yung field name sa db
-        { key: "noOfVechicles", label: "No of Vehicles"},
+        { key: "noOfVehicles", label: "No of Vehicles"},
+        { key:"typhoonSignal" , label: "Typhoon Signal"},
         
         // Emergency Details Fields
         { key: "emergencyDetails.firstName", label: "Emergency Contact First Name" },
@@ -1047,7 +1048,7 @@ Functions for Reason for Reject
                 "vehicleSerialNo",
                 "businessLocation",
                 "vehicleChassisNo",
-                "noOfVechicles",
+                "noOfVehicles",
                 "vehicleEngineNo",
                 "vehicleMake",
                 "vehicleFileNo",   
@@ -1078,7 +1079,7 @@ Functions for Reason for Reject
                 "gender", 
                 "citizenship", 
                 "vehicleType",
-                "noOfVechicles",
+                "noOfVehicles",
    
               ],
               others: [
@@ -1157,6 +1158,7 @@ Functions for Reason for Reject
                 "citizenship", 
                 "nameOfTyphoon",
                 "dateOfTyphoon",
+                "typhoonSignal"
               ],
               others: [
                 "signaturejpg",
@@ -1854,13 +1856,27 @@ Functions for Reason for Reject
     
     const print = async () => {
        /* This part will handle ung pag generate ng pdf and also updates the request's status to In - Progress */
-      if (!requestData?.documentTypeIs) {
-        handlePrint(requestData,id);
-      } else {//if existing ung documentTypeIs, it will use the other generate document function
-        handleGenerateDocument(requestData,id);
-        console.log("Existing documentTypeIs, using other generate document function");
+      
+      if(!requestData?.documentTypeIs && 
+        (requestData?.docType === "Barangay Certificate"  ||
+        requestData?.docType === "Barangay Indigency"  
+        ||(requestData?.docType === "Other Documents" && requestData?.purpose === "First Time Jobseeker")||
+          (requestData?.docType === "Barangay Clearance" && requestData?.purpose === "Residency")
+      )) {
+        handleGenerateDocumentTypeB(requestData, id);
+        
       }
-    
+      else if(!requestData?.documentTypeIs && 
+        ((requestData?.docType === "Barangay Clearance" && requestData?.purpose !== "Residency")
+        || requestData?.purpose === "Barangay ID"
+        ||  requestData?.docType === "Temporary Business Permit" 
+        || requestData?.docType === "Business Permit" 
+        || requestData?.docType === "Construction")) {
+        handlePrint(requestData,id);
+      }
+      else{
+        handleGenerateDocument(requestData,id);
+      }
       // Automatically add to Jobseeker List if needed
       if (requestData?.purpose === "First Time Jobseeker") {
         await handleJobseekerAutoAdd();
@@ -2078,7 +2094,7 @@ Functions for Reason for Reject
 
           await addDoc(notificationRef, {
             message: isFirstTimeJobseeker
-              ? "A Jobseeker Certificate requires your signature.${messageSuffix}"
+              ? `A Jobseeker Certificate requires your signature.${messageSuffix}`
               : `A document for ${docType}: ${purpose} requires your signature.${messageSuffix}`,
             timestamp: new Date(),
             requestorId: requestData!.accID,
@@ -2147,19 +2163,21 @@ Functions for Reason for Reject
         const isOnline = requestData?.accID !== "INBRGY-REQ";
         const messageSuffix = isOnline ? " (Online)" : "";
         
-        await addDoc(notificationRef, {
-          message: 
-            requestData.docType === "Construction"
+      await addDoc(notificationRef, {
+        message: 
+          requestData.purpose === "First Time Jobseeker"
+            ? `You have been assigned a new task for a Jobseeker Certificate requested by ${requestData.requestorFname}.${messageSuffix}`
+            : requestData.docType === "Construction"
               ? `You have been assigned a new task for Construction Permit requested by ${requestData.requestorFname}.${messageSuffix}`
-              : `You have been assigned a new task for ${requestData?.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
-          
-          timestamp: new Date(),
-          requestorId: requestData?.accID,
-          isRead: false,
-          transactionType: "Online Assigned Service Request",
-          recipientRole: "Admin Staff",
-          requestID: id,
-        });
+              : `You have been assigned a new task for ${requestData.docType}: ${requestData.purpose} document requested by ${requestData.requestorFname}.${messageSuffix}`,
+        timestamp: new Date(),
+        requestorId: requestData?.accID,
+        isRead: false,
+        transactionType: "Online Assigned Service Request",
+        recipientRole: "Assistant Secretary",
+        requestID: id,
+      });
+
 
 
 
@@ -2281,12 +2299,9 @@ Functions for Reason for Reject
       const isOnline = requestData?.accID !== "INBRGY-REQ";
       const messageSuffix = isOnline ? " (Online)" : "";
       
-      const isJobseeker = requestData?.purpose === "First Time Jobseeker";
 
       await addDoc(notificationRef, {
-        message: isJobseeker
-          ? "You have been assigned a new task for a Jobseeker Certificate requested by ${requestData?.requestorFname}.${messageSuffix}"
-          : `You have been assigned a new task for ${requestData?.purpose} document requested by ${requestData?.requestorFname}.${messageSuffix}`,
+        message: `Interview remarks has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}. Request ID: ${requestData?.requestId}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
@@ -2513,7 +2528,8 @@ Functions for Reason for Reject
                                 </button>
                               </>
                             )}
-                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") && (
+                            {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") || 
+                            (requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") ? (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
@@ -2522,7 +2538,20 @@ Functions for Reason for Reject
                                   <h1>Reject Request</h1>
                                 </button>
                               </>
-                            )}
+                            ): !requestData?.appointmentDate && (
+                              <>
+                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                  <div className="services-onlinereq-redirection-icons-section">
+                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                  </div>
+                                  <h1>Reject Request</h1>
+                                </button>
+                              </>
+                            )
+                             
+                            }
+
+
                         
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
                               <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
@@ -2546,6 +2575,14 @@ Functions for Reason for Reject
                                 )}
                                 {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
                                   <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <div className="services-onlinereq-redirection-icons-section">
+                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    </div>
+                                      <h1>Generate Document</h1>
+                                  </button>
+                                )}
+                                {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
+                                    <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
@@ -3070,6 +3107,17 @@ Functions for Reason for Reject
                   "Other Documents",
                 ];
 
+                const excludedDocTypesRemarks = [
+                  "Barangay Clearance",
+                  "Barangay Certificate",
+                  "Barangay Indigency",
+                  "Business Permit",
+                  "Temporary Business Permit",
+                  "Construction",
+                  "Barangay Permit",
+                  "Other Documents",
+                ];
+
                 // Hide "OR Section" if docType is in the excluded list
                 const isPayment = section === "payment";
                 const isRemarks = section === "remarks";
@@ -3085,7 +3133,7 @@ Functions for Reason for Reject
                 const shouldHideRemarks =
                   isRemarks &&
                   (
-                    (excludedDocTypes.includes(requestData?.docType || "") &&
+                    (excludedDocTypesRemarks.includes(requestData?.docType || "") &&
                       requestData?.purpose !== "First Time Jobseeker") ||
                     (requestData?.purpose === "First Time Jobseeker" && firstTimeClaimed === true)
                   );

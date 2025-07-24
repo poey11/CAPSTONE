@@ -10,7 +10,7 @@ export default function Services() {
   const user = useAuth().user;
   const router = useRouter();
 
-  const [permitOptions, setPermitOptions] = useState<string[]>([]);
+  const [permitOptions, setPermitOptions] = useState<any[]>([]);
   const [isGuest, setIsGuest] = useState(!user);  // ✅ fix
   const [userData, setUserData] = useState<any>(null);  // ✅ optional
 
@@ -78,7 +78,11 @@ export default function Services() {
             const forResidentOnly = data.forResidentOnly ?? false;
             return !isGuest || (isGuest && forResidentOnly === false);
           })
-          .map(doc => doc.data().title);
+          .map(doc => ({
+            id: doc.id,
+            title: doc.data().title,
+            type: doc.data().type,
+          }));
   
         setPermitOptions(permits);
       } catch (error) {
@@ -102,7 +106,13 @@ export default function Services() {
     const action = e.currentTarget.id;
     if (isGuest && !isAllowedForGuest(action)) return;
     router.push(`/services/action?doc=${action}`);
+ 
   };
+
+  const handleSubmitOther = (e: any) => {
+        console.log("Selected Document:", e);
+        router.push(`/services/action?doc=${e.type}&purpose=${e.title}`);
+    }
 
   return (
     <main className="services-container-document">
@@ -264,8 +274,8 @@ export default function Services() {
         <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
         <p id="Construction" onClick={goToServices}>Construction Permit</p>
         {permitOptions.map((title, index) => (
-          <p key={index} id={title} onClick={goToServices}>
-            {title}
+          <p key={title.id || index} onClick={()=>handleSubmitOther(title)}>
+            {title.title}
           </p>
         ))}
       </div>

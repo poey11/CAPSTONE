@@ -13,6 +13,7 @@ import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { set } from "date-fns";
+import { clear } from "console";
 
 interface EmergencyDetails {
   fullName: string;
@@ -26,6 +27,7 @@ interface ClearanceInput {
   accountId: string;
   residentId: string;
   docType: string;
+  typhoonSignal?: string;
   requestId: string;
   purpose: string;
   dateRequested: string;
@@ -118,7 +120,7 @@ export default function Action() {
   const docType = searchParam.get("doc") || "";
   const docPurpose = searchParam.get("purpose") || "";
   const router = useRouter();
-  const [nos, setNos] = useState(1);
+  const [nos, setNos] = useState(0);
 
   const [userData, setUserData] = useState<any>(null); // moved UP here
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
@@ -241,7 +243,7 @@ export default function Action() {
       const fetchCount = async () => {
         try {
           const count = await getSpecificCountofCollection("ServiceRequests", "accID", user.uid);
-          setNos(count || 1);
+          setNos(count || 0);
         } catch (error) {
           console.error("Error fetching count:", error);
         }
@@ -252,7 +254,7 @@ export default function Action() {
       const fetchCount = async () => {
         try {
           const count = await getSpecificCountofCollection("ServiceRequests", "accID", "Guest");
-          setNos(count || 1);
+          setNos(count || 0);
         } catch (error) {
           console.error("Error fetching count:", error);
         }
@@ -741,14 +743,29 @@ const handleFileChange = (
 
 
   // Handle file deletion for any container
-  const handleFileDelete = (fileName: string, setFile: React.Dispatch<React.SetStateAction<{ name: string, preview: string | undefined }[]>>) => {
-    setFile([]); // Reset the file list state
-  
-    const fileInput = document.getElementById(fileName) as HTMLInputElement;
-    if (fileInput) {
-      fileInput.value = ""; // Clear the file input field
-    }
-  };
+  const handleFileDelete = (
+  fieldName: string, // this should be "signaturejpg"
+  inputId: string,   // this should be "file-upload1"
+  setFile: React.Dispatch<React.SetStateAction<{ name: string, preview: string | undefined }[]>>,
+  setClearanceInput: React.Dispatch<React.SetStateAction<any>>
+) => {
+  // Clear preview files
+  setFile([]);
+
+  // Clear file from clearanceInput state
+  setClearanceInput((prev: any) => {
+    const updated = { ...prev };
+    delete updated[fieldName];
+    return updated;
+  });
+
+  // Clear actual <input type="file"> field
+  const fileInput = document.getElementById(inputId) as HTMLInputElement;
+  if (fileInput) {
+    fileInput.value = "";
+  }
+};
+
   
  const handleReportUpload = async (key: any, storageRefs: Record<string, any>) => {
   try {
@@ -795,6 +812,9 @@ const handleFileChange = (
       }),
       requestorMrMs: clearanceInput.requestorMrMs,
       requestorFname: clearanceInput.requestorFname,
+      ...(clearanceInput.purpose === "Flood Victims"&&{
+        typhoonSignal: clearanceInput.typhoonSignal,
+      })
     };
     
     // Only go to notification if addDoc is 
@@ -994,18 +1014,18 @@ const handleFileChange = (
           requiredFields.push("dateOfFireIncident")
         }
         if(clearanceInput.purpose === "Flood Victims") {
-          requiredFields.push("nameOfTyphoon", "dateOfTyphoon");
+          requiredFields.push("nameOfTyphoon", "dateOfTyphoon", "typhoonSignal");
         }
       }
 
       if(clearanceInput.docType === "Barangay Clearance") {
-        
         if(clearanceInput.purpose === "Residency"){
           requiredFields.push("CYFrom", "CYTo");
         }
       }
 
       if(clearanceInput.docType === "Other Documents") {
+        requiredFields.push("purpose");
         if(clearanceInput.purpose === "Barangay ID") {
           requiredFields.push("birthplace","religion","nationality","precinctnumber"
             ,"occupation","height","weight","bloodtype"
@@ -1030,36 +1050,38 @@ const handleFileChange = (
   return requiredFields;
 };
 
-console.log("appointment map:", appointmentsMap);
-console.log("userAppointmentsMap:", userAppointmentsMap);
+
 
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-      const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
+      if((clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docType === "Barangay Indigency") {
+        const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
       
-      // check if the user has an existing appointment for this docType and purpose on the selected date
-      const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
-      const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
-        const appDateOnly = new Date(app.appointmentDate).toDateString();
-        console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
-        return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
-      });
+        // check if the user has an existing appointment for this docType and purpose on the selected date
+        const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
+        const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
+          const appDateOnly = new Date(app.appointmentDate).toDateString();
+          console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
+          return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
+        });
 
-      if (userAppointment) {
-        setErrorMessage("You already have an appointment for this document type on the selected date.");
-        setShowErrorPopup(true);
-        return;
+        if (userAppointment) {
+          setErrorMessage("You already have an appointment for this document type on the selected date.");
+          setShowErrorPopup(true);
+          return;
+        }
+
+        // Check if the selected date is already booked for this user in any doctype and purpose
+        const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
+        const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
+
+        if(appointments ){
+          setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
+          setShowErrorPopup(true);
+          return
+        }  
       }
-
-      // Check if the selected date is already booked for this user in any doctype and purpose
-      const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
-      const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
-      
-      if(appointments ){
-        setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
-        setShowErrorPopup(true);
-        return
-      }                  
+                      
 
 
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
@@ -1152,6 +1174,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
       };
 
 
+      requiredImageFields.push(...dynamicImageFields); // Ensure signature is always required
 
       // Step 2: Check other required image fields
       for (const imgField of requiredImageFields) {
@@ -1164,13 +1187,16 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
               imgField === "validIDjpg" ||
               imgField === "letterjpg"))
         ) {
-          const label =
+            const label =
             imageFieldLabels[imgField] ||
             imgField
-              .replace(/([A-Z])/g, " $1")
-              .replace(/jpg$/, "")
+              .replace(/_/g, " ") // Replace underscores with spaces
+              .replace(/(?!^)([A-Z])/g, " $1")
+              .replace(/\.[^/.]+$/, "")
               .toLowerCase()
-              .replace(/\b\w/g, (c) => c.toUpperCase());
+              .replace(/\b\w/g, (c) => c.toUpperCase())
+              .replace(/\b(Id|ID|id)\b/g, "ID")
+              .replace(/\b(Ph|PH|ph)\b/g, "PH");
         
           setErrorMessage(`Please upload the required image: ${label}.`);
           setShowErrorPopup(true);
@@ -1183,7 +1209,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
       ...Object.keys(dynamicFileStates), // Add dynamic image fields
       "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
       "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
-      "taxDeclaration", "approvedBldgPlan", "deathCertificate", "twoByTwoPicture"
+      "taxDeclaration", "approvedBldgPlan", "deathCertificate", 
       ];
 
       const filenames: Record<string, string> = {};
@@ -1255,7 +1281,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
         vehicleType: clearanceInput.vehicleType,
         vehicleMake: clearanceInput.vehicleMake,
         noOfVehicles: clearanceInput.noOfVehicles,
-        puvPurpose: clearanceInput.goodMoralOtherPurpose,
+        goodMoralOtherPurpose: clearanceInput.goodMoralOtherPurpose,
         }),
         birthday: clearanceInput.birthday,
         age: clearanceInput.age,
@@ -1293,8 +1319,8 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
         ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
         ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
         ...(((clearanceInput.purpose === "Residency" && docType === "Barangay Certificate") || docType === "Barangay Indigency") && {
-        appointmentDate: clearanceInput.appointmentDate,
-        purpose: clearanceInput.purpose,
+          appointmentDate: clearanceInput.appointmentDate,
+          purpose: clearanceInput.purpose,
         }),
         ...(clearanceInput.purpose === "Financial Subsidy of Solo Parent" && {
         noIncomeChildFName: clearanceInput.noIncomeChildFName,
@@ -1521,6 +1547,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
           else if(key ==="projectLocation") message = "Project Location";
           else if(key ==="dateOfFireIncident") message = "Date of Fire Incident";
           else if(key ==="nameOfTyphoon") message = "Name of Typhoon";
+          else if(key ==="typhoonSignal") message = "Typhoon Signal";
           else if(key ==="dateOfTyphoon") message = "Date of Typhoon";
           else if(key ==="fullName") message = `${addOn}Full Name`;
           else if (key === "emergencyDetails.fullName") message = "Emergency Contact Full Name";
@@ -1621,13 +1648,14 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
       ...purposeFields,
       ...(clearanceInput.docType && matchedPermitFields)
     ])].filter((fieldName) => !excludedDynamicFields.includes(fieldName));
-
+    console.log("Filtered Dynamic Fields:", filteredDynamicFields);
     const matchedImageFieldsRaw = [
       ...(otherDocImageFields[clearanceInput.purpose] || []),
       ...(otherDocPurposes["Barangay Permit"]?.includes(docType || "")
         ? otherDocImageFields[docType || ""] || []
         : []),
     ];
+    
 
     // Normalize: support both [{ name: "..." }] and ["..."]
     const matchedImageFields: string[] = matchedImageFieldsRaw.map((field: any) =>
@@ -1643,6 +1671,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
         !!field &&
         !existingImageFields.includes(field)
     );
+    console.log("Dynamic Image Fields:", dynamicImageFields);
 
    
 
@@ -2147,7 +2176,25 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                           required
                           placeholder="Enter Typhoon Name"
                         />    
-                      </div>            
+                      </div> 
+                      <div className="form-group-document-req">
+                        <label htmlFor="typhoonSignal" className="form-label-document-req">Typhoon Signal<span className="required">*</span></label>
+                        <select 
+                          className="form-input-document-req" 
+                          id="typhoonSignal"
+                          name="typhoonSignal"
+                          value={clearanceInput?.typhoonSignal || ""}
+                          onChange={handleChange}
+                          required
+                        >    
+                          <option value="" disabled>Select Typhoon Signal</option>
+                          <option value="1">Signal 1</option>
+                          <option value="2">Signal 2</option>
+                          <option value="3">Signal 3</option>
+                          <option value="4">Signal 4</option>
+                          <option value="5">Signal 5</option>
+                        </select>
+                      </div>           
                     </>
                   )}
 
@@ -3519,7 +3566,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                     {/* Delete button with image */}
                                     <button
                                         type="button"
-                                        onClick={() => handleFileDelete('file-upload1', setFiles)}
+                                        onClick={() => handleFileDelete('signaturejpg','file-upload1', setFiles, setClearanceInput)}
                                         className="delete-button"
                                       >
                                         <img
@@ -3592,7 +3639,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload2', setFiles2)}
+                                            onClick={() => handleFileDelete('barangayIDjpg','file-upload2', setFiles2,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -3683,7 +3730,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       <div className="delete-container">
                                         <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload3', setFiles3)}
+                                          onClick={() => handleFileDelete('validIDjpg','file-upload3', setFiles3,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img
@@ -3751,7 +3798,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       {/* Delete button with image */}
                                       <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload4', setFiles4)}
+                                          onClick={() => handleFileDelete('letterjpg','file-upload4', setFiles4,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img
@@ -3817,7 +3864,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                           {/* Delete button with image */}
                                           <button
                                               type="button"
-                                              onClick={() => handleFileDelete('file-upload5', setFiles5)}
+                                              onClick={() => handleFileDelete('copyOfPropertyTitle','file-upload5', setFiles5, setClearanceInput)}
                                               className="delete-button"
                                             >
                                               <img
@@ -3881,7 +3928,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload6', setFiles6)}
+                                            onClick={() => handleFileDelete('dtiRegistration','file-upload6', setFiles6,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -3941,7 +3988,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload7', setFiles7)}
+                                            onClick={() => handleFileDelete('isCCTV','file-upload7', setFiles7,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4004,7 +4051,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload8',setFiles8)}
+                                            onClick={() => handleFileDelete('taxDeclaration','file-upload8',setFiles8, setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4063,7 +4110,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload9',setFiles9)}
+                                            onClick={() => handleFileDelete('approvedBldgPlan','file-upload9',setFiles9, setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4124,7 +4171,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                         {/* Delete button with image */}
                                         <button
                                             type="button"
-                                            onClick={() => handleFileDelete('file-upload10',setFiles10)}
+                                            onClick={() => handleFileDelete('deathCertificate','file-upload10',setFiles10,setClearanceInput)}
                                             className="delete-button"
                                           >
                                             <img
@@ -4191,7 +4238,7 @@ console.log("userAppointmentsMap:", userAppointmentsMap);
                                       {/* Delete button with image */}
                                       <button
                                           type="button"
-                                          onClick={() => handleFileDelete('file-upload11', setFiles11)}
+                                          onClick={() => handleFileDelete('twoByTwoPicture','file-upload11', setFiles11,setClearanceInput)}
                                           className="delete-button"
                                         >
                                           <img

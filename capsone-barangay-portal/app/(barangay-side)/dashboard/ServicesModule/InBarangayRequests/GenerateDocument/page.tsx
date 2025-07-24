@@ -27,58 +27,76 @@ export default function GenerateDocument() {
     const handleAddNewDocument = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/addNewDoc");
     }
-    const handleOtherNewDocument = () => {
-        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/OtherNewDocument");
-    }
-      const handleEditNewDocument = () => {
-        router.push("/dashboard/ServicesModule/InBarangayRequests/GenerateDocument/EditDoc");
-    }
+    
 
     const handleBack = () => {
         router.push("/dashboard/ServicesModule/InBarangayRequests");
     };
 
-    const  handleTestNewDocument = async() => {
-        let locationPath = "Barangay ID.pdf"; // Default path for Barangay Certificate
+    // function replacePlaceholders(body: string, values: Record<string, string>) {
+    //     return body.replace(/\{(\w+)\}/g, (_, key) => values[key] || `{${key}}`);
+    // }
+    
+    // const getMonthName = (monthNumber:number) => {
+    //   const monthNames = [
+    //     "January", "February", "March", "April", "May", "June",
+    //     "July", "August", "September", "October", "November", "December"
+    //   ];
+    
+    //   if (monthNumber >= 1 && monthNumber <= 12) {
+    //     return monthNames[monthNumber - 1];
+    //   } else {
+    //     return "Invalid month number";
+    //   }
+    // }
 
-        let reqData = {
-            "Text1": "John Doe",
-            "Text2": "1234",
-            "Text3": "1234 Street Name, Barangay, City",
-            "Text4": "1234567890",
-            "Text5": "1234567890",
-            "Text6": "1234567890",
-            "Text7": "1234567890",
-            "Text8": "1234567890",
-            "Text9": "1234567890",
-            "Text10": "1234567890",
-            "Text11": "1234567890",
-            "Text12": "1234567890",
-        }
+    // const  handleTestNewDocument = async() => {
+    //     let data ={
+    //         requestorFname: "John",
+    //         address: "123 Main St",
+    //         cohabitationStartDate: "2020-01-01",
+    //         requestor: "Jane Doe",
+    //         dayToday: "15",
+    //         monthToday: "October",
+    //         yearToday: "2023",
+    //     }
+    //     data.cohabitationStartDate = `${getMonthName(parseInt(data.cohabitationStartDate.split("-")[1]))} ${data.cohabitationStartDate.split("-")[2]}, ${data.cohabitationStartDate.split("-")[0]}`;
+    //     const tab = '     '; // simulate a tab (5 spaces)
 
+    //     const body = `This is to certify that {requestorFname}, of legal ages are bonafide residents of this Barangay with residence and postal address at {address} are living together as husband and wife without any interruption and without the benefit of marriage since {cohabitationStartDate}. 
+
+    //     This certification is issued upon the request of the {requestor} to attest to the truth of the foregoing facts and for whatever legal intents and purposes this may serve best. 
+
+    //     Issued this {dayToday} day of {monthToday} {yearToday} at the Barangay Hall, Dahlia Avenue, Barangay Fairview, District 5, Quezon City.`;
+
+    //     console.log("Original Body:", body);
+    //     const newBody = replacePlaceholders(body, data);
         
-        const response = await fetch("/api/fillPDF", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                location: "/ServiceRequests/templates",
-                pdfTemplate: locationPath,
-                data: reqData,
-            })
-        });
-        if(!response.ok)throw new Error("Failed to generate PDF");
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download=`test.pdf`;
-        link.click();
-        URL.revokeObjectURL(url);
-        link.remove();
-    }
+    //     console.log("Replaced Body:", newBody);
+        
+        
+    //     const response = await fetch('/api/swapTextPDF', {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify({
+    //             body: newBody,
+    //         }),
+    //     });
+    //     if (!response.ok) {
+    //         console.error("Failed to generate PDF");
+    //         return;
+    //     }
+    //     const blob = await response.blob();
+    //     const url = URL.createObjectURL(blob);
+    //     const link = document.createElement("a");
+    //     link.href = url;
+    //     link.download=`$test.pdf`;
+    //     link.click();
+    //     URL.revokeObjectURL(url);
+    //     link.remove();        
+    // }
 
     useEffect(() => {
         const collectionRef = collection(db, "OtherDocuments");
@@ -115,11 +133,11 @@ export default function GenerateDocument() {
                         <button className="action-add-new-doc"  onClick={handleAddNewDocument}>
                             Add New Document
                         </button>
-                        {/*
-                        <button className="action-edit-new-doc"  onClick={handleEditNewDocument}>
+                        
+                        {/* <button className="action-edit-new-doc"  onClick={handleTestNewDocument}>
                             Edit New Document
                         </button>
-                        */}
+                         */}
                         
                         {/* <button className="action-edit-new-doc"  onClick={handleTestNewDocument}>
                             Test Document
@@ -159,7 +177,7 @@ export default function GenerateDocument() {
                                     <div className="generate-documents-dropdown">
                                         <p className="dropdown-item" onClick={handleSubmit} id="Business Permit">Business Permit</p>
                                         <p className="dropdown-item" onClick={handleSubmit} id="Temporary Business Permit">Temporary Business Permit</p>
-                                        <p className="dropdown-item" onClick={handleSubmit} id="Construction ">Construction Permit</p>
+                                        <p className="dropdown-item" onClick={handleSubmit} id="Construction">Construction Permit</p>
                                         
                                         {/* Add dynamic permit titles */}
                                         
