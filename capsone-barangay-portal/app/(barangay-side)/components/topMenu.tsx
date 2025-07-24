@@ -232,28 +232,38 @@ export default function TopMenu() {
         const requestRef = doc(db, "ServiceRequests", requestID);
         const requestSnap = await getDoc(requestRef);
 
+
         if (requestSnap.exists()) {
           const requestData = requestSnap.data();
           const hasAppointment = Boolean(requestData.appointmentDate);
           const isApproved = requestData.approvedBySAS === true;
+
 
           const isCertificateWithMissingPhoto =
             requestData.docType === "Barangay Certificate" &&
             requestData.purpose === "Residency" &&
             (!requestData.photoUploaded || requestData.photoUploaded.trim() === "");
 
+
           const isIndigencyWithMissingRemarks =
             requestData.docType === "Barangay Indigency" &&
             (!requestData.interviewRemarks || requestData.interviewRemarks.trim() === "");
 
-          if (hasAppointment && isApproved && (isCertificateWithMissingPhoto || isIndigencyWithMissingRemarks)) {
+
+          if (
+            hasAppointment &&
+            isApproved &&
+            (isCertificateWithMissingPhoto || isIndigencyWithMissingRemarks)
+          ) {
             router.push(`/dashboard/ServicesModule/Appointments`);
           } else {
-            router.push(`/dashboard/ServicesModule/ViewRequest?id=${requestID}`);
+            const reqType = requestData.accID !== "INBRGY-REQ" ? "online" : "inbarangay";
+            router.push(`/dashboard/ServicesModule/ViewRequest?reqType=${reqType}&id=${requestID}`);
           }
         } else {
           console.warn("Service request not found:", requestID);
         }
+
       } catch (err) {
         console.error("Error fetching service request for redirection:", err);
       }

@@ -2174,7 +2174,7 @@ Functions for Reason for Reject
         requestorId: requestData?.accID,
         isRead: false,
         transactionType: "Online Assigned Service Request",
-        recipientRole: "Assistant Secretary",
+        recipientRole: "Admin Staff",
         requestID: id,
       });
 
