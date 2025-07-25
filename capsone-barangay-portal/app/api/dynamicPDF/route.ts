@@ -7,7 +7,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
   const data = await req.json();
   const { title, body, boldWords } = data;
 
-  try {
+  try { 
     const pdfRef = ref(storage, `/ServiceRequests/templates/otherdoc/template.pdf`);
     const pdfUrl = await getDownloadURL(pdfRef);
     const pdfResponse = await fetch(pdfUrl);
@@ -46,9 +46,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const bodyLines = normalizedBody.split('\n');
 
     // Normalize bold phrases for easier matching
-    const normalizedBoldPhrases = boldWords.map((phrase: string) =>
-      phrase.trim().replace(/[.,!?;:]/g, '').toLowerCase()
-    );
+    const normalize = (text: string) =>
+      text.trim().replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').toLowerCase();
+      
+    const normalizedBoldPhrases = boldWords.map(normalize);
+
 
     for (const line of bodyLines) {
       const originalWords = line.trim().split(/\s+/);

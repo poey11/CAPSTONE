@@ -232,14 +232,15 @@ const handlePrint = async(requestData:any, id:any) => {
             "Text7": `${monthToday} ${yearToday}`,
         }
     }
+    const nextYear = (parseInt(yearToday) + 1).toString();
 
     if(requestData?.docType === "Barangay Clearance"){
-        if(requestData?.purpose === "Residency") locationPath = "RESIDENCY.pdf";
-        else if(requestData?.purpose === "Loan") locationPath ="LOAN.pdf";
-        else if(requestData?.purpose === "Bank Transaction") locationPath ="BANK TRANSACTION.pdf";
-        else if(requestData?.purpose === "Local Employment") locationPath ="LOCAL EMPLOYEMENT.pdf";
-        else if(requestData?.purpose === "Maynilad") locationPath ="MAYNILAD.pdf";
-        else if(requestData?.purpose === "Meralco") locationPath ="MERALCO.pdf";
+        if(requestData?.purpose === "Residency") locationPath = "RESIDENCY.pdf"; // ✅
+        else if(requestData?.purpose === "Loan") locationPath ="LOAN.pdf"; //✅
+        else if(requestData?.purpose === "Bank Transaction") locationPath ="BANK TRANSACTION.pdf";//✅
+        else if(requestData?.purpose === "Local Employment") locationPath ="LOCAL EMPLOYEMENT.pdf";//✅
+        else if(requestData?.purpose === "Maynilad") locationPath ="MAYNILAD.pdf";//✅
+        else if(requestData?.purpose === "Meralco") locationPath ="MERALCO.pdf";//✅
         else if(requestData?.purpose === "Bail Bond") locationPath ="BAIL BOND_Clearance_OC.pdf";
 
         reqData = {
@@ -248,18 +249,18 @@ const handlePrint = async(requestData:any, id:any) => {
             .replace(/^Ms\.?\s*/i, "")
             .toUpperCase()}`,
             "Text2": requestData?.address,
-            "Text3": requestData?.birthday,
+            "Text3": `${getMonthName(parseInt(requestData?.birthday.split("-")[1]))} ${requestData?.birthday.split("-")[2]}, ${requestData?.birthday.split("-")[0]}`,
             "Text4": requestData?.civilStatus,
             "Text5": requestData?.gender,
             "Text6": requestData?.dateOfResidency.split("-")[0],
             "Text7": requestData?.age.toString(),
             "Text8": requestData?.citizenship.toUpperCase(),
-            "Text9": yearToday,
+            "Text9": nextYear,
+            "Text10": `${monthToday} ${dayToday}, ${yearToday}`,
         };
         
     }
 
-    const nextYear = (parseInt(yearToday) + 1).toString();
 
 
     if(requestData?.purpose === "Barangay ID"){
