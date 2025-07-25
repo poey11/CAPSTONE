@@ -2170,7 +2170,7 @@ Functions for Reason for Reject
 
       }else{
         /* This part will handle ung pag notify kay resident na to pickup na ung  doc */
-        handleSMS(); //Admin Staff will handle the sending of SMS to the resident
+        //handleSMS(); //Admin Staff will handle the sending of SMS to the resident
         updatedData = {
           status: "Pick-up",
           statusPriority: 3,
@@ -2241,7 +2241,7 @@ Functions for Reason for Reject
 
       if ( requestData?.docType === "Barangay Certificate" && requestData?.purpose === "Residency" && requestData?.reqType === "Online") {
         await addDoc(notificationRef, {
-          message: `You have been assigned an appointment for picture taking for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname}. Request ID: ${requestData?.requestId}`,
+          message: `You have been assigned an appointment for picture taking for ${requestData?.docType}: ${requestData?.purpose} for ${requestData?.requestorFname} at ${formattedAppointmentDate}. Request ID: ${requestData?.requestId}`,
           timestamp: new Date(),
           requestorId: requestData?.accID,
           isRead: false,
