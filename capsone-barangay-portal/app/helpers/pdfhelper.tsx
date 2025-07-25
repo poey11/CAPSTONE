@@ -526,13 +526,13 @@ const handlePrint = async(requestData:any, id:any) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download=`${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`;
+    link.download=`${requestData?.docType}_${`${requestData?.purpose || ""}`}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`
     link.click();
     URL.revokeObjectURL(url);
     link.remove();
 
     
-    const file = new File([blob], `${requestData?.docType}${`_${requestData?.purpose}` || ""}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
+    const file = new File([blob], `${requestData?.docType}_${`${requestData?.purpose || ""}`}_${requestData?.requestor.toUpperCase() || requestData?.requestorFname.toUpperCase()}.pdf`, { type: "application/pdf" });
     await uploadPDFToFirebase(file, requestData,id);
     
 
@@ -607,9 +607,6 @@ const handleGenerateDocument = async(documentB:any, id:any) => {
     // ✅ Actually store the result of filtering
     const matchedDoc = documentData.find((doc) => doc.title === documentB?.purpose);
 
-    console.log("Matched Document:", matchedDoc);
-    console.log("Document Data:", documentB);
-    console.log("Extra Data:", extraData);
 
     const documentFields =  [];
 
@@ -617,9 +614,10 @@ const handleGenerateDocument = async(documentB:any, id:any) => {
       acc[field.name] = documentB[field.name];
       return acc;
     }, {});
+
+
     
     documentFields.push(dynamicFields);
-    console.log("Document Fields:", documentFields);
 
     const mergedData = {
       ...dynamicFields,
@@ -627,6 +625,12 @@ const handleGenerateDocument = async(documentB:any, id:any) => {
     };
     
     const newBody = replacePlaceholders(matchedDoc?.body, mergedData);
+    const variableNames = extractVariableNames(matchedDoc?.body);
+    const boldWords:any[] = [];
+    variableNames.forEach((variable) => {
+        boldWords.push(mergedData[variable]);
+    });
+    console.log("Bold Words:", boldWords);
 
     console.log("Replaced Body:", newBody);
     
@@ -640,6 +644,7 @@ const handleGenerateDocument = async(documentB:any, id:any) => {
         body: JSON.stringify({
             title: matchedDoc?.title,
             body: newBody,
+            boldWords: boldWords,
         }),
     });
     if (!response.ok) {
@@ -699,6 +704,17 @@ const deleteOldestPDF = async (docId: string) => {
   }
 }
 
+function extractVariableNames(bodyText: string): string[] {
+  const regex = /{(.*?)}/g;
+  const matches = [];
+  let match;
+
+  while ((match = regex.exec(bodyText)) !== null) {
+    matches.push(match[1].trim()); // add variable name without braces
+  }
+
+  return matches;
+}
 
 
 const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
@@ -759,13 +775,11 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
             })
         }
     }
-    console.log("Document B:", documentB.purpose);
     
     const matchedDoc = documentData.find((doc) => doc.purpose === documentB?.purpose);
-    console.log("Matched Document:", matchedDoc);
-    console.log("Document Data:", documentB);
     documentB = {
         ...documentB,
+        requestorFname:`${documentB?.requestorFname || documentB?.requestor || ""}`.replace(/^Mr\.?\s*/i, "").replace(/^Ms\.?\s*/i, "").toUpperCase(),
         dayToday: dayToday,
         monthToday: monthToday,
         yearToday: yearToday,
@@ -779,6 +793,7 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
             }),
             ...(documentB?.purpose === "Cohabitation" && {
                 cohabitationStartDate: `${getMonthName(parseInt(documentB?.cohabitationStartDate.split("-")[1]))} ${documentB?.cohabitationStartDate.split("-")[2]}, ${documentB?.cohabitationStartDate.split("-")[0]}`,
+                partnerWifeHusbandFullName: `${documentB?.partnerWifeHusbandFullName || ""}`.replace(/^Mr\.?\s*/i, "").replace(/^Ms\.?\s*/i, "").toUpperCase(),
             }),
             ...(documentB?.purpose === "Good Moral and Probation B" && {
                goodMoralPurpose: documentB?.goodMoralOtherPurpose
@@ -825,11 +840,17 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
     else{
         location = "CERTIFICATE_template.pdf";
     }
-    console.log("Matched Document Body:", matchedDoc?.Body);
 
     const newBody = replacePlaceholders(matchedDoc?.Body, documentB);
-    console.log("Replaced Body:", newBody);
-     
+
+    const variableNames = extractVariableNames(matchedDoc?.Body);
+
+    const boldWords:any[] = [];
+    variableNames.forEach((variable) => {
+        boldWords.push(documentB[variable]);
+    });
+
+
     const response = await fetch('/api/swapTextPDF', {
         method: 'POST',
         headers: {
@@ -839,6 +860,7 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
             location: location,
             body: newBody,
             purpose: documentB?.purpose,
+            boldWords: boldWords,
         }),
     });
     if (!response.ok) {
@@ -858,6 +880,9 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
     const file = new File([blob], `${documentB.docType}${`_${documentB.purpose}` || ""}.pdf`, { type: "application/pdf" });
     const pdfURL = await uploadPDFToFirebase(file, documentB, id);
     
+ 
+
+
     if(documentB?.docType === "Barangay Certificate" && documentB?.purpose === "Residency"){
         const responseB = await fetch("/api/imageToPDF", {
             method: "POST",

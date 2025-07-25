@@ -69,7 +69,6 @@ interface ClearanceInput {
     weight?: string;
     bloodtype?: string;
     occupation?: string;
-    precinctnumber?: string;
     emergencyDetails?: EmergencyDetails;
     requestorMrMs?: string;
     requestorFname?: string;
@@ -316,7 +315,6 @@ export default function action() {
       weight: "",
       bloodtype: "",
       occupation: "",
-      precinctnumber: "",
       requestorMrMs: "",
       requestorFname: "",
       partnerWifeHusbandFullName: "",
@@ -867,6 +865,7 @@ export default function action() {
           "approvedBldgPlan",
           "deathCertificate",
           "identificationPic",
+          "twoByTwoPicture"
         ];
     
         for (const key of fileKeys) {
@@ -938,6 +937,7 @@ export default function action() {
             photoUploaded: "",
           }),
           ...uploadedFileUrls,
+          
         };
 
         const doc = await addDoc(docRef, docData);
@@ -1041,7 +1041,7 @@ export default function action() {
 
       if(clearanceInput.docType === "Other Documents") {
         if(clearanceInput.purpose === "Barangay ID") {
-          requiredFields.push("birthplace","religion","nationality","precinctnumber"
+          requiredFields.push("birthplace","religion","nationality"
             ,"occupation","height","weight","bloodtype"
           );
         }
@@ -1290,7 +1290,6 @@ export default function action() {
           else if(key === "birthplace") message = "Place of Birth";
           else if(key === "religion") message = "Religion";
           else if(key === "nationality") message  = "Nationality";
-          else if(key === "precinctnumber") message = "Precinct Number";
           else if(key === "occupation") message = "Occupation";
           else if(key === "height") message = "Height";
           else if(key === "weight") message = "Weight";
@@ -2474,19 +2473,6 @@ const handleChange = (
                                 )}
                               </div>
                               
-                              <div className="fields-section">
-                                <h1>Precinct Number<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
-                                  id="precinctnumber"  
-                                  name="precinctnumber"  
-                                  value={clearanceInput.precinctnumber || ""}
-                                  onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Precinct Number (e.g. 1102A)"  
-                                />
-                              </div>
                               
                             </>
                           )}
@@ -4475,7 +4461,6 @@ const handleChange = (
                                               contact: resident.contactNumber || '',
                                               age: resident.age || '',
                                               occupation: resident.occupation || '',
-                                              precinctnumber: resident.precinctNumber || '',
                                               dateOfResidency: resident.dateOfResidency || '',
                                               citizenship: resident.citizenship || '',
                                               validIDjpg: resident.verificationFilesURLs[0] || '',

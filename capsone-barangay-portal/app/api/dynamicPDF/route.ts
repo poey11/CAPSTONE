@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { storage } from '@/app/db/firebase';
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { ref, getDownloadURL } from 'firebase/storage';
-
+import { storage } from '@/app/db/firebase';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest, res: NextResponse) {
   const data = await req.json();
-  const { title, body } = data;
+  const { title, body, boldWords } = data;
 
   try {
     const pdfRef = ref(storage, `/ServiceRequests/templates/otherdoc/template.pdf`);
@@ -18,10 +17,12 @@ export async function POST(req: NextRequest, res: NextResponse) {
     const page = pdfDoc.getPage(0);
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontSize = 12;
-    const titleWidth = font.widthOfTextAtSize(title, 30);
 
     const pageWidth = page.getWidth();
+    const titleFontSize = 25;
+    const titleWidth = font.widthOfTextAtSize(title, titleFontSize);
     const titleX = (pageWidth - titleWidth) / 2;
 
     const normalizedBody = body.replace(/\r\n/g, '\n');
@@ -30,52 +31,104 @@ export async function POST(req: NextRequest, res: NextResponse) {
     page.drawText(title, {
       x: titleX,
       y: 570,
-      size: 25,
+      size: titleFontSize,
       font: font,
       color: rgb(0, 0, 0),
-      lineHeight: 14,
-      maxWidth: 500,
     });
 
-    // Left-aligned wrapped body text
+    // Prepare for body text
     const lineHeight = 20;
     let yPosition = 465;
-    const marginLeft = 25;
-    const maxWidth = 500;
+    const marginLeft = 100;
+    const marginRight = 90;
+    const maxWidth = pageWidth - marginLeft - marginRight;
 
     const bodyLines = normalizedBody.split('\n');
 
+    // Normalize bold phrases for easier matching
+    const normalizedBoldPhrases = boldWords.map((phrase: string) =>
+      phrase.trim().replace(/[.,!?;:]/g, '').toLowerCase()
+    );
+
     for (const line of bodyLines) {
-      const words = line.split(' ');
-      let currentLine = '';
+      const originalWords = line.trim().split(/\s+/);
+      const sanitizedWords = originalWords.map((word: string) =>
+        word.replace(/[.,!?;:]/g, '')
+      );
 
-      for (const word of words) {
-        const testLine = currentLine ? currentLine + ' ' + word : word;
-        const testLineWidth = font.widthOfTextAtSize(testLine, fontSize);
+      const chunks: { text: string; isBold: boolean }[] = [];
+      let i = 0;
 
-        if (testLineWidth < maxWidth) {
-          currentLine = testLine;
-        } else {
-          page.drawText(currentLine, {
-            x: marginLeft,
-            y: yPosition,
-            size: fontSize,
-            font,
-            color: rgb(0, 0, 0),
-          });
-          yPosition -= lineHeight;
-          currentLine = word;
+      while (i < sanitizedWords.length) {
+        let matched = false;
+
+        // Try to match longest possible bold phrase from current index
+        for (let j = sanitizedWords.length; j > i; j--) {
+          const candidateWords = sanitizedWords.slice(i, j);
+          const candidateText = candidateWords.join(' ').toLowerCase();
+
+          if (normalizedBoldPhrases.includes(candidateText)) {
+            // Use original words (with punctuation preserved)
+            const originalText = originalWords.slice(i, j).join(' ');
+            chunks.push({ text: originalText, isBold: true });
+            i = j;
+            matched = true;
+            break;
+          }
+        }
+
+        if (!matched) {
+          chunks.push({ text: originalWords[i], isBold: false });
+          i += 1;
         }
       }
 
-      if (currentLine) {
-        page.drawText(currentLine, {
-          x: marginLeft,
-          y: yPosition,
-          size: fontSize,
-          font,
-          color: rgb(0, 0, 0),
-        });
+      // Wrap and render the chunks
+      let currentLine: { text: string; isBold: boolean }[] = [];
+      let currentLineWidth = 0;
+      const spaceWidth = font.widthOfTextAtSize(' ', fontSize);
+
+      for (const chunk of chunks) {
+        const usedFont = chunk.isBold ? boldFont : font;
+        const chunkWidth = usedFont.widthOfTextAtSize(chunk.text, fontSize);
+
+        if (currentLineWidth + chunkWidth > maxWidth && currentLine.length > 0) {
+          // Draw current line
+          let drawX = marginLeft;
+          for (const part of currentLine) {
+            const partFont = part.isBold ? boldFont : font;
+            page.drawText(part.text, {
+              x: drawX,
+              y: yPosition,
+              size: fontSize,
+              font: partFont,
+              color: rgb(0, 0, 0),
+            });
+            drawX += partFont.widthOfTextAtSize(part.text, fontSize) + spaceWidth;
+          }
+          yPosition -= lineHeight;
+          currentLine = [];
+          currentLineWidth = 0;
+        }
+
+        currentLine.push(chunk);
+        currentLineWidth += chunkWidth + spaceWidth;
+      }
+
+      // Draw remaining line
+      if (currentLine.length > 0) {
+        let drawX = marginLeft;
+        for (const part of currentLine) {
+          const partFont = part.isBold ? boldFont : font;
+          page.drawText(part.text, {
+            x: drawX,
+            y: yPosition,
+            size: fontSize,
+            font: partFont,
+            color: rgb(0, 0, 0),
+          });
+          drawX += partFont.widthOfTextAtSize(part.text, fontSize) + spaceWidth;
+        }
         yPosition -= lineHeight;
       }
     }

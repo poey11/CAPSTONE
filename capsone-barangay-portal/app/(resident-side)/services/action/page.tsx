@@ -70,7 +70,6 @@ interface ClearanceInput {
   weight: string;
   bloodtype: string;
   occupation: string;
-  precinctnumber: string;
   fromAddress: string;
   emergencyDetails: EmergencyDetails;
   requestorMrMs: string;
@@ -182,7 +181,6 @@ export default function Action() {
     weight: "",
     bloodtype: "",  
     occupation:"",
-    precinctnumber:"",
     emergencyDetails:{
       fullName: "",
       address: "",
@@ -402,7 +400,6 @@ export default function Action() {
           setClearanceInput((prev: any) => ({
             ...prev,
             birthplace: "",
-            precinctnumber: "",
           }));
         } else {
           //  Fill all fields for self
@@ -416,7 +413,6 @@ export default function Action() {
             birthday: residentData.dateOfBirth || "",
             age: age.toString(),
             dateOfResidency: residentData.dateOfResidency || "",
-            precinctnumber: residentData.precinctNumber || "",
             requestorFname: fullName,
             requestorMrMs: mrms,
             residentId: residentData.id,
@@ -814,7 +810,8 @@ const handleFileChange = (
       requestorFname: clearanceInput.requestorFname,
       ...(clearanceInput.purpose === "Flood Victims"&&{
         typhoonSignal: clearanceInput.typhoonSignal,
-      })
+      }),
+
     };
     
     // Only go to notification if addDoc is 
@@ -1028,7 +1025,7 @@ const handleFileChange = (
       if(clearanceInput.docType === "Other Documents") {
         requiredFields.push("purpose");
         if(clearanceInput.purpose === "Barangay ID") {
-          requiredFields.push("birthplace","religion","nationality","precinctnumber"
+          requiredFields.push("birthplace","religion","nationality"
             ,"occupation","height","weight","bloodtype"
           );
         }
@@ -1211,7 +1208,8 @@ const handleFileChange = (
       "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
       "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
       "taxDeclaration", "approvedBldgPlan", "deathCertificate", 
-      ];
+      "twoByTwoPicture"
+      ];  
 
       const filenames: Record<string, string> = {};
       const storageRefs: Record<string, any> = {};
@@ -1341,7 +1339,6 @@ const handleFileChange = (
         weight: clearanceInput.weight,
         bloodtype: clearanceInput.bloodtype,
         occupation: clearanceInput.occupation,
-        precinctnumber: clearanceInput.precinctnumber,
         emergencyDetails: {
           fullName: clearanceInput.emergencyDetails?.fullName || "",
           address: clearanceInput.emergencyDetails?.address || "",
@@ -1414,7 +1411,7 @@ const handleFileChange = (
         requestId: clearanceInput.requestId,
         status: "Pending",
         statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname} ${clearanceInput.requestorLname}`,
+        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         docType: docType,
         typeofconstruction: clearanceInput.typeofconstruction,
@@ -1457,7 +1454,7 @@ const handleFileChange = (
         reqType: "Online",
         status: "Pending",
         statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         docType: docType,
         purpose: clearanceInput.purpose,
@@ -1564,7 +1561,6 @@ const handleFileChange = (
           else if(key === "birthplace") message = "Place of Birth";
           else if(key === "religion") message = "Religion";
           else if(key === "nationality") message  = "Nationality";
-          else if(key === "precinctnumber") message = "Precinct Number";
           else if(key === "occupation") message = "Occupation";
           else if(key === "height") message = "Height";
           else if(key === "weight") message = "Weight";
@@ -2428,19 +2424,7 @@ const handleFileChange = (
                         )}
                       </div>
 
-                      <div className="form-group-document-req">
-                        <label htmlFor="precinctno" className="form-label-document-req">Precinct Number<span className="required">*</span></label>
-                        <input 
-                          type="text" 
-                          id="precinctno" 
-                          name="precinctnumber" 
-                          className="form-input-document-req" 
-                          value={clearanceInput.precinctnumber}
-                          onChange={handleChange}
-                          required 
-                          placeholder="Enter Precinct Number" 
-                        />
-                      </div>
+                    
                     </>    
                   )}
 

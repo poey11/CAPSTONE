@@ -1861,13 +1861,13 @@ Functions for Reason for Reject
         (requestData?.docType === "Barangay Certificate"  ||
         requestData?.docType === "Barangay Indigency"  
         ||(requestData?.docType === "Other Documents" && requestData?.purpose === "First Time Jobseeker")||
-          (requestData?.docType === "Barangay Clearance" && requestData?.purpose === "Residency")
+          (requestData?.docType === "Barangay Clearance" && requestData?.purpose !== "Residency")
       )) {
         handleGenerateDocumentTypeB(requestData, id);
         
       }
       else if(!requestData?.documentTypeIs && 
-        ((requestData?.docType === "Barangay Clearance" && requestData?.purpose !== "Residency")
+        ((requestData?.docType === "Barangay Clearance" && requestData?.purpose === "Residency")
         || requestData?.purpose === "Barangay ID"
         ||  requestData?.docType === "Temporary Business Permit" 
         || requestData?.docType === "Business Permit" 
@@ -1892,7 +1892,7 @@ Functions for Reason for Reject
         docPrinted: true,
       };
     
-      await updateDoc(docRef, updatedData);
+     // await updateDoc(docRef, updatedData);
     
        await addDoc(collection(db, "Notifications"), {
         residentID: requestData?.accID,
