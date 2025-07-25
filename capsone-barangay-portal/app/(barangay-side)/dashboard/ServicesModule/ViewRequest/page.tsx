@@ -2284,11 +2284,11 @@ Functions for Reason for Reject
       const notificationRef = collection(db, "BarangayNotifications");
 
       const isOnline = requestData?.accID !== "INBRGY-REQ";
-      const messageSuffix = isOnline ? " (Online)" : "";
+      const messageSuffix = isOnline ? " (Online)." : "";
       
 
       await addDoc(notificationRef, {
-        message: `Interview remarks has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix}. Request ID: ${requestData?.requestId}`,
+        message: `Interview remarks has been uploaded for request ${requestData?.docType} ${requestData?.purpose}.${messageSuffix} Request ID: ${requestData?.requestId}`,
         timestamp: new Date(),
         requestorId: requestData?.accID,
         isRead: false,
