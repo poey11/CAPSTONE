@@ -546,12 +546,12 @@ if (data.appointmentDate) {
     // Dynamic count based on request type
     count: selectedRequestType === 'online'
       ? documentRequestOnlinePendingCount + documentRequestOnlineInProgressCount + documentRequestOnlinePickUpCount + documentRequestOnlineCompletedCount + documentRequestOnlineRejectedCount
-      : documentRequestPendingCount + documentRequestInProgressCount + documentRequestPickUpCount + documentRequestCompletedCount + documentRequestRejectedCount,
+      : documentRequestPendingCount + documentRequestOnlineInProgressCount + documentRequestPickUpCount + documentRequestCompletedCount + documentRequestRejectedCount,
   
     data: selectedRequestType === 'online'
       ? [
         { name: "Pending", value: documentRequestOnlinePendingCount },
-        { name: "In - Progress", value: documentRequestInProgressCount },
+        { name: "In - Progress", value: documentRequestOnlineInProgressCount },
         { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
         { name: "Completed", value: documentRequestOnlineCompletedCount },
         { name: "Rejected", value: documentRequestOnlineRejectedCount},
