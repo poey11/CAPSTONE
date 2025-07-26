@@ -325,11 +325,11 @@ useEffect(() => {
 
         residents.forEach((resident) => {
           if (resident.age >= 60) seniors++;
-          else if (resident.age < 18) minors++;
+          else if (resident.age <= 18) minors++;
           else adults++;
 
           if (resident.isPWD === true) pwds++;
-          if (resident.soloParent === true) soloParents++;
+          if (resident.isSoloParent === true) soloParents++;
         });
 
         setSeniorCitizensCount(seniors);
@@ -535,7 +535,7 @@ if (data.appointmentDate) {
       { name: "Minors", value: minorsCount },
       { name: "Adults", value: adultsCount },
     ],
-    colors: ["#4CAF50", "#2196F3", "#FF9800", "#F3B50B", "#D32F2F"],
+    colors: ["#4CAF50", "#2196F3", "#FF9800", "#9e0bf3ff", "#D32F2F"],
   };
 
   const documentRequestsStatusChart = {
