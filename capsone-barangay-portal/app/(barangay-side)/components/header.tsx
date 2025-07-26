@@ -238,6 +238,14 @@ export default function Header() {
         title: "Account Settings",
         breadcrumb: ["Settings", "Account"],
       },
+
+      //Resident Reject Page
+      "/dashboard/admin/reasonForReject": {
+        title: "Reason for Rejection  ",
+        breadcrumb: ["Account", "Rejection"],
+      },
+
+
     };
 
     
