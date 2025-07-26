@@ -10,8 +10,7 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import { set } from "date-fns";
-import { request } from "http";
+
 
 interface EmergencyDetails {
     fullName: string;

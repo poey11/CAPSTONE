@@ -275,7 +275,6 @@ const handlePrint = async(requestData:any, id:any) => {
             "Text2": requestData?.address,
             "Text3": requestData?.birthday,
             "Text4": parseInt(requestData?.age).toString(),
-            "Text5": requestData?.precinctnumber,
             "Text6": requestData?.civilStatus,
             "Text7": `${yearToday[2]}${yearToday[3]} - ${randomNumber}`,
             "Text8": requestData?.emergencyDetails.fullName,
@@ -819,7 +818,7 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
                 yearNos: (() => {
                     const yearOfResidency = parseInt(documentB?.dateOfResidency.split("-")[0]);
                     const yearOfRequest = parseInt(documentB?.createdAt.split("/")[2]);
-                    return yearOfRequest === yearOfResidency ? 1 : yearOfRequest - yearOfResidency;
+                    return `${toWords(yearOfRequest === yearOfResidency ? 1 : yearOfRequest - yearOfResidency).toUpperCase()} (${yearOfRequest === yearOfResidency ? 1 : yearOfRequest - yearOfResidency})`;
                 })(),
                 nextYear: (parseInt(yearToday) + 1).toString(),
             })
@@ -851,6 +850,15 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
         boldWords.push(documentB[variable]);
     });
 
+    const separateBoldWords: string[] = [];
+    
+    boldWords.forEach((phrase) => {
+      if (typeof phrase === 'string') {
+        // Split the phrase by whitespace and filter out empty strings
+        const words = phrase.trim().split(/\s+/);
+        separateBoldWords.push(...words);
+      }
+    });
 
     const response = await fetch('/api/swapTextPDF', {
         method: 'POST',
@@ -919,6 +927,7 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
         const newData = {
             ...documentB,
             purpose: "Oath Of Undertaking",
+            age: documentB?.age.toString(),
         }
         handleGenerateDocumentTypeB(newData, id);
         return;

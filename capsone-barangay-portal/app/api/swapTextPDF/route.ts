@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ref, getDownloadURL } from "firebase/storage";
-import {storage} from "@/app/db/firebase";
+import { storage } from "@/app/db/firebase";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 export async function POST(req: NextRequest) {
   const data = await req.json();
   const { location, body, purpose, boldWords } = data;
+  console.log("Request data:", data);
 
   try {
     const pdfRef = ref(storage, `/DocumentTemplates/${location}`);
@@ -38,31 +39,26 @@ export async function POST(req: NextRequest) {
 
     const normalizedBody = body
       .replace(/\r\n/g, '\n')
-      .replace(/\t/g, '     '); // handle tab spacing
+      .replace(/\t/g, '     '); // retain tab spacing
 
     const bodyLines = normalizedBody.split('\n');
 
-    // Sort bold phrases by length descending to match longer phrases first
     const sortedBoldPhrases = [...boldWords].sort((a, b) => b.length - a.length);
+    const normalize = (text: string) =>
+      text.trim().replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').toLowerCase();
+    const normalizedBoldPhrases = sortedBoldPhrases.map(normalize);
 
-    // Helper to draw a line with bold phrases applied
-    function drawTextWithBoldPhrases(line: string, xStart: number, y: number) {
-      let cursorX = xStart;
-      let remaining = line;
+    function tokenizeParagraph(paragraph: string) {
+      const tokens: { text: string; isBold: boolean }[] = [];
+      let remaining = paragraph;
 
       while (remaining.length > 0) {
         let matched = false;
 
-        for (const phrase of sortedBoldPhrases) {
+        for (let i = 0; i < sortedBoldPhrases.length; i++) {
+          const phrase = sortedBoldPhrases[i];
           if (remaining.startsWith(phrase)) {
-            page.drawText(phrase, {
-              x: cursorX,
-              y,
-              size: fontSize,
-              font: boldFont,
-              color: rgb(0, 0, 0),
-            });
-            cursorX += boldFont.widthOfTextAtSize(phrase, fontSize);
+            tokens.push({ text: phrase, isBold: true });
             remaining = remaining.slice(phrase.length);
             matched = true;
             break;
@@ -70,48 +66,97 @@ export async function POST(req: NextRequest) {
         }
 
         if (!matched) {
-          const char = remaining[0];
-          page.drawText(char, {
-            x: cursorX,
-            y,
-            size: fontSize,
-            font,
-            color: rgb(0, 0, 0),
-          });
-          cursorX += font.widthOfTextAtSize(char, fontSize);
-          remaining = remaining.slice(1);
+          const match = remaining.match(/^\s+|^\S+/);
+          if (match) {
+            tokens.push({ text: match[0], isBold: false });
+            remaining = remaining.slice(match[0].length);
+          } else {
+            break;
+          }
+        }
+      }
+
+      return tokens;
+    }
+
+    function drawJustifiedLine(
+      line: { text: string; isBold: boolean }[],
+      isLastLine: boolean,
+      x: number,
+      y: number,
+      fontSize: number
+    ) {
+      // Compute total width and space count
+      let totalWidth = 0;
+      let spaceCount = 0;
+      for (const segment of line) {
+        const segmentFont = segment.isBold ? boldFont : font;
+        totalWidth += segmentFont.widthOfTextAtSize(segment.text, fontSize);
+        if (!segment.isBold && /^\s+$/.test(segment.text)) {
+          spaceCount += 1;
+        }
+      }
+
+      let extraSpacePerGap = 0;
+      if (!isLastLine && spaceCount > 0) {
+        extraSpacePerGap = (maxWidth - totalWidth) / spaceCount;
+      }
+
+      let cursorX = x;
+
+      for (const segment of line) {
+        const segmentFont = segment.isBold ? boldFont : font;
+        page.drawText(segment.text, {
+          x: cursorX,
+          y,
+          size: fontSize,
+          font: segmentFont,
+          color: rgb(0, 0, 0),
+        });
+
+        const segmentWidth = segmentFont.widthOfTextAtSize(segment.text, fontSize);
+        cursorX += segmentWidth;
+
+        if (!segment.isBold && /^\s+$/.test(segment.text)) {
+          cursorX += extraSpacePerGap;
         }
       }
     }
 
-    // Process each line for wrapping, indenting, and bold styling
-    for (const line of bodyLines) {
-      if (line.trim() === '') {
+    for (const paragraph of bodyLines) {
+      if (paragraph.trim() === '') {
         yPosition -= lineHeight;
         continue;
       }
 
-      const words = line.trim().split(' ');
-      let currentLine = '';
-      let isFirstLine = true;
+      const tokens = tokenizeParagraph(paragraph);
+      let currentLine: { text: string; isBold: boolean }[] = [];
+      let currentLineWidth = 0;
+      let isFirstLineOfParagraph = true;
 
-      for (const word of words) {
-        const spacer = currentLine === '' ? '' : ' ';
-        const testLine = currentLine + spacer + word;
-        const testLineWidth = font.widthOfTextAtSize(testLine, fontSize);
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const tokenFont = token.isBold ? boldFont : font;
+        const tokenWidth = tokenFont.widthOfTextAtSize(token.text, fontSize);
 
-        if (testLineWidth < maxWidth) {
-          currentLine = testLine;
-        } else {
-          drawTextWithBoldPhrases(currentLine, isFirstLine ? marginLeft + 40 : marginLeft, yPosition);
+        if (currentLineWidth + tokenWidth > maxWidth && currentLine.length > 0) {
+          const indentX = isFirstLineOfParagraph ? marginLeft + 40 : marginLeft;
+          drawJustifiedLine(currentLine, false, indentX, yPosition, fontSize);
           yPosition -= lineHeight;
-          currentLine = word;
-          isFirstLine = false;
+
+          currentLine = [token];
+          currentLineWidth = tokenWidth;
+          isFirstLineOfParagraph = false;
+        } else {
+          currentLine.push(token);
+          currentLineWidth += tokenWidth;
         }
       }
 
-      if (currentLine) {
-        drawTextWithBoldPhrases(currentLine, isFirstLine ? marginLeft + 40 : marginLeft, yPosition);
+      // Draw final line (not justified)
+      if (currentLine.length > 0) {
+        const indentX = isFirstLineOfParagraph ? marginLeft + 40 : marginLeft;
+        drawJustifiedLine(currentLine, true, indentX, yPosition, fontSize);
         yPosition -= lineHeight;
       }
     }
@@ -125,7 +170,6 @@ export async function POST(req: NextRequest) {
         'Content-Disposition': 'attachment; filename=document.pdf',
       },
     });
-
   } catch (error) {
     console.error("Error in PDF generation:", error);
     return NextResponse.json(
