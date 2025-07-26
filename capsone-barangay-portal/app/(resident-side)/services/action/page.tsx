@@ -2071,7 +2071,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.vehicleType}
                           onChange={handleChange}   
-                          placeholder="Enter Vehicle Description"
+                          placeholder="Enter Vehicle Description (e.g. Toyota Corolla 2020, Silver)"
                         />
                       </div>
                     </>
@@ -2565,7 +2565,7 @@ const handleFileChange = (
                           required 
                           value={clearanceInput.goodMoralOtherPurpose}
                           onChange={handleChange}
-                          placeholder="Enter Certificate Purpose"
+                          placeholder="Enter the purpose of the certificate (e.g., registration, inspection, insurance)"
                         />
                       </div>
                     </>
@@ -3239,7 +3239,7 @@ const handleFileChange = (
                           name="businessNature"  
                           className="form-input-document-req"  
                           required 
-                          placeholder="Enter Business Nature"  
+                          placeholder= "Describe the nature of your business (e.g., retail, manufacturing, services)"
                           value={clearanceInput.businessNature}
                           onChange={handleChange}
                         />
