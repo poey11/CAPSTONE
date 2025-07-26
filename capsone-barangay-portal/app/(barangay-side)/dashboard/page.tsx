@@ -325,7 +325,7 @@ useEffect(() => {
 
         residents.forEach((resident) => {
           if (resident.age >= 60) seniors++;
-          else if (resident.age <= 18) minors++;
+          else if (resident.age < 18) minors++;
           else adults++;
 
           if (resident.isPWD === true) pwds++;
