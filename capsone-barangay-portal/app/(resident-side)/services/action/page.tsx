@@ -3588,6 +3588,74 @@ const handleFileChange = (
                   </div>
                 </div>
 
+                {/* Dynamically Render Extra Image Upload Fields */}
+                {dynamicImageFields.map((fieldName) => (
+                  <div className="required-documents-container" key={fieldName}>
+                    <label className="form-label-required-documents">
+                      {typeof fieldName === "string"
+                        ? formatFieldName(fieldName.replace(/jpg$/, "").trim())
+                        : ""}
+                      <span className="required">*</span>
+                    </label>
+
+                    <div className="file-upload-container-required-documents">
+                      <label htmlFor={`file-upload-${fieldName}`} className="upload-link">Click to Upload File</label>
+
+                      <input
+                        id={`file-upload-${fieldName}`}
+                        type="file"
+                        accept=".jpg,.jpeg,.png"
+                        name={fieldName}
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDynamicImageUpload(fieldName, file);
+                          e.target.value = ""; // reset input
+                        }}
+                      />
+
+                      {/* Show Preview if Files Exist */}
+                      {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
+                        <div className="file-name-image-display">
+                          <ul>
+                            {dynamicFileStates[fieldName].map((file, index) => (
+                              <div className="file-name-image-display-indiv" key={index}>
+                                <li className="file-item">
+                                  {file.preview && (
+                                    <div className="filename-image-container">
+                                      <img
+                                        src={file.preview}
+                                        alt={file.name}
+                                        className="file-preview"
+                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="file-name-truncated">{file.name}</div>
+
+                                  <div className="delete-container">
+                                    <button
+                                      type="button"
+                                      className="delete-button"
+                                      onClick={() => handleDynamicImageDelete(fieldName, file.name)}
+                                    >
+                                      <img
+                                        src="/images/trash.png"
+                                        alt="Delete"
+                                        className="delete-icon"
+                                      />
+                                    </button>
+                                  </div>
+                                </li>
+                              </div>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
 
                 {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
                   docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
@@ -4264,76 +4332,6 @@ const handleFileChange = (
                   </div>
                 )}
 
-
-                
-
-                {/* Dynamically Render Extra Image Upload Fields */}
-                {dynamicImageFields.map((fieldName) => (
-                  <div className="required-documents-container" key={fieldName}>
-                    <label className="form-label-required-documents">
-                      {typeof fieldName === "string"
-                        ? formatFieldName(fieldName.replace(/jpg$/, "").trim())
-                        : ""}
-                      <span className="required">*</span>
-                    </label>
-
-                    <div className="file-upload-container-required-documents">
-                      <label htmlFor={`file-upload-${fieldName}`} className="upload-link">Click to Upload File</label>
-
-                      <input
-                        id={`file-upload-${fieldName}`}
-                        type="file"
-                        accept=".jpg,.jpeg,.png"
-                        name={fieldName}
-                        style={{ display: "none" }}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleDynamicImageUpload(fieldName, file);
-                          e.target.value = ""; // reset input
-                        }}
-                      />
-
-                      {/* Show Preview if Files Exist */}
-                      {dynamicFileStates[fieldName] && dynamicFileStates[fieldName].length > 0 && (
-                        <div className="file-name-image-display">
-                          <ul>
-                            {dynamicFileStates[fieldName].map((file, index) => (
-                              <div className="file-name-image-display-indiv" key={index}>
-                                <li className="file-item">
-                                  {file.preview && (
-                                    <div className="filename-image-container">
-                                      <img
-                                        src={file.preview}
-                                        alt={file.name}
-                                        className="file-preview"
-                                        style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                      />
-                                    </div>
-                                  )}
-                                  <div className="file-name-truncated">{file.name}</div>
-
-                                  <div className="delete-container">
-                                    <button
-                                      type="button"
-                                      className="delete-button"
-                                      onClick={() => handleDynamicImageDelete(fieldName, file.name)}
-                                    >
-                                      <img
-                                        src="/images/trash.png"
-                                        alt="Delete"
-                                        className="delete-icon"
-                                      />
-                                    </button>
-                                  </div>
-                                </li>
-                              </div>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
 
               </div>
             </>
