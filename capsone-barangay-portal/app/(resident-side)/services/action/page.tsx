@@ -3588,6 +3588,69 @@ const handleFileChange = (
                   </div>
                 </div>
 
+                {(clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax")&& (
+                  <>
+                    <div className="required-documents-container">
+                    <label className="form-label-required-documents"> Death Certificate<span className="required">*</span></label>
+                      <div className="file-upload-container-required-documents">
+                        <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
+                          <input
+                            id="file-upload8"
+                            type="file"
+                            //required
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                              handleFileChange(e, setFiles10, 'deathCertificate');
+                            }}
+                            accept=".jpg,.jpeg,.png"
+                            style={{ display: "none" }}
+                          />
+                        <div className="uploadedFiles-container">
+                          {/* Display the file names with image previews */}
+                          {files10.length > 0 && (
+                            <div className="file-name-image-display">
+                              <ul>
+                                {files10.map((file, index) => (
+                                  <div className="file-name-image-display-indiv" key={index}>
+                                    <li> 
+                                        {/* Display the image preview */}
+                                        {file.preview && (
+                                          <div className="filename&image-container">
+                                            <img
+                                              src={file.preview}
+                                              alt={file.name}
+                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
+                                            />
+                                          </div>
+                                          )}
+                                        {file.name}  
+                                      <div className="delete-container">
+                                        {/* Delete button with image */}
+                                        <button
+                                            type="button"
+                                            onClick={() => handleFileDelete('deathCertificate','file-upload10',setFiles10,setClearanceInput)}
+                                            className="delete-button"
+                                          >
+                                            <img
+                                              src="/images/trash.png"  
+                                              alt="Delete"
+                                              className="delete-icon"
+                                            />
+                                          </button>
+                                        
+                                      </div>
+                                        
+                                    </li>
+                                  </div>
+                                ))}  
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
                 {/* Dynamically Render Extra Image Upload Fields */}
                 {dynamicImageFields.map((fieldName) => (
                   <div className="required-documents-container" key={fieldName}>
@@ -3655,6 +3718,8 @@ const handleFileChange = (
                     </div>
                   </div>
                 ))}
+
+
 
 
                 {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
@@ -4202,68 +4267,7 @@ const handleFileChange = (
                   </>
                 )}
 
-                {(clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax")&& (
-                  <>
-                    <div className="required-documents-container">
-                    <label className="form-label-required-documents"> Death Certificate<span className="required">*</span></label>
-                      <div className="file-upload-container-required-documents">
-                        <label htmlFor="file-upload8"  className="upload-link">Click to Upload File</label>
-                          <input
-                            id="file-upload8"
-                            type="file"
-                            //required
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                              handleFileChange(e, setFiles10, 'deathCertificate');
-                            }}
-                            accept=".jpg,.jpeg,.png"
-                            style={{ display: "none" }}
-                          />
-                        <div className="uploadedFiles-container">
-                          {/* Display the file names with image previews */}
-                          {files10.length > 0 && (
-                            <div className="file-name-image-display">
-                              <ul>
-                                {files10.map((file, index) => (
-                                  <div className="file-name-image-display-indiv" key={index}>
-                                    <li> 
-                                        {/* Display the image preview */}
-                                        {file.preview && (
-                                          <div className="filename&image-container">
-                                            <img
-                                              src={file.preview}
-                                              alt={file.name}
-                                              style={{ width: '50px', height: '50px', marginRight: '5px' }}
-                                            />
-                                          </div>
-                                          )}
-                                        {file.name}  
-                                      <div className="delete-container">
-                                        {/* Delete button with image */}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleFileDelete('deathCertificate','file-upload10',setFiles10,setClearanceInput)}
-                                            className="delete-button"
-                                          >
-                                            <img
-                                              src="/images/trash.png"  
-                                              alt="Delete"
-                                              className="delete-icon"
-                                            />
-                                          </button>
-                                        
-                                      </div>
-                                        
-                                    </li>
-                                  </div>
-                                ))}  
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
+                
 
                 {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
                   <div className="required-documents-container">
