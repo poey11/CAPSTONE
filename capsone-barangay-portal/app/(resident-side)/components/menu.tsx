@@ -282,7 +282,7 @@ const handleNotificationClick = async (notification: Notification) => {
     router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
   }
   else if (type === "Verification" && notification.message?.toLowerCase().includes("update")) {
-    router.push(`/ResidentAccount/Profile?id=${user?.uid}#resubmit-section`);
+    router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
   }
   else {
     console.log("No navigation triggered for this notification type.");
