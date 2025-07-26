@@ -3305,9 +3305,7 @@ const handleFileChange = (
                           value={clearanceInput.occupation}
                           onChange={handleChange}
                           required 
-                          placeholder="Enter Occupation"
-                          disabled={isReadOnly}
-                           
+                          placeholder="Enter Occupation" 
                         />
                       </div>
 
