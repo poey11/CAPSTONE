@@ -12,8 +12,7 @@ import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { set } from "date-fns";
-import { clear } from "console";
+;
 
 interface EmergencyDetails {
   fullName: string;
@@ -604,6 +603,9 @@ function toPHISOString(date: Date): string {
 
 // Disable if the date has all time slots full
 const filterDate = (date: Date) => {
+  const day = date.getDay(); 
+  if (day === 0 || day === 6) return false;
+
   let fullCount = 0;
   for (let hour = 8; hour <= 16; hour++) {
     for (let min of [0, 30]) {
@@ -617,6 +619,7 @@ const filterDate = (date: Date) => {
   }
   return fullCount < 18;
 };
+
 
 
 //Disable if that specific time slot already has 3 appointments
@@ -644,25 +647,34 @@ useEffect(() => {
 
 
 useEffect(() => {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
+  const findFirstAvailableWeekdaySlot = (): Date | null => {
+    const date = new Date(); // start from now
+    date.setHours(0, 0, 0, 0);
 
-  const findFirstAvailableSlot = (): Date | null => {
-    for (let hour = 8; hour <= 16; hour++) {
-      for (let min of [0, 30]) {
-        const slot = new Date(tomorrow);
-        slot.setHours(hour, min, 0, 0);
-        const key = toPHISOString(slot);
-        if ((appointmentsMap[key] || 0) < 3) {
-          return slot;
+    // Try up to 30 days ahead to avoid infinite loop
+    for (let d = 0; d < 30; d++) {
+      date.setDate(date.getDate() + (d === 0 ? 1 : 1)); // start with tomorrow
+
+      // Skip if weekend (0 = Sunday, 6 = Saturday)
+      if (date.getDay() === 0 || date.getDay() === 6) continue;
+
+      // Try all 30-min slots from 8:00 to 16:30
+      for (let hour = 8; hour <= 16; hour++) {
+        for (let min of [0, 30]) {
+          const slot = new Date(date);
+          slot.setHours(hour, min, 0, 0);
+          const key = toPHISOString(slot);
+          if ((appointmentsMap[key] || 0) < 3) {
+            return slot;
+          }
         }
       }
     }
-    return null;
+
+    return null; // No available slot found in the next 30 days
   };
 
-  const firstAvailable = findFirstAvailableSlot();
+  const firstAvailable = findFirstAvailableWeekdaySlot();
 
   if (firstAvailable) {
     setSelectedDate(firstAvailable);
@@ -671,9 +683,10 @@ useEffect(() => {
       ...prev,
       appointmentDate: toPHISOString(firstAvailable),
     }));
-    setMinDate(firstAvailable);
+    setMinDate(firstAvailable); // optional: restrict date picker to this or later
   }
 }, [appointmentsMap]);
+
 
 const [userAppointmentsMap, setUserAppointmentsMap] = useState<any>([]);
 useEffect(() => {
@@ -1053,7 +1066,9 @@ const handleFileChange = (
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
       if((clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docType === "Barangay Indigency") {
+        
         const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
+
       
         // check if the user has an existing appointment for this docType and purpose on the selected date
         const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
@@ -1378,6 +1393,7 @@ const handleFileChange = (
         createdAt: clearanceInput.dateRequested,
         requestId: clearanceInput.requestId,
         status: "Pending",
+        reqType: "Online",
         statusPriority: 1,
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
@@ -1411,6 +1427,7 @@ const handleFileChange = (
         requestId: clearanceInput.requestId,
         status: "Pending",
         statusPriority: 1,
+        reqType: "Online",
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         docType: docType,

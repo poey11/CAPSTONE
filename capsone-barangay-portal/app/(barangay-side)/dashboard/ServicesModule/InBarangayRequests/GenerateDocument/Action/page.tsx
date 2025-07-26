@@ -3497,16 +3497,44 @@ const handleChange = (
 
                             <div className="fields-section">
                               <h1>Relationship<span className="required">*</span></h1>
-                              <input 
-                                type="text" 
-                                id="emergencyDetails.relationship"
+                              <select
+                                id="relationship"
                                 name="emergencyDetails.relationship"
-                                value={clearanceInput?.emergencyDetails?.relationship || ""}
+                                className="createRequest-input-field"
+                                value={
+                                  ["Father", "Mother", "Brother", "Sister", "Legal Guardian"].includes(clearanceInput?.emergencyDetails?.relationship || "")
+                                    ? clearanceInput?.emergencyDetails?.relationship 
+                                    : clearanceInput?.emergencyDetails?.relationship === "Others" || ""
+                                      ? "Others"
+                                      : ""
+                                }
                                 onChange={handleChange}
                                 required
-                                className="createRequest-input-field" 
-                                placeholder="Enter Relationship"
-                              />
+                              >
+                                <option value="" disabled>Select Relationship</option>
+                                <option value="Father">Father</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Brother">Brother</option>
+                                <option value="Sister">Sister</option>
+                                <option value="Legal Guardian">Legal Guardian</option>
+                                <option value="Others">Others</option>
+                              </select>
+                              
+                              {clearanceInput?.emergencyDetails?.relationship === "Others" && (
+                                <input
+                                  type="text"
+                                  name="emergencyDetails.relationship"
+                                  placeholder="Please specify the relationship"
+                                  className="form-input-document-req"
+                                  value={
+                                    ["Father", "Mother", "Brother", "Sister", "Legal Guardian", "Others"].includes(clearanceInput.emergencyDetails.relationship)
+                                      ? ""
+                                      : clearanceInput.emergencyDetails.relationship
+                                  }
+                                  onChange={handleChange}
+                                  required
+                                />
+                              )}
                             </div>
                           </div>
                         </div>
