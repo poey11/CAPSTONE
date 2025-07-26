@@ -208,7 +208,7 @@ export default function ViewUser() {
             // Create a notification for the resident
             const notificationRef = doc(collection(db, "Notifications"));
             await setDoc(notificationRef, {
-            residentId: selectedUserId, // == user id
+            residentID: selectedUserId, // == user id
             message: `Your account is now VERIFIED and linked to your resident record.`,
             transactionType: "Verification",
             timestamp: new Date(),
