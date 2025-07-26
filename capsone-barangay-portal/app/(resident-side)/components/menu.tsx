@@ -281,7 +281,7 @@ const handleNotificationClick = async (notification: Notification) => {
   else if (type === "Online Request" || type === "Online Service Request") {
     router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
   }
-  else if (type === "Verification" && notification.message?.toLowerCase().includes("update")) {
+  else if (type === "Verification") {
     router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
   }
   else {
