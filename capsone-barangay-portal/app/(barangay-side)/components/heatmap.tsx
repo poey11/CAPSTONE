@@ -74,7 +74,7 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
     const areaScores: { [area: string]: number } = {};
     incidents.forEach((incident) => {
       const area = incident.areaOfIncident;
-      const weight = incident.typeOfIncident === "Major" ? 2 : 1;
+      const weight = incident.typeOfIncident === "Major" ? 2 : 0.5;
       if (!areaScores[area]) areaScores[area] = 0;
       areaScores[area] += weight;
     });
