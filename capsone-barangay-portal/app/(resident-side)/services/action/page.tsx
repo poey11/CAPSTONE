@@ -416,6 +416,7 @@ export default function Action() {
             requestorMrMs: mrms,
             residentId: residentData.id,
             citizenship: residentData.citizenship || "",
+            occupation: residentData.occupation || "",
           }));
         }
   
@@ -1903,7 +1904,7 @@ const handleFileChange = (
                       onChange={handleChange}
                       className="form-input-document-req" 
                       onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-
+                      disabled={isReadOnly}
                       required 
                       max={getLocalDateString(new Date())}
                     />
@@ -1920,7 +1921,7 @@ const handleFileChange = (
                       className="form-input-document-req"  
                       required 
                       placeholder={`Enter Requestor's Address`}
-                      readOnly={isReadOnly}
+                      disabled={isReadOnly}
 
                     />
                   </div>
@@ -3304,7 +3305,9 @@ const handleFileChange = (
                           value={clearanceInput.occupation}
                           onChange={handleChange}
                           required 
-                          placeholder="Enter Occupation" 
+                          placeholder="Enter Occupation"
+                          disabled={isReadOnly}
+                           
                         />
                       </div>
 
