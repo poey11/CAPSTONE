@@ -551,7 +551,7 @@ if (data.appointmentDate) {
     data: selectedRequestType === 'online'
       ? [
         { name: "Pending", value: documentRequestOnlinePendingCount },
-        { name: "In - Progress", value: documentRequestOnlinePendingCount },
+        { name: "In - Progress", value: documentRequestInProgressCount },
         { name: "For Pick-Up", value: documentRequestOnlinePickUpCount },
         { name: "Completed", value: documentRequestOnlineCompletedCount },
         { name: "Rejected", value: documentRequestOnlineRejectedCount},
