@@ -791,8 +791,8 @@ const uploadForms = async (url: string): Promise<void> => {
         seeker.monthOfBirth ? monthNames[parseInt(seeker.monthOfBirth, 10)] : "",
         seeker.dayOfBirth || "",
         seeker.yearOfBirth || "",
-        seeker.sex === "M" ? "*" : "",
-        seeker.sex === "F" ? "*" : "",
+        seeker.sex === "Male" ? "*" : "",
+        seeker.sex === "Female" ? "*" : "",
         seeker.remarks || "",
       ];
       
