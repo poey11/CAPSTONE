@@ -1012,7 +1012,7 @@ export default function GenerateDialogueLetter() {
                                 setShowPopup(true);
 
                                 if (showSubmitPopup.letterType === "dialogue") {
-                                sendSMSForDialogue(); 
+                                /*sendSMSForDialogue(); */
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
