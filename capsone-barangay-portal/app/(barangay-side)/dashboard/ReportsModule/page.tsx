@@ -4990,14 +4990,27 @@ const generateDepartmentalReport = async (
         const worksheet = workbook.worksheets[0];
     
 
-        worksheet.getCell("A1").value = allTime
-          ? "BARANGAY FAIRVIEW\nALL TIME SUMMARY OF SERVICE REQUESTS"
-          : "BARANGAY FAIRVIEW\nMONTHLY SUMMARY OF SERVICE REQUESTS";
-        worksheet.getCell("A1").alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-        worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };        
+        const docTypeDisplay = docType.toUpperCase();
 
-        // Update subheader
-        worksheet.getCell("A2").value = reportTitle;
+        let titleText = "";
+
+        if (allTime) {
+          titleText =
+            docType === "All"
+              ? "BARANGAY FAIRVIEW\nALL TIME SUMMARY OF ALL SERVICE REQUESTS"
+              : `BARANGAY FAIRVIEW\nALL TIME SUMMARY OF ${docTypeDisplay} SERVICE REQUESTS`;
+        } else {
+          titleText = `BARANGAY FAIRVIEW\nMONTHLY SUMMARY OF\n${docTypeDisplay} SERVICE REQUESTS`;
+        }
+
+        worksheet.getCell("A1").value = titleText;
+        worksheet.getCell("A1").alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+        worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+
     
         // Insert data rows
         const startRow = 4;
@@ -5139,7 +5152,7 @@ const generateDepartmentalReport = async (
                 month: "long",
               }).replace(" ", "");
       
-          saveAs(blob, `ServiceRequestReport_${label}.pdf`);
+          saveAs(blob, `ServiceRequestReport_${docType}_${label}.pdf`);
           
           const notificationRef = collection(db, "BarangayNotifications");
           const reportName = "Incident Summary Report"; // You can replace this with your dynamic report name
