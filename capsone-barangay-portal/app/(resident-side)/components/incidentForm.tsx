@@ -87,7 +87,6 @@ const formRef = useRef<HTMLFormElement>(null);
                 lastname: verifiedData.lastName || "",
                 contactNos: verifiedData.contactNumber || "",
                 email: verifiedData.emailAddress || "",
-                address: verifiedData.address || "",
                 residentId: userData.residentId || "",
               }));
             }
@@ -101,7 +100,6 @@ const formRef = useRef<HTMLFormElement>(null);
               lastname: userData.last_name || "",
               contactNos: userData.phone || "",
               email: userData.email || "",
-              address: userData.address || "",
             }));
           }
         }
