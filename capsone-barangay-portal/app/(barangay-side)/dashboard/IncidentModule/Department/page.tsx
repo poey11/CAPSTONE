@@ -45,6 +45,8 @@ export default function Department() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<any | null>(null);
   const [viewActiveSection, setViewActiveSection] = useState("complainant");
+  const [selectedArea, setSelectedArea] = useState<string>("");
+
   
   const hasAnimatedOnce = useRef(false);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
@@ -390,12 +392,22 @@ if (incidentType) {
 }
 
 
-  // Filter by case number segment
+  {/*}
   if (caseNumberSearch) {
     filtered = filtered.filter((incident) => {
       const segments = incident.caseNumber?.split(" - ");
       const lastSegment = segments?.[2]?.trim();
       return lastSegment?.includes(caseNumberSearch.trim());
+    });
+  }
+  */}
+
+    // Filter by case number (any segment, partial match)
+  if (caseNumberSearch) {
+    filtered = filtered.filter((incident) => {
+      return incident.caseNumber
+        ?.toLowerCase()
+        .includes(caseNumberSearch.trim().toLowerCase());
     });
   }
 
@@ -419,11 +431,19 @@ if (incidentType) {
   );
 }
 
+if (selectedArea) {
+  filtered = filtered.filter(
+    (incident) =>
+      incident.areaOfIncident?.toLowerCase().trim() === selectedArea.toLowerCase()
+  );
+}
+
+
   
   setCurrentPage(1);
 
   setFilteredIncidents(filtered);
-}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType, selectedNature]);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType, selectedNature, selectedArea]);
 
 
   // Pagination logic
@@ -492,13 +512,15 @@ if (incidentType) {
       </div>
 
       <div className={`section-2-departments ${filtersLoaded ? "filters-animated" : ""}`}  /* edited this class*/>
+    
       <input
-          type="text"
-          className="search-bar-departments"  /* edited this class*/
-          placeholder="Enter Case Number (e.g. 0001)"
-          value={caseNumberSearch}
-          onChange={(e) => setCaseNumberSearch(e.target.value)}
-        />
+        type="text"
+        className="search-bar-departments"
+        placeholder="Search Case No. (e.g. BCPC - POPHYJ - 0015 or 0015)"
+        value={caseNumberSearch}
+        onChange={(e) => setCaseNumberSearch(e.target.value)}
+      />
+              
 
 
 
@@ -554,6 +576,19 @@ if (incidentType) {
               ))}
             </select>
           )}
+
+
+       <select
+            className="featuredStatus-departments"
+            value={selectedArea}
+            onChange={(e) => setSelectedArea(e.target.value)}
+          >
+            <option value="">All Areas</option>
+            <option value="East Fairview">East Fairview</option>
+            <option value="West Fairview">West Fairview</option>
+            <option value="South Fairview">South Fairview</option>
+        </select>
+
 
 
 
