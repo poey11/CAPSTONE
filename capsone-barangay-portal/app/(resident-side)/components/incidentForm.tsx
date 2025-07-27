@@ -16,10 +16,14 @@ const incidentForm:React.FC = () => {
   const {user} = useAuth();
   const currentUser = user?.uid || "Guest";
   const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
-  const minDate = getLocalDateString(new Date());
   const [filesContainer1, setFilesContainer1] = useState<{ name: string, preview: string | undefined }[]>([]);
   const [isVerified, setIsVerified] = useState(false);
-
+  
+  const today = new Date();
+  const todayString = today.toISOString().split("T")[0];
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayString = yesterday.toISOString().split("T")[0];
 
 
 const formRef = useRef<HTMLFormElement>(null);
@@ -463,24 +467,19 @@ const confirmSubmit = async () => {
 
 
 
-      const isOneDayOrMore = (
-        dateFiled: string,     // e.g. "2025-07-13"
-        timeFiled: string,     // e.g. "21:06" or "21:06:00"
-        createdAt: string | Date
+        const isOneDayOrMore = (
+          dateFiled: string,    // e.g. "2025-07-13"
+          timeFiled: string,    // e.g. "21:06" or "21:06:00"
+          createdAt: string | Date
         ): boolean => {
           // Combine date + time into full ISO format
-          const filedDateTime = new Date(`${dateFiled}T${timeFiled}`);
-          const createdDate = new Date(createdAt);
-          console.log("filedDateTime", filedDateTime);
-          console.log("createdDate", createdDate);
-
-          const diff = createdDate.getTime() - filedDateTime.getTime();
-
-          console.log("Time difference in ms:", diff);
           
+          const filedDateTime = new Date(`${dateFiled}T${timeFiled}:00`);
+          const currentDateTime = new Date(createdAt);
+          const diffMs = currentDateTime.getTime() - filedDateTime.getTime();
 
-          return diff >= 24 * 60 * 60 * 1000; // 24 hours in ms
-        };
+          return diffMs > 24 * 60 * 60 * 1000; // strictly more than 24h
+        };        
 
       
     
@@ -762,18 +761,18 @@ const confirmSubmit = async () => {
                         <label htmlFor="date" className="form-label-incident-report">
                           Date of Incident<span className="required">*</span>
                           </label>
-                        <input
-                          type="date"
-                          id="dateFiled"
-                          name="dateFiled"
-                          className={`form-input-incident-report ${invalidFields.includes("dateFiled") ? "input-error" : ""}`}
-                          required
-                          max={minDate}
-                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-                          placeholder="Enter Date of Incident"
-                          value={incidentReport.dateFiled}
-                          onChange={handleFormChange}
-                        />
+                            <input
+                              type="date"
+                              id="dateFiled"
+                              name="dateFiled"
+                              className={`form-input-incident-report ${invalidFields.includes("dateFiled") ? "input-error" : ""}`}
+                              required
+                              value={incidentReport.dateFiled}
+                              onChange={handleFormChange}
+                              max={todayString}
+                              min={yesterdayString}
+                              onKeyDown={(e) => e.preventDefault()}
+                            />
                       </div>
 
                       <div className="form-group-incident-report">
