@@ -848,25 +848,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                               {(files.length > 0 || respondent.file.length > 0) ? (
                                                 <div className="file-name-image-display">
                                                   <ul>
-                                                    {respondent.file.map((url: string, index: number) => (
-                                                      <div
-                                                        className="file-name-image-display-indiv"
-                                                        key={`existing-${index}`}
-                                                      >
-                                                        <li>
-                                                          <div className="filename&image-container">
-                                                            <img
-                                                              src={url}
-                                                              alt={`Investigation Photo ${index + 1}`}
-                                                              style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                                                            />
-                                                          </div>
-                                                          <a href={url} target="_blank" rel="noopener noreferrer">
-                                                            View
-                                                          </a>
-                                                        </li>
-                                                      </div>
-                                                    ))}
+                                                    
 
                                                     {files.map((file, index) => (
                                                       <div
