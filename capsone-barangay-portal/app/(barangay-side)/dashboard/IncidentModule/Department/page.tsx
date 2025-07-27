@@ -45,6 +45,8 @@ export default function Department() {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedIncident, setSelectedIncident] = useState<any | null>(null);
   const [viewActiveSection, setViewActiveSection] = useState("complainant");
+  const [selectedArea, setSelectedArea] = useState<string>("");
+
   
   const hasAnimatedOnce = useRef(false);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
@@ -419,11 +421,19 @@ if (incidentType) {
   );
 }
 
+if (selectedArea) {
+  filtered = filtered.filter(
+    (incident) =>
+      incident.areaOfIncident?.toLowerCase().trim() === selectedArea.toLowerCase()
+  );
+}
+
+
   
   setCurrentPage(1);
 
   setFilteredIncidents(filtered);
-}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType, selectedNature]);
+}, [incidentData, selectedStatus, showCount, sortOrder, caseNumberSearch, incidentType, selectedNature, selectedArea]);
 
 
   // Pagination logic
@@ -554,6 +564,19 @@ if (incidentType) {
               ))}
             </select>
           )}
+
+
+          <select
+            className="featuredStatus-departments"
+            value={selectedArea}
+            onChange={(e) => setSelectedArea(e.target.value)}
+          >
+            <option value="">All Areas</option>
+            <option value="East Fairview">East Fairview</option>
+            <option value="West Fairview">West Fairview</option>
+            <option value="South Fairview">South Fairview</option>
+        </select>
+
 
 
 
