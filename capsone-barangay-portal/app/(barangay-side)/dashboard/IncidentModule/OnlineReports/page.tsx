@@ -136,13 +136,13 @@ const getViewedRequests = (): string[] => {
     let data = [...incidentData];
     
       // Filter by case number segment
-    if (caseNumberSearch) {
+      if (caseNumberSearch) {
       data = data.filter((incident) => {
-        const segments = incident.caseNumber?.split(" - ");
-        const lastSegment = segments?.[2]?.trim();
-        return lastSegment?.includes(caseNumberSearch.trim());
-      });
-    }
+          return incident.caseNumber
+            ?.toLowerCase()
+            .includes(caseNumberSearch.trim().toLowerCase());
+        });
+      }
 
       if (searchNameQuery) {
         const query = searchNameQuery.toLowerCase();
