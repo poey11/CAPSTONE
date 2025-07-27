@@ -7,7 +7,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
   const data = await req.json();
   const { title, body, boldWords } = data;
 
-  try { 
+  try {
     const pdfRef = ref(storage, `/ServiceRequests/templates/otherdoc/template.pdf`);
     const pdfUrl = await getDownloadURL(pdfRef);
     const pdfResponse = await fetch(pdfUrl);
@@ -48,29 +48,23 @@ export async function POST(req: NextRequest, res: NextResponse) {
     // Normalize bold phrases for easier matching
     const normalize = (text: string) =>
       text.trim().replace(/[.,!?;:]/g, '').replace(/\s+/g, ' ').toLowerCase();
-      
-    const normalizedBoldPhrases = boldWords.map(normalize);
 
+    const normalizedBoldPhrases = boldWords.map(normalize);
 
     for (const line of bodyLines) {
       const originalWords = line.trim().split(/\s+/);
       const sanitizedWords = originalWords.map((word: string) =>
         word.replace(/[.,!?;:]/g, '')
       );
-
+    
       const chunks: { text: string; isBold: boolean }[] = [];
       let i = 0;
-
       while (i < sanitizedWords.length) {
         let matched = false;
-
-        // Try to match longest possible bold phrase from current index
         for (let j = sanitizedWords.length; j > i; j--) {
           const candidateWords = sanitizedWords.slice(i, j);
           const candidateText = candidateWords.join(' ').toLowerCase();
-
           if (normalizedBoldPhrases.includes(candidateText)) {
-            // Use original words (with punctuation preserved)
             const originalText = originalWords.slice(i, j).join(' ');
             chunks.push({ text: originalText, isBold: true });
             i = j;
@@ -78,25 +72,32 @@ export async function POST(req: NextRequest, res: NextResponse) {
             break;
           }
         }
-
         if (!matched) {
           chunks.push({ text: originalWords[i], isBold: false });
           i += 1;
         }
       }
-
-      // Wrap and render the chunks
+    
+      const spaceWidth = font.widthOfTextAtSize(' ', fontSize);
+      const indentWidth = font.widthOfTextAtSize('           ', fontSize);
+    
       let currentLine: { text: string; isBold: boolean }[] = [];
       let currentLineWidth = 0;
-      const spaceWidth = font.widthOfTextAtSize(' ', fontSize);
-
+      let isFirstLine = true;
+    
       for (const chunk of chunks) {
         const usedFont = chunk.isBold ? boldFont : font;
         const chunkWidth = usedFont.widthOfTextAtSize(chunk.text, fontSize);
-
-        if (currentLineWidth + chunkWidth > maxWidth && currentLine.length > 0) {
-          // Draw current line
+      
+        const lineMaxWidth = isFirstLine
+          ? maxWidth - indentWidth
+          : maxWidth;
+      
+        if (currentLineWidth + chunkWidth > lineMaxWidth && currentLine.length > 0) {
+          // Draw the current line
           let drawX = marginLeft;
+          if (isFirstLine) drawX += indentWidth;
+        
           for (const part of currentLine) {
             const partFont = part.isBold ? boldFont : font;
             page.drawText(part.text, {
@@ -108,18 +109,22 @@ export async function POST(req: NextRequest, res: NextResponse) {
             });
             drawX += partFont.widthOfTextAtSize(part.text, fontSize) + spaceWidth;
           }
+        
           yPosition -= lineHeight;
           currentLine = [];
           currentLineWidth = 0;
+          isFirstLine = false;
         }
-
+      
         currentLine.push(chunk);
         currentLineWidth += chunkWidth + spaceWidth;
       }
-
-      // Draw remaining line
+    
+      // Draw last line of paragraph
       if (currentLine.length > 0) {
         let drawX = marginLeft;
+        if (isFirstLine) drawX += indentWidth;
+      
         for (const part of currentLine) {
           const partFont = part.isBold ? boldFont : font;
           page.drawText(part.text, {
@@ -131,9 +136,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
           });
           drawX += partFont.widthOfTextAtSize(part.text, fontSize) + spaceWidth;
         }
+      
         yPosition -= lineHeight;
       }
     }
+    
 
     const pdfBytes = await pdfDoc.save();
     return new NextResponse(pdfBytes, {

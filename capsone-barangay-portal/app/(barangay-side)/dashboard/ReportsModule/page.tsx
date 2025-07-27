@@ -283,7 +283,7 @@ const moduleTotalPages: { [key: string]: number } = {
   "Resident Module": 2,
   "Incident Module": 1,
   "Services Module": 1,
-  "Programs Module": 1,
+  //"Programs Module": 1,
 };
 
 const totalPages = selectedModule ? moduleTotalPages[selectedModule] || 1 : 1;
@@ -5285,9 +5285,11 @@ const generateDepartmentalReport = async (
                         ) && (
                           <option value="Services Module">Services Module</option>
                       )}
+                      {/*
                       {session?.user?.role === "Barangay Official" && (
                           <option value="Programs Module">Programs Module</option>
                       )}
+                          */}
                 </select>
               </div>
             </div>
@@ -5688,6 +5690,7 @@ const generateDepartmentalReport = async (
                 </>
               )}
 
+              {/*
               {selectedModule === "Programs Module" && (
                 <>
                   {currentPage === 1 && (
@@ -5708,6 +5711,7 @@ const generateDepartmentalReport = async (
                   )}
                 </>
               )}
+                */}
 
                 
               </div>
@@ -5719,8 +5723,8 @@ const generateDepartmentalReport = async (
                   disabled={
                     currentPage === 2 || 
                     selectedModule === "Incident Module" || 
-                    selectedModule === "Services Module" || 
-                    selectedModule === "Programs Module"
+                    selectedModule === "Services Module" 
+                    //selectedModule === "Programs Module"
                   }
                 >
                   <img src="/Images/next.png" className="redirection-reports-button" />
