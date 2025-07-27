@@ -1,7 +1,7 @@
 
 "use client";
 import "@/CSS/IncidentModule/OnlineReporting.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getAllSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useRouter, useSearchParams} from "next/navigation";
 import { collection, doc, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
@@ -21,6 +21,7 @@ export default function OnlineReports() {
   const [caseNumberSearch, setCaseNumberSearch] = useState("");
   const [showCount, setShowCount] = useState<number>(0);
   const isAuthorized = ["LF Staff"].includes(user?.position || "");
+  const [selectedArea, setSelectedArea] = useState<string>("");
 
   const [taskAssignedData, setTaskAssignedData] = useState<any[]>([]);
   const searchParams = useSearchParams();
@@ -222,9 +223,18 @@ const getViewedRequests = (): string[] => {
   if (showCount) {
     data = data.slice(0, showCount);
   }
+
+  if (selectedArea) {
+  data = data.filter(
+    (incident) =>
+      incident.areaOfIncident?.toLowerCase().trim() === selectedArea.toLowerCase()
+  );
+
+}
+  
   
     setFilteredData(sortData(data));
-  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder, showCount]);
+  }, [incidentData, searchQuery, searchNameQuery, selectedStatus, sortOrder, showCount, selectedArea]);
   
   
 
@@ -276,7 +286,23 @@ const getViewedRequests = (): string[] => {
       user?.position === "LF Staff";
 
       /* NEW UPDATED ADDED */
+       const hasAnimatedOnce = useRef(false);
   const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+      useEffect(() => {
+      // Animate filters only once on initial page load
+      if (!hasAnimatedOnce.current) {
+        hasAnimatedOnce.current = true;
+        setFiltersLoaded(false);
+        const timeout = setTimeout(() => {
+          setFiltersLoaded(true);
+        }, 50);
+        return () => clearTimeout(timeout);
+      } else {
+        // Never retrigger animation again
+        setFiltersLoaded(true);
+      }
+    }, []);
 
 
   return (
@@ -355,15 +381,15 @@ const getViewedRequests = (): string[] => {
           ))}
         </select>
     
-        <select
-          className="online-reports-filter"
-          value={showCount}
-          onChange={(e) => setShowCount(Number(e.target.value))}
-        >
-          <option value="0">Show All</option>
-          <option value="5">Show 5</option>
-          <option value="10">Show 10</option>
-          <option value="10">Show 15</option>
+          <select
+            className="online-reports-filter"
+            value={selectedArea}
+            onChange={(e) => setSelectedArea(e.target.value)}
+          >
+            <option value="">All Areas</option>
+            <option value="East Fairview">East Fairview</option>
+            <option value="West Fairview">West Fairview</option>
+            <option value="South Fairview">South Fairview</option>
         </select>
 
       </div>

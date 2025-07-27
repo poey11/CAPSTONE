@@ -566,7 +566,7 @@ if (selectedArea) {
           )}
 
 
-          <select
+       <select
             className="featuredStatus-departments"
             value={selectedArea}
             onChange={(e) => setSelectedArea(e.target.value)}
