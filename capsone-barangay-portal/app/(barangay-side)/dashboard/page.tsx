@@ -1205,27 +1205,27 @@ if (!mounted) return null;
 
         <div className="services-section">
 
-        <div className="dashboard-heatmap-section">
-                <div className="heatmap-header">
-                
-                  <p className="dashboard-title-heading">
-                    📍 Incident Heat Map
-                  </p>
+<div className="dashboard-heatmap-section">
+  <div className="heatmap-header">
+    <p className="dashboard-title-heading">
+      📍 Incident Heat Map
+    </p>
 
-                  <div className="heatmap-legend">
-                    <div className="legend-title">Incident Intensity</div>
-                    <div className="legend-items">
-                      <LegendColorBox color="#00ff00" label="Low" />
-                      <LegendColorBox color="#ffff00" label="Medium" />
-                      <LegendColorBox color="#ff0000" label="High" />
-                    </div>
-                  </div>
-                </div>
+    <div className="heatmap-legend">
+      <div className="legend-title">Incident Intensity</div>
+      <div className="spectrum-legend">
+        <span className="legend-label">Low</span>
+        <div className="spectrum-gradient" />
+        <span className="legend-label">High</span>
+      </div>
+    </div>
+  </div>
 
-                <div className="heatmap-container">
-                  <Heatmap incidents={reportData} />
-                </div>
-              </div>
+  <div className="heatmap-container">
+    <Heatmap incidents={reportData} />
+  </div>
+</div>
+
         </div>
 
        
