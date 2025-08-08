@@ -93,7 +93,7 @@ const BMenu: React.FC = () => {
       >
           
         <div className="dropdown-button-brgyside">
-          <Link  href="/dashboard/OfficialsModule">Officials Module</Link>
+          <Link  href="/dashboard/OfficialsModule">Officials Management</Link>
           <img 
               src={hoveredDropdown === "officials" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
               alt="Menu Icon" 
@@ -102,7 +102,7 @@ const BMenu: React.FC = () => {
         </div>
           
           <div className="dropdown-container-brgyside">
-            <Link href="/dashboard/OfficialsModule" className="dropdown-item-brgy-brgyside">Officials</Link>
+            <Link href="/dashboard/OfficialsModule" className="dropdown-item-brgy-brgyside">Barangay Officials</Link>
             <Link href="/dashboard/OfficialsModule/SitioHoaOfficers" className="dropdown-item-brgy-brgyside">Sitio/HOA Officers</Link>
           </div>
         </div>
