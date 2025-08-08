@@ -86,8 +86,7 @@ const BMenu: React.FC = () => {
           </div>
         </div>
 
-
-         Officials Module 
+ 
         <div className="dropdown-wrapper-brgyside"
           onMouseEnter={() => setHoveredDropdown("officials")}
           onMouseLeave={() => setHoveredDropdown(null)}
@@ -162,7 +161,6 @@ const BMenu: React.FC = () => {
 
 {/* For CAP2 */}
 
-             Programs and Events Module
           <div className="dropdown-wrapper-brgyside"
             onMouseEnter={() => setHoveredDropdown("programs")}
             onMouseLeave={() => setHoveredDropdown(null)}
