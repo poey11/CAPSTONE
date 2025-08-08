@@ -160,14 +160,14 @@ const BMenu: React.FC = () => {
         */}
 
 {/* For CAP2 */}
-
+{/*
           <div className="dropdown-wrapper-brgyside"
             onMouseEnter={() => setHoveredDropdown("programs")}
             onMouseLeave={() => setHoveredDropdown(null)}
         >
 
             <div className="dropdown-button-brgyside">
-              <Link href="/dashboard">Programs</Link>
+              <Link href="/dashboard">Program</Link>
               <img 
                   src={hoveredDropdown === "programs" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
                   alt="Menu Icon" 
@@ -178,9 +178,10 @@ const BMenu: React.FC = () => {
             <Link href="/dashboard/ProgramsModule" className="dropdown-item-brgy-brgyside">Volunteer Programs</Link>
             <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item-brgy-brgyside">Program Responses</Link>
             </div>
-        </div> 
+        </div> */}
 
           {/* Events Module */}
+          {/*
            <div className="dropdown-wrapper-brgyside"
             onMouseEnter={() => setHoveredDropdown("events")}
             onMouseLeave={() => setHoveredDropdown(null)}
@@ -199,6 +200,27 @@ const BMenu: React.FC = () => {
             <Link href="/dashboard/EventsModule/EventResponses" className="dropdown-item-brgy-brgyside">Event Responses</Link>
             </div>
         </div>   
+        */}
+
+{/* fix redirection links nalang */}
+        <div className="dropdown-wrapper-brgyside"
+            onMouseEnter={() => setHoveredDropdown("programs")}
+            onMouseLeave={() => setHoveredDropdown(null)}
+        >
+
+            <div className="dropdown-button-brgyside">
+              <Link href="/dashboard">Programs Management</Link>
+              <img 
+                  src={hoveredDropdown === "programs" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  alt="Menu Icon" 
+                  className="arrow-brgyside" 
+                />
+            </div>
+            <div className="dropdown-container-brgyside">
+            <Link href="/dashboard/ProgramsModule" className="dropdown-item-brgy-brgyside">Programs</Link>
+            <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item-brgy-brgyside">Events</Link>
+            </div>
+        </div>
 
       </div>
     </div>
