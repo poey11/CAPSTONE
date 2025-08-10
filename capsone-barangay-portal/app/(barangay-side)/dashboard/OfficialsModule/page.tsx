@@ -3,6 +3,7 @@ import "@/CSS/OfficialsModuleBarangdaySide/module.css";
 import type { Metadata } from "next";
 import React,{useState, useEffect, useRef} from "react";
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
 
@@ -28,7 +29,10 @@ const officialsData = [
 
 export default function OfficialsModule() {
 
-  
+  const router = useRouter();
+  const handleEditClick = () => {
+    router.push("/dashboard/OfficialsModule/EditOfficial");
+  };
 
    /* NEW UPDATED ADDED */
     const [filtersLoaded, setFiltersLoaded] = useState(false);
@@ -211,7 +215,10 @@ export default function OfficialsModule() {
                         <img src="/Images/view.png" alt="View"/>
                       </button>
 
-                     <button className="brgy-official-action-edit">
+                     <button 
+                      className="brgy-official-action-edit"
+                      onClick={handleEditClick}
+                     >
                          <img src="/Images/edit.png" alt="Edit"/>
                       </button>
 

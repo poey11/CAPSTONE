@@ -251,11 +251,19 @@ export default function Header() {
         breadcrumb: ["Officials Management", "Barangay Officials"],
       },
 
+      //Edit Barangay Official
+      "/dashboard/OfficialsModule/EditOfficial": {
+        title: "Barangay Officials",
+        breadcrumb: ["Officials Management", "Barangay Officials", "Edit Official"],
+      },
+
       //Sitio/HOA Officers
       "/dashboard/OfficialsModule/SitioHoaOfficers": {
         title: "Sitio / HOA Officers",
         breadcrumb: ["Officials Management", "Sitio / HOA Officers"],
       },
+
+      
 
 
     };
