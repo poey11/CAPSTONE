@@ -68,13 +68,6 @@ export default function ProgramsModule() {
     }, 500);
   }, []);
 
-
-
-
-
-
-
-
   
   const [searchName, setSearchName] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("");
@@ -139,11 +132,29 @@ export default function ProgramsModule() {
     }
   };
 
+
+
+
+
+
+   const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
+
+
+
+
+
+
   return (
     <main className="programs-module-main-container">
-      <div className="programs-module-section-1">
-        <button className="add-programs-btn">Add New Program</button>
-      </div>
+    <div className="programs-module-section-1">
+      <button 
+        className="add-programs-btn"
+        onClick={() => setShowAddProgramsPopup(true)}
+      >
+        Add New Program
+      </button>
+    </div>
+
 
       <div className="programs-module-section-2">
         <input
@@ -296,6 +307,75 @@ export default function ProgramsModule() {
           &raquo;
         </button>
       </div>
+
+
+
+{showAddProgramsPopup && (
+  <div className="add-programs-popup-overlay">
+    <div className="add-programs-confirmation-popup">
+
+       <h2>Add New Program</h2>
+
+       <div className="add-programs-main-container">
+
+
+          <div className="add-programs-photo-section">
+           <span className="add-programs-details-label">Program Photo</span>
+             <div className="add-programs-profile-container">
+                  <img
+                     src={"/Images/default-identificationpic.jpg"}
+                     alt="Identification"
+                     className="add-official-id-photo"
+                  />
+
+             </div>
+              <label htmlFor="identification-file-upload" className="add-programs-upload-link">Click to Upload File</label>
+          </div>
+
+          <div className="add-programs-info-main-container">
+            <div className="add-programs-content-left-side">
+              <div className="fields-section-add-programs">
+                <p>Program Name<span className="required">*</span></p>
+                  <input
+                  type="text"
+                  className="add-programs-input-field"
+                  placeholder="Program Name (E.g. Feeding Program)"
+                  />
+              </div>
+
+            </div>
+
+            <div className="add-programs-content-right-side">
+            <div className="fields-section-add-programs">
+                <p>Location<span className="required">*</span></p>
+                  <input
+                  type="text"
+                  className="add-programs-input-field"
+                  placeholder="Location (E.g. Baragay Hall)"
+                  />
+              </div>
+
+
+            </div>
+            
+          </div>
+
+       </div>
+
+
+       <div className="programs-yesno-container">
+
+        
+
+       </div>
+
+
+    </div>
+
+  </div>
+
+)}
+
     </main>
   );
 }
