@@ -36,6 +36,9 @@ export default function EditResident() {
     cluster: "",
     isStudent: false,
     isPWD: false,
+    pwdType: "",
+    pwdTemporaryUntil: "",     
+    pwdIdFileURL: "", 
     isSeniorCitizen: false,
     isSoloParent: false,
     verificationFilesURLs: [],
@@ -113,6 +116,10 @@ export default function EditResident() {
   const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
   const [verificationPreviews, setVerificationPreviews] = useState<string[]>([]);
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  const [pwdIdFile, setPwdIdFile] = useState<File | null>(null);
+  const [pwdIdPreview, setPwdIdPreview] = useState<string | null>(null);
+
   
   const handleDiscardClick = async () => {
     setShowDiscardPopup(true);
@@ -172,12 +179,16 @@ export default function EditResident() {
             verificationFilesURLs: docSnap.data().verificationFilesURLs || [],
             identificationFileURL: docSnap.data().identificationFileURL || "",
             updatedBy: docSnap.data().updatedBy || "",
+            pwdType: docSnap.data().pwdType || "",
+            pwdTemporaryUntil: docSnap.data().pwdTemporaryUntil || "",
+            pwdIdFileURL: docSnap.data().pwdIdFileURL || "",
           };
 
           setFormData(data);
           setOriginalData(data); // Store original data
           setVerificationPreviews(docSnap.data().verificationFilesURLs || []);
           setIdentificationPreview(docSnap.data().identificationFileURL || null);
+          setPwdIdPreview(data.pwdIdFileURL || null);
         }
       };
       fetchResidentData();
@@ -226,6 +237,20 @@ export default function EditResident() {
       }));
       return;
     }
+
+    if (name === "isPWD") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        isPWD: checked,
+        ...(checked ? {} : { pwdType: "", pwdTemporaryUntil: "" })
+      }));
+      if (!checked) {
+        setPwdIdFile(null);
+        setPwdIdPreview(formData.pwdIdFileURL ? formData.pwdIdFileURL : null);
+      }
+      return;
+    }    
   
     setFormData((prevData) => {
       let updatedData = {
@@ -240,6 +265,22 @@ export default function EditResident() {
       return updatedData;
     });
   };
+
+  const handlePwdIdFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setPwdIdFile(file);
+      setPwdIdPreview(URL.createObjectURL(file));
+      e.target.value = "";
+    }
+  };
+  
+  const handlePwdIdFileDelete = () => {
+    setPwdIdFile(null);
+    setPwdIdPreview(formData.pwdIdFileURL ? formData.pwdIdFileURL : null);
+    // don't clear saved URL here on edit; user can overwrite by uploading a new one
+  };
+  
   
 
   const handleSaveClick = async () => {
@@ -263,6 +304,7 @@ export default function EditResident() {
     if (!contactNumber) invalidFields.push("contactNumber");
 
 
+    
     if (invalidFields.length > 0) {
       // Set the section based on the first invalid field
       const firstInvalidField = invalidFields[0];
@@ -301,6 +343,20 @@ export default function EditResident() {
     
 
     setInvalidFields([]);
+
+    // extra PWD validation
+    if (formData.isPWD) {
+      if (!formData.pwdType) invalidFields.push("pwdType");
+      if (formData.pwdType === "Temporary") {
+        if (!formData.pwdTemporaryUntil) invalidFields.push("pwdTemporaryUntil");
+        else {
+          const until = new Date(formData.pwdTemporaryUntil);
+          const today = new Date(new Date().toISOString().split("T")[0]);
+          if (until < today) invalidFields.push("pwdTemporaryUntil");
+        }
+      }
+    }
+    
     setShowSavePopup(true);
   } 
 
@@ -362,6 +418,14 @@ export default function EditResident() {
           uploadedIdentificationURL = await getDownloadURL(idRef);
         }
 
+        let uploadedPwdIdURL = formData.pwdIdFileURL;
+        if (pwdIdFile) {
+          const pwdRef = ref(storage, `ResidentsFiles/PWDID/${pwdIdFile.name}`);
+          await uploadBytes(pwdRef, pwdIdFile);
+          uploadedPwdIdURL = await getDownloadURL(pwdRef);
+        }
+                
+
         /*
       const docRef = doc(db, "Residents", residentId!);
       await updateDoc(docRef, {
@@ -375,6 +439,7 @@ export default function EditResident() {
         ...formData,
         verificationFilesURLs: uploadedVerificationURLs.length ? uploadedVerificationURLs : formData.verificationFilesURLs,
         identificationFileURL: uploadedIdentificationURL,
+        pwdIdFileURL: uploadedPwdIdURL,
         updatedBy: session?.user?.position || "",
       });
 
@@ -964,6 +1029,82 @@ export default function EditResident() {
 
 
                             <div className="add-main-resident-section-2-bottom-side">
+
+                            {formData.isPWD && (
+                              <div className="pwd-outer" style={{ flex: "1 1 32rem" }}>
+                                <div className="pwd-title">PWD Information</div>
+
+                                <div className="pwd-card">
+                                  <div className={`pwd-upload ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
+                                    <label htmlFor="pwd-id-file-upload" className="upload-link">Click to Upload PWD ID</label>
+                                    <input
+                                      id="pwd-id-file-upload"
+                                      type="file"
+                                      className="file-upload-input"
+                                      accept=".jpg,.jpeg,.png"
+                                      onChange={handlePwdIdFileChange}
+                                    />
+                                    {(pwdIdFile || pwdIdPreview) && (
+                                      <div className="file-name-image-display">
+                                        <div className="file-name-image-display-indiv">
+                                          {pwdIdPreview && (
+                                            <img src={pwdIdPreview} alt="PWD ID Preview" style={{ width: 50, height: 50, marginRight: 5 }} />
+                                          )}
+                                          <span>{pwdIdFile?.name || "PWD ID"}</span>
+                                          <div className="delete-container">
+                                            <button type="button" onClick={handlePwdIdFileDelete} className="delete-button">
+                                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="pwd-fields">
+                                    <div className={`fields-section ${invalidFields.includes("pwdType") ? "input-error" : ""}`}>
+                                      <p className="pwd-label">Type of PWD ID <span className="required">*</span></p>
+                                      <div className="pwd-radio-row">
+                                        <label>
+                                          <input
+                                            type="radio"
+                                            name="pwdType"
+                                            value="Permanent"
+                                            checked={formData.pwdType === "Permanent"}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value, pwdTemporaryUntil: "" }))}
+                                          /> Permanent
+                                        </label>
+                                        <label>
+                                          <input
+                                            type="radio"
+                                            name="pwdType"
+                                            value="Temporary"
+                                            checked={formData.pwdType === "Temporary"}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value }))}
+                                          /> Temporary
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    {formData.pwdType === "Temporary" && (
+                                      <div className={`fields-section ${invalidFields.includes("pwdTemporaryUntil") ? "input-error" : ""}`}>
+                                        <p className="pwd-label">Valid Until <span className="required">*</span></p>
+                                        <input
+                                          type="date"
+                                          name="pwdTemporaryUntil"
+                                          className="pwd-input"
+                                          value={formData.pwdTemporaryUntil}
+                                          onChange={handleChange}
+                                          min={new Date().toISOString().split("T")[0]}
+                                          required
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
 
                             <div className="box-container-outer-resindentificationpic">
                                 <div className="title-resindentificationpic">
