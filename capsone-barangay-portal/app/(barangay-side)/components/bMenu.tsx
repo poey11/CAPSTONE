@@ -217,7 +217,7 @@ const BMenu: React.FC = () => {
                 />
             </div>
             <div className="dropdown-container-brgyside">
-            <Link href="/dashboard/ProgramsModule" className="dropdown-item-brgy-brgyside">Programs / Events</Link>
+            <Link href="/dashboard/ProgramsModule/ProgramsAndEvents" className="dropdown-item-brgy-brgyside">Programs / Events</Link>
             <Link href="/dashboard/ProgramsModule/ProgramResponses" className="dropdown-item-brgy-brgyside">Announcements</Link>
             </div>
         </div>
