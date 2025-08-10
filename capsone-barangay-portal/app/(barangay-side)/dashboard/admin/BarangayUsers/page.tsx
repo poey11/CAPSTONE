@@ -654,7 +654,7 @@ useEffect(() => {
               </button>
             </th>
             <th>Official Name</th>
-                 <th>Position</th>
+            <th>Position</th>
             <th>Gender</th>
             <th>Actions</th>
           </tr>
