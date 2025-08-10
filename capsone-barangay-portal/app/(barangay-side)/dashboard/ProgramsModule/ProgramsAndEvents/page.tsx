@@ -20,7 +20,7 @@ export default function ProgramsModule() {
       id: "2",
       programName: "Health and Wellness Fair",
       approvalStatus: "Pending",
-      progressStatus: "Not Started",
+      progressStatus: "Upcoming",
       activeStatus: "Inactive",
       dateCreated: "2025-06-10",
     },
@@ -36,7 +36,7 @@ export default function ProgramsModule() {
       id: "4",
       programName: "Senior Citizen Support Program",
       approvalStatus: "Rejected",
-      progressStatus: "N/A",
+      progressStatus: "Upcoming",
       activeStatus: "Inactive",
       dateCreated: "2025-04-12",
     },
@@ -53,8 +53,8 @@ export default function ProgramsModule() {
   const [programs, setPrograms] = useState<any[]>([]);
   const [filteredPrograms, setFilteredPrograms] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchName, setSearchName] = useState("");
-  const [showCount, setShowCount] = useState(5);
+
+
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,22 +68,44 @@ export default function ProgramsModule() {
     }, 500);
   }, []);
 
+
+
+
+
+
+
+
+  
+  const [searchName, setSearchName] = useState("");
+  const [approvalFilter, setApprovalFilter] = useState("");
+  const [progressFilter, setProgressFilter] = useState("");
+  const [activeFilter, setActiveFilter] = useState("");
+
+
   // Filtering logic
   useEffect(() => {
     let filtered = [...programs];
 
     if (searchName) {
-      filtered = filtered.filter((program) =>
-        program.programName.toLowerCase().includes(searchName.toLowerCase())
+      filtered = filtered.filter((p) =>
+        p.programName.toLowerCase().includes(searchName.toLowerCase())
       );
     }
 
-    if (showCount) {
-      filtered = filtered.slice(0, showCount);
+    if (approvalFilter) {
+      filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
+    }
+
+    if (progressFilter) {
+      filtered = filtered.filter((p) => p.progressStatus === progressFilter);
+    }
+
+    if (activeFilter) {
+      filtered = filtered.filter((p) => p.activeStatus === activeFilter);
     }
 
     setFilteredPrograms(filtered);
-  }, [searchName, showCount, programs]);
+  }, [searchName, approvalFilter, progressFilter, activeFilter, programs]);
 
   // Pagination logic
   const indexOfLast = currentPage * programsPerPage;
@@ -131,25 +153,60 @@ export default function ProgramsModule() {
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
         />
+
+        <select
+          className="programs-module-filter"
+          value={approvalFilter}
+          onChange={(e) => setApprovalFilter(e.target.value)}
+        >
+          <option value="">All Approval Status</option>
+          <option value="Approved">Approved</option>
+          <option value="Pending">Pending</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+
+        <select
+          className="programs-module-filter"
+          value={progressFilter}
+          onChange={(e) => setProgressFilter(e.target.value)}
+        >
+          <option value="">All Progress Status</option>
+          <option value="Ongoing">Ongoing</option>
+          <option value="Upcoming">Upcoming</option>
+          <option value="Completed">Completed</option>
+        </select>
+
+        <select
+          className="programs-module-filter"
+          value={activeFilter}
+          onChange={(e) => setActiveFilter(e.target.value)}
+        >
+          <option value="">All Active/Inactive</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+
+
+
       </div>
 
       <div className="programs-module-main-section">
         {loading ? (
           <p>Loading programs...</p>
         ) : currentPrograms.length === 0 ? (
-          <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
-            <p className="no-results-department">No Results Found</p>
+          <div className="no-result-card-programs">
+            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+            <p className="no-results-programs">No Results Found</p>
           </div>
         ) : (
           <table>
             <thead>
               <tr>
                 <th>Program Name</th>
+                <th>Date Created</th>
                 <th>Approval Status</th>
                 <th>Progress Status</th>
                 <th>Active/Inactive</th>
-                <th>Date Created</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -157,30 +214,62 @@ export default function ProgramsModule() {
               {currentPrograms.map((program) => (
                 <tr key={program.id}>
                   <td>{program.programName}</td>
-                  <td>{program.approvalStatus}</td>
-                  <td>{program.progressStatus}</td>
-                  <td>{program.activeStatus}</td>
                   <td>{program.dateCreated}</td>
                   <td>
-                    <div className="actions">
+                            <span
+                    className={`status-badge-programs ${program.approvalStatus
+                      .toLowerCase()
+                      .replace(/\s*-\s*/g, "-")}`}
+                  >
+                    <p>{program.approvalStatus}</p>
+                  </span>
+                  </td>
+
+                  <td>
+                    <span
+                      className={`status-badge-programs ${program.progressStatus
+                        .toLowerCase()
+                        .replace(/\s*-\s*/g, "-")}`}
+                    >
+                      <p>{program.progressStatus}</p>
+                    </span>
+                  </td>                  
+                  <td>
+                    <span
+                      className={`status-badge-programs ${program.activeStatus
+                        .toLowerCase()
+                        .replace(/\s*-\s*/g, "-")}`}
+                    >
+                      <p>{program.activeStatus}</p>
+                    </span>
+                  </td>
+  
+                  <td>
+                    <div className="actions-programs">
+
                       <button
-                        className="action-view"
+                        className="action-programs-button"
                         onClick={() => router.push(`/dashboard/ProgramsModule/ViewProgram?id=${program.id}`)}
                       >
-                        View
+                        <img
+                          src="/Images/view.png"
+                          alt="View"
+                          className="action-programs-view"
+                        />
                       </button>
+
                       <button
-                        className="action-edit"
+                        className="action-programs-button"
                         onClick={() => router.push(`/dashboard/ProgramsModule/EditProgram?id=${program.id}`)}
                       >
-                        Edit
+                        <img
+                          src="/Images/edit.png"
+                          alt="Edit"
+                          className="action-programs-edit"
+                        />
                       </button>
-                      <button
-                        className="action-delete"
-                        onClick={() => handleDelete(program.id)}
-                      >
-                        Delete
-                      </button>
+
+
                     </div>
                   </td>
                 </tr>
