@@ -50,16 +50,29 @@ export default function OfficialsModule() {
 
       
     const [showAddOfficialPopup, setShowAddOfficialPopup] = useState(false);
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [nameSearch, setNameSearch] = useState("");
     const [positionDropdown, setPositionDropdown] = useState("");
     const searchParams = useSearchParams();
     const [position, setPosition] = useState("");
+    const [viewActiveSection, setViewActiveSection] = useState("details");
     const highlightUserId = searchParams.get("highlight");
     
 
     const [filteredUser, setFilteredUser] = useState<any[]>([]); 
     const [currentPage, setCurrentPage] = useState(1);
     const UserPerPage = 10; 
+
+
+  // Open popup
+    const openPopup = () => {
+      setIsPopupOpen(true);
+    };
+
+    // Close popup
+    const closePopup = () => {
+      setIsPopupOpen(false);
+    };
 
       // Load dummy data on first render
       useEffect(() => {
@@ -191,7 +204,10 @@ export default function OfficialsModule() {
                   <td>{official.contact}</td>
                   <td>
                     <div className="bry-official-actions">
-                      <button className="brgy-official-action-view">
+                      <button 
+                        className="brgy-official-action-view"
+                        onClick={openPopup}
+                      >
                         <img src="/Images/view.png" alt="View"/>
                       </button>
 
@@ -372,7 +388,142 @@ export default function OfficialsModule() {
 
 
 
-       
+
+      {isPopupOpen && (
+        <div className="user-roles-view-popup-overlay add-incident-animated">
+          <div className="view-barangayuser-popup">
+            <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+            </div>
+            <div className="view-user-header-body">
+              <div className="view-user-header-body-top-section">
+                  <div className="view-user-backbutton-container">
+                    <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                    </button>
+                  </div>
+                  <div className="view-resident-user-info-toggle-wrapper">
+                    {["details"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`main-resident-info-toggle-btn ${viewActiveSection === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSection(section)}
+                      >
+                        {section === "details" && "Details"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="view-user-header-body-bottom-section">
+                  <div className="mainresident-photo-section">
+                    <span className="user-details-label">Official Details</span>
+                    <div className="user-profile-container">
+                      <img
+                        src={"/Images/default-identificationpic.jpg"}
+                        alt="Identification"
+                        className="resident-id-photo"
+                      />
+                    </div>
+                  </div>
+                  <div className="view-main-resident-info-main-container">
+                    <div className="view-user-info-main-content">
+                      {viewActiveSection  === "details" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                              <p>Last Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>First Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Middle Name</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                              <p>Contact Number</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                              <p>Position</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+
+                            {position === "LF Staff" && (
+                              <div className="view-user-fields-section">
+                                <p>Department</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                              </div>
+                            )}
+
+                            <div className="view-user-fields-section">
+                              <p>Term Duration</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+
+                            <div className="view-user-fields-section">
+                              <p>Email Address</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                readOnly
+                              /> 
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+          </div>
+        </div>
+      )}
       
     </main>
   );
