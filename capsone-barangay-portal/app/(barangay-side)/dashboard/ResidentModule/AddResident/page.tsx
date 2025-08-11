@@ -848,77 +848,77 @@ const [activeSection, setActiveSection] = useState("basic");
                             <div className="add-main-resident-section-2-bottom-side">
 
                             {formData.isPWD && (
-  <div className="pwd-outer" style={{ flex: "1 1 32rem" }}>
-    <div className="pwd-title">PWD Information</div>
+                                <div className="pwd-outer" style={{ flex: "1 1 32rem" }}>
+                                  <div className="pwd-title">PWD Information</div>
 
-    <div className="pwd-card">
-      <div className={`pwd-upload ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
-        <label htmlFor="pwd-id-file-upload" className="upload-link">Click to Upload PWD ID</label>
-        <input
-          id="pwd-id-file-upload"
-          type="file"
-          className="file-upload-input"
-          accept=".jpg,.jpeg,.png"
-          onChange={handlePwdIdFileChange}
-        />
-        {pwdIdFile && (
-          <div className="file-name-image-display">
-            <div className="file-name-image-display-indiv">
-              {pwdIdPreview && <img src={pwdIdPreview} alt="PWD ID Preview" style={{ width: 50, height: 50, marginRight: 5 }} />}
-              <span>{pwdIdFile.name}</span>
-              <div className="delete-container">
-                <button type="button" onClick={handlePwdIdFileDelete} className="delete-button">
-                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+                                  <div className="pwd-card">
+                                    <div className={`pwd-upload ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
+                                      <label htmlFor="pwd-id-file-upload" className="upload-link">Click to Upload PWD ID</label>
+                                      <input
+                                        id="pwd-id-file-upload"
+                                        type="file"
+                                        className="file-upload-input"
+                                        accept=".jpg,.jpeg,.png"
+                                        onChange={handlePwdIdFileChange}
+                                      />
+                                      {pwdIdFile && (
+                                        <div className="file-name-image-display">
+                                          <div className="file-name-image-display-indiv">
+                                            {pwdIdPreview && <img src={pwdIdPreview} alt="PWD ID Preview" style={{ width: 50, height: 50, marginRight: 5 }} />}
+                                            <span>{pwdIdFile.name}</span>
+                                            <div className="delete-container">
+                                              <button type="button" onClick={handlePwdIdFileDelete} className="delete-button">
+                                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                        {/* section for the radio choices at the bottom */}
+                                    <div className="pwd-fields">
+                                      <div className={`fields-section ${invalidFields.includes("pwdType") ? "input-error" : ""}`}>
+                                        <p className="pwd-label">Type of PWD ID <span className="required">*</span></p>
+                                        <div className="pwd-radio-row">
+                                          <label>
+                                            <input
+                                              type="radio"
+                                              name="pwdType"
+                                              value="Permanent"
+                                              checked={formData.pwdType === "Permanent"}
+                                              onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value, pwdTemporaryUntil: "" }))}
+                                            /> Permanent
+                                          </label>
+                                          <label>
+                                            <input
+                                              type="radio"
+                                              name="pwdType"
+                                              value="Temporary"
+                                              checked={formData.pwdType === "Temporary"}
+                                              onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value }))}
+                                            /> Temporary
+                                          </label>
+                                        </div>
+                                      </div>
 
-      <div className="pwd-fields">
-        <div className={`fields-section ${invalidFields.includes("pwdType") ? "input-error" : ""}`}>
-          <p className="pwd-label">Type of PWD ID <span className="required">*</span></p>
-          <div className="pwd-radio-row">
-            <label>
-              <input
-                type="radio"
-                name="pwdType"
-                value="Permanent"
-                checked={formData.pwdType === "Permanent"}
-                onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value, pwdTemporaryUntil: "" }))}
-              /> Permanent
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="pwdType"
-                value="Temporary"
-                checked={formData.pwdType === "Temporary"}
-                onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value }))}
-              /> Temporary
-            </label>
-          </div>
-        </div>
-
-        {formData.pwdType === "Temporary" && (
-          <div className={`fields-section ${invalidFields.includes("pwdTemporaryUntil") ? "input-error" : ""}`}>
-            <p className="pwd-label">Valid Until <span className="required">*</span></p>
-            <input
-              type="date"
-              name="pwdTemporaryUntil"
-              className="pwd-input"
-              value={formData.pwdTemporaryUntil}
-              onChange={handleChange}
-              min={new Date().toISOString().split("T")[0]}
-              required
-            />
-          </div>
-        )}
-      </div>
-    </div>
-  </div>
-)}
+                                      {formData.pwdType === "Temporary" && (
+                                        <div className={`fields-section ${invalidFields.includes("pwdTemporaryUntil") ? "input-error" : ""}`}>
+                                          <p className="pwd-label">Valid Until <span className="required">*</span></p>
+                                          <input
+                                            type="date"
+                                            name="pwdTemporaryUntil"
+                                            className="pwd-input"
+                                            value={formData.pwdTemporaryUntil}
+                                            onChange={handleChange}
+                                            min={new Date().toISOString().split("T")[0]}
+                                            required
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
 
 
                             <div className="box-container-outer-resindentificationpic">

@@ -1508,6 +1508,8 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     text-align: center;
   }
 
+  /* PWD CHANGES START HEAR */
+
   :root {
     --resident-card-width: 370px;
     --resident-card-min-h: 460px;
