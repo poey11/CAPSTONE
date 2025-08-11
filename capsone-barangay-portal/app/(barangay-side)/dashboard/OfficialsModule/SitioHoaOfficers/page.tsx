@@ -48,7 +48,7 @@ export default function SitioHoaOfficersModule() {
 
   const router = useRouter();
   const handleEditClick = () => {
-    //router.push("/dashboard/OfficialsModule/EditOfficial");
+    router.push("/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer");
   };
 
   const [filtersLoaded, setFiltersLoaded] = useState(false);
