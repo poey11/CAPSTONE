@@ -404,13 +404,13 @@ export default function ProgramsModule() {
 
 
             <div className="add-programs-lower-section">
-                                    <div className="view-incident-partyA-container">
-                                      <div className="box-container-outer-natureoffacts">
-                                          <div className="title-remarks-latefiling">
+                                    <div className="programs-description-container">
+                                      <div className="box-container-outer-description">
+                                          <div className="title-description-programs">
                                               Description of Program
                                           </div>
-                                          <div className="box-container-partyA">
-                                            <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling"  readOnly/>
+                                          <div className="box-container-description">
+                                            <textarea className="description-input-field" />
                                           </div>
                                       </div>
                                     </div>
