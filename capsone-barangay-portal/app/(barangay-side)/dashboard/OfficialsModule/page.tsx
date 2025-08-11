@@ -263,7 +263,7 @@ export default function OfficialsModule() {
 
                     <div className="add-official-main-container">
                       <div className="add-official-photo-section">
-                        <span className="add-official-details-label">Identification Photo</span>
+                        <span className="add-official-details-label">Identification Picture</span>
                         <div className="add-official-profile-container">
                           <img
                             src={"/Images/default-identificationpic.jpg"}
