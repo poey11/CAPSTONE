@@ -1,4 +1,5 @@
 
+
 html, body {
   height: 100%;
   margin: 0;
@@ -8,7 +9,8 @@ html, body {
 
 
 
-.brgy-officials-main-container{
+.brgy-officials-main-container,
+.officiers-main-container{
     width: 100%;  
   height: 100vh;
   background-color: #F0F2F8; 
@@ -23,7 +25,8 @@ html, body {
 }
 
 
- .brgy-officials-main-section {
+ .brgy-officials-main-section,
+ .officers-main-section {
     flex: 1; /* Makes it take up remaining space */
     display: flex; /* Ensures proper alignment */
     flex-direction: column;
@@ -45,12 +48,14 @@ html, body {
     max-height: 75%;
 }
 
-.brgy-officials-main-section table {
+.brgy-officials-main-section table,
+.officers-main-section table {
     width: 100%; /* Ensures the table spans the full width */
     border-collapse: collapse; /* Removes unnecessary spacing between table cells */
 }
 
-.brgy-officials-main-section thead {
+.brgy-officials-main-section thead,
+.officers-main-section thead {
      position: sticky;
     top: 0;
     background-color: #214666; /* Ensures it's visible when scrolled */
@@ -59,7 +64,8 @@ html, body {
     height: 50px; /* edited this line */
 }
 
-.brgy-officials-main-section td {
+.brgy-officials-main-section td,
+.officers-main-section td {
     padding: 1rem; 
   text-align: center; 
   border-bottom: 2px solid #ddd;
@@ -69,7 +75,8 @@ html, body {
   font-size: 14px; /* added this line */
 }
 
-.brgy-officials-main-section th {
+.brgy-officials-main-section th,
+.officers-main-section th {
    padding: 1rem; 
   text-align: left; 
   border-bottom: 2px solid #ddd;
@@ -154,7 +161,8 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
 }
 
 
-.brgy-officials-section-1{
+.brgy-officials-section-1,
+.officers-section-1{
     display: flex;
     justify-content: flex-end; 
     width: 100%;
@@ -162,14 +170,16 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
 
 }
 
-.brgy-officials-section-1 h1{
+.brgy-officials-section-1 h1,
+.officers-section-1 h1{
    font-size: 2rem;
     font-weight: bold;
     color: rgba(0, 0, 0, 0.5);
    
 }
 
-.add-brgy-official-btn {
+.add-brgy-official-btn,
+.add-officers-btn {
     background-color: #e56723;
   color: #fff;
   border: none;
@@ -183,16 +193,18 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
   font-size: 13px; /* edited this line */
   }
   
-  .add-brgy-official-btn:hover {
+  .add-brgy-official-btn:hover,
+  .add-officers-btn:hover {
     background-color:#cc591b;
   }
 
-  .brgy-officials-section-2{
+.brgy-officials-section-2,
+.officers-section-2{
     display: flex;
-  gap: 20px;
-  padding: 0;
-  
-  margin-top: 20px;
+    gap: 20px;
+    padding: 0;
+    
+    margin-top: 20px;
   }
 
   .search-bar, .featuredStatus{
@@ -210,8 +222,9 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     color: rgba(0, 0, 0, 0.4); 
   }
 
-  .brgy-officials-filter {
-  padding: 8px;
+  .brgy-officials-filter,
+  .officers-filter {
+    padding: 8px;
     width: 100%;
     max-width: 100%;
     margin-top: 10px;
@@ -225,17 +238,20 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
     height: 35px; /* added this line */
 }
 
-.brgy-officials-filter:focus{
+.brgy-officials-filter:focus,
+.officers-filter:focus{
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
-.brgy-officials-filter option {
+.brgy-officials-filter option,
+.officers-filter option {
   color: rgba(0, 0, 0, 0.4); 
 }
 
-  .add-brgy-official-animated{
+.add-brgy-official-animated,
+.add-officiers-animated{
   opacity: 0;
   animation: dropDownFromTop 0.6s ease-out forwards;
   animation-delay: 0.3s;
@@ -245,16 +261,19 @@ filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-
 Newly added for tables
 */
 
-.brgy-officials-main-section tbody tr:nth-child(even){
+.brgy-officials-main-section tbody tr:nth-child(even),
+.officers-main-section tbody tr:nth-child(even){
   background-color: #f0f4f8; /* Softer modern gray-blue tone */
 }
 
-.brgy-officials-main-section tbody tr:nth-child(odd){
+.brgy-officials-main-section tbody tr:nth-child(odd),
+.officers-main-section tbody tr:nth-child(odd){
   background-color: #ffffff; /* Crisp white */
 }
 
 
-.brgy-officials-main-section tbody tr:hover{ 
+.brgy-officials-main-section tbody tr:hover,
+.officers-main-section tbody tr:hover{ 
    background-color: #d0e4f5 !important; 
   transition: background-color 0.2s ease;
 }
@@ -410,12 +429,14 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   color: #e7594e;
 }
 
-.brgy-officials-main-section th:first-child {
+.brgy-officials-main-section th:first-child,
+.officers-main-section th:first-child {
   padding-left: 90px;
 }
 
-/* ADD OFFICIAL POP UP*/
-  .add-official-popup-overlay {
+/* ADD OFFICIAL/OFFICER POP UP*/
+.add-official-popup-overlay,
+.add-officer-popup-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -428,7 +449,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     z-index: 2000; 
   }
 
-    .add-official-confirmation-popup {
+  .add-official-confirmation-popup,
+  .add-officer-confirmation-popup {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -448,11 +470,13 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     animation: slideDownFadeIn 0.4s ease-out;
   }
 
-.add-official-confirmation-popup p{
+.add-official-confirmation-popup p,
+.add-officer-confirmation-popup p{
     color: rgb(97, 97, 97);
   }
 
-  .add-official-confirmation-popup h2 {
+  .add-official-confirmation-popup h2,
+  .add-officer-confirmation-popup h2 {
   font-size: 1.80rem;
   font-weight: bolder;
   text-align: center;
@@ -462,7 +486,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   padding-bottom: 10px;
 }
  
-.official-yesno-container{
+.official-yesno-container,
+.officer-yesno-container{
     padding-top: 20px;
     display: flex;
     gap: 20px;
@@ -497,7 +522,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     background-color:  #c2352b; 
   } 
 
-  .add-official-main-container{
+  .add-official-main-container,
+  .add-officer-main-container{
     width: 100%;
     height: 370px;
     display: flex;
@@ -505,7 +531,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     gap: 20px;
   }
 
-  .add-official-photo-section {
+.add-official-photo-section,
+.add-officer-photo-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -514,14 +541,16 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   padding-top: 20px;
 }
 
-.add-official-info-main-container{
+.add-official-info-main-container,
+.add-officer-info-main-container{
   width: 65%;
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.add-official-details-label {
+.add-official-details-label,
+.add-officer-details-label {
   background-color: #1f3b57;
   color: white;
   padding: 8px 16px;
@@ -534,7 +563,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   left: 10px;
 }
 
-.add-official-profile-container {
+.add-official-profile-container,
+.add-officer-profile-container {
   border: 1px solid rgba(44, 62, 80, 0.7);
   border-radius: 8px;
   overflow: hidden;
@@ -547,14 +577,16 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   height: 250px;
 }
 
-.add-official-id-photo {
+.add-official-id-photo,
+.add-officer-id-photo {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 8px;
 }
 
-  .add-official-upload-link {
+  .add-official-upload-link,
+  .add-officer-upload-link {
     margin-top: 20px;
     color: rgb(245, 143, 88);
     text-decoration: underline;
@@ -562,13 +594,15 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     font-size: 15px;
   }
 
-  .add-official-content-left-side{
+  .add-official-content-left-side,
+  .add-officer-content-left-side{
   display: flex;
   flex-direction: column;
   width: 50%;
 } 
 
-  .add-official-content-right-side{
+.add-official-content-right-side,
+.add-officer-content-right-side{
   display: flex;
   flex-direction: column;
   width: 50%;
@@ -593,7 +627,8 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     margin-left: 5px;
   }
 
-    .add-official-input-field {
+  .add-official-input-field,
+  .add-officer-input-field {
     padding: 8px;
     width: 90%;
     height: 35px;
@@ -605,13 +640,15 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     font-size: 16px;
   }
 
-  .add-official-input-field:focus {
+  .add-official-input-field:focus,
+  .add-officer-input-field:focus{
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
-  .add-official-input-field option:disabled {
+  .add-official-input-field option:disabled,
+  .add-officer-input-field option:disabled {
     color: grey;
   }
 
