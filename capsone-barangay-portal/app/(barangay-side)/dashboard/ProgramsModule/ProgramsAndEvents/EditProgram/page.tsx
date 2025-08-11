@@ -73,17 +73,160 @@ export default function EditResident() {
                        
                         {activeSection === "details" && (
                            <>
-                            <div className="edit-program-section-2-left-side">
 
-                                
-                            </div>
+                           <div className="edit-programs-upper-section">
+                                <div className="edit-program-section-2-left-side">
+                                <div className="fields-section-edit-programs">
+                                    <p>Program Name<span className="required">*</span></p>
+                                        <input
+                                        type="text"
+                                        className="edit-programs-input-field"
+                                        placeholder="Program Name (E.g. Feeding Program)"
+                                        />
+                                </div>
 
-                           <div className="edit-program-section-2-right-side">
-                                
-                                
-                            </div>
+                                <div className="fields-section-edit-programs">
+                                    <p>Number of Participants<span className="required">*</span></p>
+                                        <input
+                                         type="number"
+                                          min="1"
+                                        className="edit-programs-input-field"
+                                         placeholder="E.g. 50"
+                                        />
+                                </div>
+
+
+                                <div className="fields-section-edit-programs">
+                                    <p>Eligible Participants<span className="required">*</span></p>
+                                <select className="edit-programs-input-field">
+                                    <option value="">Select requirement</option>
+                                    <option value="resident">Resident</option>
+                                    <option value="non-resident">Non-Resident</option>
+                                    <option value="both">Both</option>
+                                </select>
+                                </div>
+                                    
+                                </div>
+
+                            <div className="edit-program-section-2-right-side">
+                              <div className="fields-section-edit-programs">
+                                    <p>Location<span className="required">*</span></p>
+                                        <input
+                                        type="text"
+                                        className="edit-programs-input-field"
+                                         placeholder="Location (E.g. Baragay Hall)"
+                                    />
+                                </div>
+
+                                <div className="fields-section-edit-programs">
+                                     <p>Schedule of Program<span className="required">*</span></p>
+
+                                <div className="edit-program-schedule-container">
+                                    <div className="edit-date-input-wrapper">
+                                    <label>Start Date</label>
+                                    <input type="date" className="edit-programs-input-field" />
+                                    </div>
+
+                                    <div className="edit-date-input-wrapper">
+                                    <label>End Date</label>
+                                    <input type="date" className="edit-programs-input-field" />
+                                    </div>
+                                </div>
+
+
+                                </div>
+                                    
+                                    
+                                </div>
+
+                           </div>
+
+
+
                            </> 
                           )}
+
+                        {activeSection === "others" && (
+                            <>
+
+
+                            <div className="edit-programs-upper-section">
+
+                                <div className="edit-program-section-2-left-side">
+
+                                <div className="edit-programs-description-container">
+                                      <div className="edit-box-container-outer-description">
+                                          <div className="edit-title-description-programs">
+                                              Description of Program
+                                          </div>
+                                          <div className="edit-box-container-description">
+                                            <textarea className="eeditdescription-input-field" />
+                                          </div>
+                                      </div>
+                                    </div>
+
+                              </div>
+
+
+                             <div className="edit-program-section-2-right-side">
+                                    <div className="edit-official-others-mainsection">
+                                        <div className="box-container-outer-resindentificationpic">
+                                            <div className="title-resindentificationpic">
+                                                Program Photo
+                                            </div>
+
+                                            <div className="box-container-resindentificationpic">
+
+                                            {/* File Upload Section */}
+                                            <div className="identificationpic-container">
+                                                <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
+                                                <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange}/>
+
+
+                                                {(identificationFile || identificationPreview) && (
+                                                    <div className="identificationpic-display">
+                                                    <div className="identification-picture">
+                                                        {identificationPreview && (
+                                                        <img
+                                                            src={identificationPreview}
+                                                            alt="Preview"
+                                                            style={{ height: '200px'}}
+                                                        />
+                                                        )}
+                                                    </div>
+                                                    
+                                                    </div>
+
+                                                )}
+                                                {(identificationFile || identificationPreview) && (
+                                                    <div className="delete-container">
+                                                    <button type="button" /*onClick={handleIdentificationFileDelete}*/ className="delete-button">
+                                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                    </button>
+                                                    </div>
+                                                )}
+                                                </div>
+                                            
+                                            </div>
+                                        </div> 
+
+                                    </div>
+                                
+                              </div>
+
+                            </div>
+
+
+
+
+
+
+                            </> 
+                          )}
+
+
+
+                          
 
 
 
