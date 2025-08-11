@@ -759,7 +759,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 {showDoneIncidentPopup && (
   <div className="confirmation-popup-overlay-add">
     <div className="confirmation-popup-add">
-      <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
+      <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
       <p>Has the incident case been settled?</p>
       <div className="yesno-container-add">
 

@@ -388,11 +388,11 @@ to {
 
 /* Move closer to center */
 .button-left {
-  left: 10%; /* adjust as needed */
+  left: 7%; /* adjust as needed */
 }
 
 .button-right {
-  right: 10%; /* adjust as needed */
+  right: 7%; /* adjust as needed */
 }
 
 /* Button styles */

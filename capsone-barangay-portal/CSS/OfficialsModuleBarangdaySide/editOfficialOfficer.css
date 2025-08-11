@@ -5,7 +5,8 @@ html, body {
   
 }
 
-.edit-official-main-container {
+.edit-official-main-container,
+.edit-officer-main-container {
   width: 100%;
   height: 100vh; 
   background-color: #F0F2F8;
@@ -28,7 +29,8 @@ html, body {
   }
 }
 
-.edit-official-main-content {
+.edit-official-main-content,
+.edit-officer-main-content {
   display: flex;
   flex-direction: column;
   width: 90%;
@@ -39,10 +41,11 @@ html, body {
   overflow: hidden;
 
 
-animation: fadeSlideIn 0.5s ease-out;
+  animation: fadeSlideIn 0.5s ease-out;
 }
 
-.edit-official-main-section1{
+.edit-official-main-section1,
+.edit-officer-main-section1{
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -51,7 +54,8 @@ animation: fadeSlideIn 0.5s ease-out;
   padding-bottom: 20px;
 }
 
-.edit-official-main-section1-left{
+.edit-official-main-section1-left,
+.edit-officer-main-section1-left{
   display: flex;
   align-items: center;
   gap: 20px;
@@ -64,7 +68,8 @@ animation: fadeSlideIn 0.5s ease-out;
   filter: invert(1);
 }
 
-.edit-official-main-section1 h1{
+.edit-official-main-section1 h1,
+.edit-officer-main-section1 h1{
   font-size: 1.25rem;
   font-weight: bold;
   color: #ffffff;
@@ -106,14 +111,16 @@ animation: fadeSlideIn 0.5s ease-out;
     background-color: #3e8f41;
 }
 
-.edit-official-bottom-section{
+.edit-official-bottom-section,
+.edit-officer-bottom-section{
   padding-top: 35px;
   padding-left: 35px;
   padding-right: 35px;
   height: 100%;
 }
 
-.edit-official-info-toggle-wrapper{
+.edit-official-info-toggle-wrapper,
+.edit-officer-info-toggle-wrapper{
   display: flex;
   justify-content: center;
   gap: 15px;
@@ -144,7 +151,8 @@ animation: fadeSlideIn 0.5s ease-out;
   background-color: transparent;
 }
 
-.edit-official-section-2 {
+.edit-official-section-2,
+.edit-officer-section-2 {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -152,19 +160,22 @@ animation: fadeSlideIn 0.5s ease-out;
     width: 100%;
 }
 
-.edit-official-section-2-full-top{
+.edit-official-section-2-full-top,
+.edit-officer-section-2-full-top{
   display: flex;
   flex-direction: row;
   width: 100%;
 }
 
-.edit-official-section-2-left-side {
+.edit-official-section-2-left-side,
+.edit-officer-section-2-left-side {
     display: flex;
     flex-direction: column;
     width: 50%;
 } 
 
-  .edit-official-section-2-right-side {
+  .edit-official-section-2-right-side,
+  .edit-officer-section-2-right-side {
     display: flex;
     flex-direction: column;
     width: 50%;
@@ -172,7 +183,9 @@ animation: fadeSlideIn 0.5s ease-out;
   }
 
 .edit-official-section-2-left-side p,
-.edit-official-section-2-right-side p {
+.edit-official-section-2-right-side p,
+.edit-officer-section-2-left-side p,
+.edit-officer-section-2-right-side p {
    color: grey;
    font-weight: bold;
    font-size: 1rem;
@@ -197,7 +210,8 @@ animation: fadeSlideIn 0.5s ease-out;
   align-self: center; 
 }
 
-  .edit-official-input-field {
+  .edit-official-input-field,
+  .edit-officer-input-field {
     padding: 8px;
     width: 85%;
     margin-top: 10px;
@@ -207,16 +221,19 @@ animation: fadeSlideIn 0.5s ease-out;
     text-align: left; 
   }
 
-    .edit-official-input-field option:disabled {
+    .edit-official-input-field option:disabled,
+    .edit-officer-input-field option:disabled {
     color: grey;
   }
 
-  .edit-official-input-field:focus {
+  .edit-official-input-field:focus,
+  .edit-officer-input-field:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
-.add-resident-bottom-section-scroll{
+.edit-official-bottom-section-scroll,
+.edit-officer-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
   padding-bottom: 40px;
@@ -228,7 +245,8 @@ animation: fadeSlideIn 0.5s ease-out;
   }
 
 
-.edit-official-others-mainsection{
+.edit-official-others-mainsection,
+.edit-officer-others-mainsection{
   display: flex;
   align-items: center;
   justify-content: center;
@@ -237,6 +255,7 @@ animation: fadeSlideIn 0.5s ease-out;
   width: 100%;
 }
 
+.box-container-outer-resindentificationpic,
 .box-container-outer-resindentificationpic {
   position: relative; 
   margin-top: 20px;
@@ -340,3 +359,78 @@ animation: fadeSlideIn 0.5s ease-out;
       width: 20px;
       height: 20px;
   }
+
+.confirmation-popup-overlay-edit-official {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-edit-official {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.confirmation-popup-edit-official p{
+  color: rgb(97, 97, 97);
+}
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.yesno-container-add{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add,
+.no-button-add{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-add {
+  background-color: #4caf50; 
+}
+
+.yes-button-add:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-add {
+  background-color: #f44336;
+}
+
+.no-button-add:hover {
+  background-color:  #c2352b; 
+} 

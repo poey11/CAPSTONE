@@ -2,17 +2,17 @@
 import "@/CSS/OfficialsModuleBarangdaySide/editOfficialOfficer.css";
 import { useState } from "react";
 
-
-export default function EditOfficial() {
+export default function EditOfficer() {
 
     const [activeSection, setActiveSection] = useState("details");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [position, setPosition] = useState("");
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+    const [title, setTitle] = useState("");
 
     const handleBack = () => {
-      window.location.href = "/dashboard/OfficialsModule";
+      window.location.href = "/dashboard/OfficialsModule/SitioHoaOfficers";
     };
 
     const handleDiscardClick = async () => {
@@ -29,15 +29,15 @@ export default function EditOfficial() {
     };
 
     return (
-        <main className="edit-official-main-container">
-            <div className="edit-official-main-content">
-                <div className="edit-official-main-section1">
-                    <div className="edit-official-main-section1-left">
+        <main className="edit-officer-main-container">
+            <div className="edit-officer-main-content">
+                <div className="edit-officer-main-section1">
+                    <div className="edit-officer-main-section1-left">
                         <button onClick={handleBack}>
                         <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1> Edit Official </h1>
+                        <h1> Edit Officer </h1>
                     </div>
 
                     <div className="action-btn-section">
@@ -49,7 +49,7 @@ export default function EditOfficial() {
                 </div>
 
                 <div className="edit-official-bottom-section">
-                    <nav className="edit-official-info-toggle-wrapper">
+                    <nav className="edit-officer-info-toggle-wrapper">
                         {["details", "others"].map((section) => (
                             <button
                                 key={section}
@@ -62,82 +62,87 @@ export default function EditOfficial() {
                             </button>
                         ))}
                     </nav>
-
-                    <div className="edit-official-bottom-section-scroll">
-                        <form  className="edit-official-section-2">
+                    
+                    <div className="edit-officer-bottom-section-scroll">
+                        <form  className="edit-officer-section-2">
                             {activeSection === "details" && (
                                 <>
-                                    <div className="edit-official-section-2-full-top">
+                                    <div className="edit-officer-section-2-full-top">
                                         <div className="edit-official-section-2-left-side">
                                             <div className="fields-section-official">
                                                 <p>Last Name<span className="required">*</span></p>
                                                 <input type="text" 
                                                 required
-                                                className="edit-official-input-field" />
+                                                className="edit-officer-input-field" />
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>First Name<span className="required">*</span></p>
                                                 <input type="text" 
                                                 required
-                                                className="edit-official-input-field" />
+                                                className="edit-officer-input-field" />
                                             </div>
                                             <div className="fields-section-official">
-                                                <p>Middle Name<span className="required">*</span></p>
+                                                <p>Middle Name</p>
                                                 <input type="text" 
                                                 required
-                                                className="edit-official-input-field" />
+                                                className="edit-officer-input-field" />
                                             </div>
                                             <div className="fields-section-official">
-                                                <p>Contact Number<span className="required">*</span></p>
-                                                <input type="text" 
-                                                required
-                                                className="edit-official-input-field" />
+                                                <p>Title<span className="required">*</span></p>
+                                                <select
+                                                    className="edit-officer-input-field"
+                                                    name="position"
+                                                    required
+                                                    onChange={(e) => setTitle(e.target.value)}
+                                                >
+                                                    <option value="">Select a Title</option>
+                                                    <option value="Ms.">Ms.</option>
+                                                    <option value="Mr.">Mr.</option>
+                                                
+                                                </select>
                                             </div>
                                         </div>
-                                        <div className="edit-official-section-2-right-side">
+                                        <div className="edit-officer-section-2-right-side">
                                             <div className="fields-section-official">
                                                 <p>Position<span className="required">*</span></p>
                                                 <select
-                                                    required
-                                                    className="edit-official-input-field"
-                                                    name="position"
-                                                    value={position}
-                                                    onChange={(e) => setPosition(e.target.value)}
+                                                className="edit-officer-input-field"
+                                                name="position"
+                                                required
                                                 >
-                                                    <option value="">Select a Position</option>
-                                                    <option value="Punong Barangay">Punong Barangay</option>
-                                                    <option value="Secretary">Secretary</option>
-                                                    <option value="Assistant Secretary">Asst Secretary</option>
-                                                    <option value="Admin Staff">Admin Staff</option>
-                                                    <option value="LF Staff">LF Staff</option>
+                                                <option value="">Position</option>
+                                                <option value="Association President">Association President</option>
+                                                {/* not sure if pwede may ibang position*/}
                                                 </select>
                                             </div>
-
-                                            {position === "LF Staff" && (
-                                                <div className="fields-section-official">
-                                                    <p>Department<span className="required">*</span></p>
-                                                    <input type="text" 
-                                                    required
-                                                    className="edit-official-input-field" />
-                                                </div>
-                                            )}
-
                                             <div className="fields-section-official">
-                                                <p>Term Duration<span className="required">*</span></p>
-                                                <input
-                                                    type="date"
-                                                    className="edit-official-input-field"
-                                                    name="termDuration"
-                                                    required
-                                                    min={new Date().toISOString().split("T")[0]}
-                                                />
+                                                <p>Location<span className="required">*</span></p>
+                                                <select
+                                                className="edit-officer-input-field"
+                                                name="position"
+                                                required
+                                                >
+                                                <option value="">Location</option>
+                                                <option value="East Fairview">East Fairview</option>
+                                                <option value="West Fairview">West Fairview</option>
+                                                <option value="South Fairview">South Fairview</option>
+                                                </select>
                                             </div>
-
                                             <div className="fields-section-official">
-                                                <p>Email Address<span className="required">*</span></p>
+                                                <p>Cluster/Section<span className="required">*</span></p>
                                                 <input type="text" 
                                                 required
-                                                className="edit-official-input-field" />
+                                                className="edit-officer-input-field" />
+                                            </div>
+                                            <div className="fields-section-official">
+                                                <p>Contact Number<span className="required">*</span></p>
+                                                <input 
+                                                    type="tel" 
+                                                    className="edit-officer-input-field"
+                                                    name="contactNumber"
+                                                    pattern="^[0-9]{11}$" 
+                                                    placeholder="Enter 11-digit phone number" 
+                                                />
                                             </div>
                                         </div>
                                     </div>
@@ -145,7 +150,7 @@ export default function EditOfficial() {
                             )}
                             {activeSection === "others" && (
                                 <>
-                                    <div className="edit-official-others-mainsection">
+                                    <div className="edit-officer-others-mainsection">
                                         <div className="box-container-outer-resindentificationpic">
                                             <div className="title-resindentificationpic">
                                                 Identification Picture
@@ -184,8 +189,7 @@ export default function EditOfficial() {
                                                 </div>
                                             
                                             </div>
-                                        </div> 
-
+                                        </div>
                                     </div>
                                 </>
                             )}
@@ -195,6 +199,7 @@ export default function EditOfficial() {
                 </div>
 
             </div>
+
 
             {showDiscardPopup && (
                         <div className="confirmation-popup-overlay-edit-official">
@@ -208,9 +213,6 @@ export default function EditOfficial() {
                             </div>
                         </div>
                     )}
-
-
         </main>
     );
 }
-
