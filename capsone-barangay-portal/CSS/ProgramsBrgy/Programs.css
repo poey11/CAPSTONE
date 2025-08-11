@@ -498,7 +498,7 @@ Add Programs
 .add-programs-info-main-container{
   width: 65%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
 }
 
@@ -590,3 +590,77 @@ Add Programs
 }
 
 
+
+.add-programs-upper-section {
+  display: flex;
+  width: 100%;
+}
+
+.add-programs-lower-section {
+  display: flex;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+
+
+
+ .view-incident-partyA-container {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+
+    .box-container-outer-natureoffacts {
+    position: relative; 
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+        .title-remarks-latefiling {
+    position: absolute;
+    left: 50%; 
+    top: 30px; 
+    transform: translate(-50%, -50%);
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 5;
+    width: 300px;
+    text-align: center;
+  }
+  
+      .box-container-partyA {
+    position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 250px;
+  }
+
+      .natureoffacts-input-field {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 120px;
+    margin-top: 20px;
+    resize: none;
+  }
+
+  .natureoffacts-input-field:focus {
+    outline: none;
+    border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+    box-shadow: none;
+  }
+
+
+  

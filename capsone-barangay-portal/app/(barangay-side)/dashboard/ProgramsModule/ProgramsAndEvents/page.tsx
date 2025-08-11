@@ -334,7 +334,7 @@ export default function ProgramsModule() {
 
           <div className="add-programs-info-main-container">
 
-            
+           <div className="add-programs-upper-section">
             <div className="add-programs-content-left-side">
               <div className="fields-section-add-programs">
                 <p>Program Name<span className="required">*</span></p>
@@ -397,6 +397,23 @@ export default function ProgramsModule() {
 
             
 
+
+            </div>
+            
+            </div> 
+
+
+            <div className="add-programs-lower-section">
+                                    <div className="view-incident-partyA-container">
+                                      <div className="box-container-outer-natureoffacts">
+                                          <div className="title-remarks-latefiling">
+                                              Description of Program
+                                          </div>
+                                          <div className="box-container-partyA">
+                                            <textarea className="natureoffacts-input-field" name="reasonForLateFiling" id="reasonForLateFiling"  readOnly/>
+                                          </div>
+                                      </div>
+                                    </div>
 
             </div>
             
