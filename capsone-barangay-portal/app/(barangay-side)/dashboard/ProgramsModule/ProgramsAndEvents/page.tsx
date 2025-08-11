@@ -333,6 +333,8 @@ export default function ProgramsModule() {
           </div>
 
           <div className="add-programs-info-main-container">
+
+            
             <div className="add-programs-content-left-side">
               <div className="fields-section-add-programs">
                 <p>Program Name<span className="required">*</span></p>
@@ -343,17 +345,57 @@ export default function ProgramsModule() {
                   />
               </div>
 
+              <div className="fields-section-add-programs">
+                <p>Number of Participants<span className="required">*</span></p>
+                <input
+                  type="number"
+                  min="1"
+                  className="add-programs-input-field"
+                  placeholder="E.g. 50"
+                />
+              </div>
+
+            <div className="fields-section-add-programs">
+              <p>Eligible Participants<span className="required">*</span></p>
+              <select className="add-programs-input-field">
+                <option value="">Select requirement</option>
+                <option value="resident">Resident</option>
+                <option value="non-resident">Non-Resident</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+
             </div>
 
             <div className="add-programs-content-right-side">
-            <div className="fields-section-add-programs">
-                <p>Location<span className="required">*</span></p>
-                  <input
-                  type="text"
-                  className="add-programs-input-field"
-                  placeholder="Location (E.g. Baragay Hall)"
-                  />
+               <div className="fields-section-add-programs">
+                  <p>Location<span className="required">*</span></p>
+                    <input
+                    type="text"
+                    className="add-programs-input-field"
+                    placeholder="Location (E.g. Baragay Hall)"
+                    />
+                 </div>
+
+
+
+              <div className="fields-section-add-programs">
+                <p>Schedule of Program<span className="required">*</span></p>
+                  <div className="program-schedule-container">
+                    <div className="date-input-wrapper">
+                      <label>Start Date</label>
+                      <input type="date" className="add-programs-input-field" />
+                    </div>
+
+                    <div className="date-input-wrapper">
+                      <label>End Date</label>
+                      <input type="date" className="add-programs-input-field" />
+                    </div>
+                  </div>
+
               </div>
+
+            
 
 
             </div>

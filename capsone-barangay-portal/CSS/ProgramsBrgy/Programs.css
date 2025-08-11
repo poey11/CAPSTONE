@@ -561,3 +561,32 @@ Add Programs
   .add-programs-input-field option:disabled {
     color: grey;
   }
+
+
+
+  .program-schedule-container {
+  width: 90%;
+  background-color: #ffffff; /* Matches main section background */
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  padding: 1rem; /* Consistent padding for content */
+  margin-top: 1rem; /* Space from the section above */
+
+
+}
+
+.date-input-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-input-wrapper label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #2C3E50;
+  margin-bottom: 5px;
+}
+
+
