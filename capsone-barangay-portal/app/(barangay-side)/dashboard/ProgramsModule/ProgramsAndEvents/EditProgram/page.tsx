@@ -10,6 +10,14 @@ export default function EditResident() {
     const [position, setPosition] = useState("");
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+      const [showRejectPopup, setShowRejectPopup] = useState(false); 
+  const [loading, setLoading] = useState(false); 
+
+
+
+  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
+      const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
 
     const handleBack = () => {
       window.location.href = "/dashboard/ProgramsModule/ProgramsAndEvents";
@@ -18,6 +26,12 @@ export default function EditResident() {
     const handleDiscardClick = async () => {
         setShowDiscardPopup(true);
     }
+
+
+
+      const handleRejectClick = () => {
+    setShowRejectPopup(true); 
+  };
 
     const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -28,8 +42,121 @@ export default function EditResident() {
 
 };
 
+      const confirmSubmit = () => {
+          try {
+              
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); //  show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
+
     return (
         <main className="edit-program-main-container" >
+
+
+
+        
+                {showRejectPopup && (
+                  <div className="reasonfor-recject-popup-overlay">
+                    <div className="reasonfor-reject-confirmation-popup">
+                      <h2>Reject Request</h2>
+
+                      <form  className="reject-container" >
+                        <div className="box-container-outer-reasonforreject">
+                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
+                          <div className="box-container-reasonforreject">
+                            <textarea
+                              className="reasonforreject-input-field"
+                              name="reason"
+                              id="reason"
+                             placeholder="Enter the reason for rejecting the program (e.g., overlaps with another event, insufficient budget allocation, safety concerns)..."
+
+                            />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="reject-reason-yesno-container">
+                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
+                            Cancel
+                          </button>
+                            <button 
+                                type="button" 
+                                className="reject-reason-yes-button" 
+                                disabled={loading}
+                                onClick={() => setShowSubmitRejectPopup(true)}
+                            >
+                                {loading ? "Saving..." : "Save"}
+                            </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+
+             {showSubmitRejectPopup && (
+                <div className="confirmation-popup-overlay-program-reject">
+                    <div className="confirmation-popup-program-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to Submit? </p>
+                        <div className="yesno-container-add">
+                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
+                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+
+
+           {showPopup && (
+                <div className={`popup-overlay-program show`}>
+                    <div className="popup-program">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
+
+            <div className="program-redirectionpage-section">
+
+                   <button className="program-redirection-buttons" onClick={handleRejectClick}>
+                        <div className="program-redirection-icons-section" >
+                             <img src="/images/rejected.png" alt="user info" className="program-redirection-icons-info" />
+                             </div>
+                         <h1>Reject Request</h1>
+                    </button>
+
+
+
+                <button className="program-redirection-buttons">
+                        <div className="program-redirection-icons-section">
+                            <img src="/images/generatedoc.png" alt="user info" className="program-redirection-icons-info" />
+                             </div>
+                         <h1>Approve Request</h1>
+                    </button>
+
+
+
+            </div>
+
             <div className="edit-program-main-content">
               <div className="edit-program-main-section1">
                     <div className="edit-program-main-section1-left">
