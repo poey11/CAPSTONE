@@ -109,8 +109,8 @@ export default function EditResident() {
                                 </div>
 
                             <div className="edit-program-section-2-right-side">
-                              <div className="fields-section-edit-programs">
-                                    <p>Location<span className="required">*</span></p>
+                                <div className="fields-section-edit-programs">
+                                    <p>Program Location<span className="required">*</span></p>
                                         <input
                                         type="text"
                                         className="edit-programs-input-field"
@@ -118,25 +118,40 @@ export default function EditResident() {
                                     />
                                 </div>
 
+{/*
                                 <div className="fields-section-edit-programs">
                                      <p>Schedule of Program<span className="required">*</span></p>
 
-                                <div className="edit-program-schedule-container">
-                                    <div className="edit-date-input-wrapper">
-                                    <label>Start Date</label>
-                                    <input type="date" className="edit-programs-input-field" />
-                                    </div>
+                                    <div className="edit-program-schedule-container">
+                                        <div className="edit-date-input-wrapper">
+                                        <label>Start Date</label>
+                                        <input type="date" className="edit-programs-input-field" />
+                                        </div>
 
-                                    <div className="edit-date-input-wrapper">
-                                    <label>End Date</label>
-                                    <input type="date" className="edit-programs-input-field" />
+                                        <div className="edit-date-input-wrapper">
+                                        <label>End Date</label>
+                                        <input type="date" className="edit-programs-input-field" />
+                                        </div>
                                     </div>
                                 </div>
-
-
-                                </div>
                                     
-                                    
+                                    */}
+
+                                    <div className="fields-section-edit-programs">
+                                        <p>Program Start Date<span className="required">*</span></p>
+                                            <input
+                                            type="date"
+                                            className="edit-programs-input-field"
+                                        />
+                                    </div>
+
+                                    <div className="fields-section-edit-programs">
+                                        <p>Program End Date<span className="required">*</span></p>
+                                            <input
+                                            type="date"
+                                            className="edit-programs-input-field"
+                                        />
+                                    </div>
                                 </div>
 
                            </div>
@@ -151,25 +166,18 @@ export default function EditResident() {
 
 
                             <div className="edit-programs-upper-section">
-
-                                <div className="edit-program-section-2-left-side">
-
-                                <div className="edit-programs-description-container">
-                                      <div className="edit-box-container-outer-description">
-                                          <div className="edit-title-description-programs">
-                                              Description of Program
-                                          </div>
-                                          <div className="edit-box-container-description">
-                                            <textarea className="eeditdescription-input-field" />
-                                          </div>
-                                      </div>
-                                    </div>
-
-                              </div>
-
-
-                             <div className="edit-program-section-2-right-side">
                                     <div className="edit-official-others-mainsection">
+
+                                        <div className="edit-box-container-outer-programdesc">
+                                            <div className="title-remarks">
+                                                Description of Program
+                                            </div>
+                                            <div className="box-container-programdesc">
+                                                <textarea className="programdesc-input-field" placeholder="Enter Remarks" name="programDescription"  />
+
+                                            </div>
+                                        </div>
+
                                         <div className="box-container-outer-resindentificationpic">
                                             <div className="title-resindentificationpic">
                                                 Program Photo
@@ -212,7 +220,7 @@ export default function EditResident() {
 
                                     </div>
                                 
-                              </div>
+                             
 
                             </div>
 
@@ -241,6 +249,20 @@ export default function EditResident() {
                 
 
             </div>
+
+
+            {showDiscardPopup && (
+                        <div className="confirmation-popup-overlay-edit-program">
+                            <div className="confirmation-popup-edit-program">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                                <p>Are you sure you want to discard the changes?</p>
+                                <div className="yesno-container-add">
+                                    <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+                                    <button className="yes-button-add">Yes</button> 
+                                </div> 
+                            </div>
+                        </div>
+      )}
         </main>
     );
 }
