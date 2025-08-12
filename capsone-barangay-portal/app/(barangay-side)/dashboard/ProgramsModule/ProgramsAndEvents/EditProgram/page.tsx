@@ -13,6 +13,12 @@ export default function EditResident() {
       const [showRejectPopup, setShowRejectPopup] = useState(false); 
   const [loading, setLoading] = useState(false); 
 
+
+
+  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
+      const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
     const handleBack = () => {
       window.location.href = "/dashboard/OfficialsModule";
     };
@@ -35,6 +41,27 @@ export default function EditResident() {
     }
 
 };
+
+      const confirmSubmit = () => {
+          try {
+              
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); //  show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
 
     return (
         <main className="edit-program-main-container" >
@@ -66,13 +93,44 @@ export default function EditResident() {
                           <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
                             Cancel
                           </button>
-                          <button type="submit" className="reject-reason-yes-button" disabled={loading}>
-                            {loading ? "Saving..." : "Save"}
-                          </button>
+                            <button 
+                                type="button" 
+                                className="reject-reason-yes-button" 
+                                disabled={loading}
+                                onClick={() => setShowSubmitRejectPopup(true)}
+                            >
+                                {loading ? "Saving..." : "Save"}
+                            </button>
                         </div>
                       </form>
                     </div>
                   </div>
+                )}
+
+
+             {showSubmitRejectPopup && (
+                <div className="confirmation-popup-overlay-program-reject">
+                    <div className="confirmation-popup-program-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to Submit? </p>
+                        <div className="yesno-container-add">
+                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
+                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+
+
+           {showPopup && (
+                <div className={`popup-overlay-program show`}>
+                    <div className="popup-program">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
                 )}
 
 
