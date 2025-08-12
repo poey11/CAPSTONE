@@ -10,6 +10,8 @@ export default function EditResident() {
     const [position, setPosition] = useState("");
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+      const [showRejectPopup, setShowRejectPopup] = useState(false); 
+  const [loading, setLoading] = useState(false); 
 
     const handleBack = () => {
       window.location.href = "/dashboard/OfficialsModule";
@@ -18,6 +20,12 @@ export default function EditResident() {
     const handleDiscardClick = async () => {
         setShowDiscardPopup(true);
     }
+
+
+
+      const handleRejectClick = () => {
+    setShowRejectPopup(true); 
+  };
 
     const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,6 +38,67 @@ export default function EditResident() {
 
     return (
         <main className="edit-program-main-container" >
+
+
+
+        
+                {showRejectPopup && (
+                  <div className="reasonfor-recject-popup-overlay">
+                    <div className="reasonfor-reject-confirmation-popup">
+                      <h2>Reject Request</h2>
+
+                      <form  className="reject-container" >
+                        <div className="box-container-outer-reasonforreject">
+                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
+                          <div className="box-container-reasonforreject">
+                            <textarea
+                              className="reasonforreject-input-field"
+                              name="reason"
+                              id="reason"
+                             placeholder="Enter the reason for rejecting the program (e.g., overlaps with another event, insufficient budget allocation, safety concerns)..."
+
+                            />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="reject-reason-yesno-container">
+                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
+                            Cancel
+                          </button>
+                          <button type="submit" className="reject-reason-yes-button" disabled={loading}>
+                            {loading ? "Saving..." : "Save"}
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+
+
+            <div className="program-redirectionpage-section">
+
+                   <button className="program-redirection-buttons" onClick={handleRejectClick}>
+                        <div className="program-redirection-icons-section" >
+                             <img src="/images/rejected.png" alt="user info" className="program-redirection-icons-info" />
+                             </div>
+                         <h1>Reject Request</h1>
+                    </button>
+
+
+
+                <button className="program-redirection-buttons">
+                        <div className="program-redirection-icons-section">
+                            <img src="/images/generatedoc.png" alt="user info" className="program-redirection-icons-info" />
+                             </div>
+                         <h1>Approve Request</h1>
+                    </button>
+
+
+
+            </div>
+
             <div className="edit-program-main-content">
               <div className="edit-program-main-section1">
                     <div className="edit-program-main-section1-left">
