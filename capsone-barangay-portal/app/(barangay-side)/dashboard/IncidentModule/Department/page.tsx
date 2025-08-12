@@ -1790,7 +1790,9 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                   </div>
                 </div>
             </div>
-        </div>
+        </div>      
+      </div>
+    )}
 
      {/* Generating of Report Popup */}
           {isGenerating && (
@@ -1800,9 +1802,7 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                 <p>{generatingMessage}</p>
               </div>
             </div>
-          )}        
-      </div>
-    )}
+          )}  
 
           {/* Success Generate Report Popup*/}
       {showSuccessGenerateReportPopup && (
@@ -1814,7 +1814,7 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
         </div>
       )}
 
-      {/* Success Generate Report Popup*/}
+      {/* Error Generate Report Popup*/}
       {showErrorGenerateReportPopup && (
         <div className={`popup-overlay-error-generate-report show`}>
           <div className="popup-error-generate-report">
