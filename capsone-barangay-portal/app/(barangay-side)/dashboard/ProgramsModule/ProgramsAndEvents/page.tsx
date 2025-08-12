@@ -140,8 +140,17 @@ export default function ProgramsModule() {
    const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
 
 
+   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  // Open popup
+    const openPopup = () => {
+      setIsPopupOpen(true);
+    };
 
+    // Close popup
+    const closePopup = () => {
+      setIsPopupOpen(false);
+    };
 
 
   return (
@@ -260,12 +269,13 @@ export default function ProgramsModule() {
 
                       <button
                         className="action-programs-button"
-                        onClick={() => router.push(`/dashboard/ProgramsModule/ViewProgram?id=${program.id}`)}
+                        onClick={openPopup}
                       >
                         <img
                           src="/Images/view.png"
                           alt="View"
                           className="action-programs-view"
+                          
                         />
                       </button>
 
@@ -443,6 +453,38 @@ export default function ProgramsModule() {
   </div>
 
 )}
+
+
+
+
+  {isPopupOpen && (
+
+    <div className="programs-view-popup-overlay programs-animated">
+      <div className="view-program-popup">
+                    <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+            </div>
+
+
+      </div>
+      
+      
+
+    </div>
+
+
+ )}
 
     </main>
   );
