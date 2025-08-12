@@ -140,8 +140,21 @@ export default function ProgramsModule() {
    const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
 
 
+   const [isPopupOpen, setIsPopupOpen] = useState(false);
 
+  // Open popup
+    const openPopup = () => {
+      setIsPopupOpen(true);
+    };
 
+    // Close popup
+    const closePopup = () => {
+      setIsPopupOpen(false);
+    };
+
+    const handleEditClick = () => {
+    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram");
+  };
 
 
   return (
@@ -260,24 +273,32 @@ export default function ProgramsModule() {
 
                       <button
                         className="action-programs-button"
-                        onClick={() => router.push(`/dashboard/ProgramsModule/ViewProgram?id=${program.id}`)}
+                        onClick={openPopup}
                       >
                         <img
                           src="/Images/view.png"
                           alt="View"
                           className="action-programs-view"
+                          
                         />
                       </button>
 
                       <button
                         className="action-programs-button"
-                        onClick={() => router.push(`/dashboard/ProgramsModule/EditProgram?id=${program.id}`)}
+                        onClick={handleEditClick}
                       >
                         <img
                           src="/Images/edit.png"
                           alt="Edit"
                           className="action-programs-edit"
                         />
+                      </button>
+
+                            <button
+                        className="action-programs-button"
+                      >
+
+                        <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
                       </button>
 
 
@@ -375,28 +396,24 @@ export default function ProgramsModule() {
                     className="add-programs-input-field"
                     placeholder="Location (E.g. Baragay Hall)"
                     />
-                 </div>
-
+                </div>
 
 
               <div className="fields-section-add-programs">
-                <p>Schedule of Program<span className="required">*</span></p>
-                  <div className="program-schedule-container">
-                    <div className="date-input-wrapper">
-                      <label>Start Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
+                  <p>Program Start Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
+                </div>
 
-                    <div className="date-input-wrapper">
-                      <label>End Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
-                  </div>
-
-              </div>
-
-            
-
+                <div className="fields-section-add-programs">
+                  <p>Program End Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
+                </div>
 
             </div>
             
@@ -423,8 +440,10 @@ export default function ProgramsModule() {
 
 
        <div className="programs-yesno-container">
-
-        
+             <button onClick={() => setShowAddProgramsPopup(false)} className="program-no-button">Cancel</button>
+                     <button className="program-yes-button">
+                     Save
+                </button>
 
        </div>
 
@@ -434,6 +453,18 @@ export default function ProgramsModule() {
   </div>
 
 )}
+
+  {isPopupOpen && (
+    <div className="user-roles-view-popup-overlay add-incident-animated">
+      <div className="view-barangayuser-popup">
+
+      </div>
+    </div>
+  )}
+
+
+
+
 
     </main>
   );

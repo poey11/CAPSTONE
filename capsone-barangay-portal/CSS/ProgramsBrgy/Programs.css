@@ -310,6 +310,12 @@ width: 100px;
 }
 
 
+
+.action-programs-delete {
+   filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
+}
+
+
   /* NEW UPDATED */
   .no-result-card-programs {
   display: flex;
@@ -437,8 +443,7 @@ Add Programs
 
     .add-programs-main-container{
     width: 100%;
-   /* height: 375px;*/
-    height: 85%;
+    height: 375px;
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -449,6 +454,39 @@ Add Programs
     display: flex;
     gap: 20px;
   }
+
+
+
+
+  .program-yes-button,
+.program-no-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.program-yes-button {
+  background-color: #4caf50; 
+}
+
+.program-yes-button:hover {
+  background-color: #3d8c40; 
+} 
+
+.program-no-button {
+  background-color: #f44336;
+}
+
+.program-no-button:hover {
+  background-color: #c2352b; 
+}
+
 
 
   .add-programs-photo-section {
@@ -668,3 +706,180 @@ Add Programs
 
 
   
+
+
+
+
+
+
+  /*
+VIEW
+
+  */
+
+
+
+
+    @keyframes slideDownFadeIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+
+  .programs-view-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; 
+
+  }
+
+
+
+ .programs-animated {
+  opacity: 0;
+  animation: dropDownFromTop 0.6s ease-out forwards;
+  
+}
+
+
+
+
+    .view-program-popup {
+    display: flex;
+    flex-direction: column;
+    /*height: 550px;*/
+    height: 600px;
+    width: 65%;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: fixed;
+    overflow: hidden;
+
+    animation: slideDownFadeIn 0.4s ease-out;
+  }
+
+
+  
+  
+    .view-user-main-section1{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #214666;
+  width: 100%;
+  height: 100px;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.user-logo1-image-side-bar-1{
+  width: 150px;
+  height: 80px;
+}
+
+.view-user-header-second-section {
+  padding-right: 50px;
+  text-align: center;
+  color: white;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+
+  }
+  
+
+  .view-user-header-second-section h1 {
+    margin: 1px 0;
+    font-size: 11px;
+    font-weight: normal;
+  }
+
+.view-user-header-second-section h2 {
+  margin: 1px 0;
+  font-size: 10px;
+  font-weight: normal;
+}
+  
+.view-user-header-second-section .barangay-name {
+  font-size: 15px;
+  font-weight: bolder;
+  letter-spacing: 1px;
+}
+  
+.view-user-header-second-section .address,
+.view-user-header-second-section .contact {
+  font-size: 11px;
+}
+
+.user-logo2-image-side-bar-1{
+  width: 70px;
+  height: 70px;
+  margin-right: 45px;
+}
+
+
+
+/* test */
+
+  .user-roles-view-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; 
+  }
+
+
+    .add-incident-animated {
+  opacity: 0;
+  animation: dropDownFromTop 0.6s ease-out forwards;
+  
+}
+
+    .view-barangayuser-popup {
+    display: flex;
+    flex-direction: column;
+    /*height: 550px;*/
+    height: 600px;
+    width: 65%;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    border: 2px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    position: fixed;
+    overflow: hidden;
+
+    animation: slideDownFadeIn 0.4s ease-out;
+  }
