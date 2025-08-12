@@ -152,6 +152,10 @@ export default function ProgramsModule() {
       setIsPopupOpen(false);
     };
 
+    const handleEditClick = () => {
+    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram");
+  };
+
 
   return (
     <main className="programs-module-main-container">
@@ -281,7 +285,7 @@ export default function ProgramsModule() {
 
                       <button
                         className="action-programs-button"
-                        onClick={() => router.push(`/dashboard/ProgramsModule/EditProgram?id=${program.id}`)}
+                        onClick={handleEditClick}
                       >
                         <img
                           src="/Images/edit.png"
@@ -392,28 +396,24 @@ export default function ProgramsModule() {
                     className="add-programs-input-field"
                     placeholder="Location (E.g. Baragay Hall)"
                     />
-                 </div>
-
+                </div>
 
 
               <div className="fields-section-add-programs">
-                <p>Schedule of Program<span className="required">*</span></p>
-                  <div className="program-schedule-container">
-                    <div className="date-input-wrapper">
-                      <label>Start Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
+                  <p>Program Start Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
+                </div>
 
-                    <div className="date-input-wrapper">
-                      <label>End Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
-                  </div>
-
-              </div>
-
-            
-
+                <div className="fields-section-add-programs">
+                  <p>Program End Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
+                </div>
 
             </div>
             
@@ -454,37 +454,17 @@ export default function ProgramsModule() {
 
 )}
 
-
-
-
   {isPopupOpen && (
-
-    <div className="programs-view-popup-overlay programs-animated">
-      <div className="view-program-popup">
-                    <div className="view-user-main-section1">
-                <div className="view-user-header-first-section">
-                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
-                </div>
-                <div className="view-user-header-second-section">
-                  <h2 className="gov-info">Republic of the Philippines</h2>
-                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
-                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
-                  <h2 className="contact">930-0040 / 428-9030</h2>
-                </div>
-                <div className="view-user-header-third-section">
-                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
-                </div>
-            </div>
-
+    <div className="user-roles-view-popup-overlay add-incident-animated">
+      <div className="view-barangayuser-popup">
 
       </div>
-      
-      
-
     </div>
+  )}
 
 
- )}
+
+
 
     </main>
   );
