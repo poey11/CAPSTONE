@@ -421,7 +421,7 @@ export default function OfficialsModule() {
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">
-                    {["details"].map((section) => (
+                    {["details", "history"].map((section) => (
                       <button
                         key={section}
                         type="button"
@@ -429,6 +429,7 @@ export default function OfficialsModule() {
                         onClick={() => setViewActiveSection(section)}
                       >
                         {section === "details" && "Details"}
+                        {section === "history" && "History"}
                       </button>
                     ))}
                   </div>
@@ -519,6 +520,38 @@ export default function OfficialsModule() {
                                 className="view-user-input-field"
                                 readOnly
                               /> 
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {viewActiveSection  === "history" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                                <p>Created By</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                                <p>Created At</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                                <p>Updated By</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
                             </div>
                           </div>
                         </>
