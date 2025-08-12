@@ -369,7 +369,7 @@ export default function ProgramsModule() {
 
             <div className="add-programs-content-right-side">
                <div className="fields-section-add-programs">
-                  <p>Location<span className="required">*</span></p>
+                  <p>Program Location<span className="required">*</span></p>
                     <input
                     type="text"
                     className="add-programs-input-field"
@@ -378,24 +378,21 @@ export default function ProgramsModule() {
                  </div>
 
 
-
-              <div className="fields-section-add-programs">
-                <p>Schedule of Program<span className="required">*</span></p>
-                  <div className="program-schedule-container">
-                    <div className="date-input-wrapper">
-                      <label>Start Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
-
-                    <div className="date-input-wrapper">
-                      <label>End Date</label>
-                      <input type="date" className="add-programs-input-field" />
-                    </div>
-                  </div>
-
+            <div className="fields-section-add-programs">
+                  <p>Program Start Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
               </div>
 
-            
+              <div className="fields-section-add-programs">
+                  <p>Program End Date<span className="required">*</span></p>
+                    <input
+                    type="date"
+                    className="add-programs-input-field"
+                    />
+              </div>
 
 
             </div>

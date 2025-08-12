@@ -263,6 +263,18 @@ export default function Header() {
         breadcrumb: ["Officials Management", "Sitio / HOA Officers"],
       },
 
+      //Programs/Events
+      "/dashboard/ProgramsModule/ProgramsAndEvents": {
+        title: "Programs / Events",
+        breadcrumb: ["Programs Management", "Programs / Events"],
+      },
+
+      //Edit Programs/Events
+      "/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram": {
+        title: "Programs / Events",
+        breadcrumb: ["Programs Management", "Programs / Events", "Edit Programs / Events"],
+      },
+
       
 
 

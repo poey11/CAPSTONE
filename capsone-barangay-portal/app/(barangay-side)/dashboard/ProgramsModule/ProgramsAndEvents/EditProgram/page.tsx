@@ -12,7 +12,7 @@ export default function EditResident() {
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
 
     const handleBack = () => {
-      window.location.href = "/dashboard/OfficialsModule";
+      window.location.href = "/dashboard/ProgramsModule/ProgramsAndEvents";
     };
 
     const handleDiscardClick = async () => {
@@ -117,25 +117,6 @@ export default function EditResident() {
                                          placeholder="Location (E.g. Baragay Hall)"
                                     />
                                 </div>
-
-{/*
-                                <div className="fields-section-edit-programs">
-                                     <p>Schedule of Program<span className="required">*</span></p>
-
-                                    <div className="edit-program-schedule-container">
-                                        <div className="edit-date-input-wrapper">
-                                        <label>Start Date</label>
-                                        <input type="date" className="edit-programs-input-field" />
-                                        </div>
-
-                                        <div className="edit-date-input-wrapper">
-                                        <label>End Date</label>
-                                        <input type="date" className="edit-programs-input-field" />
-                                        </div>
-                                    </div>
-                                </div>
-                                    
-                                    */}
 
                                     <div className="fields-section-edit-programs">
                                         <p>Program Start Date<span className="required">*</span></p>
