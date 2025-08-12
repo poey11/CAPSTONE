@@ -423,8 +423,10 @@ export default function ProgramsModule() {
 
 
        <div className="programs-yesno-container">
-
-        
+             <button onClick={() => setShowAddProgramsPopup(false)} className="program-no-button">Cancel</button>
+                <button className="program-yes-button">
+                 Save
+              </button>
 
        </div>
 
