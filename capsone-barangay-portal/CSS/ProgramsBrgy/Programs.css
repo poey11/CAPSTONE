@@ -310,6 +310,12 @@ width: 100px;
 }
 
 
+
+.action-programs-delete {
+   filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
+}
+
+
   /* NEW UPDATED */
   .no-result-card-programs {
   display: flex;
