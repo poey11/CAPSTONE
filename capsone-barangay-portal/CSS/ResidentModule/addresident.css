@@ -1507,3 +1507,94 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     margin-top: 8px;
     text-align: center;
   }
+
+
+  /* Row that holds Resident Classification + PWD side-by-side */
+.resident-classification-pwd-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap; /* stack on smaller screens */
+}
+
+/* PWD outer wrapper (same width as your other 370px cards) */
+.box-container-outer-pwd {
+  position: relative;
+  flex: 0 0 var(--resident-card-width, 370px);
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* PWD inner card — visually matches your Identification/Verification cards */
+.box-container-pwd {
+  width: var(--resident-card-width, 370px);
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 40px 20px 50px;  /* same padding */
+  margin-top: 30px;
+  min-height: var(--resident-card-min-h, 340px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.box-container-pwd:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+/* Title tab (centered, same look as others) */
+.title-pwd {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;        /* matches your other titles */
+  text-align: center;
+}
+
+/* PWD upload area (isolated class so we don't touch .file-upload-container) */
+.pwd-upload-container {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  display: block;
+  text-align: center;
+  height: 220px;
+  width: 350px;
+  overflow-y: auto;
+  margin-top: 10px;
+  align-self: center;
+}
+
+.pwd-upload-container .upload-link { color: rgb(245, 143, 88); text-decoration: underline; cursor: pointer; }
+.pwd-upload-container .file-upload-input { display: none; }
+
+/* PWD form bits */
+.pwd-fields { width: 100%; max-width: 350px; display: grid; row-gap: 16px; }
+.pwd-label  { font-size: 15px; color: #2C3E50; font-weight: bold; }
+.pwd-radio-row { display: flex; align-items: center; gap: 24px; }
+.pwd-input { padding: 8px; width: 85%; border: 1px solid rgba(36,53,76,0.7); border-radius: 5px; color: #000; }
+
+/* Keep vertical space when not showing the date field (prevents jump) */
+.pwd-valid-until.keep-space { visibility: hidden; height: 64px; }
+
+/* Error highlight compatible with your global styles */
+.pwd-error { border: 2px solid red !important; box-shadow: 0 0 5px red; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .box-container-outer-pwd { flex: 1 1 100%; }
+  .box-container-pwd { width: 100%; }
+  .pwd-upload-container { width: 100%; }
+}

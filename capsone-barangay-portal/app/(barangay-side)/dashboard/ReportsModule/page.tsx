@@ -1497,12 +1497,31 @@ const uploadForms = async (url: string): Promise<void> => {
       const q = query(residentRef);
       const querySnapshot = await getDocs(q);
   
+      const todayStr = new Date().toISOString().split("T")[0];
+      const today = new Date(todayStr);
+  
+      // FILTER:
+      // - isPWD true
+      // - Permanent => must have pwdIdFileURL
+      // - Temporary => not expired (pwdTemporaryUntil >= today)
       const residents = querySnapshot.docs
         .map((doc) => doc.data())
-        .filter((resident) => resident.isPWD === true);
+        .filter((r) => r.isPWD === true)
+        .filter((r) => {
+          const type = (r.pwdType || "").toLowerCase();
+          if (type === "permanent") {
+            return !!r.pwdIdFileURL;
+          }
+          if (type === "temporary") {
+            if (!r.pwdTemporaryUntil) return false;
+            const until = new Date(r.pwdTemporaryUntil);
+            return until >= today;
+          }
+          return false;
+        });
   
       if (residents.length === 0) {
-        await showErrorToast("No PWD records found.");
+        await showErrorToast("No qualified PWD records found.");
         return;
       }
   
@@ -1516,27 +1535,30 @@ const uploadForms = async (url: string): Promise<void> => {
       await workbook.xlsx.load(arrayBuffer);
       const worksheet = workbook.worksheets[0];
   
-      // Update header
+      // Header
       worksheet.getCell("A1").value = "BARANGAY FAIRVIEW\nRECORD OF BARANGAY DEMOGRAPHICS";
       worksheet.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      // Define rows for data and footer
+      // Layout rows
       const dataStartRow = 4;
-      const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
-      const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
+      const originalFooterStartRow = 24;
+      const originalFooterEndRow = 28;
   
-      // Get footer drawings (images) in the footer rows
-      const footerDrawings = worksheet.getImages().filter(img => {
+      // Footer drawings to move later
+      const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
-        return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
+        return row >= originalFooterStartRow - 1 && row <= originalFooterEndRow - 1;
       });
   
-      // Insert enough rows before footer to fit all resident rows
+      // Make room before footer
       const rowsNeeded = Math.max(0, dataStartRow + residents.length - (originalFooterStartRow - 1));
-      worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));  
-      // Insert resident data rows
+      if (rowsNeeded > 0) {
+        worksheet.insertRows(originalFooterStartRow - 1, new Array(rowsNeeded).fill([]));
+      }
+  
+      // Fill rows
       residents.forEach((resident, index) => {
         const rowIndex = dataStartRow + index;
         const row = worksheet.getRow(rowIndex);
@@ -1575,11 +1597,11 @@ const uploadForms = async (url: string): Promise<void> => {
         row.commit();
       });
   
-      // Add the total solo parents row just below the last resident data row
+      // Total row (fixed label)
       const totalRowIndex = dataStartRow + residents.length;
       const totalRow = worksheet.getRow(totalRowIndex);
       worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
-      totalRow.getCell(1).value = `TOTAL STUDENTS/MINORS: ${residents.length}`;
+      totalRow.getCell(1).value = `TOTAL PWD: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
       for (let col = 1; col <= 12; col++) {
@@ -1593,34 +1615,25 @@ const uploadForms = async (url: string): Promise<void> => {
       }
       totalRow.commit();
   
-      // Move footer drawings down by the number of inserted rows (residents.length)
-      footerDrawings.forEach(drawing => {
-        const offset = rowsNeeded;
-        if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
-        if (drawing.range?.br) drawing.range.br.nativeRow += offset;
+      // Move footer drawings down
+      footerDrawings.forEach((drawing) => {
+        if (drawing.range?.tl) drawing.range.tl.nativeRow += rowsNeeded;
+        if (drawing.range?.br) drawing.range.br.nativeRow += rowsNeeded;
       });
   
-      // Insert 2 more rows after footer to add date text
-      // Footer end row shifts by the number of inserted rows too
-      const footerShift = rowsNeeded;
-      const newDateRowIndex = originalFooterEndRow + footerShift + 1; 
-  
-      // Insert 2 rows for spacing before date (optional, since we calculate exact position)
-      worksheet.insertRow(newDateRowIndex - 1, []); // 1st empty row before date
-      worksheet.insertRow(newDateRowIndex, []);     // 2nd empty row before date
-  
-      // Set the date string in column A of newDateRowIndex + 1
+      // Date text after footer
+      const newDateRowIndex = originalFooterEndRow + rowsNeeded + 1;
+      worksheet.insertRow(newDateRowIndex - 1, []);
+      worksheet.insertRow(newDateRowIndex, []);
       const dateRow = worksheet.getRow(newDateRowIndex + 1);
-
-      // Increase the row height (e.g., 30 points)
       dateRow.height = 40;
-      
+  
       const formattedDate = currentDate.toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       });
-      
+  
       worksheet.mergeCells(`C${dateRow.number}:D${dateRow.number}`);
       const dateCell1 = dateRow.getCell(3);
       dateCell1.value = `${formattedDate}\nDate`;
@@ -1633,44 +1646,41 @@ const uploadForms = async (url: string): Promise<void> => {
       dateCell2.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
       dateCell2.font = { name: "Calibri", size: 11, italic: true, bold: true };
   
-      // Save and upload
+      // Page setup
       worksheet.pageSetup = {
         horizontalCentered: true,
         verticalCentered: false,
         orientation: "landscape",
-        paperSize: 9, 
+        paperSize: 9,
         fitToPage: true,
         fitToWidth: 1,
-        fitToHeight: 0, 
+        fitToHeight: 0,
       };
-
+  
+      // Save & upload
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
   
       const fileName = `PWD_Demographic_Report_${year}.xlsx`;
-      const storageRef = ref(storage, `GeneratedReports/${fileName}`);
-      await uploadBytes(storageRef, blob);
+      const storageRefOut = ref(storage, `GeneratedReports/${fileName}`);
+      await uploadBytes(storageRefOut, blob);
   
-      const fileUrl = await getDownloadURL(storageRef);
+      const fileUrl = await getDownloadURL(storageRefOut);
       setGeneratingMessage("Generating PWD Demographic Report...");
       return fileUrl;
     } catch (error) {
       setIsGenerating(false);
-
-      console.error("Error generating Student report:", error);
-
+      console.error("Error generating PWD report:", error);
       setShowErrorGenerateReportPopup(true);
-      setPopupErrorGenerateReportMessage("Failed to generate PWD Report");  
-      
-      setTimeout(() => {
-        setShowErrorGenerateReportPopup(false);
-      }, 5000);
+      setPopupErrorGenerateReportMessage("Failed to generate PWD Report");
+      setTimeout(() => setShowErrorGenerateReportPopup(false), 5000);
     } finally {
       setLoadingResidentPWDDemographic(false);
     }
   };
+  
 
   
   const handleGeneratePwdPDF = async () => {

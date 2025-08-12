@@ -7,8 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { getAllSpecificDocument, deleteDocument, generateDownloadLink} from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
 import { db,storage } from "@/app/db/firebase";
-import { collection, onSnapshot, orderBy, query, where, getDocs, doc, getDoc} from "firebase/firestore";
-
+import { collection, onSnapshot, orderBy, query, where, getDocs, doc, getDoc, addDoc} from "firebase/firestore";
+import ExcelJS from "exceljs";
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { saveAs } from "file-saver";
 
 const statusOptions = ["Pending", "CFA", "Settled", "Archived"];
 
@@ -30,6 +32,14 @@ export default function Department() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showAlertPopup, setshowAlertPopup] = useState(false); 
+
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingMessage, setGeneratingMessage] = useState("");
+  const [showSuccessGenerateReportPopup, setShowSuccessGenerateReportPopup] = useState(false);
+  const [popupSuccessGenerateReportMessage, setPopupSuccessGenerateReportMessage] = useState("");
+  const [showErrorGenerateReportPopup, setShowErrorGenerateReportPopup] = useState(false);
+  const [popupErrorGenerateReportMessage, setPopupErrorGenerateReportMessage] = useState("");
+  const [loadingIncidentSummary, setLoadingIncidentSummary] = useState(false);    
 
  const searchParams = useSearchParams();
   const highlightUserId = searchParams.get("highlight");
@@ -60,6 +70,23 @@ export default function Department() {
   const [hearingData, setHearingData] = useState<any[]>([]);
   const [generatedSummonLetter, setGeneratedSummonLetter] = useState<any[]>([]);
 
+  // error toast top right
+  let toastQueue: Promise<void> = Promise.resolve();
+
+  const showErrorToast = (message: string) => {
+  // Chain onto the queue to ensure order
+  toastQueue = toastQueue.then(() => {
+    return new Promise((resolve) => {
+      setPopupErrorGenerateReportMessage(message);
+      setShowErrorGenerateReportPopup(true);
+
+      setTimeout(() => {
+        setShowErrorGenerateReportPopup(false);
+        resolve(); // Let the next toast proceed
+      }, 3000);
+    });
+  });
+};
 
 
 const openPopup = async (incident: any) => {
@@ -501,6 +528,389 @@ if (selectedArea) {
      setMediaType(type);
    }, [concernImageUrl]);
 
+   // generate individual case report
+const toDateSafe = (raw: any): Date | null => {
+  if (!raw) return null;
+  if (typeof raw?.toDate === "function") return raw.toDate();
+  if (raw instanceof Date) return raw;
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+const formatDT = (raw: any): string => {
+  const d = toDateSafe(raw);
+  if (!d) return "";
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const HH = String(d.getHours()).padStart(2, "0");
+  const MM = String(d.getMinutes()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${HH}:${MM}`;
+};
+
+const formatDTLoose = (raw: any): string => {
+  if (!raw) return "";
+  const d = toDateSafe(raw);
+  if (d) {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const HH = String(d.getHours()).padStart(2, "0");
+    const MM = String(d.getMinutes()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd} ${HH}:${MM}`;
+  }
+  if (typeof raw === "string") {
+    // accept e.g. "2025-07-28T15:51" or "2025-07-28 15:51[:ss]"
+    const m = raw.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})(?::\d{2})?$/);
+    if (m) return `${m[1]} ${m[2]}`;
+    return raw; // last resort: pass through
+  }
+  return "";
+};
+
+
+const replacePlaceholders = (worksheet: ExcelJS.Worksheet, mapping: Record<string, string>) => {
+  worksheet.eachRow((row) => {
+    row.eachCell((cell) => {
+      if (typeof cell.value === "string") {
+        let val = cell.value as string;
+        let changed = false;
+        for (const [key, replacement] of Object.entries(mapping)) {
+          if (val.includes(key)) {
+            val = val.split(key).join(replacement ?? "");
+            changed = true;
+          }
+        }
+        if (changed) cell.value = val;
+      }
+    });
+  });
+};
+
+const deleteRowsByLabels = (ws: ExcelJS.Worksheet, labels: string[]) => {
+  const toDelete: number[] = [];
+  ws.eachRow((row, n) => {
+    const a = String(row.getCell(1).value ?? "").trim();
+    if (labels.includes(a)) toDelete.push(n);
+  });
+  toDelete.sort((a, b) => b - a).forEach((n) => ws.spliceRows(n, 1));
+};
+
+const sheetHasPlaceholder = (ws: ExcelJS.Worksheet, placeholder: string): boolean => {
+  let found = false;
+  ws.eachRow((row) =>
+    row.eachCell((cell) => {
+      if (typeof cell.value === "string" && (cell.value as string).includes(placeholder)) found = true;
+    })
+  );
+  return found;
+};
+
+// Basic “auto-fit” row height for wrapped text in a given column (default B)
+const autoFitRows = (ws: ExcelJS.Worksheet, textCol = 2) => {
+  const colWidth = ws.getColumn(textCol).width ?? 50; // chars
+  const charsPerLine = Math.max(10, Math.floor(colWidth)); // rough
+  const base = 15; // pt per line approx
+
+  ws.eachRow((row) => {
+    const cell = row.getCell(textCol);
+    if (cell && typeof cell.value === "string") {
+      const s = (cell.value as string).replace(/\r/g, "");
+      const segments = s.split("\n").map((v) => v.trim());
+      const lines = segments.reduce((sum, seg) => sum + Math.max(1, Math.ceil(seg.length / charsPerLine)), 0);
+      cell.alignment = { ...(cell.alignment || {}), wrapText: true, vertical: "top" };
+      row.height = Math.max(base + 2, lines * base); // grow row
+    }
+  });
+};
+
+// Delete a contiguous section starting at header text in Column A
+const deleteSectionByHeader = (ws: ExcelJS.Worksheet, headerLabel: string, nextHeaderCandidates: string[]) => {
+  let start = -1;
+  ws.eachRow((row, n) => {
+    const a = String(row.getCell(1).value ?? "").trim();
+    if (a === headerLabel && start === -1) start = n;
+  });
+  if (start === -1) return;
+
+  let stop = (ws.lastRow?.number ?? start) + 1;
+  ws.eachRow((row, n) => {
+    if (n <= start) return;
+    const a = String(row.getCell(1).value ?? "").trim();
+    if (nextHeaderCandidates.includes(a) && n < stop) stop = n;
+  });
+
+  const count = stop - start;
+  if (count > 0) ws.spliceRows(start, count);
+};
+
+const ORD_LABELS = ["First", "Second", "Third"] as const;
+type OrdLabel = typeof ORD_LABELS[number];
+const normalizeOrd = (v: any): OrdLabel | null => {
+  if (v === null || v === undefined) return null;
+  const num = typeof v === "number" ? v : /^\d+$/.test(String(v)) ? parseInt(String(v), 10) : NaN;
+  if (!isNaN(num)) {
+    if (num >= 0 && num <= 2) return ORD_LABELS[num];
+    if (num >= 1 && num <= 3) return ORD_LABELS[num - 1];
+  }
+  const s = String(v).toLowerCase().trim();
+  if (["first", "1st"].includes(s)) return "First";
+  if (["second", "2nd"].includes(s)) return "Second";
+  if (["third", "3rd"].includes(s)) return "Third";
+  return null;
+};
+
+const pickOfficer = (h: any, label: OrdLabel): string =>
+  h?.hearingOfficer ||
+  h?.[`${label.toLowerCase()}HearingOfficer`] ||
+  h?.firstHearingOfficer ||
+  h?.secondHearingOfficer ||
+  h?.thirdHearingOfficer ||
+  "";
+
+
+const generateIncidentCaseReport = async (
+  incidentId: string,
+  caseNumber?: string
+): Promise<string | null> => {
+  try {
+    setLoadingIncidentSummary?.(true);
+    setIsGenerating?.(true);
+    setGeneratingMessage?.("Generating Incident Case Report...");
+
+    const incRef = doc(db, "IncidentReports", incidentId);
+    const incSnap = await getDoc(incRef);
+    if (!incSnap.exists()) { showErrorToast?.("Incident not found."); return null; }
+    const inc: any = { id: incidentId, ...incSnap.data() };
+
+    const dialogueSnap = await getDoc(doc(db, "IncidentReports", incidentId, "DialogueMeeting", incidentId));
+    const dialogue = dialogueSnap.exists() ? dialogueSnap.data() : null;
+
+    const dialogueLetterSnap = await getDocs(query(
+      collection(db, "IncidentReports", incidentId, "GeneratedLetters"),
+      where("letterType", "==", "dialogue"),
+      orderBy("createdAt", "desc")
+    ));
+    const dialogueLetter = dialogueLetterSnap.empty ? null : dialogueLetterSnap.docs[0].data();
+
+    const summonLettersSnap = await getDocs(query(
+      collection(db, "IncidentReports", incidentId, "GeneratedLetters"),
+      where("letterType", "==", "summon"),
+      orderBy("createdAt", "asc")
+    ));
+    const summonLetters = summonLettersSnap.docs.map(d => d.data());
+
+    const hearingsSnap = await getDocs(query(
+      collection(db, "IncidentReports", incidentId, "SummonsMeeting"),
+      orderBy("nosHearing", "asc")
+    ));
+    const rawHearings = hearingsSnap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+
+    const normHearings = rawHearings
+      .map(h => ({ ...h, ord: normalizeOrd(h.nosHearing ?? h.nos) }))
+      .filter(h => !!h.ord)
+      .sort((a, b) => (a.ord === "First" ? 1 : a.ord === "Second" ? 2 : 3) - (b.ord === "First" ? 1 : b.ord === "Second" ? 2 : 3));
+
+    const hearingByOrd: Record<OrdLabel, any> = {} as any;
+    normHearings.forEach(h => (hearingByOrd[h.ord as OrdLabel] = h));
+
+    const lettersByOrd: Record<OrdLabel, any> = {} as any;
+    summonLetters.forEach((L: any) => {
+      const ord = normalizeOrd(L?.nosHearing ?? L?.nos ?? L?.ordinal);
+      if (ord) lettersByOrd[ord] = L;
+    });
+
+    const complainant = inc.complainant || {};
+    const respondent = inc.respondent || {};
+
+    const mapping: Record<string, string> = {
+      "{{CaseNumber}}": inc.caseNumber || caseNumber || "",
+      "{{Department}}": inc.department || "",
+      "{{Status}}": inc.status || "",
+      "{{DateFiled}}": `${inc.dateFiled || ""} ${inc.timeFiled || ""}`.trim(),
+      "{{DateReceived}}": `${inc.dateReceived || ""} ${inc.timeReceived || ""}`.trim(),
+      "{{Location}}": [inc.location, inc.areaOfIncident].filter(Boolean).join(" - "),
+      "{{Nature}}": inc.nature || "",
+      "{{TypeOfIncident}}": inc.typeOfIncident || "",
+      "{{DeskOfficer}}": inc.receivedBy || "",
+      "{{IsLate}}": inc.isReportLate ? "Yes" : "No",
+      "{{ReasonLate}}": inc.isReportLate ? (inc.reasonForLateFiling || "N/A") : "",
+      "{{Concern}}": inc.concern || "",
+
+      "{{ComplainantFullName}}": `${complainant.fname || ""} ${complainant.lname || ""}`.trim(),
+      "{{ComplainantAddress}}": complainant.address || "",
+      "{{ComplainantContact}}": complainant.contact || "",
+      "{{ComplainantSex}}": complainant.sex || "",
+      "{{ComplainantAge}}": complainant.age ? String(complainant.age) : "",
+      "{{ComplainantCivilStatus}}": complainant.civilStatus || "",
+
+      "{{RespondentFullName}}": `${respondent.fname || ""} ${respondent.lname || ""}`.trim(),
+      "{{RespondentAddress}}": respondent.address || "",
+      "{{RespondentContact}}": respondent.contact || "",
+      "{{RespondentSex}}": respondent.sex || "",
+      "{{RespondentAge}}": respondent.age ? String(respondent.age) : "",
+      "{{RespondentCivilStatus}}": respondent.civilStatus || "",
+
+      "{{DialogueDateTime}}": dialogueLetter?.DateTimeOfMeeting ? formatDT(dialogueLetter.DateTimeOfMeeting) : "",
+      "{{DialogueOfficer}}": dialogue?.HearingOfficer || "",
+      "{{DialoguePartyA}}": dialogue?.partyA || "",
+      "{{DialoguePartyB}}": dialogue?.partyB || "",
+      "{{DialogueRemarks}}": dialogue?.remarks || "",
+      "{{DialogueMinutes}}": dialogue?.minutesOfDialogue || "",
+    };
+
+(["First","Second","Third"] as const).forEach((label, i) => {
+  const h = hearingByOrd[label] || {};
+  const letter = lettersByOrd[label] ?? summonLetters[i] ?? null; // <— fallback to index
+
+  const dtRaw =
+    letter?.DateTimeOfMeeting ??
+    h.DateTimeOfMeeting ??
+    h.hearingMeetingDateTime ??
+    h.dateTimeOfMeeting ?? // just in case different casing
+    null;
+
+  const idx = i + 1;
+  mapping[`{{Hearing${idx}DateTime}}`] = formatDTLoose(dtRaw);
+  mapping[`{{Hearing${idx}Officer}}`] = pickOfficer(h, label) || "";
+  mapping[`{{Hearing${idx}PartyA}}`] = h.partyA ?? h.partyAStatement ?? h.partyAInput ?? "";
+  mapping[`{{Hearing${idx}PartyB}}`] = h.partyB ?? h.partyBStatement ?? h.partyBInput ?? "";
+  mapping[`{{Hearing${idx}Remarks}}`] = h.remarks ?? h.remarksHearing ?? "";
+  mapping[`{{Hearing${idx}Minutes}}`] = h.minutesOfCaseProceedings ?? h.minutes ?? h.minutesOfDialogue ?? "";
+});
+
+
+    const templateRef = ref(storage, "ReportsModule/LFStaff/Individual Case Report Template.xlsx");
+    const templateUrl = await getDownloadURL(templateRef);
+    const resp = await fetch(templateUrl);
+    const arrayBuffer = await resp.arrayBuffer();
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+    const ws = workbook.worksheets[0];
+
+    // Layout to reduce clipping
+    ws.getColumn(1).width = ws.getColumn(1).width ?? 28; // labels
+    ws.getColumn(2).width = Math.max(ws.getColumn(2).width ?? 70, 70); // text
+    ws.eachRow((row) => {
+      const b = row.getCell(2);
+      if (typeof b.value === "string") {
+        b.alignment = { ...(b.alignment || {}), wrapText: true, vertical: "top" };
+      }
+    });
+
+    try {
+      ws.getCell("A1").value = "BARANGAY FAIRVIEW\nINDIVIDUAL INCIDENT REPORT";
+      ws.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
+      ws.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+      if (!sheetHasPlaceholder(ws, "{{CaseNumber}}")) {
+        ws.getCell("A2").value = `Case No.: ${inc.caseNumber || caseNumber || incidentId}`;
+      }
+    } catch {}
+
+    replacePlaceholders(ws, mapping);
+
+    if (!inc.isReportLate) {
+      deleteRowsByLabels(ws, ["Late Report?", "Reason for Late Filing"]);
+    }
+
+    // Remove empty hearing sections entirely
+    const nextHeaders = ["HEARING 1","HEARING 2","HEARING 3","DIALOGUE","RESPONDENT","COMPLAINANT","CASE DETAILS"];
+    const hEmpty = (n: 1|2|3) =>
+      !mapping[`{{Hearing${n}DateTime}}`] &&
+      !mapping[`{{Hearing${n}Officer}}`] &&
+      !mapping[`{{Hearing${n}PartyA}}`] &&
+      !mapping[`{{Hearing${n}PartyB}}`] &&
+      !mapping[`{{Hearing${n}Remarks}}`] &&
+      !mapping[`{{Hearing${n}Minutes}}`];
+
+    // delete from bottom up so row indices stay valid
+    if (hEmpty(3)) deleteSectionByHeader(ws, "HEARING 3", nextHeaders);
+    if (hEmpty(2)) deleteSectionByHeader(ws, "HEARING 2", nextHeaders);
+    if (hEmpty(1)) deleteSectionByHeader(ws, "HEARING 1", nextHeaders);
+
+    // Auto-fit rows so long paragraphs don't clip
+    autoFitRows(ws, 2);
+
+    ws.pageSetup = {
+      horizontalCentered: true,
+      orientation: "portrait",
+      paperSize: 9,
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+    };
+
+    const safeCase = (inc.caseNumber || caseNumber || incidentId).replace(/[^\w.-]/g, "_");
+    const xlsxRef = ref(storage, `GeneratedReports/Incident_Case_${safeCase}.xlsx`);
+    const xlsxBuffer = await workbook.xlsx.writeBuffer();
+    await uploadBytes(xlsxRef, new Blob([xlsxBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    const xlsxUrl = await getDownloadURL(xlsxRef);
+
+    setGeneratingMessage?.("Uploading Incident Case Report...");
+    return xlsxUrl;
+  } catch (error) {
+    console.error("Error generating Incident Case XLSX:", error);
+    try {
+      setShowErrorGenerateReportPopup?.(true);
+      setPopupErrorGenerateReportMessage?.("Failed to generate Incident Case Report");
+      setTimeout?.(() => setShowErrorGenerateReportPopup?.(false), 5000);
+    } catch {}
+    return null;
+  } finally {
+    try { setLoadingIncidentSummary?.(false); } catch {}
+  }
+};
+
+
+const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: string) => {
+  try {
+    setLoadingIncidentSummary?.(true);
+    setIsGenerating?.(true);
+    setGeneratingMessage?.("Generating PDF...");
+
+    const fileUrl = await generateIncidentCaseReport(incidentId, caseNumber);
+    if (!fileUrl) { setIsGenerating?.(false); showErrorToast?.("Failed to generate Excel report"); return; }
+
+    const response = await fetch("/api/convertPDF", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileUrl }),
+    });
+    if (!response.ok) throw new Error("Failed to convert to PDF");
+
+    const pdfBlob = await response.blob();
+    const safeCase = (caseNumber || incidentId).replace(/[^\w.-]/g, "_");
+    saveAs(pdfBlob, `Incident_Case_${caseNumber}.pdf`);
+
+    try {
+      await addDoc(collection(db, "BarangayNotifications"), {
+        message: `A report (Incident Case: ${caseNumber || incidentId}) was generated by ${user?.fullName || user?.name || "Unknown"}.`,
+        timestamp: new Date(),
+        isRead: false,
+        recipientRole: "Punong Barangay",
+        transactionType: "System Report",
+      });
+    } catch {}
+
+    setIsGenerating?.(false);
+    setGeneratingMessage?.("");
+    setPopupSuccessGenerateReportMessage?.("Incident Case Report generated successfully");
+    setShowSuccessGenerateReportPopup?.(true);
+    setTimeout?.(() => setShowSuccessGenerateReportPopup?.(false), 5000);
+  } catch (error) {
+    console.error("Error generating Incident Case PDF:", error);
+    try {
+      setShowErrorGenerateReportPopup?.(true);
+      setPopupErrorGenerateReportMessage?.("Failed to generate PDF");
+      setTimeout?.(() => setShowErrorGenerateReportPopup?.(false), 5000);
+    } catch {}
+  } finally {
+    try { setLoadingIncidentSummary?.(false); setIsGenerating?.(false); } catch {}
+  }
+};
+
   return (
     <main className="main-container-departments"  /* edited this class*/>
       
@@ -645,6 +1055,17 @@ if (selectedArea) {
                           <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
                         )}
                           <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
+                        {incident.status == "CFA" && (
+                          <button
+                            className="action-delete-departments-main"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleGenerateIncidentCasePDF(incident.id, incident.caseNumber);
+                            }}
+                          >
+                            <img src="/Images/print.png" alt="Print" />
+                          </button>
+                        )}
                         </>
                       )}
                     </div>
@@ -1369,9 +1790,40 @@ if (selectedArea) {
                   </div>
                 </div>
             </div>
-        </div>
+        </div>      
       </div>
     )}
+
+     {/* Generating of Report Popup */}
+          {isGenerating && (
+            <div className="popup-backdrop">
+              <div className="popup-content">
+                <div className="spinner" />
+                <p>{generatingMessage}</p>
+              </div>
+            </div>
+          )}  
+
+          {/* Success Generate Report Popup*/}
+      {showSuccessGenerateReportPopup && (
+        <div className={`popup-overlay-success-generate-report show`}>
+          <div className="popup-success-generate-report">
+            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+            <p>{popupSuccessGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error Generate Report Popup*/}
+      {showErrorGenerateReportPopup && (
+        <div className={`popup-overlay-error-generate-report show`}>
+          <div className="popup-error-generate-report">
+          <img src={ "/Images/warning-1.png"} alt="icon alert" className="icon-alert" />
+            <p>{popupErrorGenerateReportMessage}</p>
+          </div>
+        </div>
+      )}
+
 
     </main>
   );

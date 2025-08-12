@@ -32,6 +32,8 @@ export default function AddResident() {
     citizenship: "",
     isStudent: false,
     isPWD: false,
+    pwdType: "",
+    pwdTemporaryUntil: "",
     isSeniorCitizen: false,
     isSoloParent: false,
     residentNumber: 0,
@@ -103,6 +105,9 @@ export default function AddResident() {
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
+  const [pwdIdFile, setPwdIdFile] = useState<File | null>(null);
+  const [pwdIdPreview, setPwdIdPreview] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     let newValue: any = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
@@ -145,15 +150,42 @@ export default function AddResident() {
         age: age,
         isSeniorCitizen: age >= 60,
       }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: newValue,
+    } else if (name === "isPWD") {
+      const checked = (e.target as HTMLInputElement).checked;
+      setFormData(prev => ({
+        ...prev,
+        isPWD: checked,
+        // Clear related fields when toggled off
+        ...(checked ? {} : { pwdType: "", pwdTemporaryUntil: "" })
       }));
+      // Clear file preview when toggled off
+      if (!checked) {
+        setPwdIdFile(null);
+        setPwdIdPreview(null);
+      }
+      return;
     }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: newValue,
+    }));
   };
   
   
+  const handlePwdIdFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      setPwdIdFile(file);
+      setPwdIdPreview(URL.createObjectURL(file));
+      e.target.value = "";
+    }
+  };
+
+  const handlePwdIdFileDelete = () => {
+    setPwdIdFile(null);
+    setPwdIdPreview(null);
+  };
 
   
   const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,6 +242,29 @@ export default function AddResident() {
   
     if (verificationFiles.length === 0) {
       invalidFields.push("verificationFiles");
+    }
+
+    // Extra validation when PWD is checked
+    if (formData.isPWD) {
+      if (!formData.pwdType) invalidFields.push("pwdType");
+      if (!pwdIdFile) invalidFields.push("pwdIdFile");
+      if (formData.pwdType === "Temporary") {
+        if (!formData.pwdTemporaryUntil) invalidFields.push("pwdTemporaryUntil");
+        else {
+          const until = new Date(formData.pwdTemporaryUntil);
+          const today = new Date();
+          // must be today or future
+          if (until < new Date(today.toISOString().split("T")[0])) {
+            invalidFields.push("pwdTemporaryUntil");
+            setPopupErrorMessage("PWD temporary validity date cannot be in the past.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            setActiveSection("others");
+            setInvalidFields(invalidFields);
+            return;
+          }
+        }
+      }
     }
   
     if (invalidFields.length > 0) {
@@ -332,6 +387,14 @@ export default function AddResident() {
         await uploadBytes(storageRef, identificationFile);
         identificationFileURL = await getDownloadURL(storageRef);
       }
+
+      let pwdIdFileURL = "";
+      if (pwdIdFile) {
+        const storageRef = ref(storage, `ResidentsFiles/PWDID/${pwdIdFile.name}`);
+        await uploadBytes(storageRef, pwdIdFile);
+        pwdIdFileURL = await getDownloadURL(storageRef);
+      }
+
   
       // Fetch the highest residentNumber
       const residentsRef = collection(db, "Residents");
@@ -357,6 +420,7 @@ export default function AddResident() {
         createdAt: currentDate,
         verificationFilesURLs,
         identificationFileURL,
+        pwdIdFileURL,
         createdBy: session?.user?.position || "Unknown",
       });
       return docRef.id; // return ID
@@ -770,7 +834,6 @@ const [activeSection, setActiveSection] = useState("basic");
                                       PWD
                                     </label>
                                   </div>
-
                                   <div className="checkbox-container">
                                     <label className="checkbox-label">
                                       <input type="checkbox" name="isSoloParent" checked={formData.isSoloParent} onChange={handleChange} />
@@ -779,11 +842,112 @@ const [activeSection, setActiveSection] = useState("basic");
                                   </div>  
                                 </div>
                               </div> 
+                                                            {/* NEW PWD card — appears only when PWD is checked */}
+                                                            {formData.isPWD && (
+                                <div className="box-container-outer-pwd">
+                                  <div className="title-pwd">PWD Information</div>
+
+                                  <div className="box-container-pwd">
+                                    {/* Upload area */}
+                                    <div className={`pwd-upload-container ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
+                                      <label htmlFor="pwd-id-file-upload" className="upload-link">Click to Upload PWD ID</label>
+                                      <input
+                                        id="pwd-id-file-upload"
+                                        type="file"
+                                        className="file-upload-input"
+                                        accept=".jpg,.jpeg,.png"
+                                        onChange={handlePwdIdFileChange}
+                                      />
+
+                                      {pwdIdFile && (
+                                        <div className="file-name-image-display">
+                                          <div className="file-name-image-display-indiv">
+                                            {pwdIdPreview && (
+                                              <img
+                                                src={pwdIdPreview}
+                                                alt="PWD ID Preview"
+                                                style={{ width: 50, height: 50, marginRight: 5 }}
+                                              />
+                                            )}
+                                            <span>{pwdIdFile.name}</span>
+                                            <div className="delete-container">
+                                              <button
+                                                type="button"
+                                                onClick={handlePwdIdFileDelete}
+                                                className="delete-button"
+                                              >
+                                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Fields */}
+                                    <div className="pwd-fields">
+                                      <div className="fields-section">
+                                        <p className="pwd-label">
+                                          Type of PWD ID <span className="required">*</span>
+                                        </p>
+                                        <div className="pwd-radio-row">
+                                          <label>
+                                            <input
+                                              type="radio"
+                                              name="pwdType"
+                                              value="Permanent"
+                                              checked={formData.pwdType === "Permanent"}
+                                              onChange={(e) =>
+                                                setFormData((prev) => ({
+                                                  ...prev,
+                                                  pwdType: e.target.value,
+                                                  pwdTemporaryUntil: "",
+                                                }))
+                                              }
+                                            />{" "}
+                                            Permanent
+                                          </label>
+                                          <label>
+                                            <input
+                                              type="radio"
+                                              name="pwdType"
+                                              value="Temporary"
+                                              checked={formData.pwdType === "Temporary"}
+                                              onChange={(e) =>
+                                                setFormData((prev) => ({
+                                                  ...prev,
+                                                  pwdType: e.target.value,
+                                                }))
+                                              }
+                                            />{" "}
+                                            Temporary
+                                          </label>
+                                        </div>
+                                      </div>
+
+                                      {/* keep-space avoids layout jump when switching Permanent/Temporary */}
+                                      <div className={`fields-section pwd-valid-until ${formData.pwdType === "Temporary" ? "" : "keep-space"}`}>
+                                        <p className="pwd-label">
+                                          Valid Until <span className="required">*</span>
+                                        </p>
+                                        <input
+                                          type="date"
+                                          name="pwdTemporaryUntil"
+                                          className="pwd-input"
+                                          value={formData.pwdTemporaryUntil || ""}
+                                          onChange={handleChange}
+                                          min={new Date().toISOString().split("T")[0]}
+                                          required={formData.pwdType === "Temporary"}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
 
                             <div className="add-main-resident-section-2-bottom-side">
-
                             <div className="box-container-outer-resindentificationpic">
                                 <div className="title-resindentificationpic">
                                   Identification Picture

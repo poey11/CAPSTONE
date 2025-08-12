@@ -965,7 +965,45 @@ useEffect(() => {
                               </div>
                             </div>
                           )}
+
                           </div>
+                            {/* PWD Identification (matches Verification card styles) */}
+                            {selectedUser.isPWD && (
+                              <div className="services-onlinereq-verification-requirements-section">
+                                <span className="verification-requirements-label">PWD Identification</span>
+
+                                <div className="services-onlinereq-verification-requirements-container">
+                                  {selectedUser.pwdIdFileURL ? (
+                                    <div className="file-name-image-display">
+                                      <a
+                                        href={selectedUser.pwdIdFileURL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <img
+                                          src={selectedUser.pwdIdFileURL}
+                                          alt="PWD ID"
+                                          className="verification-reqs-pic uploaded-pic"
+                                          style={{ cursor: 'pointer' }}
+                                        />
+                                      </a>
+                                    </div>
+                                  ) : (
+                                    <div className="no-verification-files-text">
+                                      <p>No PWD ID uploaded.</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Extra PWD details below the image, still inside the same card */}
+                                <div style={{ marginTop: 10, textAlign: "center" }}>
+                                  <div><strong>Type:</strong> {selectedUser.pwdType || "N/A"}</div>
+                                  {selectedUser.pwdType === "Temporary" && (
+                                    <div><strong>Valid Until:</strong> {selectedUser.pwdTemporaryUntil || "N/A"}</div>
+                                  )}
+                                </div>
+                              </div>
+                            )}                          
                         </div>
                     </>
                   )}
