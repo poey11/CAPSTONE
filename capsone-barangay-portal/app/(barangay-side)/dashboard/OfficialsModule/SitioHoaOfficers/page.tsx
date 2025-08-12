@@ -48,7 +48,7 @@ export default function SitioHoaOfficersModule() {
 
   const router = useRouter();
   const handleEditClick = () => {
-    //router.push("/dashboard/OfficialsModule/EditOfficial");
+    router.push("/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer");
   };
 
   const [filtersLoaded, setFiltersLoaded] = useState(false);
@@ -397,7 +397,7 @@ export default function SitioHoaOfficersModule() {
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">
-                    {["details"].map((section) => (
+                    {["details", "history"].map((section) => (
                       <button
                         key={section}
                         type="button"
@@ -405,13 +405,14 @@ export default function SitioHoaOfficersModule() {
                         onClick={() => setViewActiveSection(section)}
                       >
                         {section === "details" && "Details"}
+                        {section === "history" && "History"}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="view-user-header-body-bottom-section">
                   <div className="mainresident-photo-section">
-                    <span className="user-details-label">Official Details</span>
+                    <span className="user-details-label">Officer Details</span>
                     <div className="user-profile-container">
                       <img
                         src={"/Images/default-identificationpic.jpg"}
@@ -496,6 +497,38 @@ export default function SitioHoaOfficersModule() {
                           </div>
                         </>
                       )}
+                    {viewActiveSection  === "history" && (
+                        <>
+                          <div className="view-mainresident-content-left-side">
+                            <div className="view-user-fields-section">
+                                <p>Created By</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                            </div>
+                            <div className="view-user-fields-section">
+                                <p>Created At</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                            </div>
+                          </div>
+                          <div className="view-mainresident-content-right-side">
+                            <div className="view-user-fields-section">
+                                <p>Updated By</p>
+                                <input
+                                  type="text"
+                                  className="view-user-input-field"
+                                  readOnly
+                                /> 
+                            </div>
+                          </div>
+                        </>
+                    )}
                     </div>
                   </div>
                 </div>
