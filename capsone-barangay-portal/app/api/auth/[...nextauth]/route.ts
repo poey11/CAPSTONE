@@ -61,8 +61,8 @@ import { JWT } from "next-auth/jwt";
                 loginStatus: token.loginStatus,
                 fullName: token.fullName,
                 department: token.department,
-                profileImage: token.profileImage
-
+                profileImage: token.profileImage,
+                createdAt: token.createdAt as import("firebase/firestore").Timestamp, // Ensure createdAt is included if needed
             }
             return session;
         },
