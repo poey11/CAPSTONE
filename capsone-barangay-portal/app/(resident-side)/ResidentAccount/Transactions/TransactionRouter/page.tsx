@@ -2,14 +2,7 @@ import DocumentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/T
 import OtherDocumentTransactions from "@/app/(resident-side)/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions/component";
 import IncidentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/Transactions/IncidentTransactions/component";
 
-interface TransactionRouterProps {
-  searchParams: {
-    id?: string;
-    type?: string;
-  };
-}
-
-export default function TransactionRouter({ searchParams }: TransactionRouterProps) {
+export default function TransactionRouter({ searchParams }: any) {
   const { id, type } = searchParams;
 
   if (!id) return null;
