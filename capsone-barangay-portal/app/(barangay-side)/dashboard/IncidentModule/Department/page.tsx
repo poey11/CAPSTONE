@@ -1057,13 +1057,13 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                           <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
                         {incident.status == "CFA" && (
                           <button
-                            className="action-delete-departments-main"
+                            className="action-print-departments-main"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleGenerateIncidentCasePDF(incident.id, incident.caseNumber);
                             }}
                           >
-                            <img src="/Images/print.png" alt="Print" />
+                            <img src="/Images/printer.png" alt="Print" />
                           </button>
                         )}
                         </>

@@ -181,7 +181,8 @@ SCROLL FOR CHROME ETC
 /* NEW UPDATED */
 .action-view-departments-main,
 .action-edit-departments-main,
-.action-delete-departments-main {
+.action-delete-departments-main,
+.action-print-departments-main {
   border: none;
     cursor: pointer;
 
@@ -194,7 +195,8 @@ SCROLL FOR CHROME ETC
 /* NEW UPDATED ADDED */
 .action-view-departments-main:hover,
 .action-edit-departments-main:hover,
-.action-delete-departments-main:hover {
+.action-delete-departments-main:hover,
+.action-print-departments-main:hover {
   transform: scale(1.2); /* Slight zoom-in */
   filter: brightness(1.3); /* Make icon a bit brighter */
 }
@@ -210,6 +212,10 @@ SCROLL FOR CHROME ETC
 
 .action-delete-departments-main img {
   filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
+}
+
+.action-print-departments-main img {
+  filter: brightness(0) saturate(100%) invert(57%) sepia(78%) saturate(2000%) hue-rotate(-15deg) brightness(95%) contrast(90%);
 }
 
 
