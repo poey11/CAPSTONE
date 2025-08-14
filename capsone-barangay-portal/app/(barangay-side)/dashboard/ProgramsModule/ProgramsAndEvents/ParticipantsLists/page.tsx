@@ -202,6 +202,13 @@ const dummyParticipants = [
                 onChange={(e) => setSearchName(e.target.value)}
                   className="programs-module-filter-participants"
                 />
+
+
+                  <img
+                src="/Images/addicon.png"
+                alt="Add Icon"
+                className="add-icon"
+              />
               </div>
 
 
