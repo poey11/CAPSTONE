@@ -524,6 +524,13 @@ Add Programs
   height: 250px;
 }
 
+.add-program-photo {
+  width: 100%;
+  height: 100%; 
+  object-fit: contain;
+  filter: grayscale(100%); 
+}
+
 
 .add-programs-upload-link {
     margin-top: 20px;
@@ -918,3 +925,4 @@ VIEW
   border-bottom: 3px solid #ED7014;
   background-color: transparent;
 }
+

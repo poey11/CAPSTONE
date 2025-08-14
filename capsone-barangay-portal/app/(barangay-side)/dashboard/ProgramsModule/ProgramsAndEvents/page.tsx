@@ -351,12 +351,12 @@ export default function ProgramsModule() {
 
 
           <div className="add-programs-photo-section">
-           <span className="add-programs-details-label">Program Photo</span>
+           <span className="add-programs-details-label"> Photo </span>
              <div className="add-programs-profile-container">
                   <img
-                     src={"/Images/default-identificationpic.jpg"}
+                     src={"/Images/thumbnail.png"}
                      alt="Identification"
-                     className="add-official-id-photo"
+                     className="add-program-photo"
                   />
 
              </div>

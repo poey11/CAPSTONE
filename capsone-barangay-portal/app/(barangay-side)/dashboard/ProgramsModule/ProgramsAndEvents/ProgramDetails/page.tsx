@@ -345,7 +345,7 @@ export default function EditResident() {
 
                                         <div className="box-container-outer-resindentificationpic">
                                             <div className="title-resindentificationpic">
-                                                Program Photo
+                                                Photo
                                             </div>
 
                                             <div className="box-container-resindentificationpic">
