@@ -189,8 +189,8 @@ export default function AddNewDoc() {
     return(
         <main className="addNewDoc-main-container">
             {/* NEW */}
-            <form onSubmit={handleSubmit}>
-                <div className="addNewDoc-inbrgy-main-content">
+            <form onSubmit={handleSubmit} className="addNewDoc-inbrgy-main-content">
+              
                     <div className="addNewDoc-inbrgy-main-section1">
                         <div className="addNewDoc-inbrgy-main-section1-left">
                             <button type="button" onClick={handleBack}>
@@ -212,6 +212,7 @@ export default function AddNewDoc() {
                             <h1>* Please fill in the details of the new document you want to add. *</h1>
                         </div>
                         <div className="addNewDoc-info-bottom-section">
+                            <div className="add-resident-bottom-section-scroll"> 
                             <div className="addNewDoc-left-section">
                                 <div className="addNewDoc-fields-section">
                                     <p>Document Title<span className="required">*</span></p>
@@ -589,9 +590,9 @@ export default function AddNewDoc() {
                             </div>
                             
                         </div>
-                        
+                        </div>
                     </div>
-                </div>
+       
             </form>
 
             {showPopup && (

@@ -751,7 +751,7 @@ const handleSubmit = async (event: React.FormEvent) => {
 
        
 
-        <form onSubmit={delayedSubmit}>
+        <form onSubmit={delayedSubmit} className="content">
 
             <div className="section-1-add">
 
@@ -806,7 +806,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                   ))}
                 </nav>
 
-
+<div className="add-incindent-bottom-section-container">
             <div className="add-incindent-bottom-section-scroll">
 
             <div className="add-incident-section-2">
@@ -1598,6 +1598,8 @@ const handleSubmit = async (event: React.FormEvent) => {
            
           </div>
                          </div> 
+      </div>
+     
           </div>
         </form>
 

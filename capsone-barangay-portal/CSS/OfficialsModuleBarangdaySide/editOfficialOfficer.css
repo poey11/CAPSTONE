@@ -14,7 +14,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 14.2%;
+  padding-top: 180px;
   padding-bottom: 3%;
 }
 
@@ -34,6 +34,7 @@ html, body {
   display: flex;
   flex-direction: column;
   width: 90%;
+  height: 100%;
   background-color: #ffffff;
   border-radius: 1rem;
 
@@ -235,7 +236,7 @@ html, body {
 .edit-official-bottom-section-scroll,
 .edit-officer-bottom-section-scroll{
   overflow-y: auto;
-  height: 400px;
+  height: 80%;
   padding-bottom: 40px;
 }
 

@@ -2680,7 +2680,7 @@ Functions for Reason for Reject
                       status !== "Completed" &&
                       status !== "Rejected"
                         ? "100%"
-                        : "85%",
+                        : "100%",
                   }}
                 >
 
