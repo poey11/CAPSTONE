@@ -21,7 +21,7 @@ html, body {
   margin-left: 1rem; 
 
 
-  padding-top: 13.2%;
+  padding-top: 180px;
   padding-bottom: 3%;
 }
 
@@ -388,7 +388,7 @@ FOR ONLINE INCIDENT REPORTING CSS
   padding-right: 20px; /* edited */
 
 
-  padding-top: 14.2%;
+  padding-top: 180px;
   padding-bottom: 3%;
   }
   
@@ -397,11 +397,11 @@ FOR ONLINE INCIDENT REPORTING CSS
   display: flex;
   flex-direction: column;
   width: 90%;
+  height: 100%;
   border-radius: 1rem;
   margin:  auto; 
   background-color: #ffffff;
   overflow: hidden; 
-  height: 610px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); 
 }
 .section-1-online-report {
