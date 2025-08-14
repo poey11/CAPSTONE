@@ -105,13 +105,13 @@ export default function Services() {
   const goToServices = (e: any) => {
     const action = e.currentTarget.id;
     if (isGuest && !isAllowedForGuest(action)) return;
-    router.push(`/services/action?doc=${action}`);
+    router.push(`/services/action?docB=${action}`);
  
   };
 
   const handleSubmitOther = (e: any) => {
         console.log("Selected Document:", e);
-        router.push(`/services/action?doc=${e.type}&purpose=${e.title}`);
+        router.push(`/services/action?docB=${e.type}&purpose=${e.title}`);
     }
 
   return (
