@@ -1,6 +1,6 @@
 "use client";
-import "@/CSS/ProgramsBrgy/ParticipantsLists.css";
-import { useState } from "react";
+import "@/CSS/ProgramsBrgy/EditPrograms.css";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 
@@ -71,6 +71,25 @@ const dummyParticipants = [
   { name: "Isabella Gutierrez", contact: "0918-321-5432", email: "isabella@email.com", location: "Cavite" }
 ];
 
+
+
+  // State
+  const [searchName, setSearchName] = useState("");
+  const [participants, setParticipants] = useState<any[]>(dummyParticipants);
+  const [filteredParticipants, setFilteredParticipants] = useState<any[]>(dummyParticipants);
+
+  // Filtering logic (like your other page)
+  useEffect(() => {
+    let filtered = [...participants];
+
+    if (searchName) {
+      filtered = filtered.filter((p) =>
+        p.name.toLowerCase().includes(searchName.toLowerCase())
+      );
+    }
+
+    setFilteredParticipants(filtered);
+  }, [searchName, participants]);
 
     return (
         <main className="edit-program-main-container" >
@@ -174,6 +193,18 @@ const dummyParticipants = [
                 </div>
 
 
+                     
+              <div className="filter-section">
+                <input
+                  type="text"
+                placeholder="Search by name..."
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                  className="programs-module-filter-participants"
+                />
+              </div>
+
+
                 <div className="edit-program-bottom-section-participants">
                   
                     <div className="participants-container">
@@ -187,7 +218,7 @@ const dummyParticipants = [
                           </tr>
                         </thead>
                         <tbody>
-                          {dummyParticipants.map((participant, index) => (
+                          {filteredParticipants.map((participant, index) => (
                             <tr key={index}>
                               <td>{participant.name}</td>
                               <td>{participant.contact}</td>
