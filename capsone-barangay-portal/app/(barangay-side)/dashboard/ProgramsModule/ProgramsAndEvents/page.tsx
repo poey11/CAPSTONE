@@ -153,8 +153,10 @@ export default function ProgramsModule() {
     };
 
     const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram");
+    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
   };
+
+
 
 
   return (

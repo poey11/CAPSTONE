@@ -39,10 +39,26 @@ html, body {
 
 
 
-.edit-program-main-content {
+/*
+Edited for Participants
+*/
+.edit-program-bottom-section-participants{
+  height: 100%;
+  overflow-y: auto;
+      scrollbar-width: thin; 
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+}
+
+/*
+Edited for Participants
+*/
+
+
+.edit-program-main-content-participants {
   display: flex;
   flex-direction: column;
   width: 90%;
+  height: 100%; /* ADDED*/
   background-color: #ffffff;
   border-radius: 1rem;
 
@@ -125,14 +141,6 @@ animation: fadeSlideIn 0.5s ease-out;
     background-color: #3e8f41;
 }
 
-
-
-.edit-program-bottom-section{
-  padding-top: 35px;
-  padding-left: 35px;
-  padding-right: 35px;
-  height: 100%;
-}
 
 .edit-program-info-toggle-wrapper{
   display: flex;
@@ -1139,6 +1147,7 @@ For Participants Lists
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 0;
+  height: 100%;
 }
 
 .participants-table {
@@ -1197,4 +1206,20 @@ For Participants Lists
     padding: 10px;
     font-size: 0.85rem;
   }
+}
+
+
+
+.participants-count {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  background: #f0f4f8;
+  padding: 6px 14px;
+  border-radius: 8px;
+  box-shadow: 0px 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: fit-content;
 }
