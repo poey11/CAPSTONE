@@ -276,6 +276,7 @@ export default function ProgramsModule() {
                   <td>
                     <div className="actions-programs">
 
+                    {/*}
                       <button
                         className="action-programs-button"
                         onClick={openPopup}
@@ -287,6 +288,9 @@ export default function ProgramsModule() {
                           
                         />
                       </button>
+
+                      */}
+                      
 
                       <button
                         className="action-programs-button"
