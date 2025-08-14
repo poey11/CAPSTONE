@@ -1,6 +1,6 @@
-import DocumentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/Transactions/DocumentTransactions/page";
-import OtherDocumentTransactions from "@/app/(resident-side)/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions/page";
-import IncidentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/Transactions/IncidentTransactions/page";
+import DocumentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/Transactions/DocumentTransactions/component";
+import OtherDocumentTransactions from "@/app/(resident-side)/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions/component";
+import IncidentTransactionsDetails from "@/app/(resident-side)/ResidentAccount/Transactions/IncidentTransactions/component";
 
 interface TransactionRouterProps {
   searchParams: {
