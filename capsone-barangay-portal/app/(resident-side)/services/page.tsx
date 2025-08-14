@@ -208,7 +208,7 @@ export default function Services() {
     
 <div className="services-section-withbg">
   {/* Left document cards */}
-  <div className={`button-column button-left slide-in ${hasAnimated ? "slide-in-visible" : ""}`}>
+  <div className={`button-column button-left`}>
     <div className="tooltip-wrapper">
       <div
         className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") ? "disabled-card" : ""}`}
@@ -263,7 +263,7 @@ export default function Services() {
   </div>
 
   {/* Right document cards */}
-  <div className={`button-column button-right slide-in ${hasAnimated ? "slide-in-visible" : ""}`}>
+  <div className={`button-column button-right`}>
     <div className="documents-card dropdown-container">
       <div className="card-content-up">
         <img src="/images/document.png" alt="Document Icon" className="document-icon" />
