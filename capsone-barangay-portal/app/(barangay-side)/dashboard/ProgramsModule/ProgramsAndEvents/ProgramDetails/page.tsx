@@ -1,9 +1,13 @@
 "use client";
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 
 export default function EditResident() {
+
+
+     const router = useRouter();
 
     const [activeSection, setActiveSection] = useState("details");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
@@ -62,6 +66,9 @@ export default function EditResident() {
           }
       };
 
+   const handleParticipantsClick = () => {
+    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists");
+  };
 
     return (
         <main className="edit-program-main-container" >
@@ -135,7 +142,50 @@ export default function EditResident() {
 
 
 
+
+
+
+
+
+
             <div className="program-redirectionpage-section">
+
+
+
+                {/*
+                    MAIN REDIRECTION BUTTONS.
+                
+                    Will only be shown if  na approve na ni punong banargay yung requested na program or
+                    if si assistant nag create ng program.
+                */}
+
+               <button className="program-redirection-buttons-selected">
+                        <div className="program-redirection-icons-section">
+                            <img src="/images/profile-user.png" alt="user info" className="program-redirection-icons-info" />
+                             </div>
+                         <h1>Program Details</h1>
+                </button>
+
+
+                <button className="program-redirection-buttons" onClick={handleParticipantsClick }>
+                        <div className="program-redirection-icons-section">
+                            <img src="/images/team.png" alt="user info" className="program-redirection-icons-info"/> 
+                             </div>
+                         <h1>Partcipants</h1>
+                </button>
+
+
+
+
+
+
+
+
+                {/*
+            
+                         NOTE:
+                   1. Buttons for punong barangay only if a new button was suggested.
+                   2. Hide mo nalang je if need mo na
 
                    <button className="program-redirection-buttons" onClick={handleRejectClick}>
                         <div className="program-redirection-icons-section" >
@@ -151,7 +201,14 @@ export default function EditResident() {
                             <img src="/images/generatedoc.png" alt="user info" className="program-redirection-icons-info" />
                              </div>
                          <h1>Approve Request</h1>
-                    </button>
+                </button>
+
+              */}
+
+
+
+
+
 
 
 
@@ -164,7 +221,7 @@ export default function EditResident() {
                             <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                             </button>
 
-                            <h1> Edit Program Details </h1>
+                            <h1> Program Details </h1>
                     </div>
 
                     <div className="action-btn-section-program">
@@ -288,7 +345,7 @@ export default function EditResident() {
 
                                         <div className="box-container-outer-resindentificationpic">
                                             <div className="title-resindentificationpic">
-                                                Program Photo
+                                                Photo
                                             </div>
 
                                             <div className="box-container-resindentificationpic">

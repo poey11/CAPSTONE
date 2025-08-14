@@ -270,10 +270,17 @@ export default function Header() {
       },
 
       //Edit Programs/Events
-      "/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram": {
+      "/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails": {
         title: "Programs / Events",
-        breadcrumb: ["Programs Management", "Programs / Events", "Edit Programs / Events"],
+        breadcrumb: ["Programs Management", "Programs And Events", "Details"],
       },
+
+            //Edit Programs/Events
+      "/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists": {
+        title: "Programs / Events",
+        breadcrumb: ["Programs Management", "Programs And Events", "Participants Lists"],
+      },
+
 
       //Edit Sitio/HOA Officers
       "/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer": {

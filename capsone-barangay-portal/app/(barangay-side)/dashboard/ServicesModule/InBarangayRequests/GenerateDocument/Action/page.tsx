@@ -1611,8 +1611,8 @@ const handleChange = (
     return (
         <main className="createRequest-main-container">
           {/* NEW */}
-          <form  onSubmit={handleSubmit}>
-            <div className="createRequest-inbrgy-main-content">
+          <form  onSubmit={handleSubmit} className="createRequest-inbrgy-main-content">
+            <div className="createRequest-inbrgy-main">
               <div className="createRequest-inbrgy-main-section1">
                 <div className="createRequest-inbrgy-main-section1-left">
                   <button type="button"onClick={handleBack}>

@@ -153,8 +153,12 @@ export default function ProgramsModule() {
     };
 
     const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/EditProgram");
+    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
   };
+
+
+  const [activeSection, setActiveSection] = useState("details");
+
 
 
   return (
@@ -166,6 +170,7 @@ export default function ProgramsModule() {
       >
         Add New Program
       </button>
+
     </div>
 
 
@@ -271,6 +276,7 @@ export default function ProgramsModule() {
                   <td>
                     <div className="actions-programs">
 
+                    {/*}
                       <button
                         className="action-programs-button"
                         onClick={openPopup}
@@ -282,6 +288,9 @@ export default function ProgramsModule() {
                           
                         />
                       </button>
+
+                      */}
+                      
 
                       <button
                         className="action-programs-button"
@@ -336,17 +345,22 @@ export default function ProgramsModule() {
     <div className="add-programs-confirmation-popup">
 
        <h2>Add New Program</h2>
+       
 
        <div className="add-programs-main-container">
 
+        
+           {activeSection === "details" && (
+              <>
+
 
           <div className="add-programs-photo-section">
-           <span className="add-programs-details-label">Program Photo</span>
+           <span className="add-programs-details-label"> Photo </span>
              <div className="add-programs-profile-container">
                   <img
-                     src={"/Images/default-identificationpic.jpg"}
+                     src={"/Images/thumbnail.png"}
                      alt="Identification"
-                     className="add-official-id-photo"
+                     className="add-program-photo"
                   />
 
              </div>
@@ -354,6 +368,20 @@ export default function ProgramsModule() {
           </div>
 
           <div className="add-programs-info-main-container">
+
+                <nav className="program-info-toggle-wrapper">
+                  {["details", "reqs"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "details" && "Details"}
+                      {section === "reqs" && "Requirements"}
+                    </button>
+                  ))}
+                </nav>
 
            <div className="add-programs-upper-section">
             <div className="add-programs-content-left-side">
@@ -435,8 +463,41 @@ export default function ProgramsModule() {
             </div>
             
           </div>
+                                  </>
+                      )}
+
+
+         {activeSection === "reqs" && (
+              <>
+
+          <div className="add-programs-info-main-container">
+
+                <nav className="program-info-toggle-wrapper">
+                  {["details", "reqs"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {section === "details" && "Details"}
+                      {section === "reqs" && "Requirements"}
+                    </button>
+                  ))}
+                </nav>
+
+
+
+
+            
+          </div>
+
+              </>
+           )}
+
 
        </div>
+       
 
 
        <div className="programs-yesno-container">

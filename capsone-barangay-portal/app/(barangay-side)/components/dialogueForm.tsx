@@ -376,8 +376,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
     return (
         <>
             
-        <form onSubmit={handleSaveClick} className="dialogue-hearing-container">
+        
             <div className="edit-incident-main-content-dialogue-hearing">
+              <form onSubmit={handleSaveClick} className="dialogue-hearing-container">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button type="button" onClick={handleBack}>
@@ -642,6 +643,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
                 </div>
 
+
+             </form>   
+
             </div>
                 
 
@@ -806,7 +810,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
             */}
             
-        </form>
+
 
 
         {showSubmitPopup && (

@@ -15,6 +15,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
+  /*padding-top: 14.2%;*/
   padding-top: 180px;
   padding-bottom: 3%;
 
@@ -39,10 +40,26 @@ html, body {
 
 
 
-.edit-program-main-content {
+/*
+Edited for Participants
+*/
+.edit-program-bottom-section-participants{
+  height: 100%;
+  overflow-y: auto;
+      scrollbar-width: thin; 
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+}
+
+/*
+Edited for Participants
+*/
+
+
+.edit-program-main-content-participants {
   display: flex;
   flex-direction: column;
   width: 90%;
+  height: 100%; /* ADDED*/
   background-color: #ffffff;
   border-radius: 1rem;
 
@@ -125,14 +142,6 @@ animation: fadeSlideIn 0.5s ease-out;
     background-color: #3e8f41;
 }
 
-
-
-.edit-program-bottom-section{
-  padding-top: 35px;
-  padding-left: 35px;
-  padding-right: 35px;
-  height: 100%;
-}
 
 .edit-program-info-toggle-wrapper{
   display: flex;
@@ -1125,68 +1134,6 @@ For Reason of reject
 
 
 
-.filter-section {
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
-
-
-.add-icon {
-  width: 24px; 
-  height: 24px;
-
-  margin-left: 15px;
-  margin-top: 10px;
-
-
-    cursor: pointer;
-  filter: invert(39%) sepia(88%) saturate(411%) hue-rotate(88deg) brightness(92%) contrast(88%);
-  transition: filter 0.3s ease;
-}
-
-.add-icon:hover {
-  filter: invert(48%) sepia(88%) saturate(611%) hue-rotate(88deg) brightness(102%) contrast(95%);
-}
-
-   .programs-module-filter-participants{
-    padding: 8px;
-    width: 70%;
-    max-width: 700%;
-    margin-top: 10px;
-    border: 1px solid rgba(36, 53, 76, 0.7);
-    border-radius: 5px;
-    color: #000000;
-    text-align: left;
-
-
-    font-size: 15px; /* added this line */
-    height: 35px; /* added this line */
-  }
-
-
-
-  .programs-module-filter-participants:focus {
-    border-color: #f49028;
-    outline: none;
-    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
-  }
-
-  .programs-module-filter-participants option {
-    color: #000000; 
-  }
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -1276,37 +1223,4 @@ For Participants Lists
   align-items: center;
   justify-content: center;
   height: fit-content;
-}
-
-
-
-
-/*
-Edited for Participants
-*/
-.edit-program-bottom-section-participants{
-  height: 100%;
-  overflow-y: auto;
-      scrollbar-width: thin; 
-    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
-}
-
-/*
-Edited for Participants
-*/
-
-
-.edit-program-main-content-participants {
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  height: 100%; /* ADDED*/
-  background-color: #ffffff;
-  border-radius: 1rem;
-
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-
-
-animation: fadeSlideIn 0.5s ease-out;
 }
