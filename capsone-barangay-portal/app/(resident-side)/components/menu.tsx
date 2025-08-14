@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { usePathname, useSearchParams} from "next/navigation";
+import { usePathname} from "next/navigation";
 import { auth, db } from "../../db/firebase";
 import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
@@ -39,8 +39,6 @@ interface Resident {
 }
 
 const Menu = () => {
-  const searchParams = useSearchParams();
-  const residentId = searchParams.get("id");
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
