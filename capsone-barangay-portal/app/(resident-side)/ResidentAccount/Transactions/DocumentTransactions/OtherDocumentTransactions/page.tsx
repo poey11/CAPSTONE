@@ -26,10 +26,10 @@ interface ServiceRequest {
 }
 
 
-export default function OtherDocumentTransactions() {
-    const searchParams = useSearchParams();
+export default function OtherDocumentTransactions({id}:any) {
+    // const searchParams = useSearchParams();
     const router = useRouter();
-    const id = searchParams.get("id");
+    // const id = searchParams.get("id");
     const [documentData, setDocumentData] = useState<ServiceRequest>({});
 
     useEffect(() =>{    

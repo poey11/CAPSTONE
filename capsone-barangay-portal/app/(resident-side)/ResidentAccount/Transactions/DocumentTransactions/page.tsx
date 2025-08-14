@@ -62,10 +62,11 @@ interface BarangayDocument {
 
 }
 
-export default function DocumentTransactionsDetails() {
-    const searchParams = useSearchParams();
+export default function DocumentTransactionsDetails({referenceId}:any) {
+   // const searchParams = useSearchParams();
     const router = useRouter();
-    const referenceId = searchParams.get("id");
+
+    // const referenceId = searchParams.get("id");
 
     const [transactionData, setTransactionData] = useState<BarangayDocument | null>(null);
     const [loading, setLoading] = useState(true);

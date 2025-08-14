@@ -78,14 +78,15 @@ export default function Transactions() {
 
     const handleTransactionClick = (transaction: any) => {
         console.log("Transaction clicked:", transaction);
-        if (transaction.type === "IncidentReport") {
-            router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
-        } else if (transaction.type === "ServiceRequest") {
-            router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${transaction.id}`);
-        } 
-        else{
-            router.push(`/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions?id=${transaction.id}`);
-        }  
+        // if (transaction.type === "IncidentReport") {
+        //     router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${transaction.id}`);
+        // } else if (transaction.type === "ServiceRequest") {
+        //     router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${transaction.id}`);
+        // } 
+        // else{
+        //     router.push(`/ResidentAccount/Transactions/DocumentTransactions/OtherDocumentTransactions?id=${transaction.id}`);
+        // }  
+        router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${transaction.id}&type=${transaction.type}`);
     };
 
 const filteredTransactions = transactionData.filter((item) => {
