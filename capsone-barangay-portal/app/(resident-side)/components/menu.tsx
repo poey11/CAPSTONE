@@ -250,7 +250,6 @@ case "document":
     );
   }
 
-console.log("notifications", notifications);
 const handleNotificationClick = async (notification: Notification) => {
   console.log("Notification clicked:", notification);
 
@@ -270,7 +269,6 @@ const handleNotificationClick = async (notification: Notification) => {
       console.error("Error marking notification as read:", error);
     }
   }
-
   // Navigation logic
   const type = notification.transactionType;
 
@@ -286,7 +284,12 @@ const handleNotificationClick = async (notification: Notification) => {
   // else {
   //   console.log("No navigation triggered for this notification type.");
   // }
-  router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
+  if(notification.requestID){
+    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
+  }
+  else{
+    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.incidentID}&type=${notification.transactionType}`);
+  }
 
 };
 

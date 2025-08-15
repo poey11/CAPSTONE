@@ -983,7 +983,7 @@ export default function GenerateDialogueLetter() {
 
                                 if (showSubmitPopup.letterType === "summon") {
                                 // Redirect to HearingSection after 3 seconds
-                                sendSMSForSummons();
+                                //sendSMSForSummons();
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
@@ -1012,7 +1012,7 @@ export default function GenerateDialogueLetter() {
                                 setShowPopup(true);
 
                                 if (showSubmitPopup.letterType === "dialogue") {
-                                sendSMSForDialogue(); 
+                                //sendSMSForDialogue(); 
                                 setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
