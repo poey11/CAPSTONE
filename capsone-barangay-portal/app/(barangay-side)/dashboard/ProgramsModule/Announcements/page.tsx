@@ -1,5 +1,5 @@
 "use client";
-import "@/CSS/ProgramsBrgy/Programs.css";
+import "@/CSS/AnnouncementsBrgy/Announcements.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -67,35 +67,35 @@ const dummyAnnouncements = [
 
   
   const [searchName, setSearchName] = useState("");
-  const [approvalFilter, setApprovalFilter] = useState("");
-  const [progressFilter, setProgressFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
+  const [searchHeadline, setSearchHeadline] = useState("");
+const [searchDate, setSearchDate] = useState("");
 
 
-  // Filtering logic
-  useEffect(() => {
-    let filtered = [...announcements];
+useEffect(() => {
+  let filtered = [...announcements];
 
-    if (searchName) {
-      filtered = filtered.filter((p) =>
-        p.programName.toLowerCase().includes(searchName.toLowerCase())
-      );
-    }
+  // Headline filter
+  if (searchHeadline) {
+    filtered = filtered.filter((a) =>
+      a.announcementHeadline.toLowerCase().includes(searchHeadline.toLowerCase())
+    );
+  }
 
-    if (approvalFilter) {
-      filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
-    }
+  // Published date filter
+  if (searchDate) {
+    filtered = filtered.filter((a) => a.publishedDate === searchDate);
+  }
 
-    if (progressFilter) {
-      filtered = filtered.filter((p) => p.progressStatus === progressFilter);
-    }
+  // Active/Inactive filter
+  if (activeFilter) {
+    filtered = filtered.filter(
+      (a) => a.featuredInAnnouncements.toLowerCase() === activeFilter.toLowerCase()
+    );
+  }
 
-    if (activeFilter) {
-      filtered = filtered.filter((p) => p.activeStatus === activeFilter);
-    }
-
-    setFilteredAnnouncements(filtered);
-  }, [searchName, approvalFilter, progressFilter, activeFilter, announcements]);
+  setFilteredAnnouncements(filtered);
+}, [searchHeadline, searchDate, activeFilter, announcements]);
 
   // Pagination logic
   const indexOfLast = currentPage * announcementsPerPage;
@@ -159,10 +159,10 @@ const dummyAnnouncements = [
 
 
   return (
-    <main className="programs-module-main-container">
-    <div className="programs-module-section-1">
+    <main className="announcement-main-container">
+    <div className="announcement-module-section-1">
       <button 
-        className="add-programs-btn"
+        className="add-announcement-btn"
         onClick={() => setShowAddProgramsPopup(true)}
       >
         Add New Announcement
@@ -171,52 +171,38 @@ const dummyAnnouncements = [
     </div>
 
 
-      <div className="programs-module-section-2">
-        <input
-          type="text"
-          className="programs-module-filter"
-          placeholder="Search by Program Name"
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-        />
+      <div className="announcement-module-section-2">  
+            <input
+                type="text"
+                className="announcement-module-filter"
+                placeholder="Search by Headline"
+                value={searchHeadline}
+                onChange={(e) => setSearchHeadline(e.target.value)}
+            />
 
-        <select
-          className="programs-module-filter"
-          value={approvalFilter}
-          onChange={(e) => setApprovalFilter(e.target.value)}
-        >
-          <option value="">All Approval Status</option>
-          <option value="Approved">Approved</option>
-          <option value="Pending">Pending</option>
-          <option value="Rejected">Rejected</option>
-        </select>
+            {/* Published Date filter */}
+            <input
+                type="date"
+                className="announcement-module-filter"
+                value={searchDate}
+                onChange={(e) => setSearchDate(e.target.value)}
+            />
 
-        <select
-          className="programs-module-filter"
-          value={progressFilter}
-          onChange={(e) => setProgressFilter(e.target.value)}
-        >
-          <option value="">All Progress Status</option>
-          <option value="Ongoing">Ongoing</option>
-          <option value="Upcoming">Upcoming</option>
-          <option value="Completed">Completed</option>
-        </select>
-
-        <select
-          className="programs-module-filter"
-          value={activeFilter}
-          onChange={(e) => setActiveFilter(e.target.value)}
-        >
-          <option value="">All Active/Inactive</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-
+            {/* Active/Inactive filter */}
+            <select
+                className="announcement-module-filter"
+                value={activeFilter}
+                onChange={(e) => setActiveFilter(e.target.value)}
+            >
+                <option value="">All Active/Inactive</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
 
 
       </div>
 
-      <div className="programs-module-main-section">
+      <div className="announcements-module-main-section">
         {loading ? (
           <p>Loading programs...</p>
         ) : currentAnnouncements.length === 0 ? (
@@ -250,7 +236,7 @@ const dummyAnnouncements = [
                   </td>
   
                   <td>
-                    <div className="actions-programs">
+                    <div className="actions-announcements">
 
                     {/*}
                       <button
@@ -269,21 +255,21 @@ const dummyAnnouncements = [
                       
 
                       <button
-                        className="action-programs-button"
+                        className="action-announcements-button"
                         onClick={handleEditClick}
                       >
                         <img
                           src="/Images/edit.png"
                           alt="Edit"
-                          className="action-programs-edit"
+                          className="action-announcements-edit"
                         />
                       </button>
 
                             <button
-                        className="action-programs-button"
+                        className="action-announcements-button"
                       >
 
-                        <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
+                        <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
                       </button>
 
 

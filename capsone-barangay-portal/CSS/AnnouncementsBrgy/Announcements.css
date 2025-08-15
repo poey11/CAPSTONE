@@ -8,8 +8,8 @@ html, body {
   
 }
 
-.programs-module-main-container {
-  width: 100%;  
+.announcement-main-container {
+ width: 100%;  
   height: 100vh;
   background-color: #F0F2F8; 
   margin-left: 1rem;
@@ -20,3 +20,320 @@ html, body {
   padding-top: 180px; /* new d*/
   padding-bottom: 3%; /* new d*/
 }
+
+.announcement-module-section-1 {
+    display: flex;
+    justify-content: flex-end; /*Gawin space between if sa taas yung pagination*/ 
+    width: 100%;
+    gap: 1rem; 
+}
+
+.announcement-module-section-1 h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+
+.add-announcement-btn {
+  background-color: #e56723;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.25s ease, transform 0.2s ease;
+
+  font-size: 13px; /* edited this line */
+  }
+  
+  .add-announcement-btn:hover {
+     background-color: #cc591b;
+  transform: translateY(-1px);
+  }
+
+    .announcement-module-section-2{
+    display: flex;
+    gap: 20px;
+    padding: 0;
+    margin-top: 20px; /* edited this line */
+  }
+
+    .announcement-module-filter{
+    padding: 8px;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+
+
+    font-size: 15px; /* added this line */
+    height: 35px; /* added this line */
+  }
+
+
+
+  .announcement-module-filter:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+  .announcement-module-filter option {
+    color: #000000; 
+  }
+
+    .announcements-module-main-section {
+  flex: 1; /* Makes it take up remaining space */
+    display: flex; /* Ensures proper alignment */
+    flex-direction: column;
+    padding: 0;
+    margin: 0; /* Remove default margin */
+    overflow: auto; /* Allow scrolling if content overflows */
+    width: 100%;
+    
+
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    background-color: #ffffff;
+    border-radius: 6px;
+    scrollbar-width: thin;
+    scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+    margin-top: 1.5rem; /* edited this line */
+    height: 75%; /* edited this line */
+    max-height: 75%;
+}
+
+
+
+  .announcements-module-main-section table {
+    width: 100%; /* Ensures the table spans the full width */
+    border-collapse: collapse; /* Removes unnecessary spacing between table cells */
+}
+
+.announcements-module-main-section tbody tr:hover { 
+   background-color: #d0e4f5 !important; /* Light pastel blue hover */
+  transition: background-color 0.2s ease;
+}
+
+/* NEW UPDATED */
+.announcements-module-main-section td {
+  padding: 1rem; 
+  text-align: center; 
+  border-bottom: 2px solid #ddd;
+  color: rgb(44, 42, 42);
+  font-weight: normal;
+  
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.announcements-module-main-section th {
+  padding: 1rem; 
+  text-align: left; 
+  border-bottom: 2px solid #ddd;
+  color: #FFFFFF;
+  text-align: center;
+    
+  font-size: 14px; /* added this line */
+}
+
+/* NEW UPDATED */
+.announcements-module-main-section thead {
+  position: sticky;
+  top: 0;
+  background-color: #214666;
+  z-index: 10; 
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1); 
+  
+  height: 50px; /* edited this line */
+}
+
+/* NEW UPDATED ADDED THIS */
+.announcements-module-main-section tbody tr {
+  height: 50px; 
+}
+
+.announcements-module-main-section tbody tr:nth-child(even) {
+  background-color: #f0f4f8; /* Softer modern gray-blue tone */
+}
+
+.announcements-module-main-section tbody tr:nth-child(odd) {
+  background-color: #ffffff; /* Crisp white */
+}
+
+
+
+  /* NEW UPDATED */
+  .no-result-card-programs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  gap: 10px;
+  align-self: center;
+
+  border: 2px solid #f3c3bf;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fff, #fff5f5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+
+  /* Entrance animation */
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  height: 150px; /* edited this line */
+  width: 400px; /* edited this line */
+  margin-top: 11rem; /* edited this line */
+  }
+  
+.no-result-card-programs:hover {
+    transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+
+
+  .no-result-icon-programs {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 0.5rem;
+  opacity: 0.75;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+
+  .no-result-card-programs:hover .no-result-icon-programs {
+    transform: scale(1.05);
+    opacity: 0.85;  
+  }
+
+  @keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+  .no-results-programs {
+   font-weight: 600;
+  font-size: 1.25rem;
+  color: #e7594e;
+  text-align: center;
+  transition: color 0.3s ease;
+  }
+
+
+  
+  /* NEW UPDATED */
+.status-badge-programs {
+padding: 5px 10px;            
+border-radius: 5px;          
+font-size: 13px;              
+color: white;                
+display: inline-block;        
+text-transform: capitalize;   
+text-align: center;    
+width: 100px; 
+}
+
+.status-badge-programs.active {
+  background-color: #388e3c; 
+}
+
+.status-badge-programs.inactive {
+  background-color: #9e9e9e; 
+}
+
+
+
+
+
+
+
+.actions-announcements {
+   display: flex;
+   gap: 1rem; 
+   justify-content: center;
+}
+
+.action-announcements-button {   
+  border: none;
+  cursor: pointer;
+  width: 20px;  /* edited this line */
+  height: 20px; /* edited this line */
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.action-announcements-button:hover {
+  transform: scale(1.2); /* Slight zoom-in */
+  filter: brightness(1.3); /* Make icon a bit brighter */
+}
+
+.action-announcements-view {
+    filter: brightness(0) saturate(100%) invert(38%) sepia(78%) saturate(374%) hue-rotate(81deg) brightness(91%) contrast(92%);
+}
+
+.action-announcements-edit {
+   filter: brightness(0) saturate(100%) invert(27%) sepia(99%) saturate(1972%) hue-rotate(189deg) brightness(91%) contrast(101%);
+}
+
+.action-announcements-delete {
+   filter: brightness(0) saturate(100%) invert(19%) sepia(93%) saturate(7490%) hue-rotate(357deg) brightness(96%) contrast(107%);
+}
+
+
+
+/* NEW UPDATED */
+.redirection-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  border-radius: 6px;
+  gap: 5px;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  background-color: #ffffff;
+
+  border: 1px solid rgba(36, 53, 76, 0.7); /* edited this line */
+  }
+  
+  /* NEW UPDATED */
+  .redirection-section button {
+    border: none;
+  background-color: #2C3E50;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.3s;
+
+  padding: 2px 7px; /* edited this line */
+  font-size: 13px;
+  }
+  
+  .redirection-section button:hover {
+    background-color: #214666;
+  }
+  
+  .redirection-section button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  .redirection-section .active {
+     background-color: #214666;
+    font-weight: bold;
+  }
