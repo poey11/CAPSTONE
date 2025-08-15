@@ -878,8 +878,11 @@ const handleFileChange = (
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,
-      transactionType: "Online Service Request",
-      recipientRole: (
+      ...(documentTypeIs !== "" ? {
+        transactionType: documentTypeIs,}:
+      {
+        transactionType: "ServiceRequest",
+      }),      recipientRole: (
         clearanceInput.purpose === "First Time Jobseeker" ||
         clearanceInput.docB === "Barangay Certificate" ||
         clearanceInput.docB === "Barangay Clearance" ||
@@ -900,7 +903,11 @@ const handleFileChange = (
     requestID: newDoc,
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
-    transactionType: "Online Service Request",
+    ...(documentTypeIs !== "" ? {
+        transactionType: documentTypeIs,}:
+      {
+        transactionType: "ServiceRequest",
+      }),
     isRead: false,
   });
 

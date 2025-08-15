@@ -24,6 +24,7 @@ type Notification = {
   incidentID: string;
   requestID: string;
   isRead?: boolean;
+  type: string;
 };
 
 
@@ -249,7 +250,7 @@ case "document":
     );
   }
 
-
+console.log("notifications", notifications);
 const handleNotificationClick = async (notification: Notification) => {
   console.log("Notification clicked:", notification);
 
@@ -285,7 +286,7 @@ const handleNotificationClick = async (notification: Notification) => {
   // else {
   //   console.log("No navigation triggered for this notification type.");
   // }
-  router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.id}&type=${notification.transactionType}`);
+  router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
 
 };
 
@@ -410,7 +411,7 @@ const handleDeleteNotification = async (notificationId: string) => {
                             </div>
                             <div className="delete-icon-section">
                               <button className="delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
-                                <img src="/Images/Delete.png" alt="Delete" className="delete-icon-image" />
+                                <img src="/Images/delete.png" alt="Delete" className="delete-icon-image" />
                               </button>
                             </div>
                           </div>
