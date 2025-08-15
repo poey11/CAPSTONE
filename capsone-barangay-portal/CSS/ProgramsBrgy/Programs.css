@@ -656,7 +656,6 @@ Add Programs
 
  .programs-description-container {
     width: 100%;
-    padding-left: 20px;
     padding-right: 20px;
   }
 
@@ -926,3 +925,128 @@ VIEW
   background-color: transparent;
 }
 
+
+
+
+
+.center-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+
+
+.pending-program-info-toggle-wrapper {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+
+}
+
+
+.pending-program-info-toggle-wrapper.with-add-request {
+  padding-left: 150px; 
+}
+
+
+/* NEW UPDATED*/
+.info-toggle-btn-pending-program {
+  padding: 8px 18px;
+  /* border: 1px solid transparent;*/
+   border: 1px solid #214666;
+   border-radius: 20px;
+   background-color: transparent;
+   color: #214666;
+   font-weight: 700;
+   cursor: pointer;
+   transition: all 0.3s ease;
+   font-size: 14px;
+   text-transform: capitalize; 
+ 
+ 
+   padding: 8px 18px; /* edited this line */
+}
+
+.info-toggle-btn-pending-program:hover {
+  background-color: rgba(33, 70, 102, 0.1);
+}
+
+.info-toggle-btn-pending-program.active {
+  background-color: #214666;
+  color: #ffffff;
+  border: 1px solid #214666;
+}
+
+.assigned-tasks{
+  opacity: 0;
+  animation: dropDownFromTop 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+
+.task-badge {
+  position: absolute;
+  top: -15px;
+  right: -20px;
+  background-color: #e53935; /* red badge */
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+  display: inline-block;
+  box-shadow: 0 0 0 2px white;
+  pointer-events: none;
+  animation: popIn 0.3s ease;
+}
+
+.badge-container {
+  position: relative;
+  display: inline-block;
+}
+
+
+/* NEW UPDATED ADDED */
+.filters-animated > * {
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInFromLeft 0.5s forwards;
+}
+
+/* NEW UPDATED ADDED */
+.filters-animated > *:nth-child(1) { animation-delay: 0.2s; }
+.filters-animated > *:nth-child(2) { animation-delay: 0.5s; }
+.filters-animated > *:nth-child(3) { animation-delay: 0.8s; }
+.filters-animated > *:nth-child(4) { animation-delay: 1.1s; }
+.filters-animated > *:nth-child(5) { animation-delay: 1.4s; }
+
+/* NEW UPDATED ADDED */
+@keyframes slideInFromLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* NEW UPDATED ADDED */
+@keyframes dropDownFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.section-add-program {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
