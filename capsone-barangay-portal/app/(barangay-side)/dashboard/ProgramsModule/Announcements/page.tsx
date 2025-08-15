@@ -3,7 +3,7 @@ import "@/CSS/AnnouncementsBrgy/Announcements.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function ProgramsModule() {
+export default function AnnouncementModule() {
   const router = useRouter();
 
 
@@ -134,7 +134,7 @@ useEffect(() => {
 
 
 
-   const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
+   const [showAddAnnouncementPopup, setShowAddAnnouncementPopup] = useState(false);
 
 
    const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -163,7 +163,7 @@ useEffect(() => {
     <div className="announcement-module-section-1">
       <button 
         className="add-announcement-btn"
-        onClick={() => setShowAddProgramsPopup(true)}
+        onClick={() => setShowAddAnnouncementPopup(true)}
       >
         Add New Announcement
       </button>
@@ -172,7 +172,7 @@ useEffect(() => {
 
 
       <div className="announcement-module-section-2">  
-            <input
+    <input
                 type="text"
                 className="announcement-module-filter"
                 placeholder="Search by Headline"
@@ -302,122 +302,109 @@ useEffect(() => {
 
 
 
-{showAddProgramsPopup && (
-  <div className="add-programs-popup-overlay">
-    <div className="add-programs-confirmation-popup">
+{showAddAnnouncementPopup && (
+  <div className="add-announcements-popup-overlay">
+    <div className="add-announcements-confirmation-popup">
 
-       <h2>Add New Program</h2>
+       <h2>Add New Announcement</h2>
        
 
-       <div className="add-programs-main-container">
+       <div className="add-announcements-main-container">
 
         
-           {activeSection === "details" && (
-              <>
+    
 
 
-          <div className="add-programs-photo-section">
-           <span className="add-programs-details-label"> Photo </span>
-             <div className="add-programs-profile-container">
+          <div className="add-announcements-photo-section">
+           <span className="add-announcements-details-label"> Photo </span>
+             <div className="add-announcements-profile-container">
                   <img
                      src={"/Images/thumbnail.png"}
                      alt="Identification"
-                     className="add-program-photo"
+                     className="add-announcements-photo"
                   />
 
              </div>
-              <label htmlFor="identification-file-upload" className="add-programs-upload-link">Click to Upload File</label>
+              <label htmlFor="identification-file-upload" className="add-announcements-upload-link">Click to Upload File</label>
           </div>
 
-          <div className="add-programs-info-main-container">
+          <div className="add-announcements-info-main-container">
 
-                <nav className="program-info-toggle-wrapper">
-                  {["details", "reqs"].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                      onClick={() => setActiveSection(section)}
-                    >
-                      {section === "details" && "Details"}
-                      {section === "reqs" && "Requirements"}
-                    </button>
-                  ))}
-                </nav>
 
-           <div className="add-programs-upper-section">
-            <div className="add-programs-content-left-side">
-              <div className="fields-section-add-programs">
-                <p>Program Name<span className="required">*</span></p>
+
+           <div className="add-announcements-upper-section">
+            <div className="add-announcements-content-left-side">
+              <div className="fields-section-add-announcements">
+                <p>Program Headline<span className="required">*</span></p>
                   <input
                   type="text"
-                  className="add-programs-input-field"
+                  className="add-announcements-input-field"
                   placeholder="Program Name (E.g. Feeding Program)"
                   />
               </div>
 
-              <div className="fields-section-add-programs">
-                <p>Number of Participants<span className="required">*</span></p>
-                <input
-                  type="number"
-                  min="1"
-                  className="add-programs-input-field"
-                  placeholder="E.g. 50"
-                />
-              </div>
-
-            <div className="fields-section-add-programs">
-              <p>Eligible Participants<span className="required">*</span></p>
-              <select className="add-programs-input-field">
-                <option value="">Select requirement</option>
-                <option value="resident">Resident</option>
-                <option value="non-resident">Non-Resident</option>
-                <option value="both">Both</option>
+           <div className="fields-section-add-announcements">
+              <p>Announcement Category<span className="required">*</span></p>
+              <select className="add-announcements-input-field">
+                <option value="">Choose Category</option>
+                <option value="">Public Advisory</option>
+                <option value="">Emergency</option>
+                <option value="">Barangay Event</option>
               </select>
             </div>
 
+
+
+
+
             </div>
 
-            <div className="add-programs-content-right-side">
-               <div className="fields-section-add-programs">
-                  <p>Location<span className="required">*</span></p>
-                    <input
-                    type="text"
-                    className="add-programs-input-field"
-                    placeholder="Location (E.g. Baragay Hall)"
-                    />
+            <div className="add-announcements-content-right-side">
+
+{/*}
+                <div className="fields-section-add-announcements">
+                <label className="switch-label">
+                    Featured in Announcements
+                    <label className="switch">
+                    <input type="checkbox" defaultChecked />
+                    <span className="slider round"></span>
+                    </label>
+                </label>
                 </div>
+*/}
 
 
-              <div className="fields-section-add-programs">
-                  <p>Program Start Date<span className="required">*</span></p>
-                    <input
-                    type="date"
-                    className="add-programs-input-field"
-                    />
-                </div>
-
-                <div className="fields-section-add-programs">
-                  <p>Program End Date<span className="required">*</span></p>
+              <div className="fields-section-add-announcements">
+                  <p> Published Date <span className="required">*</span></p>
                     <input
                     type="date"
-                    className="add-programs-input-field"
+                    className="add-announcements-input-field"
                     />
                 </div>
+
+             <div className="fields-section-add-announcements">
+                <p>Author<span className="required">*</span></p>
+                  <input
+                  type="text"
+                  className="add-announcements-input-field"
+                  />
+              </div>
+
+
 
             </div>
             
             </div> 
 
 
-            <div className="add-programs-lower-section">
-                                    <div className="programs-description-container">
-                                      <div className="box-container-outer-description">
-                                          <div className="title-description-programs">
-                                              Description of Program
+            <div className="add-announcements-lower-section">
+                                    <div className="announcements-description-container">
+                                      <div className="box-container-outer-description-announcements">
+                                          <div className="title-description-announcements">
+                                              Full Content / Description
                                           </div>
-                                          <div className="box-container-description">
-                                            <textarea className="description-input-field" />
+                                          <div className="box-container-description-announcements">
+                                            <textarea className="description-input-field-announcements" />
                                           </div>
                                       </div>
                                     </div>
@@ -425,20 +412,15 @@ useEffect(() => {
             </div>
             
           </div>
-                                  </>
-                      )}
-
-
-
 
 
        </div>
        
 
 
-       <div className="programs-yesno-container">
-             <button onClick={() => setShowAddProgramsPopup(false)} className="program-no-button">Cancel</button>
-                     <button className="program-yes-button">
+       <div className="announcement-yesno-container">
+             <button onClick={() => setShowAddAnnouncementPopup(false)} className="announcement-no-button">Cancel</button>
+                     <button className="announcement-yes-button">
                      Save
                 </button>
 

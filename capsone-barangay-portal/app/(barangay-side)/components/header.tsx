@@ -288,6 +288,15 @@ export default function Header() {
         breadcrumb: ["Officials Management", "Sitio / HOA Officers", "Edit Officer"],
       },
 
+
+      //Announcements
+
+         "/dashboard/ProgramsModule/Announcements": {
+        title: "Announcements",
+        breadcrumb: ["Programs Management", "Announcements"],
+      },
+
+
       
 
 

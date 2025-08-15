@@ -337,3 +337,368 @@ width: 100px;
      background-color: #214666;
     font-weight: bold;
   }
+
+
+
+      .add-announcements-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; 
+  }
+
+
+  
+  .add-announcements-confirmation-popup {
+        display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 570px;
+    width: 65%;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    border: 2px solid rgb(168, 161, 158);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: lighter;
+    position: fixed;
+
+    animation: slideDownFadeIn 0.4s ease-out;
+  }
+
+  .add-announcements-confirmation-popup p {
+    color: rgb(97, 97, 97);
+  }
+
+  .add-announcements-confirmation-popup h2 {
+
+  font-size: 1.80rem;
+  font-weight: bolder;
+  text-align: center;
+  font-weight: bold;
+  color: #214666;
+  width: 100%;
+  padding-bottom: 10px;
+
+  }
+
+
+      .add-announcements-main-container{
+    width: 100%;
+    height: 375px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+  }
+
+    .add-announcements-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 35%;
+  padding-top: 20px;
+}
+
+
+.add-announcements-details-label {
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  top: 12px; /* Pushes it closer to the card */
+  z-index: 1;
+  left: 10px;
+}
+
+.add-announcements-profile-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 250px;
+  text-align: center;
+  margin-top: -8px; /* Pulls the card up under the label */
+  margin-left: 20px;
+  height: 250px;
+}
+
+.add-announcements-photo {
+  width: 100%;
+  height: 100%; 
+  object-fit: contain;
+  filter: grayscale(100%); 
+}
+
+
+.add-announcements-upload-link {
+    margin-top: 20px;
+    color: rgb(245, 143, 88);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 15px;
+  }
+
+  .add-announcements-info-main-container {
+  width: 65%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* changed from center so scrolling works naturally */
+  height: 100%; /* take full height of parent */
+  max-height: 100%; /* prevent exceeding container */
+  overflow-y: auto; /* allow vertical scrolling */
+  padding-right: 10px; /* prevent scrollbar from overlapping content */
+}
+
+
+
+
+.add-announcements-upper-section {
+  display: flex;
+  width: 100%;
+}
+
+.add-announcements-lower-section {
+  display: flex;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.add-announcements-content-left-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%
+}
+
+.add-announcements-content-right-side {
+    display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+
+
+
+
+.fields-section-add-announcements{
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.fields-section-add-announcements p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+  p .required {
+    color: red;
+    margin-left: 5px;
+  }
+
+
+ .add-announcements-input-field {
+    padding: 8px;
+    width: 90%;
+    height: 35px;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    font-size: 16px;
+  }
+
+  .add-announcements-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+  .add-announcements-input-field option:disabled {
+    color: grey;
+  }
+
+
+
+
+/* Label for the switch with text */
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between text and switch */
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Toggle Switch Container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+/* Circle */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+/* Checked (ON) state */
+.switch input:checked + .slider {
+  background-color: #4caf50; /* Green ON */
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Rounded style */
+.slider.round {
+  border-radius: 26px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+
+
+
+
+ .announcements-description-container {
+    width: 100%;
+    padding-right: 20px;
+  }
+
+
+    .box-container-outer-description-announcements {
+    position: relative; 
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+        .title-description-announcements {
+    position: absolute;
+    left: 50%; 
+    top: 30px; 
+    transform: translate(-50%, -50%);
+    background-color: #1f3b57;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    z-index: 5;
+    width: 300px;
+    text-align: center;
+  }
+  
+      .box-container-description-announcements {
+    position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 250px;
+  }
+
+      .description-input-field-announcements {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 120px;
+    margin-top: 20px;
+    resize: none;
+  }
+
+  .description-input-field-announcements:focus {
+    outline: none;
+    border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
+    box-shadow: none;
+  }
+
+
+    .announcement-yesno-container{
+    padding-top: 20px;
+    display: flex;
+    gap: 20px;
+  }
+
+
+
+    .announcement-yes-button,
+.announcement-no-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.announcement-yes-button {
+  background-color: #4caf50; 
+}
+
+.announcement-yes-button:hover {
+  background-color: #3d8c40; 
+} 
+
+.announcement-no-button {
+  background-color: #f44336;
+}
+
+.announcement-no-button:hover {
+  background-color: #c2352b; 
+}
+
