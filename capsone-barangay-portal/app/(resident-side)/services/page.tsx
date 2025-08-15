@@ -254,8 +254,8 @@ export default function Services() {
 
   {/* Center image stack */}
   <div className="center-images">
-    <img src="/images/bluebg1.png" alt="Background" className="background-services" />
-    <img src="/images/brgy_fairview_pic.png" alt="Kapitan" className="kap-services" />
+    <img src="/Images/bluebg1.png" alt="Background" className="background-services" />
+    <img src="/Images/brgy_fairview_pic.png" alt="Kapitan" className="kap-services" />
 
     <div className="services-explore-title">
       <h1>Explore Our Document Services</h1>
