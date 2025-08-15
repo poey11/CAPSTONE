@@ -273,18 +273,20 @@ const handleNotificationClick = async (notification: Notification) => {
   // Navigation logic
   const type = notification.transactionType;
 
-  if (type === "Online Incident") {
-    router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`);
-  } 
-  else if (type === "Online Request" || type === "Online Service Request") {
-    router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
-  }
-  else if (type === "Verification") {
-    router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
-  }
-  else {
-    console.log("No navigation triggered for this notification type.");
-  }
+  // if (type === "Online Incident") {
+  //   router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`);
+  // } 
+  // else if (type === "Online Request" || type === "Online Service Request") {
+  //   router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
+  // }
+  // else if (type === "Verification") {
+  //   router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
+  // }
+  // else {
+  //   console.log("No navigation triggered for this notification type.");
+  // }
+  router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.id}&type=${notification.transactionType}`);
+
 };
 
 
@@ -403,12 +405,12 @@ const handleDeleteNotification = async (notificationId: string) => {
                             </div>
                             <div className="unread-icon-section">
                               {message.isRead === false && (
-                                <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
+                                <img src="/Images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
                               )}
                             </div>
                             <div className="delete-icon-section">
                               <button className="delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
-                                <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
+                                <img src="/Images/Delete.png" alt="Delete" className="delete-icon-image" />
                               </button>
                             </div>
                           </div>
