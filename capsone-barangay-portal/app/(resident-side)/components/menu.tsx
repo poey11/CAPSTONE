@@ -377,7 +377,7 @@ const handleDeleteNotification = async (notificationId: string) => {
             <div className="dropdown-Container-notifications">
               <div className="dropdown-item-no-hover-notifications">
                 <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
-                  <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                  <img src="/Images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                   {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                 </p>
               </div>
