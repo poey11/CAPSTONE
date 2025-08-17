@@ -1,12 +1,8 @@
+"use client";
 import "@/CSS/Announcements/Announcements.css";
-
-import type { Metadata } from "next";
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+
 
 export default function Announcement() {
   const announcements = [

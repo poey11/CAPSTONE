@@ -1,11 +1,7 @@
+"use client";
+
 import "@/CSS/OfficialsPage/Sitio.css";
 
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Sitio Officers Page for Residents",
-  description: "Stay updated with the latest lists of Sitio Officers",
-};
 
 export default function SitioOfficersPage() {
   

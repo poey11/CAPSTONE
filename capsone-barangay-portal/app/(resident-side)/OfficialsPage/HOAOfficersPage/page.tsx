@@ -1,13 +1,7 @@
+"use client";
 
 import "@/CSS/OfficialsPage/HOA.css";
 
-import type { Metadata } from "next";
-
-
-export const metadata: Metadata = {
-  title: "HOA Officers Page for Residents",
-  description: "Stay updated with the latest lists of Sitio Officers",
-};
 
 export default function HOAOfficersPage() {
   

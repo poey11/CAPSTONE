@@ -1,14 +1,8 @@
+"use client";
 
 
 import "@/CSS/OfficialsPage/OfficialsPage.css";
 
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Official Page for Residents",
-  description: "Stay updated with the latest lists of officials",
-};
 
 export default function Official() {
   const captain = {
