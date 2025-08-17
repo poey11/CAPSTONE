@@ -432,6 +432,33 @@ const prevPendingPage = () =>
 const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState("details");
 
 
+const [showRejectPopup, setShowRejectPopup] = useState(false); 
+  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
+      const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+
+      const confirmSubmit = () => {
+          try {
+              
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); //  show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
+
   return (
     <main className="programs-module-main-container">
 
@@ -1133,13 +1160,12 @@ const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState
 
                     <div className="action-btn-section-verify-section-participant">
                       <div className="action-btn-section-verify">
-                      
-                        <button 
-                          className="participant-action-reject" 
-                        >
-                          Reject
-                        </button>
-
+                      <button 
+                        className="participant-action-reject" 
+                        onClick={() => setShowRejectPopup(true)}
+                      >
+                        Reject
+                      </button>
                         <button 
                           className="participant-action-accept" 
                         >
@@ -1233,6 +1259,10 @@ const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState
                             </div>
                           </div>
 
+                          {/*
+                           Add rendering for dynamic/additional requirements
+                          */}
+
 
                       </>
                   )}
@@ -1250,6 +1280,68 @@ const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState
     </div>
   )}
 
+
+                  {showRejectPopup && (
+                  <div className="reasonfor-recject-popup-overlay">
+                    <div className="reasonfor-reject-confirmation-popup">
+                      <h2>Reject Participant</h2>
+
+                      <form  className="reject-container" >
+                        <div className="box-container-outer-reasonforreject">
+                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
+                          <div className="box-container-reasonforreject">
+                            <textarea
+                              className="reasonforreject-input-field"
+                              name="reason"
+                              id="reason"
+                           placeholder="Enter the reason for rejecting the participant (e.g., incomplete requirements, invalid information, duplicate registration)..."
+
+                            />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="reject-reason-yesno-container">
+                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
+                            Cancel
+                          </button>
+                            <button 
+                                type="button" 
+                                className="reject-reason-yes-button" 
+                                disabled={loading}
+                                onClick={() => setShowSubmitRejectPopup(true)}
+                            >
+                                {loading ? "Saving..." : "Save"}
+                            </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+
+             {showSubmitRejectPopup && (
+                <div className="confirmation-popup-overlay-program-reject">
+                    <div className="confirmation-popup-program-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to Submit? </p>
+                        <div className="yesno-container-add">
+                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
+                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+                       {showPopup && (
+                <div className={`popup-overlay-participant show`}>
+                    <div className="popup-participant">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
 
 
 
