@@ -266,6 +266,25 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     };
   }, []);
 
+const addMinutes = (hhmm: string, minutes: number) => {
+  const [h, m] = hhmm.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return "";
+  const total = h * 60 + m + minutes;
+  const newH = Math.floor((total % (24 * 60)) / 60);
+  const newM = total % 60;
+  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+};
+
+const isSameDay = () => {
+  if (eventType === "single") return true;
+  if (!startDate || !endDate) return false;
+  return startDate === endDate;
+};
+
+// For End Time’s min attribute
+const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
+
+
   const handleSave = async () => {
     if (saving) return;
     if (!validate()) {
@@ -473,7 +492,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           shake.timeStart ? "shake" : "",
                         ].join(" ").trim()}
                         value={timeStart}
-                        onChange={(e) => setTimeStart(e.target.value)}
+                        onChange={(e) => {
+                          const newStart = e.target.value;
+                          setTimeStart(newStart);
+
+                          if (isSameDay() && newStart && timeEnd) {
+                            const minAllowed = addMinutes(newStart, 180);
+                            if (toMinutes(timeEnd) < toMinutes(minAllowed)) {
+                              setTimeEnd(minAllowed);
+                            }
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -526,7 +555,18 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             ].join(" ").trim()}
                             min={minDate}
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => {
+                              const newStart = e.target.value;
+                              setStartDate(newStart);
+                              // If endDate is set and is before newStart, bump it to newStart
+                              if (endDate && new Date(endDate) < new Date(newStart)) {
+                                setEndDate(newStart);
+                              }
+                              // If times are same-day and endTime < startTime, bump endTime
+                              if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
+                                setTimeEnd(timeStart);
+                              }
+                            }}
                           />
                         </div>
                         <div className="fields-section-add-programs">
@@ -540,9 +580,22 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                               errors.endDate ? "input-error" : "",
                               shake.endDate ? "shake" : "",
                             ].join(" ").trim()}
-                            min={minDate}
+                            // Prevent picking an end date before the start date
+                            min={startDate || minDate}
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => {
+                              const newEnd = e.target.value;
+                              // If user tries to pick before start, clamp to start
+                              if (startDate && new Date(newEnd) < new Date(startDate)) {
+                                setEndDate(startDate);
+                              } else {
+                                setEndDate(newEnd);
+                              }
+                              // If same day after change, also ensure end time >= start time
+                              if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
+                                setTimeEnd(timeStart);
+                              }
+                            }}
                           />
                         </div>
                       </>
@@ -576,8 +629,19 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           errors.timeEnd ? "input-error" : "",
                           shake.timeEnd ? "shake" : "",
                         ].join(" ").trim()}
+                        min={endTimeMin}
                         value={timeEnd}
-                        onChange={(e) => setTimeEnd(e.target.value)}
+                        onChange={(e) => {
+                          const newEnd = e.target.value;
+                          if (isSameDay() && timeStart) {
+                            const minAllowed = addMinutes(timeStart, 180);
+                            if (toMinutes(newEnd) < toMinutes(minAllowed)) {
+                              setTimeEnd(minAllowed);
+                              return;
+                            }
+                          }
+                          setTimeEnd(newEnd);
+                        }}
                       />
                     </div>
                   </div>
