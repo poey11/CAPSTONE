@@ -22,7 +22,12 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 ];
 
 const toSet = (arr: SimpleField[]) =>
-  new Set(arr.filter(Boolean).map(f => f.name?.toLowerCase().trim()).filter(Boolean) as string[]);
+  new Set(
+    arr
+      .filter(Boolean)
+      .map((f) => f.name?.toLowerCase().trim())
+      .filter(Boolean) as string[]
+  );
 
 const dedupeByName = (arr: SimpleField[]) => {
   const seen = new Set<string>();
@@ -44,7 +49,9 @@ export default function ProgramDetails() {
 
   const user = session?.user as any;
   const userPosition = user?.position || "";
-  const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
+  const reviewerName = [userPosition, user?.fullName || user?.name || ""]
+    .filter(Boolean)
+    .join(" ");
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
 
@@ -79,8 +86,10 @@ export default function ProgramDetails() {
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
   const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null);
 
-  // Approval state
+  // Statuses
   const [approvalStatus, setApprovalStatus] = useState<string>("Pending");
+  const [progressStatus, setProgressStatus] = useState<string>("Upcoming"); // NEW
+  const [activeStatus, setActiveStatus] = useState<"Active" | "Inactive">("Inactive"); // NEW
   const [rejectionReason, setRejectionReason] = useState("");
 
   // Who suggested (for notifications)
@@ -107,9 +116,12 @@ export default function ProgramDetails() {
     if (!v) return;
     const lc = v.toLowerCase();
     const pre = toSet(PREDEFINED_REQ_TEXT);
-    const exists = pre.has(lc) || reqTextFields.some(f => f.name.toLowerCase() === lc);
-    if (exists) { setReqTextNew(""); return; }
-    setReqTextFields(prev => [...prev, { name: v }]);
+    const exists = pre.has(lc) || reqTextFields.some((f) => f.name.toLowerCase() === lc);
+    if (exists) {
+      setReqTextNew("");
+      return;
+    }
+    setReqTextFields((prev) => [...prev, { name: v }]);
     setReqTextNew("");
   };
   const addReqFile = () => {
@@ -117,13 +129,16 @@ export default function ProgramDetails() {
     if (!v) return;
     const lc = v.toLowerCase();
     const pre = toSet(PREDEFINED_REQ_FILES);
-    const exists = pre.has(lc) || reqFileFields.some(f => f.name.toLowerCase() === lc);
-    if (exists) { setReqFileNew(""); return; }
-    setReqFileFields(prev => [...prev, { name: v }]);
+    const exists = pre.has(lc) || reqFileFields.some((f) => f.name.toLowerCase() === lc);
+    if (exists) {
+      setReqFileNew("");
+      return;
+    }
+    setReqFileFields((prev) => [...prev, { name: v }]);
     setReqFileNew("");
   };
-  const removeReqText = (i: number) => setReqTextFields(prev => prev.filter((_, idx) => idx !== i));
-  const removeReqFile = (i: number) => setReqFileFields(prev => prev.filter((_, idx) => idx !== i));
+  const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
+  const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
 
   // Min date (tomorrow)
   const minDate = useMemo(() => {
@@ -148,6 +163,9 @@ export default function ProgramDetails() {
     return h * 60 + m;
   };
 
+  // Read-only when Completed
+  const isReadOnly = progressStatus === "Completed"; // NEW
+
   // Load the program by id
   useEffect(() => {
     const load = async () => {
@@ -164,14 +182,15 @@ export default function ProgramDetails() {
 
         setProgramName(data.programName ?? "");
         setParticipants(
-          typeof data.participants === "number"
-            ? String(data.participants)
-            : data.participants ?? ""
+          typeof data.participants === "number" ? String(data.participants) : data.participants ?? ""
         );
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
 
         setApprovalStatus(data.approvalStatus ?? "Pending");
+        setProgressStatus(data.progressStatus ?? "Upcoming"); // NEW
+        setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive"); // NEW
+
         setSuggestedBy(data.suggestedBy ?? "");
         setSuggestedByUid(data.suggestedByUid ?? null);
 
@@ -217,12 +236,8 @@ export default function ProgramDetails() {
         const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
         const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
 
-        setReqTextFields(
-          dedupeByName(allText).filter(f => !preTextSet.has(f.name.toLowerCase()))
-        );
-        setReqFileFields(
-          dedupeByName(allFiles).filter(f => !preFileSet.has(f.name.toLowerCase()))
-        );
+        setReqTextFields(dedupeByName(allText).filter((f) => !preTextSet.has(f.name.toLowerCase())));
+        setReqFileFields(dedupeByName(allFiles).filter((f) => !preFileSet.has(f.name.toLowerCase())));
       } catch (e) {
         console.error(e);
         setPopupMessage("Failed to load program.");
@@ -245,6 +260,27 @@ export default function ProgramDetails() {
     const file = e.target.files?.[0] || null;
     setIdentificationFile(file);
     if (file) setIdentificationPreview(URL.createObjectURL(file));
+  };
+
+  // Active/Inactive toggle (instant write)
+  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!programId || isReadOnly) return; // locked if completed
+    const next = (e.target.value as "Active" | "Inactive") || "Inactive";
+    const prev = activeStatus;
+    setActiveStatus(next);
+    try {
+      setLoading(true);
+      await updateDoc(doc(db, "Programs", programId), { activeStatus: next });
+      setPopupMessage(`Status set to ${next}.`);
+      setShowPopup(true);
+    } catch (err) {
+      console.error(err);
+      setActiveStatus(prev); // rollback
+      setPopupMessage("Failed to update status.");
+      setShowPopup(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const confirmSubmitReject = async () => {
@@ -295,6 +331,7 @@ export default function ProgramDetails() {
   };
 
   const validate = () => {
+    if (isReadOnly) return false; // guard; shouldn't save anyway
     const e: { [k: string]: boolean } = {};
     const need = (k: string, ok: boolean) => {
       if (!ok) {
@@ -342,7 +379,7 @@ export default function ProgramDetails() {
   };
 
   const handleSave = async () => {
-    if (!programId) return;
+    if (!programId || isReadOnly) return; // locked if completed
     if (!validate()) {
       setPopupMessage("Please correct the highlighted fields.");
       setShowPopup(true);
@@ -370,6 +407,7 @@ export default function ProgramDetails() {
         timeEnd,
         description: description.trim(),
         summary: summary.trim(),
+        activeStatus, // persist current toggle
         requirements: {
           textFields: mergedText,
           fileFields: mergedFiles,
@@ -404,7 +442,7 @@ export default function ProgramDetails() {
   };
 
   const handleApprove = async () => {
-    if (!programId) return;
+    if (!programId || isReadOnly) return; // locked if completed
     try {
       setLoading(true);
 
@@ -459,6 +497,7 @@ export default function ProgramDetails() {
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Enter the reason for rejecting the program (e.g., overlaps with another event, insufficient budget allocation, safety concerns)..."
+                    disabled={isReadOnly}
                   />
                 </div>
               </div>
@@ -473,7 +512,7 @@ export default function ProgramDetails() {
                 <button
                   type="button"
                   className="reject-reason-yes-button"
-                  disabled={loading}
+                  disabled={loading || isReadOnly}
                   onClick={() => setShowSubmitRejectPopup(true)}
                 >
                   {loading ? "Saving..." : "Save"}
@@ -524,7 +563,7 @@ export default function ProgramDetails() {
           <h1>Participants</h1>
         </button>
 
-        {approvalStatus === "Pending" && userPosition === "Punong Barangay" && (
+        {approvalStatus === "Pending" && userPosition === "Punong Barangay" && !isReadOnly && (
           <>
             <button className="program-redirection-buttons" onClick={handleApprove}>
               <div className="program-redirection-icons-section">
@@ -552,13 +591,47 @@ export default function ProgramDetails() {
             <h1> Program Details </h1>
           </div>
 
+          {/* Header actions: Active/Inactive + Save/Discard */}
           <div className="action-btn-section-program">
-            <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-            <button className="action-save" onClick={handleSave}>
-              {loading ? "Saving..." : "Save"}
-            </button>
+            {/* Active/Inactive toggle */}
+            <select
+              className="action-select-status"
+              value={activeStatus}
+              onChange={handleStatusChange}
+              disabled={isReadOnly}
+              title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"}
+              style={{ marginRight: 12 }}
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+
+            {!isReadOnly && (
+              <>
+                <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+                <button className="action-save" onClick={handleSave}>
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {isReadOnly && (
+          <div
+            style={{
+              margin: "10px 20px 0",
+              padding: "10px 12px",
+              background: "#f5f7fa",
+              border: "1px solid #d9e1ec",
+              borderRadius: 8,
+              color: "#334155",
+              fontSize: 14,
+            }}
+          >
+            This program is <strong>Completed</strong>. Editing is disabled (view-only).
+          </div>
+        )}
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
@@ -594,6 +667,7 @@ export default function ProgramDetails() {
                           placeholder="Program Name (E.g. Feeding Program)"
                           value={programName}
                           onChange={(e) => setProgramName(e.target.value)}
+                          disabled={isReadOnly}
                         />
                       </div>
 
@@ -610,6 +684,7 @@ export default function ProgramDetails() {
                           placeholder="E.g. 50"
                           value={participants}
                           onChange={(e) => setParticipants(e.target.value)}
+                          disabled={isReadOnly}
                         />
                       </div>
 
@@ -623,6 +698,7 @@ export default function ProgramDetails() {
                           ].join(" ").trim()}
                           value={eligibleParticipants}
                           onChange={(e) => setEligibleParticipants(e.target.value)}
+                          disabled={isReadOnly}
                         >
                           <option value="">Select requirement</option>
                           <option value="resident">Resident</option>
@@ -642,6 +718,7 @@ export default function ProgramDetails() {
                           ].join(" ").trim()}
                           value={timeStart}
                           onChange={(e) => setTimeStart(e.target.value)}
+                          disabled={isReadOnly}
                         />
                       </div>
                     </div>
@@ -653,6 +730,7 @@ export default function ProgramDetails() {
                           className="edit-programs-input-field"
                           value={eventType}
                           onChange={(e) => setEventType(e.target.value as "single" | "multiple")}
+                          disabled={isReadOnly}
                         >
                           <option value="single">Single Day</option>
                           <option value="multiple">Multiple Days</option>
@@ -672,6 +750,7 @@ export default function ProgramDetails() {
                             min={minDate}
                             value={singleDate}
                             onChange={(e) => setSingleDate(e.target.value)}
+                            disabled={isReadOnly}
                           />
                         </div>
                       ) : (
@@ -688,6 +767,7 @@ export default function ProgramDetails() {
                               min={minDate}
                               value={startDate}
                               onChange={(e) => setStartDate(e.target.value)}
+                              disabled={isReadOnly}
                             />
                           </div>
 
@@ -703,6 +783,7 @@ export default function ProgramDetails() {
                               min={minDate}
                               value={endDate}
                               onChange={(e) => setEndDate(e.target.value)}
+                              disabled={isReadOnly}
                             />
                           </div>
                         </>
@@ -719,6 +800,7 @@ export default function ProgramDetails() {
                           ].join(" ").trim()}
                           value={timeEnd}
                           onChange={(e) => setTimeEnd(e.target.value)}
+                          disabled={isReadOnly}
                         />
                       </div>
 
@@ -734,6 +816,7 @@ export default function ProgramDetails() {
                           placeholder="Location (E.g. Barangay Hall)"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
+                          disabled={isReadOnly}
                         />
                       </div>
                     </div>
@@ -745,7 +828,10 @@ export default function ProgramDetails() {
                 <div className="edit-programs-upper-section">
                   {/* Pre-defined Requirements */}
                   <div className="fields-section-edit-programs">
-                    <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div
+                      className="predefined-header"
+                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                    >
                       <p style={{ margin: 0, fontWeight: 600 }}>Pre-defined Requirements</p>
                       <button
                         type="button"
@@ -760,10 +846,14 @@ export default function ProgramDetails() {
                       <div style={{ marginTop: 8 }}>
                         <ul style={{ paddingLeft: 18, margin: 0 }}>
                           {PREDEFINED_REQ_TEXT.map((f, i) => (
-                            <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
+                            <li key={`pretext-${i}`}>
+                              {f.name} <span style={{ opacity: 0.6 }}>(text)</span>
+                            </li>
                           ))}
                           {PREDEFINED_REQ_FILES.map((f, i) => (
-                            <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
+                            <li key={`prefile-${i}`}>
+                              {f.name} <span style={{ opacity: 0.6 }}>(file)</span>
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -780,25 +870,41 @@ export default function ProgramDetails() {
                         placeholder="e.g., guardianName"
                         value={reqTextNew}
                         onChange={(e) => setReqTextNew(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addReqText();
+                          }
+                        }}
+                        disabled={isReadOnly}
                       />
-                      <button type="button" className="info-toggle-btn" onClick={addReqText}>+</button>
+                      <button type="button" className="info-toggle-btn" onClick={addReqText} disabled={isReadOnly}>
+                        +
+                      </button>
                     </div>
 
                     {reqTextFields.length > 0 && (
                       <div style={{ marginTop: 10 }}>
                         {reqTextFields.map((f, i) => (
-                          <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                          <div
+                            key={`rt-${i}`}
+                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
+                          >
                             <input
                               type="text"
                               className="edit-programs-input-field"
                               value={f.name}
                               onChange={(e) => {
                                 const v = e.target.value;
-                                setReqTextFields(prev => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
                               }}
+                              disabled={isReadOnly}
                             />
-                            <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
+                            {!isReadOnly && (
+                              <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>
+                                -
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -815,25 +921,41 @@ export default function ProgramDetails() {
                         placeholder="e.g., medicalCertificateJpg"
                         value={reqFileNew}
                         onChange={(e) => setReqFileNew(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addReqFile();
+                          }
+                        }}
+                        disabled={isReadOnly}
                       />
-                      <button type="button" className="info-toggle-btn" onClick={addReqFile}>+</button>
+                      <button type="button" className="info-toggle-btn" onClick={addReqFile} disabled={isReadOnly}>
+                        +
+                      </button>
                     </div>
 
                     {reqFileFields.length > 0 && (
                       <div style={{ marginTop: 10 }}>
                         {reqFileFields.map((f, i) => (
-                          <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                          <div
+                            key={`rf-${i}`}
+                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
+                          >
                             <input
                               type="text"
                               className="edit-programs-input-field"
                               value={f.name}
                               onChange={(e) => {
                                 const v = e.target.value;
-                                setReqFileFields(prev => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
                               }}
+                              disabled={isReadOnly}
                             />
-                            <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
+                            {!isReadOnly && (
+                              <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>
+                                -
+                              </button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -857,11 +979,14 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.description ? "input-error" : "",
                               shake.description ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             placeholder="Enter Remarks"
                             name="programDescription"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            disabled={isReadOnly}
                           />
                         </div>
                       </div>
@@ -874,11 +999,14 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.summary ? "input-error" : "",
                               shake.summary ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             placeholder="Enter Summary"
                             name="programSummary"
                             value={summary}
                             onChange={(e) => setSummary(e.target.value)}
+                            disabled={isReadOnly}
                           />
                         </div>
                       </div>
@@ -887,7 +1015,11 @@ export default function ProgramDetails() {
                         <div className="title-resindentificationpic">Photo</div>
                         <div className="box-container-resindentificationpic">
                           <div className="identificationpic-container">
-                            <label htmlFor="identification-file-upload" className="upload-link">
+                            <label
+                              htmlFor="identification-file-upload"
+                              className="upload-link"
+                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
+                            >
                               Click to Upload File
                             </label>
                             <input
@@ -896,6 +1028,7 @@ export default function ProgramDetails() {
                               className="file-upload-input"
                               accept=".jpg,.jpeg,.png"
                               onChange={handleIdentificationFileChange}
+                              disabled={isReadOnly}
                             />
 
                             {(identificationFile || identificationPreview || existingPhotoURL) && (
@@ -910,12 +1043,15 @@ export default function ProgramDetails() {
                               </div>
                             )}
 
-                            {(identificationFile || identificationPreview) && (
+                            {(identificationFile || identificationPreview) && !isReadOnly && (
                               <div className="delete-container">
                                 <button
                                   type="button"
                                   className="delete-button"
-                                  onClick={() => { setIdentificationFile(null); setIdentificationPreview(null); }}
+                                  onClick={() => {
+                                    setIdentificationFile(null);
+                                    setIdentificationPreview(null);
+                                  }}
                                 >
                                   <img src="/images/trash.png" alt="Delete" className="delete-icon" />
                                 </button>
@@ -939,7 +1075,9 @@ export default function ProgramDetails() {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to discard the changes?</p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">
+                No
+              </button>
               <button
                 className="yes-button-add"
                 onClick={() => {
