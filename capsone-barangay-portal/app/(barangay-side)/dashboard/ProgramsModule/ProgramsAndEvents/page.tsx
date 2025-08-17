@@ -73,6 +73,10 @@ export default function ProgramsModule() {
 
   const [activeSectionRedirection, setActiveSectionRedirection] = useState<"main" | "programs" | "participants">("main");
 
+  // Main-page popup state (shared UI)
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+
   // Load Programs from Firestore
   useEffect(() => {
     const q = query(collection(db, "Programs"), orderBy("createdAt", "desc"));
@@ -394,6 +398,12 @@ export default function ProgramsModule() {
       <AddNewProgramModal
         isOpen={showAddProgramsPopup}
         onClose={() => setShowAddProgramsPopup(false)}
+        // 🔔 When the modal saves successfully, show popup on main page
+        onProgramSaved={(msg) => {
+          setPopupMessage(msg || "Program saved successfully.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 1500);
+        }}
       />
 
       {activeSectionRedirection === "main" && (
@@ -769,6 +779,16 @@ export default function ProgramsModule() {
             </button>
           </div>
         </>
+      )}
+
+      {/* 🔔 Shared popup rendered on main page */}
+      {showPopup && (
+        <div className="popup-overlay-program show">
+          <div className="popup-program">
+            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+            <p>{popupMessage}</p>
+          </div>
+        </div>
       )}
     </main>
   );
