@@ -305,7 +305,7 @@ export default function ProgramDetails() {
       });
 
       await addDoc(collection(db, "BarangayNotifications"), {
-        message: `Your program (${programName}) has been rejected by ${reviewerName}.`,
+        message: `Your program (${programName}) has been rejected by ${reviewerName}. Reason: ${rejectionReason}.`,
         timestamp: new Date(),
         isRead: false,
         recipientRole: suggestedByUid,
