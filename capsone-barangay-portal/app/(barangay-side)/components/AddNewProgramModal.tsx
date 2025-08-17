@@ -34,23 +34,25 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
   const { data: session } = useSession();
   const userPosition = (session?.user as any)?.position ?? "";
   const userFullName = (session?.user as any)?.fullName ?? "";
+  const userUid =
+    (session?.user as any)?.id ??
+    null;
   const staffDisplayName = [userPosition, userFullName].filter(Boolean).join(" ");
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // DETAILS: form state
+  // Form state
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
-  // Event type + dates/times
   const [eventType, setEventType] = useState<"single" | "multiple">("single");
-  const [singleDate, setSingleDate] = useState(""); // yyyy-mm-dd
-  const [startDate, setStartDate] = useState("");  // yyyy-mm-dd
-  const [endDate, setEndDate] = useState("");      // yyyy-mm-dd
-  const [timeStart, setTimeStart] = useState("");  // HH:MM
-  const [timeEnd, setTimeEnd] = useState("");      // HH:MM
+  const [singleDate, setSingleDate] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [timeStart, setTimeStart] = useState("");
+  const [timeEnd, setTimeEnd] = useState("");
 
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
@@ -65,7 +67,7 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
     setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), 400);
   };
 
-  // Min date (tomorrow) blocks today/past in pickers
+  // Min date (tomorrow)
   const minDate = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 1);
@@ -82,6 +84,7 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
 
   const toMinutes = (hhmm: string) => {
     const [h, m] = hhmm.split(":").map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return -1;
     return h * 60 + m;
   };
 
@@ -113,24 +116,27 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
       }
     };
 
-    // Required fields
-    need("programName", !!programName);
-    need("participants", !!participants);
+    const participantsNum = Number(participants);
+    const validParticipants =
+      participants.trim().length > 0 &&
+      Number.isFinite(participantsNum) &&
+      participantsNum > 0;
+
+    need("programName", !!programName.trim());
+    need("participants", validParticipants);
     need("eligibleParticipants", !!eligibleParticipants);
-    need("location", !!location);
-    need("description", !!description);
-    need("summary", !!summary);
+    need("location", !!location.trim());
+    need("description", !!description.trim());
+    need("summary", !!summary.trim());
     need("photoFile", !!photoFile);
     need("timeStart", !!timeStart);
     need("timeEnd", !!timeEnd);
 
-    // Dates with Event Type
     if (eventType === "single") {
       need("singleDate", !!singleDate && isFutureDate(singleDate));
     } else {
       need("startDate", !!startDate && isFutureDate(startDate));
       need("endDate", !!endDate && isFutureDate(endDate));
-
       if (startDate && endDate) {
         const s = new Date(startDate);
         const eDate = new Date(endDate);
@@ -143,9 +149,10 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
       }
     }
 
-    // Time rule: End > Start
     if (timeStart && timeEnd) {
-      if (toMinutes(timeEnd) <= toMinutes(timeStart)) {
+      const tS = toMinutes(timeStart);
+      const tE = toMinutes(timeEnd);
+      if (tS < 0 || tE < 0 || tE <= tS) {
         e["timeEnd"] = true;
         triggerShake("timeEnd");
       }
@@ -161,7 +168,25 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
     return nameOk && roleOk;
   };
 
+  const handleFileChange = (file: File | null) => {
+    if (!file) {
+      setPhotoFile(null);
+      return;
+    }
+    const maxBytes = 5 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      alert("Image too large. Max 5MB.");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file.");
+      return;
+    }
+    setPhotoFile(file);
+  };
+
   const handleSave = async () => {
+    if (saving) return;
     if (!validate()) {
       setActiveSection("details");
       return;
@@ -170,32 +195,32 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
     setSaving(true);
     try {
       const autoApproved = isAutoApprovedByPolicy();
+
       const normalizedStart = eventType === "single" ? singleDate : startDate;
       const normalizedEnd = eventType === "single" ? singleDate : endDate;
 
       const payload: any = {
-        programName,
+        programName: programName.trim(),
         participants: Number(participants),
         eligibleParticipants,
-        location,
+        location: location.trim(),
         eventType,
         startDate: normalizedStart,
         endDate: normalizedEnd,
         timeStart,
         timeEnd,
-        description,
-        summary,
+        description: description.trim(),
+        summary: summary.trim(),
         approvalStatus: autoApproved ? "Approved" : "Pending",
         progressStatus: "Upcoming",
         activeStatus: autoApproved ? "Active" : "Inactive",
         createdAt: serverTimestamp(),
-        suggestedBy: staffDisplayName,
-        suggestedByUid: (session?.user as any)?.id ?? null,
+        suggestedBy: staffDisplayName || null,
+        suggestedByUid: userUid,
       };
 
       const programRef = await addDoc(collection(db, "Programs"), payload);
 
-      // Upload thumbnail
       if (photoFile) {
         const storageRef = ref(
           storage,
@@ -206,7 +231,6 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
         await updateDoc(doc(db, "Programs", programRef.id), { photoURL });
       }
 
-      // Notify PB if pending
       if (!autoApproved) {
         await addDoc(collection(db, "BarangayNotifications"), {
           message: `A new program (${programName}) has been suggested by ${staffDisplayName}.`,
@@ -215,16 +239,18 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
           recipientRole: "Punong Barangay",
           transactionType: "Program Suggestion",
           programID: programRef.id,
-          programName,
-          suggestedBy: staffDisplayName,
-          suggestedByUid: (session?.user as any)?.uid ?? null,
+          programName: programName.trim(),
+          suggestedBy: staffDisplayName || null,
+          suggestedByUid: userUid,
         });
       }
 
+      alert("Program saved successfully.");
       resetForm();
       onClose();
     } catch (err) {
       console.error(err);
+      alert("Failed to save program. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -238,7 +264,7 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
         <h2>Add New Program</h2>
 
         <div className="add-programs-main-container">
-          {/* LEFT: Photo */}
+          {/* Left: Photo */}
           <div className="add-programs-photo-section">
             <span className="add-programs-details-label">
               Photo <span className="required">*</span>
@@ -259,7 +285,7 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
               accept="image/*"
               style={{ display: "none" }}
               id="identification-file-upload"
-              onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
             />
             <label
               htmlFor="identification-file-upload"
@@ -269,7 +295,7 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
             </label>
           </div>
 
-          {/* RIGHT: Form */}
+          {/* Right: Form */}
           <div className="add-programs-info-main-container">
             <nav className="program-info-toggle-wrapper">
               {["details", "reqs"].map((section) => (
@@ -288,10 +314,12 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
             {activeSection === "details" && (
               <>
                 <div className="add-programs-upper-section">
-                  {/* LEFT column */}
+                  {/* Left column */}
                   <div className="add-programs-content-left-side">
                     <div className="fields-section-add-programs">
-                      <p>Program Name<span className="required">*</span></p>
+                      <p>
+                        Program Name<span className="required">*</span>
+                      </p>
                       <input
                         type="text"
                         className={`add-programs-input-field ${errors.programName ? "error shake" : ""}`}
@@ -302,7 +330,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     </div>
 
                     <div className="fields-section-add-programs">
-                      <p>Number of Participants<span className="required">*</span></p>
+                      <p>
+                        Number of Participants<span className="required">*</span>
+                      </p>
                       <input
                         type="number"
                         min="1"
@@ -314,7 +344,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     </div>
 
                     <div className="fields-section-add-programs">
-                      <p>Eligible Participants<span className="required">*</span></p>
+                      <p>
+                        Eligible Participants<span className="required">*</span>
+                      </p>
                       <select
                         className={`add-programs-input-field ${errors.eligibleParticipants ? "error shake" : ""}`}
                         value={eligibleParticipants}
@@ -328,7 +360,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     </div>
 
                     <div className="fields-section-add-programs">
-                      <p>Time Start<span className="required">*</span></p>
+                      <p>
+                        Time Start<span className="required">*</span>
+                      </p>
                       <input
                         type="time"
                         className={`add-programs-input-field ${errors.timeStart ? "error shake" : ""}`}
@@ -338,10 +372,12 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     </div>
                   </div>
 
-                  {/* RIGHT column */}
+                  {/* Right column */}
                   <div className="add-programs-content-right-side">
                     <div className="fields-section-add-programs">
-                      <p>Event Type<span className="required">*</span></p>
+                      <p>
+                        Event Type<span className="required">*</span>
+                      </p>
                       <select
                         className="add-programs-input-field"
                         value={eventType}
@@ -354,7 +390,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
 
                     {eventType === "single" ? (
                       <div className="fields-section-add-programs">
-                        <p>Event Date<span className="required">*</span></p>
+                        <p>
+                          Event Date<span className="required">*</span>
+                        </p>
                         <input
                           type="date"
                           className={`add-programs-input-field ${errors.singleDate ? "error shake" : ""}`}
@@ -366,7 +404,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     ) : (
                       <>
                         <div className="fields-section-add-programs">
-                          <p>Program Start Date<span className="required">*</span></p>
+                          <p>
+                            Program Start Date<span className="required">*</span>
+                          </p>
                           <input
                             type="date"
                             className={`add-programs-input-field ${errors.startDate ? "error shake" : ""}`}
@@ -376,7 +416,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                           />
                         </div>
                         <div className="fields-section-add-programs">
-                          <p>Program End Date<span className="required">*</span></p>
+                          <p>
+                            Program End Date<span className="required">*</span>
+                          </p>
                           <input
                             type="date"
                             className={`add-programs-input-field ${errors.endDate ? "error shake" : ""}`}
@@ -389,7 +431,9 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                     )}
 
                     <div className="fields-section-add-programs">
-                      <p>Location<span className="required">*</span></p>
+                      <p>
+                        Location<span className="required">*</span>
+                      </p>
                       <input
                         type="text"
                         className={`add-programs-input-field ${errors.location ? "error shake" : ""}`}
@@ -398,16 +442,18 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
                         onChange={(e) => setLocation(e.target.value)}
                       />
                     </div>
-                    
+
                     <div className="fields-section-add-programs">
-                      <p>Time End<span className="required">*</span></p>
+                      <p>
+                        Time End<span className="required">*</span>
+                      </p>
                       <input
                         type="time"
                         className={`add-programs-input-field ${errors.timeEnd ? "error shake" : ""}`}
                         value={timeEnd}
                         onChange={(e) => setTimeEnd(e.target.value)}
                       />
-                    </div>                    
+                    </div>
                   </div>
                 </div>
 
@@ -445,17 +491,17 @@ export default function AddNewProgramModal({ isOpen, onClose }: Props) {
               </>
             )}
 
-            {activeSection === "reqs" && (
-              <div className="add-programs-upper-section"></div>
-            )}
+            {activeSection === "reqs" && <div className="add-programs-upper-section"></div>}
           </div>
         </div>
 
         <div className="programs-yesno-container">
           <button
             onClick={() => {
-              resetForm();
-              onClose();
+              if (!saving) {
+                resetForm();
+                onClose();
+              }
             }}
             className="program-no-button"
             disabled={saving}
