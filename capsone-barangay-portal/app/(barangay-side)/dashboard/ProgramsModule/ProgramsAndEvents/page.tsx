@@ -44,6 +44,43 @@ type Participant = {
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
 
+// ---- helpers: safe date parsing & status computation ----
+const parseYMD = (s?: string | null): Date | null => {
+  if (!s || typeof s !== "string") return null;
+  const [y, m, d] = s.split("-").map((n) => Number(n));
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d); // local TZ midnight
+};
+
+const startOfToday = () => {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  return t;
+};
+
+const computeProgress = (p: any): Program["progressStatus"] | null => {
+  const s = parseYMD(p?.startDate);
+  const e = parseYMD(p?.endDate);
+  if (!s) return null; // no dates -> don't change
+
+  const today = startOfToday();
+  const isSingle =
+    (p?.eventType === "single") ||
+    (!!s && !!e && s.getTime() === e?.getTime());
+
+  if (isSingle) {
+    if (today.getTime() < s.getTime()) return "Upcoming";
+    if (today.getTime() === s.getTime()) return "Ongoing";
+    return "Completed";
+  }
+
+  // multiple days (needs both s & e)
+  if (!e) return null;
+  if (today.getTime() < s.getTime()) return "Upcoming";
+  if (today.getTime() > e.getTime()) return "Completed";
+  return "Ongoing";
+};
+
 function tsToYMD(ts?: Timestamp | null): string {
   try {
     if (!ts) return "";
@@ -77,26 +114,42 @@ export default function ProgramsModule() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
-  // Load Programs from Firestore
+  // Load Programs from Firestore (and auto-fix progressStatus)
   useEffect(() => {
     const q = query(collection(db, "Programs"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(
       q,
-      (snap) => {
+      async (snap) => {
         const list: Program[] = [];
+        const updates: Promise<any>[] = [];
+
         snap.forEach((docu) => {
           const d = docu.data() as any;
+          const computed = computeProgress(d);
+          const progress = (computed ?? d.progressStatus ?? "Upcoming") as Program["progressStatus"];
+
+          // enqueue db update only when needed
+          if (computed && d.progressStatus !== computed) {
+            updates.push(updateDoc(doc(db, "Programs", docu.id), { progressStatus: computed }));
+          }
+
           const dateCreated = tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
           list.push({
             id: docu.id,
             programName: d.programName ?? "",
             approvalStatus: d.approvalStatus ?? "Pending",
-            progressStatus: d.progressStatus ?? "Upcoming",
+            progressStatus: progress,
             activeStatus: d.activeStatus ?? "Inactive",
             createdAt: d.createdAt ?? null,
             dateCreated,
           });
         });
+
+        // apply updates in background (no await needed for UI to render quick)
+        if (updates.length) {
+          Promise.allSettled(updates).catch(() => {/* noop */});
+        }
+
         const nonPending = list.filter((p) => p.approvalStatus !== "Pending");
         const pending = list.filter((p) => p.approvalStatus === "Pending");
         setPrograms(nonPending);
@@ -398,7 +451,7 @@ export default function ProgramsModule() {
       <AddNewProgramModal
         isOpen={showAddProgramsPopup}
         onClose={() => setShowAddProgramsPopup(false)}
-        // 🔔 When the modal saves successfully, show popup on main page
+        // When the modal saves successfully, show popup on main page
         onProgramSaved={(msg) => {
           setPopupMessage(msg || "Program saved successfully.");
           setShowPopup(true);
@@ -781,7 +834,7 @@ export default function ProgramsModule() {
         </>
       )}
 
-      {/* 🔔 Shared popup rendered on main page */}
+      {/* Shared popup rendered on main page */}
       {showPopup && (
         <div className="popup-overlay-program show">
           <div className="popup-program">
