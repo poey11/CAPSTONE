@@ -11,7 +11,7 @@ export default function AnnouncementDetails() {
     {
       title: "Volunteer",
       description:
-        "Join our community efforts and make a direct impact by volunteering your time and skills.",
+        "Join our community efforts and make a direct impact by volunteering.",
       icon: <Users className="icon" />,
     },
     {

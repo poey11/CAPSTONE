@@ -309,6 +309,18 @@ border-radius: 15px;
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .programs-title-specific::before,
