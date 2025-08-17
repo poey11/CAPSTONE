@@ -164,7 +164,7 @@ export default function ProgramDetails() {
   };
 
   // Read-only when Completed
-  const isReadOnly = progressStatus === "Completed"; // NEW
+  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected"; // NEW
 
   // Load the program by id
   useEffect(() => {
@@ -629,9 +629,21 @@ export default function ProgramDetails() {
               fontSize: 14,
             }}
           >
-            This program is <strong>Completed</strong>. Editing is disabled (view-only).
-          </div>
-        )}
+              {approvalStatus === "Rejected" ? (
+                <>
+                  This program has been <strong>Rejected</strong>
+                  {rejectionReason ? (
+                    <> — <em>{rejectionReason}</em></>
+                  ) : null}
+                  . Editing is disabled (view-only).
+                </>
+              ) : (
+                <>
+                  This program is <strong>Completed</strong>. Editing is disabled (view-only).
+                </>
+              )}
+            </div>
+          )}
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
