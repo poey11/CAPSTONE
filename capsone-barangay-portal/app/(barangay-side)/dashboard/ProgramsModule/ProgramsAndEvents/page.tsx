@@ -1,1351 +1,909 @@
 "use client";
 import "@/CSS/ProgramsBrgy/Programs.css";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import AddNewProgramModal from "@/app/(barangay-side)/components/AddNewProgramModal";
+import EditParticipantModal from "@/app/(barangay-side)/components/EditParticipantModal";
+
+// Firestore
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  Timestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+
+type Program = {
+  id: string;
+  programName: string;
+  approvalStatus: "Approved" | "Pending" | "Rejected";
+  progressStatus: "Ongoing" | "Upcoming" | "Completed" | "Rejected"; // includes Rejected
+  activeStatus: "Active" | "Inactive";
+  createdAt?: Timestamp | null;
+  dateCreated: string;
+};
+
+type Participant = {
+  id: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  contactNumber?: string;
+  emailAddress?: string;
+  email?: string;
+  location?: string;
+  address?: string;
+  programName?: string;
+  idImageUrl?: string;
+  approvalStatus?: "Pending" | "Approved" | "Rejected";
+};
+
+// ---- helpers: safe date parsing & single status decider ----
+const parseYMD = (s?: string | null): Date | null => {
+  if (!s || typeof s !== "string") return null;
+  const [y, m, d] = s.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d); // local midnight
+};
+
+const startOfToday = () => {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  return t;
+};
+
+/** Decide BOTH progress and active in one shot (no date checks if Rejected) */
+const decideStatuses = (p: any): {
+  progress: Program["progressStatus"];
+  active: Program["activeStatus"];
+} => {
+  const approval: Program["approvalStatus"] = p?.approvalStatus ?? "Pending";
+
+  // 🔴 If rejected, stop here.
+  if (approval === "Rejected") {
+    return { progress: "Rejected", active: "Inactive" };
+  }
+
+  // Otherwise compute date-based progress
+  const s = parseYMD(p?.startDate);
+  const e = parseYMD(p?.endDate);
+  let progress: Program["progressStatus"] =
+    (p?.progressStatus as Program["progressStatus"]) || "Upcoming";
+
+  if (s) {
+    const today = startOfToday();
+    const isSingle = p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
+
+    if (isSingle) {
+      if (today.getTime() < s.getTime()) progress = "Upcoming";
+      else if (today.getTime() === s.getTime()) progress = "Ongoing";
+      else progress = "Completed";
+    } else if (e) {
+      if (today.getTime() < s.getTime()) progress = "Upcoming";
+      else if (today.getTime() > e.getTime()) progress = "Completed";
+      else progress = "Ongoing";
+    }
+  }
+
+  // Active rule: Pending OR Completed => Inactive, else preserve/Active
+  const active: Program["activeStatus"] =
+    approval === "Pending" || progress === "Completed"
+      ? "Inactive"
+      : ((p?.activeStatus as Program["activeStatus"]) ?? "Inactive");
+
+  return { progress, active };
+};
+
+function tsToYMD(ts?: Timestamp | null): string {
+  try {
+    if (!ts) return "";
+    const d = ts.toDate();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  } catch {
+    return "";
+  }
+}
 
 export default function ProgramsModule() {
   const router = useRouter();
-
   const { data: session } = useSession();
-   const user = session?.user;
+  const user = session?.user as any;
 
-  // Dummy data for programs
-  const dummyPrograms = [
-    {
-      id: "1",
-      programName: "Community Clean-up Drive",
-      approvalStatus: "Approved",
-      progressStatus: "Ongoing",
-      activeStatus: "Active",
-      dateCreated: "2025-07-20",
-    },
-    {
-      id: "2",
-      programName: "Health and Wellness Fair",
-      approvalStatus: "Pending",
-      progressStatus: "Upcoming",
-      activeStatus: "Inactive",
-      dateCreated: "2025-06-10",
-    },
-    {
-      id: "3",
-      programName: "Youth Sports Festival",
-      approvalStatus: "Approved",
-      progressStatus: "Completed",
-      activeStatus: "Active",
-      dateCreated: "2025-05-05",
-    },
-    {
-      id: "4",
-      programName: "Senior Citizen Support Program",
-      approvalStatus: "Rejected",
-      progressStatus: "Upcoming",
-      activeStatus: "Inactive",
-      dateCreated: "2025-04-12",
-    },
-    {
-      id: "5",
-      programName: "Barangay Tree Planting",
-      approvalStatus: "Approved",
-      progressStatus: "Ongoing",
-      activeStatus: "Active",
-      dateCreated: "2025-02-18",
-    },
-  ];
+  const searchParams = useSearchParams();
 
+  const [loadingPrograms, setLoadingPrograms] = useState(true);
+  const [loadingParticipants, setLoadingParticipants] = useState(true);
 
-// Dummy participants data
-const dummyParticipants = [
-  {
-    id: "1",
-    fullName: "Juan Dela Cruz",
-    contactNumber: "0917-123-4567",
-    emailAddress: "juan.delacruz@example.com",
-    location: "Barangay Fairview, Quezon City",
-    programName: "Community Clean-up Drive"
-  },
-  {
-    id: "2",
-    fullName: "Maria Santos",
-    contactNumber: "0922-987-6543",
-    emailAddress: "maria.santos@example.com",
-    location: "Barangay Fairview, Quezon City",
-    programName: "Health and Wellness Fair"
-  },
-  {
-    id: "3",
-    fullName: "Pedro Ramirez",
-    contactNumber: "0998-456-7890",
-    emailAddress: "pedro.ramirez@example.com",
-    location: "Barangay Fairview, Quezon City",
-    programName: "Youth Sports Festival"
-  },
-];
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [programsAssignedData, setProgramsAssignedData] = useState<Program[]>([]);
+  const [participantsListsData, setParticipantsListsData] = useState<Participant[]>([]);
 
+  const [activeSectionRedirection, setActiveSectionRedirection] =
+    useState<"main" | "programs" | "participants">("main");
 
+  // Main-page popup state (shared UI)
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
 
+  // Load Programs from Firestore (and auto-fix progress/active atomically)
+  useEffect(() => {
+    const q = query(collection(db, "Programs"), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(
+      q,
+      async (snap) => {
+        const list: Program[] = [];
+        const updates: Promise<any>[] = [];
 
+        snap.forEach((docu) => {
+          const d = docu.data() as any;
 
-// Load dummy data and split into main and pending
-useEffect(() => {
-  setTimeout(() => {
-    // Separate pending and non-pending
-    const pendingOnly = dummyPrograms.filter(p => p.approvalStatus === "Pending");
-    const nonPendingOnly = dummyPrograms.filter(p => p.approvalStatus !== "Pending");
+          const { progress, active } = decideStatuses(d);
+          const approval: Program["approvalStatus"] = d.approvalStatus ?? "Pending";
 
-    // Main section will use non-pending programs
-    setPrograms(nonPendingOnly);
+          // Prepare single atomic patch if needed
+          const patch: Record<string, any> = {};
+          if (d.progressStatus !== progress) patch.progressStatus = progress;
+          if (d.activeStatus !== active) patch.activeStatus = active;
 
-    // Pending section will use pending ones
-    setProgramsAssignedData(pendingOnly);
+          if (Object.keys(patch).length) {
+            updates.push(updateDoc(doc(db, "Programs", docu.id), patch));
+          }
 
-    // Participants
-    setParticipantsListsData(dummyParticipants);
+          const dateCreated = tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
+          list.push({
+            id: docu.id,
+            programName: d.programName ?? "",
+            approvalStatus: approval,
+            progressStatus: progress,
+            activeStatus: active,
+            createdAt: d.createdAt ?? null,
+            dateCreated,
+          });
+        });
 
-    setLoading(false);
-  }, 500);
-}, []);
+        if (updates.length) void Promise.allSettled(updates);
 
+        const nonPending = list.filter((p) => p.approvalStatus !== "Pending");
+        const pending = list.filter((p) => p.approvalStatus === "Pending");
+        setPrograms(nonPending);
+        setProgramsAssignedData(pending);
+        setLoadingPrograms(false);
+      },
+      () => {
+        setLoadingPrograms(false);
+      }
+    );
+    return () => unsub();
+  }, []);
 
-  const [programs, setPrograms] = useState<any[]>([]);
-  const [filteredPrograms, setFilteredPrograms] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Load Participants from Firestore
+  useEffect(() => {
+    const q = query(collection(db, "ProgramsParticipants"), orderBy("programName", "asc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        const list: Participant[] = [];
+        snap.forEach((docu) => {
+          const d = docu.data() as any;
+          list.push({
+            id: docu.id,
+            fullName: d.fullName ?? "",
+            firstName: d.firstName ?? "",
+            lastName: d.lastName ?? "",
+            contactNumber: d.contactNumber ?? "",
+            emailAddress: d.emailAddress ?? d.email ?? "",
+            email: d.email ?? d.emailAddress ?? "",
+            location: d.location ?? d.address ?? "",
+            address: d.address ?? d.location ?? "",
+            programName: d.programName ?? "",
+            idImageUrl: d.idImageUrl ?? "",
+            approvalStatus: d.approvalStatus ?? "Pending",
+          });
+        });
+        setParticipantsListsData(list);
+        setLoadingParticipants(false);
+      },
+      () => {
+        setLoadingParticipants(false);
+      }
+    );
+    return () => unsub();
+  }, []);
 
-  const [activeSectionRedirection, setActiveSectionRedirection] = useState("main");
-const [programsAssignedData, setProgramsAssignedData] = useState<any[]>([]); // similar to taskAssignedData
-const [participantsListsData, setParticipantsListsData] = useState<any[]>([]);
+  // Section routing sync
+  useEffect(() => {
+    const section = searchParams.get("section");
+    if (!section) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("section", "main");
+      router.replace(`?${params.toString()}`, { scroll: false });
+    } else if (section === "main" || section === "programs" || section === "participants") {
+      setActiveSectionRedirection(section);
+    }
+  }, [searchParams, router]);
 
+  const handleSectionSwitch = (section: "main" | "programs" | "participants") => {
+    setActiveSectionRedirection(section);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", section);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
 
-const searchParams = useSearchParams();
+  const handleEditClick = (id: string) => {
+    router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${id}`);
+  };
 
+  // Program delete
+  const handleDeleteProgram = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this program?")) return;
+    try {
+      await deleteDoc(doc(db, "Programs", id));
+      alert("Program deleted successfully!");
+    } catch (e) {
+      alert("Failed to delete program.");
+    }
+  };
 
+  // Add Program Modal
+  const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const programsPerPage = 10;
-
-useEffect(() => {
-  setTimeout(() => {
-    setPrograms(dummyPrograms);
-    setParticipantsListsData(dummyParticipants); 
-    setLoading(false);
-  }, 500);
-}, []);
-
-  
+  // Main programs filtering
   const [searchName, setSearchName] = useState("");
   const [approvalFilter, setApprovalFilter] = useState("");
   const [progressFilter, setProgressFilter] = useState("");
   const [activeFilter, setActiveFilter] = useState("");
+  const [filteredPrograms, setFilteredPrograms] = useState<Program[]>([]);
 
-
-  // Filtering logic
   useEffect(() => {
     let filtered = [...programs];
-    /*   let filtered = programs.filter(p => p.approvalStatus !== "Pending");*/
-
-    if (searchName) {
-      filtered = filtered.filter((p) =>
-        p.programName.toLowerCase().includes(searchName.toLowerCase())
-      );
-    }
-
-    if (approvalFilter) {
-      filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
-    }
-
-    if (progressFilter) {
-      filtered = filtered.filter((p) => p.progressStatus === progressFilter);
-    }
-
-    if (activeFilter) {
-      filtered = filtered.filter((p) => p.activeStatus === activeFilter);
-    }
-
+    if (searchName) filtered = filtered.filter((p) => p.programName.toLowerCase().includes(searchName.toLowerCase()));
+    if (approvalFilter) filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
+    if (progressFilter) filtered = filtered.filter((p) => p.progressStatus === progressFilter);
+    if (activeFilter) filtered = filtered.filter((p) => p.activeStatus === activeFilter);
     setFilteredPrograms(filtered);
   }, [searchName, approvalFilter, progressFilter, activeFilter, programs]);
 
-  // Pagination logic
+  // Main programs pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const programsPerPage = 10;
   const indexOfLast = currentPage * programsPerPage;
   const indexOfFirst = indexOfLast - programsPerPage;
   const currentPrograms = filteredPrograms.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
-
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
   const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
-
   const getPageNumbers = () => {
     const pageNumbersToShow: (number | string)[] = [];
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         pageNumbersToShow.push(i);
-      } else if (
-        (i === currentPage - 2 || i === currentPage + 2) &&
-        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
-      ) {
+      } else if ((i === currentPage - 2 || i === currentPage + 2) && pageNumbersToShow[pageNumbersToShow.length - 1] !== "...") {
         pageNumbersToShow.push("...");
       }
     }
     return pageNumbersToShow;
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this program?")) {
-      setPrograms((prev) => prev.filter((program) => program.id !== id));
-      alert("Program deleted successfully!");
+  // Participants filtering
+  const [participantNameSearch, setParticipantNameSearch] = useState("");
+  const [participantProgramSearch, setParticipantProgramSearch] = useState("");
+  const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
+
+  useEffect(() => {
+    let filtered = [...participantsListsData];
+    if (participantNameSearch.trim()) {
+      filtered = filtered.filter((p) => (p.fullName || "").toLowerCase().includes(participantNameSearch.toLowerCase()));
+    }
+    if (participantProgramSearch.trim()) {
+      filtered = filtered.filter((p) => (p.programName || "").toLowerCase().includes(participantProgramSearch.toLowerCase()));
+    }
+    setFilteredParticipants(filtered);
+    setParticipantsPage(1);
+  }, [participantNameSearch, participantProgramSearch, participantsListsData]);
+
+  // Participants pagination
+  const [participantsPage, setParticipantsPage] = useState(1);
+  const participantsPerPage = 10;
+  const indexOfLastParticipant = participantsPage * participantsPerPage;
+  const indexOfFirstParticipant = indexOfLastParticipant - participantsPerPage;
+  const currentParticipants = filteredParticipants.slice(indexOfFirstParticipant, indexOfLastParticipant);
+  const participantsTotalPages = Math.ceil(filteredParticipants.length / participantsPerPage);
+  const paginateParticipants = (pageNumber: number) => setParticipantsPage(pageNumber);
+  const nextParticipantsPage = () => setParticipantsPage((prev) => (prev < participantsTotalPages ? prev + 1 : prev));
+  const prevParticipantsPage = () => setParticipantsPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+  // Pending programs filtering
+  const [pendingSearchName, setPendingSearchName] = useState("");
+  const [pendingApprovalFilter, setPendingApprovalFilter] = useState("Pending");
+  const [pendingProgressFilter, setPendingProgressFilter] = useState("");
+  const [pendingActiveFilter, setPendingActiveFilter] = useState("");
+  const [filteredPendingPrograms, setFilteredPendingPrograms] = useState<Program[]>([]);
+
+  useEffect(() => {
+    let filtered = [...programsAssignedData];
+    if (pendingSearchName) filtered = filtered.filter((p) => p.programName.toLowerCase().includes(pendingSearchName.toLowerCase()));
+    if (pendingApprovalFilter) filtered = filtered.filter((p) => p.approvalStatus === pendingApprovalFilter);
+    if (pendingProgressFilter) filtered = filtered.filter((p) => p.progressStatus === pendingProgressFilter);
+    if (pendingActiveFilter) filtered = filtered.filter((p) => p.activeStatus === pendingActiveFilter);
+    setFilteredPendingPrograms(filtered);
+  }, [pendingSearchName, pendingApprovalFilter, pendingProgressFilter, pendingActiveFilter, programsAssignedData]);
+
+  // Pending programs pagination
+  const [pendingProgramsPage, setPendingProgramsPage] = useState(1);
+  const pendingProgramsPerPage = 10;
+  const indexOfLastPending = pendingProgramsPage * pendingProgramsPerPage;
+  const indexOfFirstPending = indexOfLastPending - pendingProgramsPerPage;
+  const currentPendingPrograms = filteredPendingPrograms.slice(indexOfFirstPending, indexOfLastPending);
+  const pendingTotalPages = Math.ceil(filteredPendingPrograms.length / pendingProgramsPerPage);
+  const paginatePending = (pageNumber: number) => setPendingProgramsPage(pageNumber);
+  const nextPendingPage = () => setPendingProgramsPage((prev) => (prev < pendingTotalPages ? prev + 1 : prev));
+  const prevPendingPage = () => setPendingProgramsPage((prev) => (prev > 1 ? prev - 1 : prev));
+
+  // Participant modal state
+  const [isParticipantModalOpen, setIsParticipantModalOpen] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+
+  const openParticipantModal = (participant: Participant) => {
+    setSelectedParticipant(participant);
+    setIsParticipantModalOpen(true);
+  };
+
+  const closeParticipantModal = () => {
+    setIsParticipantModalOpen(false);
+    setSelectedParticipant(null);
+  };
+
+  // Participant edit save
+  const handleParticipantSave = async (updated: Participant) => {
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", updated.id), {
+        firstName: updated.firstName ?? "",
+        lastName: updated.lastName ?? "",
+        fullName: updated.fullName ?? `${updated.firstName || ""} ${updated.lastName || ""}`.trim(),
+        contactNumber: updated.contactNumber ?? "",
+        emailAddress: updated.emailAddress ?? updated.email ?? "",
+        email: updated.email ?? updated.emailAddress ?? "",
+        location: updated.location ?? updated.address ?? "",
+        address: updated.address ?? updated.location ?? "",
+        programName: updated.programName ?? "",
+      });
+      setParticipantsListsData((prev) =>
+        prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
+      );
+    } catch (e) {
+      alert("Failed to save participant changes.");
     }
   };
 
-
-
-
-
-
-   const [showAddProgramsPopup, setShowAddProgramsPopup] = useState(false);
-
-
-   const [isPopupOpen, setIsPopupOpen] = useState(false);
-
-  // Open popup
-    const openPopup = () => {
-      setIsPopupOpen(true);
-    };
-
-    // Close popup
-    const closePopup = () => {
-      setIsPopupOpen(false);
-    };
-
-    const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
+  // Participant approve
+  const handleParticipantApprove = async (id: string) => {
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", id), {
+        approvalStatus: "Approved",
+      });
+      alert("Participant approved.");
+    } catch {
+      alert("Failed to approve participant.");
+    }
   };
 
-
-  const [activeSection, setActiveSection] = useState("details");
-
-
-
-
- const [filtersLoaded, setFiltersLoaded] = useState(false);
- const hasAnimatedOnce = useRef(false);
- 
-
-
-
-
-
-
-
-// On first load, ensure section param exists
-useEffect(() => {
-  const section = searchParams.get("section");
-  if (!section) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("section", "main");
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }
-}, []);
-
-{/*}
-// Handle section switching
-const handleSectionSwitch = (section: string) => {
-  setActiveSectionRedirection(section);
-  const params = new URLSearchParams(searchParams.toString());
-  if (section === "main") {
-    params.set("section", "main");
-  } else if (section === "programs") {
-    params.set("section", "programs");
-  }
-  router.push(`?${params.toString()}`, { scroll: false });
-};
-*/}
-
-
-// Handle section switching
-const handleSectionSwitch = (section: string) => {
-  setActiveSectionRedirection(section);
-  const params = new URLSearchParams(searchParams.toString());
-  params.set("section", section);
-  router.push(`?${params.toString()}`, { scroll: false });
-};
-
-
-
-
-
-/*
- FOR PARTICIPANTS LOGIC
-*/
-
-
-// Participants filtering states
-const [participantNameSearch, setParticipantNameSearch] = useState("");
-const [participantProgramSearch, setParticipantProgramSearch] = useState("");
-const [filteredParticipants, setFilteredParticipants] = useState<any[]>([]);
-
-// Participants pagination states
-const [participantsPage, setParticipantsPage] = useState(1);
-const participantsPerPage = 10;
-
-
-useEffect(() => {
-  let filtered = [...participantsListsData];
-
-  if (participantNameSearch.trim()) {
-    filtered = filtered.filter((p) =>
-      p.fullName.toLowerCase().includes(participantNameSearch.toLowerCase())
-    );
-  }
-
-  if (participantProgramSearch.trim()) {
-    filtered = filtered.filter((p) =>
-      p.programName.toLowerCase().includes(participantProgramSearch.toLowerCase())
-    );
-  }
-
-  setFilteredParticipants(filtered);
-  setParticipantsPage(1); // Reset page when filtering
-}, [participantNameSearch, participantProgramSearch, participantsListsData]);
-
-
-const indexOfLastParticipant = participantsPage * participantsPerPage;
-const indexOfFirstParticipant = indexOfLastParticipant - participantsPerPage;
-const currentParticipants = filteredParticipants.slice(indexOfFirstParticipant, indexOfLastParticipant);
-
-const participantsTotalPages = Math.ceil(filteredParticipants.length / participantsPerPage);
-
-const paginateParticipants = (pageNumber: number) => setParticipantsPage(pageNumber);
-const nextParticipantsPage = () =>
-  setParticipantsPage((prev) => (prev < participantsTotalPages ? prev + 1 : prev));
-const prevParticipantsPage = () =>
-  setParticipantsPage((prev) => (prev > 1 ? prev - 1 : prev));
-
-
-
-
-
-
-// Load dummy data and split into main and pending
-useEffect(() => {
-  setTimeout(() => {
-    // Separate pending and non-pending
-    const pendingOnly = dummyPrograms.filter(p => p.approvalStatus === "Pending");
-    const nonPendingOnly = dummyPrograms.filter(p => p.approvalStatus !== "Pending");
-
-    // Main section will use non-pending programs
-    setPrograms(nonPendingOnly);
-
-    // Pending section will use pending ones
-    setProgramsAssignedData(pendingOnly);
-
-    // Participants
-    setParticipantsListsData(dummyParticipants);
-
-    setLoading(false);
-  }, 500);
-}, []);
-
-
-
-
-
-
-
-
-/*
-For Participants Logic
-*/
-
-
-
-// Pagination states for PENDING PROGRAMS
-const [pendingProgramsPage, setPendingProgramsPage] = useState(1);
-const pendingProgramsPerPage = 10;
-
-
-{/*}
-// Load dummy data and filter pending ones
-useEffect(() => {
-  setTimeout(() => {
-    setPrograms(dummyPrograms);
-    setParticipantsListsData(dummyParticipants);
-
-    // Only pending programs
-    const pendingOnly = dummyPrograms.filter(p => p.approvalStatus === "Pending");
-    setProgramsAssignedData(pendingOnly);
-
-    setLoading(false);
-  }, 500);
-}, []);
-
-
-*/}
-
-// Pending programs filter logic
-const [pendingSearchName, setPendingSearchName] = useState("");
-const [pendingApprovalFilter, setPendingApprovalFilter] = useState("");
-const [pendingProgressFilter, setPendingProgressFilter] = useState("");
-const [pendingActiveFilter, setPendingActiveFilter] = useState("");
-const [filteredPendingPrograms, setFilteredPendingPrograms] = useState<any[]>([]);
-
-useEffect(() => {
-  let filtered = [...programsAssignedData];
-  if (pendingSearchName) {
-    filtered = filtered.filter(p =>
-      p.programName.toLowerCase().includes(pendingSearchName.toLowerCase())
-    );
-  }
-  if (pendingApprovalFilter) {
-    filtered = filtered.filter(p => p.approvalStatus === pendingApprovalFilter);
-  }
-  if (pendingProgressFilter) {
-    filtered = filtered.filter(p => p.progressStatus === pendingProgressFilter);
-  }
-  if (pendingActiveFilter) {
-    filtered = filtered.filter(p => p.activeStatus === pendingActiveFilter);
-  }
-  setFilteredPendingPrograms(filtered);
-}, [
-  pendingSearchName,
-  pendingApprovalFilter,
-  pendingProgressFilter,
-  pendingActiveFilter,
-  programsAssignedData
-]);
-
-// Pending programs pagination logic
-const indexOfLastPending = pendingProgramsPage * pendingProgramsPerPage;
-const indexOfFirstPending = indexOfLastPending - pendingProgramsPerPage;
-const currentPendingPrograms = filteredPendingPrograms.slice(indexOfFirstPending, indexOfLastPending);
-const pendingTotalPages = Math.ceil(filteredPendingPrograms.length / pendingProgramsPerPage);
-
-const paginatePending = (pageNumber: number) => setPendingProgramsPage(pageNumber);
-const nextPendingPage = () =>
-  setPendingProgramsPage(prev => (prev < pendingTotalPages ? prev + 1 : prev));
-const prevPendingPage = () =>
-  setPendingProgramsPage(prev => (prev > 1 ? prev - 1 : prev));
-
-
-
-const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState("details");
-
-
-const [showRejectPopup, setShowRejectPopup] = useState(false); 
-  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
-      const [showPopup, setShowPopup] = useState(false);
-    const [popupMessage, setPopupMessage] = useState("");
-
-
-      const confirmSubmit = () => {
-          try {
-              
-              setShowSubmitRejectPopup(false); // close confirmation
-
-              setShowRejectPopup(false); 
-
-              setTimeout(() => {
-                  setPopupMessage("Reason for Rejection submitted successfully!");
-                  setShowPopup(true); //  show success popup after hiding
-              }, 100); // slight delay to allow DOM transition (optional)
-
-              setTimeout(() => {
-
-              }, 3000);
-          } catch (error) {
-              console.error("Error updating rejection reason:", error);
-          }
-      };
-
+  // Participant reject
+  const handleParticipantReject = async (id: string, reason: string) => {
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", id), {
+        approvalStatus: "Rejected",
+        rejectionReason: reason,
+      });
+      alert("Participant rejected.");
+    } catch {
+      alert("Failed to reject participant.");
+    }
+  };
+
+  // Participant delete
+  const handleDeleteParticipant = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this participant?")) return;
+    try {
+      await deleteDoc(doc(db, "ProgramsParticipants", id));
+      alert("Participant deleted successfully!");
+    } catch {
+      alert("Failed to delete participant.");
+    }
+  };
 
   return (
     <main className="programs-module-main-container">
-
-
-
-    <div className="programs-module-section-1">
-
-    <div className="center-wrapper">
-      <div
-        className={`pending-program-info-toggle-wrapper ${
-          user?.position === "Assistant Secretary" ? "with-add-request" : ""
-        }`}
-      >
-        {["main", "programs", "participants"].map((section) => (
-          <button
-            key={section}
-            type="button"
-            className={`info-toggle-btn-pending-program assigned-tasks ${
-              activeSectionRedirection === section ? "active" : ""
+      <div className="programs-module-section-1">
+        <div className="center-wrapper">
+          <div
+            className={`pending-program-info-toggle-wrapper ${
+              user?.position === "Assistant Secretary" ? "with-add-request" : ""
             }`}
-            onClick={() => handleSectionSwitch(section)}
           >
-            {section === "main" && "All Programs"}
-            {section === "programs" && (
-              <>
-                <span className="badge-container">
-                  Pending Programs
-                  {programsAssignedData.length > 0 && (
-                    <span className="task-badge">{programsAssignedData.length}</span>
-                  )}
-                </span>
-              </>
-            )}
-            {section === "participants" && (
-              <>
-                <span className="badge-container">
-                  Pending Participants
-                  {participantsListsData.length > 0 && (
-                    <span className="task-badge">{participantsListsData.length}</span>
-                  )}
-                </span>
-              </>
-            )}
-          </button>
-        ))}
-      </div>
-    </div>
-
-
-    
-
-
-
-<div className="section-add-program">
-    <button 
-        className="add-programs-btn"
-        onClick={() => setShowAddProgramsPopup(true)}
-      >
-        Add New Program
-      </button>
-
-    </div>
-
-</div>
-
- {activeSectionRedirection === "main" && (
-      <>
-
-      <div className="programs-module-section-2">
-        <input
-          type="text"
-          className="programs-module-filter"
-          placeholder="Search by Program Name"
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-        />
-
-        <select
-          className="programs-module-filter"
-          value={approvalFilter}
-          onChange={(e) => setApprovalFilter(e.target.value)}
-        >
-          <option value="">All Approval Status</option>
-          <option value="Approved">Approved</option>
-          <option value="Pending">Pending</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-
-        <select
-          className="programs-module-filter"
-          value={progressFilter}
-          onChange={(e) => setProgressFilter(e.target.value)}
-        >
-          <option value="">All Progress Status</option>
-          <option value="Ongoing">Ongoing</option>
-          <option value="Upcoming">Upcoming</option>
-          <option value="Completed">Completed</option>
-        </select>
-
-        <select
-          className="programs-module-filter"
-          value={activeFilter}
-          onChange={(e) => setActiveFilter(e.target.value)}
-        >
-          <option value="">All Active/Inactive</option>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-
-
-
-      </div>
-
-      <div className="programs-module-main-section">
-        {loading ? (
-          <p>Loading programs...</p>
-        ) : currentPrograms.length === 0 ? (
-          <div className="no-result-card-programs">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
-            <p className="no-results-programs">No Results Found</p>
-          </div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Program Name</th>
-                <th>Date Created</th>
-                <th>Approval Status</th>
-                <th>Progress Status</th>
-                <th>Active/Inactive</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPrograms.map((program) => (
-                <tr key={program.id}>
-                  <td>{program.programName}</td>
-                  <td>{program.dateCreated}</td>
-                  <td>
-                            <span
-                    className={`status-badge-programs ${program.approvalStatus
-                      .toLowerCase()
-                      .replace(/\s*-\s*/g, "-")}`}
-                  >
-                    <p>{program.approvalStatus}</p>
+            {["main", "programs", "participants"].map((sectionKey) => (
+              <button
+                key={sectionKey}
+                type="button"
+                className={`info-toggle-btn-pending-program assigned-tasks ${
+                  activeSectionRedirection === sectionKey ? "active" : ""
+                }`}
+                onClick={() =>
+                  handleSectionSwitch(sectionKey as "main" | "programs" | "participants")
+                }
+              >
+                {sectionKey === "main" && "All Programs"}
+                {sectionKey === "programs" && (
+                  <span className="badge-container">
+                    Pending Programs
+                    {programsAssignedData.length > 0 && (
+                      <span className="task-badge">{programsAssignedData.length}</span>
+                    )}
                   </span>
-                  </td>
-
-                  <td>
-                    <span
-                      className={`status-badge-programs ${program.progressStatus
-                        .toLowerCase()
-                        .replace(/\s*-\s*/g, "-")}`}
-                    >
-                      <p>{program.progressStatus}</p>
-                    </span>
-                  </td>                  
-                  <td>
-                    <span
-                      className={`status-badge-programs ${program.activeStatus
-                        .toLowerCase()
-                        .replace(/\s*-\s*/g, "-")}`}
-                    >
-                      <p>{program.activeStatus}</p>
-                    </span>
-                  </td>
-  
-                  <td>
-                    <div className="actions-programs">
-
-                    {/*}
-                      <button
-                        className="action-programs-button"
-                        onClick={openPopup}
-                      >
-                        <img
-                          src="/Images/view.png"
-                          alt="View"
-                          className="action-programs-view"
-                          
-                        />
-                      </button>
-
-                      */}
-                      
-
-                      <button
-                        className="action-programs-button"
-                        onClick={handleEditClick}
-                      >
-                        <img
-                          src="/Images/edit.png"
-                          alt="Edit"
-                          className="action-programs-edit"
-                        />
-                      </button>
-
-                            <button
-                        className="action-programs-button"
-                      >
-
-                        <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
-                      </button>
-
-
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="redirection-section">
-        <button onClick={prevPage} disabled={currentPage === 1}>
-          &laquo;
-        </button>
-        {getPageNumbers().map((number, index) => (
-          <button
-            key={index}
-            onClick={() => typeof number === "number" && paginate(number)}
-            className={currentPage === number ? "active" : ""}
-          >
-            {number}
-          </button>
-        ))}
-        <button onClick={nextPage} disabled={currentPage === totalPages}>
-          &raquo;
-        </button>
-      </div>
-         </>
-        )}
-
-
-
-        
-    {activeSectionRedirection === "participants" && (
-      <>
-
-{activeSectionRedirection === "participants" && (
-  <>
-
-<div className="programs-module-section-2">
-  <input
-    type="text"
-    className="programs-module-filter"
-    placeholder="Search by Full Name"
-    value={participantNameSearch}
-    onChange={(e) => setParticipantNameSearch(e.target.value)}
-  />
-  <input
-    type="text"
-    className="programs-module-filter"
-    placeholder="Search by Program Name"
-    value={participantProgramSearch}
-    onChange={(e) => setParticipantProgramSearch(e.target.value)}
-  />
-</div>
-
-
-
-    <div className="programs-module-main-section">
-      {loading ? (
-        <p>Loading participants...</p>
-      ) : currentParticipants.length === 0 ? (
-        <div className="no-result-card-programs">
-          <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
-          <p className="no-results-programs">No Results Found</p>
-        </div>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Program Name</th>
-              <th>Contact Number</th>
-              <th>Email Address</th>
-              <th>Location</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentParticipants.map((participant) => (
-              <tr key={participant.id}>
-                <td>{participant.fullName}</td>
-                <td>{participant.programName}</td>
-                <td>{participant.contactNumber}</td>
-                <td>{participant.emailAddress}</td>
-                <td>{participant.location}</td>
-                <td>
-                  <div className="actions-programs">
-                    <button
-                      className="action-programs-button"
-                      onClick={openPopup} 
-                    >
-                      <img src="/Images/edit.png" alt="Edit" className="action-programs-edit" />
-                    </button>
-                    <button className="action-programs-button">
-                      <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
+                )}
+                {sectionKey === "participants" && (
+                  <span className="badge-container">
+                    Pending Participants
+                    {participantsListsData.filter((p) => p.approvalStatus === "Pending").length >
+                      0 && (
+                      <span className="task-badge">
+                        {
+                          participantsListsData.filter(
+                            (p) => p.approvalStatus === "Pending"
+                          ).length
+                        }
+                      </span>
+                    )}
+                  </span>
+                )}
+              </button>
             ))}
-          </tbody>
+          </div>
+        </div>
 
-        </table>
-      )}
-    </div>
-  </>
-)}
-
-
-    <div className="redirection-section">
-        <button onClick={prevParticipantsPage} disabled={participantsPage === 1}>
-          &laquo;
-        </button>
-        {Array.from({ length: participantsTotalPages }, (_, i) => i + 1).map((num) => (
-          <button
-            key={num}
-            onClick={() => paginateParticipants(num)}
-            className={participantsPage === num ? "active" : ""}
-          >
-            {num}
+        <div className="section-add-program">
+          <button className="add-programs-btn" onClick={() => setShowAddProgramsPopup(true)}>
+            Add New Program
           </button>
-        ))}
-        <button
-          onClick={nextParticipantsPage}
-          disabled={participantsPage === participantsTotalPages}
-        >
-          &raquo;
-        </button>
+        </div>
       </div>
-      </>
-     )}
 
-
-
-    {activeSectionRedirection === "programs" && (
-      <>
-
-      
-    <div className="programs-module-section-2">
-      <input
-        type="text"
-        className="programs-module-filter"
-        placeholder="Search by Program Name"
-        value={pendingSearchName}
-        onChange={(e) => setPendingSearchName(e.target.value)}
+      <AddNewProgramModal
+        isOpen={showAddProgramsPopup}
+        onClose={() => setShowAddProgramsPopup(false)}
+        // When the modal saves successfully, show popup on main page
+        onProgramSaved={(msg) => {
+          setPopupMessage(msg || "Program saved successfully.");
+          setShowPopup(true);
+          setTimeout(() => setShowPopup(false), 1500);
+        }}
       />
-      <select
-        className="programs-module-filter"
-        value={pendingApprovalFilter}
-        onChange={(e) => setPendingApprovalFilter(e.target.value)}
-      >
-        <option value="">All Approval Status</option>
-        <option value="Pending">Pending</option>
-      </select>
-      <select
-        className="programs-module-filter"
-        value={pendingProgressFilter}
-        onChange={(e) => setPendingProgressFilter(e.target.value)}
-      >
-        <option value="">All Progress Status</option>
-        <option value="Ongoing">Ongoing</option>
-        <option value="Upcoming">Upcoming</option>
-        <option value="Completed">Completed</option>
-      </select>
-      <select
-        className="programs-module-filter"
-        value={pendingActiveFilter}
-        onChange={(e) => setPendingActiveFilter(e.target.value)}
-      >
-        <option value="">All Active/Inactive</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-    </div>
 
-       <div className="programs-module-main-section">
-        {loading ? (
-          <p>Loading programs...</p>
-        ) : currentPendingPrograms.length === 0 ? (
-          <div className="no-result-card-programs">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
-            <p className="no-results-programs">No Results Found</p>
-          </div>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Program Name</th>
-                <th>Date Created</th>
-                <th>Approval Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentPendingPrograms.map((program) => (
-                <tr key={program.id}>
-                  <td>{program.programName}</td>
-                  <td>{program.dateCreated}</td>
-                  <td>
-                            <span
-                    className={`status-badge-programs ${program.approvalStatus
-                      .toLowerCase()
-                      .replace(/\s*-\s*/g, "-")}`}
-                  >
-                    <p>{program.approvalStatus}</p>
-                  </span>
-                  </td>
+      {activeSectionRedirection === "main" && (
+        <>
+          <div className="programs-module-section-2">
+            <input
+              type="text"
+              className="programs-module-filter"
+              placeholder="Search by Program Name"
+              value={searchName}
+              onChange={(e) => setSearchName(e.target.value)}
+            />
 
+            <select
+              className="programs-module-filter"
+              value={approvalFilter}
+              onChange={(e) => setApprovalFilter(e.target.value)}
+            >
+              <option value="">All Approval Status</option>
+              <option value="Approved">Approved</option>
+              <option value="Pending">Pending</option>
+              <option value="Rejected">Rejected</option>
+            </select>
 
-  
-                  <td>
-                    <div className="actions-programs">
+            <select
+              className="programs-module-filter"
+              value={progressFilter}
+              onChange={(e) => setProgressFilter(e.target.value)}
+            >
+              <option value="">All Progress Status</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
 
-                    {/*}
-                      <button
-                        className="action-programs-button"
-                        onClick={openPopup}
-                      >
-                        <img
-                          src="/Images/view.png"
-                          alt="View"
-                          className="action-programs-view"
-                          
-                        />
-                      </button>
-
-                      */}
-                      
-
-                      <button
-                        className="action-programs-button"
-                        onClick={handleEditClick}
-                      >
-                        <img
-                          src="/Images/edit.png"
-                          alt="Edit"
-                          className="action-programs-edit"
-                        />
-                      </button>
-
-                            <button
-                        className="action-programs-button"
-                      >
-
-                        <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
-                      </button>
-
-
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-    <div className="redirection-section">
-      <button onClick={prevPendingPage} disabled={pendingProgramsPage === 1}> &laquo; </button>
-      {Array.from({ length: pendingTotalPages }, (_, i) => i + 1).map((num) => (
-        <button
-          key={num}
-          onClick={() => paginatePending(num)}
-          className={pendingProgramsPage === num ? "active" : ""}
-        >
-          {num}
-        </button>
-      ))}
-      <button onClick={nextPendingPage} disabled={pendingProgramsPage === pendingTotalPages}> &raquo; </button>
-    </div>
-
-
-      </>
-     )}
-
-
-
-
-{showAddProgramsPopup && (
-  <div className="add-programs-popup-overlay">
-    <div className="add-programs-confirmation-popup">
-
-       <h2>Add New Program</h2>
-       
-
-       <div className="add-programs-main-container">
-
-        
-           {activeSection === "details" && (
-              <>
-
-
-          <div className="add-programs-photo-section">
-           <span className="add-programs-details-label"> Photo </span>
-             <div className="add-programs-profile-container">
-                  <img
-                     src={"/Images/thumbnail.png"}
-                     alt="Identification"
-                     className="add-program-photo"
-                  />
-
-             </div>
-              <label htmlFor="identification-file-upload" className="add-programs-upload-link">Click to Upload File</label>
+            <select
+              className="programs-module-filter"
+              value={activeFilter}
+              onChange={(e) => setActiveFilter(e.target.value)}
+            >
+              <option value="">All Active/Inactive</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           </div>
 
-          <div className="add-programs-info-main-container">
-
-                <nav className="program-info-toggle-wrapper">
-                  {["details", "reqs"].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                      onClick={() => setActiveSection(section)}
-                    >
-                      {section === "details" && "Details"}
-                      {section === "reqs" && "Requirements"}
-                    </button>
-                  ))}
-                </nav>
-
-           <div className="add-programs-upper-section">
-            <div className="add-programs-content-left-side">
-              <div className="fields-section-add-programs">
-                <p>Program Name<span className="required">*</span></p>
-                  <input
-                  type="text"
-                  className="add-programs-input-field"
-                  placeholder="Program Name (E.g. Feeding Program)"
-                  />
-              </div>
-
-              <div className="fields-section-add-programs">
-                <p>Number of Participants<span className="required">*</span></p>
-                <input
-                  type="number"
-                  min="1"
-                  className="add-programs-input-field"
-                  placeholder="E.g. 50"
+          <div className="programs-module-main-section">
+            {loadingPrograms ? (
+              <p>Loading programs...</p>
+            ) : currentPrograms.length === 0 ? (
+              <div className="no-result-card-programs">
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
                 />
+                <p className="no-results-programs">No Results Found</p>
               </div>
-
-            <div className="fields-section-add-programs">
-              <p>Eligible Participants<span className="required">*</span></p>
-              <select className="add-programs-input-field">
-                <option value="">Select requirement</option>
-                <option value="resident">Resident</option>
-                <option value="non-resident">Non-Resident</option>
-                <option value="both">Both</option>
-              </select>
-            </div>
-
-            </div>
-
-            <div className="add-programs-content-right-side">
-               <div className="fields-section-add-programs">
-                  <p>Location<span className="required">*</span></p>
-                    <input
-                    type="text"
-                    className="add-programs-input-field"
-                    placeholder="Location (E.g. Baragay Hall)"
-                    />
-                </div>
-
-
-              <div className="fields-section-add-programs">
-                  <p>Program Start Date<span className="required">*</span></p>
-                    <input
-                    type="date"
-                    className="add-programs-input-field"
-                    />
-                </div>
-
-                <div className="fields-section-add-programs">
-                  <p>Program End Date<span className="required">*</span></p>
-                    <input
-                    type="date"
-                    className="add-programs-input-field"
-                    />
-                </div>
-
-            </div>
-            
-            </div> 
-
-
-            <div className="add-programs-lower-section">
-                                    <div className="programs-description-container">
-                                      <div className="box-container-outer-description">
-                                          <div className="title-description-programs">
-                                              Description of Program
-                                          </div>
-                                          <div className="box-container-description">
-                                            <textarea className="description-input-field" />
-                                          </div>
-                                      </div>
-                                    </div>
-
-            </div>
-            
-          </div>
-                                  </>
-                      )}
-
-
-         {activeSection === "reqs" && (
-              <>
-
-          <div className="add-programs-info-main-container">
-
-                <nav className="program-info-toggle-wrapper">
-                  {["details", "reqs"].map((section) => (
-                    <button
-                      key={section}
-                      type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                      onClick={() => setActiveSection(section)}
-                    >
-                      {section === "details" && "Details"}
-                      {section === "reqs" && "Requirements"}
-                    </button>
-                  ))}
-                </nav>
-
-
-
-
-            
-          </div>
-
-              </>
-           )}
-
-
-       </div>
-       
-
-
-       <div className="programs-yesno-container">
-             <button onClick={() => setShowAddProgramsPopup(false)} className="program-no-button">Cancel</button>
-                     <button className="program-yes-button">
-                     Save
-                </button>
-
-       </div>
-
-
-    </div>
-
-  </div>
-
-)}
-
-  {isPopupOpen && (
-    <div className="participants-view-popup-overlay add-incident-animated">
-      <div className="view-barangayuser-popup">
-           <div className="view-user-main-section1">
-                <div className="view-user-header-first-section">
-                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
-                </div>
-                <div className="view-user-header-second-section">
-                  <h2 className="gov-info">Republic of the Philippines</h2>
-                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
-                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
-                  <h2 className="contact">930-0040 / 428-9030</h2>
-                </div>
-                <div className="view-user-header-third-section">
-                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
-                </div>
-           </div>
-
-           <div className="view-participant-header-body">
-            <div className="view-participant-header-body-top-section">
-              <div className="view-participant-backbutton-container">
-                   <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
-                    </button>
-
-              </div>
-
-               <div className="view-participant-info-toggle-wrapper">
-                    {["details", "reqs"].map((section) => (
-                      <button
-                        key={section}
-                        type="button"
-                        className={`participant-info-toggle-btn ${viewActiveSectionParticipant === section ? "active" : ""}`}
-                        onClick={() => setViewActiveSectionParticipant(section)}
-                      >
-                        {section === "details" && "Full Details"}
-                        {section === "reqs" && "Requirements"}
-                      </button>
-                    ))}
-                  </div>
-
-                    <div className="action-btn-section-verify-section-participant">
-                      <div className="action-btn-section-verify">
-                      <button 
-                        className="participant-action-reject" 
-                        onClick={() => setShowRejectPopup(true)}
-                      >
-                        Reject
-                      </button>
-                        <button 
-                          className="participant-action-accept" 
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Program Name</th>
+                    <th>Date Created</th>
+                    <th>Approval Status</th>
+                    <th>Progress Status</th>
+                    <th>Active/Inactive</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentPrograms.map((program) => (
+                    <tr key={program.id}>
+                      <td>{program.programName}</td>
+                      <td>{program.dateCreated}</td>
+                      <td>
+                        <span
+                          className={`status-badge-programs ${program.approvalStatus
+                            .toLowerCase()
+                            .replace(/\s*-\s*/g, "-")}`}
                         >
-                          Approve
-                        </button>
-
-
-                      
-                      </div>
-                    </div>
-
-            </div>
-
-            <div className="view-participant-header-body-bottom-section">
-              <div className="view-participant-user-info-main-container">
-                <div className="view-participant-info-main-content">
-
-                {viewActiveSectionParticipant  === "details" && (
-                 <>
-                  <div className="view-participant-user-content-left-side">
-                        <div className="view-participant-fields-section">
-                           <p>Last Name</p>
-                           <input
-                             type="text"
-                             className="view-participant-input-field"
-                              readOnly
-                              /> 
-                          </div>
-                              <div className="view-participant-fields-section">
-                           <p>Contact Number</p>
-                              <input
-                                type="tel"
-                                className="view-participant-input-field"
-                                readOnly
-                              />
-                          </div>
-
-                       <div className="view-participant-fields-section">
-                           <p>Home Address</p>
-                           <input
-                             type="text"
-                             className="view-participant-input-field"
-                              readOnly
-                              /> 
-                          </div>
-                  </div>
-
-                    <div className="view-participant-user-content-right-side">
-                      <div className="view-participant-fields-section">
-                           <p>First Name</p>
-                           <input
-                             type="text"
-                             className="view-participant-input-field"
-                              readOnly
-                              /> 
-                       </div>
-
-                    <div className="view-participant-fields-section">
-                           <p>Email</p>
-                              <input
-                          type="email"
-                          className="view-participant-input-field"
-                          readOnly
-                        />
-                          </div>
-                    </div>
-                           </>
-                      )}
-
-               {viewActiveSectionParticipant  === "reqs" && (
-                 <>
-                                  <div className="participant-uploaded-photo-section">
-                            <div className="box-container-outer-participant">
-                              <div className="title-remarks-participant">
-                                Uploaded Valid ID
-                              </div>
-                              <div className="box-container-participant-2">
-                                  <a    
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <img
-                                      alt="Verification Requirement"
-                                      className="participant-img-view uploaded-pic-participant"
-                                      style={{ cursor: 'pointer' }}
-                                     
-                                    />
-                                  </a>
-
-                              </div>
-                            </div>
-                          </div>
-
-                          {/*
-                           Add rendering for dynamic/additional requirements
-                          */}
-
-
-                      </>
-                  )}
-                </div>
-
-              </div>
-
-            </div>
-
-           </div>
-
-        
-
-      </div>
-    </div>
-  )}
-
-
-                  {showRejectPopup && (
-                  <div className="reasonfor-recject-popup-overlay">
-                    <div className="reasonfor-reject-confirmation-popup">
-                      <h2>Reject Participant</h2>
-
-                      <form  className="reject-container" >
-                        <div className="box-container-outer-reasonforreject">
-                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
-                          <div className="box-container-reasonforreject">
-                            <textarea
-                              className="reasonforreject-input-field"
-                              name="reason"
-                              id="reason"
-                           placeholder="Enter the reason for rejecting the participant (e.g., incomplete requirements, invalid information, duplicate registration)..."
-
+                          <p>{program.approvalStatus}</p>
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge-programs ${program.progressStatus
+                            .toLowerCase()
+                            .replace(/\s*-\s*/g, "-")}`}
+                        >
+                          <p>{program.progressStatus}</p>
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge-programs ${program.activeStatus
+                            .toLowerCase()
+                            .replace(/\s*-\s*/g, "-")}`}
+                        >
+                          <p>{program.activeStatus}</p>
+                        </span>
+                      </td>
+                      <td>
+                        <div className="actions-programs">
+                          <button
+                            className="action-programs-button"
+                            onClick={() => handleEditClick(program.id)}
+                          >
+                            <img
+                              src="/Images/edit.png"
+                              alt="Edit"
+                              className="action-programs-edit"
                             />
-                          </div>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="reject-reason-yesno-container">
-                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
-                            Cancel
                           </button>
-                            <button 
-                                type="button" 
-                                className="reject-reason-yes-button" 
-                                disabled={loading}
-                                onClick={() => setShowSubmitRejectPopup(true)}
-                            >
-                                {loading ? "Saving..." : "Save"}
-                            </button>
+                          <button
+                            className="action-programs-button"
+                            onClick={() => handleDeleteProgram(program.id)}
+                          >
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
+                          </button>
                         </div>
-                      </form>
-                    </div>
-                  </div>
-                )}
-
-
-             {showSubmitRejectPopup && (
-                <div className="confirmation-popup-overlay-program-reject">
-                    <div className="confirmation-popup-program-status">
-                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-                        <p>Are you sure you want to Submit? </p>
-                        <div className="yesno-container-add">
-                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
-                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
-                        </div>
-                    </div>
-                </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             )}
+          </div>
 
+          <div className="redirection-section">
+            <button onClick={prevPage} disabled={currentPage === 1}>
+              &laquo;
+            </button>
+            {getPageNumbers().map((number, index) => (
+              <button
+                key={index}
+                onClick={() => typeof number === "number" && paginate(number)}
+                className={currentPage === number ? "active" : ""}
+              >
+                {number}
+              </button>
+            ))}
+            <button onClick={nextPage} disabled={currentPage === totalPages}>
+              &raquo;
+            </button>
+          </div>
+        </>
+      )}
 
-                       {showPopup && (
-                <div className={`popup-overlay-participant show`}>
-                    <div className="popup-participant">
-                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-                      <p>{popupMessage}</p>
-                    </div>
-                </div>
-                )}
+      {activeSectionRedirection === "participants" && (
+        <>
+          <div className="programs-module-section-2">
+            <input
+              type="text"
+              className="programs-module-filter"
+              placeholder="Search by Full Name"
+              value={participantNameSearch}
+              onChange={(e) => setParticipantNameSearch(e.target.value)}
+            />
+            <input
+              type="text"
+              className="programs-module-filter"
+              placeholder="Search by Program Name"
+              value={participantProgramSearch}
+              onChange={(e) => setParticipantProgramSearch(e.target.value)}
+            />
+          </div>
 
+          <div className="programs-module-main-section">
+            {loadingParticipants ? (
+              <p>Loading participants...</p>
+            ) : currentParticipants.length === 0 ? (
+              <div className="no-result-card-programs">
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
+                />
+                <p className="no-results-programs">No Results Found</p>
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Program Name</th>
+                    <th>Contact Number</th>
+                    <th>Email Address</th>
+                    <th>Location</th>
+                    <th>Approval</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentParticipants.map((participant) => (
+                    <tr key={participant.id}>
+                      <td>{participant.fullName}</td>
+                      <td>{participant.programName}</td>
+                      <td>{participant.contactNumber}</td>
+                      <td>{participant.emailAddress}</td>
+                      <td>{participant.location}</td>
+                      <td>
+                        <span
+                          className={`status-badge-programs ${String(
+                            participant.approvalStatus || "Pending"
+                          )
+                            .toLowerCase()
+                            .replace(/\s*-\s*/g, "-")}`}
+                        >
+                          <p>{participant.approvalStatus || "Pending"}</p>
+                        </span>
+                      </td>
+                      <td>
+                        <div className="actions-programs">
+                          <button
+                            className="action-programs-button"
+                            onClick={() => openParticipantModal(participant)}
+                          >
+                            <img
+                              src="/Images/edit.png"
+                              alt="Edit"
+                              className="action-programs-edit"
+                            />
+                          </button>
+                          <button
+                            className="action-programs-button"
+                            onClick={() => handleDeleteParticipant(participant.id)}
+                          >
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
 
+          <div className="redirection-section">
+            <button onClick={prevParticipantsPage} disabled={participantsPage === 1}>
+              &laquo;
+            </button>
+            {Array.from({ length: participantsTotalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                onClick={() => paginateParticipants(num)}
+                className={participantsPage === num ? "active" : ""}
+              >
+                {num}
+              </button>
+            ))}
+            <button
+              onClick={nextParticipantsPage}
+              disabled={participantsPage === participantsTotalPages}
+            >
+              &raquo;
+            </button>
+          </div>
 
+          <EditParticipantModal
+            isOpen={isParticipantModalOpen}
+            onClose={closeParticipantModal}
+            participant={selectedParticipant}
+            onSave={handleParticipantSave}
+            onApprove={handleParticipantApprove}
+            onReject={handleParticipantReject}
+          />
+        </>
+      )}
 
+      {activeSectionRedirection === "programs" && (
+        <>
+          <div className="programs-module-section-2">
+            <input
+              type="text"
+              className="programs-module-filter"
+              placeholder="Search by Program Name"
+              value={pendingSearchName}
+              onChange={(e) => setPendingSearchName(e.target.value)}
+            />
+            <select
+              className="programs-module-filter"
+              value={pendingApprovalFilter}
+              onChange={(e) => setPendingApprovalFilter(e.target.value)}
+            >
+              <option value="">All Approval Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+            <select
+              className="programs-module-filter"
+              value={pendingProgressFilter}
+              onChange={(e) => setPendingProgressFilter(e.target.value)}
+            >
+              <option value="">All Progress Status</option>
+              <option value="Ongoing">Ongoing</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+            <select
+              className="programs-module-filter"
+              value={pendingActiveFilter}
+              onChange={(e) => setPendingActiveFilter(e.target.value)}
+            >
+              <option value="">All Active/Inactive</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div className="programs-module-main-section">
+            {loadingPrograms ? (
+              <p>Loading programs...</p>
+            ) : currentPendingPrograms.length === 0 ? (
+              <div className="no-result-card-programs">
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
+                />
+                <p className="no-results-programs">No Results Found</p>
+              </div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Program Name</th>
+                    <th>Date Created</th>
+                    <th>Approval Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentPendingPrograms.map((program) => (
+                    <tr key={program.id}>
+                      <td>{program.programName}</td>
+                      <td>{program.dateCreated}</td>
+                      <td>
+                        <span
+                          className={`status-badge-programs ${program.approvalStatus
+                            .toLowerCase()
+                            .replace(/\s*-\s*/g, "-")}`}
+                        >
+                          <p>{program.approvalStatus}</p>
+                        </span>
+                      </td>
+                      <td>
+                        <div className="actions-programs">
+                          <button
+                            className="action-programs-button"
+                            onClick={() => handleEditClick(program.id)}
+                          >
+                            <img
+                              src="/Images/edit.png"
+                              alt="Edit"
+                              className="action-programs-edit"
+                            />
+                          </button>
+                          <button
+                            className="action-programs-button"
+                            onClick={() => handleDeleteProgram(program.id)}
+                          >
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div className="redirection-section">
+            <button onClick={prevPendingPage} disabled={pendingProgramsPage === 1}>
+              &laquo;
+            </button>
+            {Array.from({ length: pendingTotalPages }, (_, i) => i + 1).map((num) => (
+              <button
+                key={num}
+                onClick={() => paginatePending(num)}
+                className={pendingProgramsPage === num ? "active" : ""}
+              >
+                {num}
+              </button>
+            ))}
+            <button onClick={nextPendingPage} disabled={pendingProgramsPage === pendingTotalPages}>
+              &raquo;
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* Shared popup rendered on main page */}
+      {showPopup && (
+        <div className="popup-overlay-program show">
+          <div className="popup-program">
+            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+            <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
