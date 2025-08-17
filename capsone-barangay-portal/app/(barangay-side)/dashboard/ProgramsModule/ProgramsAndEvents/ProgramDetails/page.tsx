@@ -7,6 +7,35 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
+type SimpleField = { name: string };
+
+const PREDEFINED_REQ_TEXT: SimpleField[] = [
+  { name: "firstName" },
+  { name: "lastName" },
+  { name: "contactNumber" },
+  { name: "emailAddress" },
+  { name: "location" },
+];
+
+const PREDEFINED_REQ_FILES: SimpleField[] = [
+  { name: "validIDjpg" }, // Valid ID upload
+];
+
+const toSet = (arr: SimpleField[]) =>
+  new Set(arr.filter(Boolean).map(f => f.name?.toLowerCase().trim()).filter(Boolean) as string[]);
+
+const dedupeByName = (arr: SimpleField[]) => {
+  const seen = new Set<string>();
+  const out: SimpleField[] = [];
+  for (const f of arr) {
+    const k = f?.name?.toLowerCase().trim();
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push({ name: f.name.trim() });
+  }
+  return out;
+};
+
 export default function ProgramDetails() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,7 +46,7 @@ export default function ProgramDetails() {
   const userPosition = user?.position || "";
   const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
 
-  const [activeSection, setActiveSection] = useState<"details" | "others">("details");
+  const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
 
   // Popups
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
@@ -65,6 +94,36 @@ export default function ProgramDetails() {
     setShake((prev) => ({ ...prev, [field]: true }));
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
+
+  // ===== Requirements state (custom, editable) =====
+  const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
+  const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
+  const [reqTextNew, setReqTextNew] = useState("");
+  const [reqFileNew, setReqFileNew] = useState("");
+  const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
+
+  const addReqText = () => {
+    const v = reqTextNew.trim();
+    if (!v) return;
+    const lc = v.toLowerCase();
+    const pre = toSet(PREDEFINED_REQ_TEXT);
+    const exists = pre.has(lc) || reqTextFields.some(f => f.name.toLowerCase() === lc);
+    if (exists) { setReqTextNew(""); return; }
+    setReqTextFields(prev => [...prev, { name: v }]);
+    setReqTextNew("");
+  };
+  const addReqFile = () => {
+    const v = reqFileNew.trim();
+    if (!v) return;
+    const lc = v.toLowerCase();
+    const pre = toSet(PREDEFINED_REQ_FILES);
+    const exists = pre.has(lc) || reqFileFields.some(f => f.name.toLowerCase() === lc);
+    if (exists) { setReqFileNew(""); return; }
+    setReqFileFields(prev => [...prev, { name: v }]);
+    setReqFileNew("");
+  };
+  const removeReqText = (i: number) => setReqTextFields(prev => prev.filter((_, idx) => idx !== i));
+  const removeReqFile = (i: number) => setReqFileFields(prev => prev.filter((_, idx) => idx !== i));
 
   // Min date (tomorrow)
   const minDate = useMemo(() => {
@@ -149,6 +208,21 @@ export default function ProgramDetails() {
 
         setExistingPhotoURL(data.photoURL ?? null);
         setIdentificationPreview(data.photoURL ?? null);
+
+        // ----- Load Requirements (split into predefined vs custom) -----
+        const preTextSet = toSet(PREDEFINED_REQ_TEXT);
+        const preFileSet = toSet(PREDEFINED_REQ_FILES);
+
+        const req = data.requirements || {};
+        const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
+        const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
+
+        setReqTextFields(
+          dedupeByName(allText).filter(f => !preTextSet.has(f.name.toLowerCase()))
+        );
+        setReqFileFields(
+          dedupeByName(allFiles).filter(f => !preFileSet.has(f.name.toLowerCase()))
+        );
       } catch (e) {
         console.error(e);
         setPopupMessage("Failed to load program.");
@@ -280,6 +354,10 @@ export default function ProgramDetails() {
       const normalizedStart = eventType === "single" ? singleDate : startDate;
       const normalizedEnd = eventType === "single" ? singleDate : endDate;
 
+      // merge requirements (predefined + custom) and dedupe
+      const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
+      const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
+
       const updates: any = {
         programName: programName.trim(),
         participants: Number(participants),
@@ -292,6 +370,10 @@ export default function ProgramDetails() {
         timeEnd,
         description: description.trim(),
         summary: summary.trim(),
+        requirements: {
+          textFields: mergedText,
+          fileFields: mergedFiles,
+        },
       };
 
       if (identificationFile) {
@@ -480,14 +562,15 @@ export default function ProgramDetails() {
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
-            {["details", "others"].map((section) => (
+            {["details", "reqs", "others"].map((section) => (
               <button
                 key={section}
                 type="button"
                 className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                onClick={() => setActiveSection(section as "details" | "others")}
+                onClick={() => setActiveSection(section as "details" | "reqs" | "others")}
               >
                 {section === "details" && "Details"}
+                {section === "reqs" && "Requirements"}
                 {section === "others" && "Others"}
               </button>
             ))}
@@ -656,6 +739,110 @@ export default function ProgramDetails() {
                     </div>
                   </div>
                 </>
+              )}
+
+              {activeSection === "reqs" && (
+                <div className="edit-programs-upper-section">
+                  {/* Pre-defined Requirements */}
+                  <div className="fields-section-edit-programs">
+                    <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <p style={{ margin: 0, fontWeight: 600 }}>Pre-defined Requirements</p>
+                      <button
+                        type="button"
+                        className="info-toggle-btn"
+                        onClick={() => setIsPredefinedOpen((s) => !s)}
+                        aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
+                      >
+                        {isPredefinedOpen ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {isPredefinedOpen && (
+                      <div style={{ marginTop: 8 }}>
+                        <ul style={{ paddingLeft: 18, margin: 0 }}>
+                          {PREDEFINED_REQ_TEXT.map((f, i) => (
+                            <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
+                          ))}
+                          {PREDEFINED_REQ_FILES.map((f, i) => (
+                            <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Custom Text Requirements */}
+                  <div className="fields-section-edit-programs">
+                    <p style={{ fontWeight: 600 }}>Custom Text Requirements</p>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input
+                        type="text"
+                        className="edit-programs-input-field"
+                        placeholder="e.g., guardianName"
+                        value={reqTextNew}
+                        onChange={(e) => setReqTextNew(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
+                      />
+                      <button type="button" className="info-toggle-btn" onClick={addReqText}>+</button>
+                    </div>
+
+                    {reqTextFields.length > 0 && (
+                      <div style={{ marginTop: 10 }}>
+                        {reqTextFields.map((f, i) => (
+                          <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                            <input
+                              type="text"
+                              className="edit-programs-input-field"
+                              value={f.name}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setReqTextFields(prev => prev.map((x, idx) => idx === i ? { name: v } : x));
+                              }}
+                            />
+                            <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Custom File Requirements */}
+                  <div className="fields-section-edit-programs">
+                    <p style={{ fontWeight: 600 }}>Custom File Requirements</p>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input
+                        type="text"
+                        className="edit-programs-input-field"
+                        placeholder="e.g., medicalCertificateJpg"
+                        value={reqFileNew}
+                        onChange={(e) => setReqFileNew(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
+                      />
+                      <button type="button" className="info-toggle-btn" onClick={addReqFile}>+</button>
+                    </div>
+
+                    {reqFileFields.length > 0 && (
+                      <div style={{ marginTop: 10 }}>
+                        {reqFileFields.map((f, i) => (
+                          <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                            <input
+                              type="text"
+                              className="edit-programs-input-field"
+                              value={f.name}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setReqFileFields(prev => prev.map((x, idx) => idx === i ? { name: v } : x));
+                              }}
+                            />
+                            <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
+                      Tip: keep names consistent (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>)
+                    </div>
+                  </div>
+                </div>
               )}
 
               {activeSection === "others" && (
