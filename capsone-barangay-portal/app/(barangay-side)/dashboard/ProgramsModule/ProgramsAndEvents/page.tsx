@@ -159,8 +159,8 @@ export default function ProgramsModule() {
     router.push(`?${params.toString()}`, { scroll: false });
   };
 
-  const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
+  const handleEditClick = (id: string) => {
+    router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${id}`);
   };
 
   // Program delete
@@ -496,7 +496,7 @@ export default function ProgramsModule() {
                         <div className="actions-programs">
                           <button
                             className="action-programs-button"
-                            onClick={handleEditClick}
+                            onClick={() => handleEditClick(program.id)}
                           >
                             <img
                               src="/Images/edit.png"
@@ -728,7 +728,7 @@ export default function ProgramsModule() {
                         <div className="actions-programs">
                           <button
                             className="action-programs-button"
-                            onClick={handleEditClick}
+                            onClick={() => handleEditClick(program.id)}
                           >
                             <img
                               src="/Images/edit.png"
