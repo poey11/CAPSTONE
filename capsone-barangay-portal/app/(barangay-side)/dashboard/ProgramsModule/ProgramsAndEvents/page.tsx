@@ -429,6 +429,36 @@ const prevPendingPage = () =>
 
 
 
+const [viewActiveSectionParticipant, setViewActiveSectionParticipant] = useState("details");
+
+
+const [showRejectPopup, setShowRejectPopup] = useState(false); 
+  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false); 
+      const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+
+
+      const confirmSubmit = () => {
+          try {
+              
+              setShowSubmitRejectPopup(false); // close confirmation
+
+              setShowRejectPopup(false); 
+
+              setTimeout(() => {
+                  setPopupMessage("Reason for Rejection submitted successfully!");
+                  setShowPopup(true); //  show success popup after hiding
+              }, 100); // slight delay to allow DOM transition (optional)
+
+              setTimeout(() => {
+
+              }, 3000);
+          } catch (error) {
+              console.error("Error updating rejection reason:", error);
+          }
+      };
+
+
   return (
     <main className="programs-module-main-container">
 
@@ -721,7 +751,10 @@ const prevPendingPage = () =>
                 <td>{participant.location}</td>
                 <td>
                   <div className="actions-programs">
-                    <button className="action-programs-button">
+                    <button
+                      className="action-programs-button"
+                      onClick={openPopup} 
+                    >
                       <img src="/Images/edit.png" alt="Edit" className="action-programs-edit" />
                     </button>
                     <button className="action-programs-button">
@@ -1085,13 +1118,230 @@ const prevPendingPage = () =>
 )}
 
   {isPopupOpen && (
-    <div className="user-roles-view-popup-overlay add-incident-animated">
+    <div className="participants-view-popup-overlay add-incident-animated">
       <div className="view-barangayuser-popup">
+           <div className="view-user-main-section1">
+                <div className="view-user-header-first-section">
+                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                </div>
+                <div className="view-user-header-second-section">
+                  <h2 className="gov-info">Republic of the Philippines</h2>
+                  <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+                  <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+                  <h2 className="contact">930-0040 / 428-9030</h2>
+                </div>
+                <div className="view-user-header-third-section">
+                  <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+                </div>
+           </div>
+
+           <div className="view-participant-header-body">
+            <div className="view-participant-header-body-top-section">
+              <div className="view-participant-backbutton-container">
+                   <button onClick={closePopup}>
+                      <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+                    </button>
+
+              </div>
+
+               <div className="view-participant-info-toggle-wrapper">
+                    {["details", "reqs"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`participant-info-toggle-btn ${viewActiveSectionParticipant === section ? "active" : ""}`}
+                        onClick={() => setViewActiveSectionParticipant(section)}
+                      >
+                        {section === "details" && "Full Details"}
+                        {section === "reqs" && "Requirements"}
+                      </button>
+                    ))}
+                  </div>
+
+                    <div className="action-btn-section-verify-section-participant">
+                      <div className="action-btn-section-verify">
+                      <button 
+                        className="participant-action-reject" 
+                        onClick={() => setShowRejectPopup(true)}
+                      >
+                        Reject
+                      </button>
+                        <button 
+                          className="participant-action-accept" 
+                        >
+                          Approve
+                        </button>
+
+
+                      
+                      </div>
+                    </div>
+
+            </div>
+
+            <div className="view-participant-header-body-bottom-section">
+              <div className="view-participant-user-info-main-container">
+                <div className="view-participant-info-main-content">
+
+                {viewActiveSectionParticipant  === "details" && (
+                 <>
+                  <div className="view-participant-user-content-left-side">
+                        <div className="view-participant-fields-section">
+                           <p>Last Name</p>
+                           <input
+                             type="text"
+                             className="view-participant-input-field"
+                              readOnly
+                              /> 
+                          </div>
+                              <div className="view-participant-fields-section">
+                           <p>Contact Number</p>
+                              <input
+                                type="tel"
+                                className="view-participant-input-field"
+                                readOnly
+                              />
+                          </div>
+
+                       <div className="view-participant-fields-section">
+                           <p>Home Address</p>
+                           <input
+                             type="text"
+                             className="view-participant-input-field"
+                              readOnly
+                              /> 
+                          </div>
+                  </div>
+
+                    <div className="view-participant-user-content-right-side">
+                      <div className="view-participant-fields-section">
+                           <p>First Name</p>
+                           <input
+                             type="text"
+                             className="view-participant-input-field"
+                              readOnly
+                              /> 
+                       </div>
+
+                    <div className="view-participant-fields-section">
+                           <p>Email</p>
+                              <input
+                          type="email"
+                          className="view-participant-input-field"
+                          readOnly
+                        />
+                          </div>
+                    </div>
+                           </>
+                      )}
+
+               {viewActiveSectionParticipant  === "reqs" && (
+                 <>
+                                  <div className="participant-uploaded-photo-section">
+                            <div className="box-container-outer-participant">
+                              <div className="title-remarks-participant">
+                                Uploaded Valid ID
+                              </div>
+                              <div className="box-container-participant-2">
+                                  <a    
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <img
+                                      alt="Verification Requirement"
+                                      className="participant-img-view uploaded-pic-participant"
+                                      style={{ cursor: 'pointer' }}
+                                     
+                                    />
+                                  </a>
+
+                              </div>
+                            </div>
+                          </div>
+
+                          {/*
+                           Add rendering for dynamic/additional requirements
+                          */}
+
+
+                      </>
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+
+           </div>
+
+        
 
       </div>
     </div>
   )}
 
+
+                  {showRejectPopup && (
+                  <div className="reasonfor-recject-popup-overlay">
+                    <div className="reasonfor-reject-confirmation-popup">
+                      <h2>Reject Participant</h2>
+
+                      <form  className="reject-container" >
+                        <div className="box-container-outer-reasonforreject">
+                          <div className="title-remarks-reasonforreject">Reason For Reject</div>
+                          <div className="box-container-reasonforreject">
+                            <textarea
+                              className="reasonforreject-input-field"
+                              name="reason"
+                              id="reason"
+                           placeholder="Enter the reason for rejecting the participant (e.g., incomplete requirements, invalid information, duplicate registration)..."
+
+                            />
+                          </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="reject-reason-yesno-container">
+                          <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
+                            Cancel
+                          </button>
+                            <button 
+                                type="button" 
+                                className="reject-reason-yes-button" 
+                                disabled={loading}
+                                onClick={() => setShowSubmitRejectPopup(true)}
+                            >
+                                {loading ? "Saving..." : "Save"}
+                            </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+
+             {showSubmitRejectPopup && (
+                <div className="confirmation-popup-overlay-program-reject">
+                    <div className="confirmation-popup-program-status">
+                        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                        <p>Are you sure you want to Submit? </p>
+                        <div className="yesno-container-add">
+                            <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
+                            <button onClick={confirmSubmit} className="yes-button-add">Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
+                       {showPopup && (
+                <div className={`popup-overlay-participant show`}>
+                    <div className="popup-participant">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+                )}
 
 
 
