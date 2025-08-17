@@ -58,13 +58,19 @@ export default function ProgramDetails() {
   const [suggestedBy, setSuggestedBy] = useState<string>("");
   const [suggestedByUid, setSuggestedByUid] = useState<string | null>(null);
 
-  // Errors for red highlight
+  // Errors + shake
   const [errors, setErrors] = useState<{ [k: string]: boolean }>({});
+  const [shake, setShake] = useState<{ [k: string]: boolean }>({});
+  const triggerShake = (field: string, ms = 300) => {
+    setShake((prev) => ({ ...prev, [field]: true }));
+    window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
+  };
 
   // Min date (tomorrow)
   const minDate = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 1);
+    t.setHours(0, 0, 0, 0);
     return t.toISOString().split("T")[0];
   }, []);
 
@@ -216,7 +222,12 @@ export default function ProgramDetails() {
 
   const validate = () => {
     const e: { [k: string]: boolean } = {};
-    const need = (k: string, ok: boolean) => { if (!ok) e[k] = true; };
+    const need = (k: string, ok: boolean) => {
+      if (!ok) {
+        e[k] = true;
+        triggerShake(k);
+      }
+    };
 
     need("programName", !!programName.trim());
     need("participants", !!participants);
@@ -236,6 +247,8 @@ export default function ProgramDetails() {
         if (!(eDate > s)) {
           e["startDate"] = true;
           e["endDate"] = true;
+          triggerShake("startDate");
+          triggerShake("endDate");
         }
       }
     }
@@ -243,6 +256,7 @@ export default function ProgramDetails() {
     if (timeStart && timeEnd) {
       if (toMinutes(timeEnd) <= toMinutes(timeStart)) {
         e["timeEnd"] = true;
+        triggerShake("timeEnd");
       }
     } else {
       need("timeStart", !!timeStart);
@@ -489,7 +503,11 @@ export default function ProgramDetails() {
                         <p>Program Name<span className="required">*</span></p>
                         <input
                           type="text"
-                          className={`edit-programs-input-field ${errors.programName ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.programName ? "input-error" : "",
+                            shake.programName ? "shake" : "",
+                          ].join(" ").trim()}
                           placeholder="Program Name (E.g. Feeding Program)"
                           value={programName}
                           onChange={(e) => setProgramName(e.target.value)}
@@ -501,7 +519,11 @@ export default function ProgramDetails() {
                         <input
                           type="number"
                           min="1"
-                          className={`edit-programs-input-field ${errors.participants ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.participants ? "input-error" : "",
+                            shake.participants ? "shake" : "",
+                          ].join(" ").trim()}
                           placeholder="E.g. 50"
                           value={participants}
                           onChange={(e) => setParticipants(e.target.value)}
@@ -511,7 +533,11 @@ export default function ProgramDetails() {
                       <div className="fields-section-edit-programs">
                         <p>Eligible Participants<span className="required">*</span></p>
                         <select
-                          className={`edit-programs-input-field ${errors.eligibleParticipants ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.eligibleParticipants ? "input-error" : "",
+                            shake.eligibleParticipants ? "shake" : "",
+                          ].join(" ").trim()}
                           value={eligibleParticipants}
                           onChange={(e) => setEligibleParticipants(e.target.value)}
                         >
@@ -526,7 +552,11 @@ export default function ProgramDetails() {
                         <p>Time Start<span className="required">*</span></p>
                         <input
                           type="time"
-                          className={`edit-programs-input-field ${errors.timeStart ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.timeStart ? "input-error" : "",
+                            shake.timeStart ? "shake" : "",
+                          ].join(" ").trim()}
                           value={timeStart}
                           onChange={(e) => setTimeStart(e.target.value)}
                         />
@@ -551,7 +581,11 @@ export default function ProgramDetails() {
                           <p>Event Date<span className="required">*</span></p>
                           <input
                             type="date"
-                            className={`edit-programs-input-field ${errors.singleDate ? "error" : ""}`}
+                            className={[
+                              "edit-programs-input-field",
+                              errors.singleDate ? "input-error" : "",
+                              shake.singleDate ? "shake" : "",
+                            ].join(" ").trim()}
                             min={minDate}
                             value={singleDate}
                             onChange={(e) => setSingleDate(e.target.value)}
@@ -563,7 +597,11 @@ export default function ProgramDetails() {
                             <p>Program Start Date<span className="required">*</span></p>
                             <input
                               type="date"
-                              className={`edit-programs-input-field ${errors.startDate ? "error" : ""}`}
+                              className={[
+                                "edit-programs-input-field",
+                                errors.startDate ? "input-error" : "",
+                                shake.startDate ? "shake" : "",
+                              ].join(" ").trim()}
                               min={minDate}
                               value={startDate}
                               onChange={(e) => setStartDate(e.target.value)}
@@ -574,7 +612,11 @@ export default function ProgramDetails() {
                             <p>Program End Date<span className="required">*</span></p>
                             <input
                               type="date"
-                              className={`edit-programs-input-field ${errors.endDate ? "error" : ""}`}
+                              className={[
+                                "edit-programs-input-field",
+                                errors.endDate ? "input-error" : "",
+                                shake.endDate ? "shake" : "",
+                              ].join(" ").trim()}
                               min={minDate}
                               value={endDate}
                               onChange={(e) => setEndDate(e.target.value)}
@@ -587,7 +629,11 @@ export default function ProgramDetails() {
                         <p>Time End<span className="required">*</span></p>
                         <input
                           type="time"
-                          className={`edit-programs-input-field ${errors.timeEnd ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.timeEnd ? "input-error" : "",
+                            shake.timeEnd ? "shake" : "",
+                          ].join(" ").trim()}
                           value={timeEnd}
                           onChange={(e) => setTimeEnd(e.target.value)}
                         />
@@ -597,7 +643,11 @@ export default function ProgramDetails() {
                         <p>Program Location<span className="required">*</span></p>
                         <input
                           type="text"
-                          className={`edit-programs-input-field ${errors.location ? "error" : ""}`}
+                          className={[
+                            "edit-programs-input-field",
+                            errors.location ? "input-error" : "",
+                            shake.location ? "shake" : "",
+                          ].join(" ").trim()}
                           placeholder="Location (E.g. Barangay Hall)"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
@@ -616,7 +666,11 @@ export default function ProgramDetails() {
                         <div className="title-remarks">Description of Program</div>
                         <div className="box-container-programdesc">
                           <textarea
-                            className={`programdesc-input-field ${errors.description ? "error" : ""}`}
+                            className={[
+                              "programdesc-input-field",
+                              errors.description ? "input-error" : "",
+                              shake.description ? "shake" : "",
+                            ].join(" ").trim()}
                             placeholder="Enter Remarks"
                             name="programDescription"
                             value={description}
@@ -629,7 +683,11 @@ export default function ProgramDetails() {
                         <div className="title-remarks">Summary of Program</div>
                         <div className="box-container-programdesc">
                           <textarea
-                            className={`programdesc-input-field ${errors.summary ? "error" : ""}`}
+                            className={[
+                              "programdesc-input-field",
+                              errors.summary ? "input-error" : "",
+                              shake.summary ? "shake" : "",
+                            ].join(" ").trim()}
                             placeholder="Enter Summary"
                             name="programSummary"
                             value={summary}
