@@ -339,7 +339,15 @@ const handleDeleteNotification = async (notificationId: string) => {
           </div>
         </div>
 
-        {/*}
+        <div className="navbar-indiv-container">
+            <div className="dropdown-Container">
+              <Link href="/Programs">
+                <p className="dropdown-item-resident" onClick={toggleLoginOptionsOff}>Programs</p>
+              </Link>
+            </div>
+          </div>
+
+        
           <div className="navbar-indiv-container">
             <div className="dropdown-Container">
               <Link href="/Announcements">
@@ -347,9 +355,9 @@ const handleDeleteNotification = async (notificationId: string) => {
               </Link>
             </div>
           </div>
-        */}
+        
 
-        {/*}
+        
           <div className="dropdown-Container">
             <div className="menu-section-container">
               <p className="dropdown-item-resident">Officials</p>
@@ -367,7 +375,7 @@ const handleDeleteNotification = async (notificationId: string) => {
               </Link>
             </div>
           </div>
-        */}
+        
       </div>
       
 
