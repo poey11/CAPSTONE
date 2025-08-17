@@ -889,60 +889,59 @@ const [activeSection, setActiveSection] = useState("basic");
                                     
                                       <div className="pwd-type-container">
                                         <div className="pwd-fields-section">
-                                          <p>
+                                          <p className="pwd-label">
                                             Type of PWD ID <span className="required">*</span>
                                           </p>
+
                                           <div className="pwd-radio-row">
-                                          <label>
-                                            <input
-                                              type="radio"
-                                              name="pwdType"
-                                              value="Permanent"
-                                              checked={formData.pwdType === "Permanent"}
-                                              onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                  ...prev,
-                                                  pwdType: e.target.value,
-                                                  pwdTemporaryUntil: "",
-                                                }))
-                                              }
-                                            />{" "}
-                                            Permanent
-                                          </label>
-                                          <label>
-                                            <input
-                                              type="radio"
-                                              name="pwdType"
-                                              value="Temporary"
-                                              checked={formData.pwdType === "Temporary"}
-                                              onChange={(e) =>
-                                                setFormData((prev) => ({
-                                                  ...prev,
-                                                  pwdType: e.target.value,
-                                                }))
-                                              }
-                                            />{" "}
-                                            Temporary
-                                          </label>
+                                            <label className={`radio-card ${formData.pwdType === "Permanent" ? "active" : ""}`}>
+                                              <input
+                                                type="radio"
+                                                name="pwdType"
+                                                value="Permanent"
+                                                checked={formData.pwdType === "Permanent"}
+                                                onChange={(e) =>
+                                                  setFormData((prev) => ({
+                                                    ...prev,
+                                                    pwdType: e.target.value,
+                                                    pwdTemporaryUntil: "",
+                                                  }))
+                                                }
+                                              />
+                                              Permanent
+                                            </label>
+
+                                            <label className={`radio-card ${formData.pwdType === "Temporary" ? "active" : ""}`}>
+                                              <input
+                                                type="radio"
+                                                name="pwdType"
+                                                value="Temporary"
+                                                checked={formData.pwdType === "Temporary"}
+                                                onChange={(e) =>
+                                                  setFormData((prev) => ({
+                                                    ...prev,
+                                                    pwdType: e.target.value,
+                                                  }))
+                                                }
+                                              />
+                                              Temporary
+                                            </label>
+                                          </div>
                                         </div>
 
-                                        <div className={`pwd-fields-section-valid pwd-valid-until ${formData.pwdType === "Temporary" ? "" : "keep-space"}`}>
-                                        <p>
-                                          Valid Until <span className="required">*</span>
-                                        </p>
-                                        <input
-                                          type="date"
-                                          name="pwdTemporaryUntil"
-                                          className="pwd-input"
-                                          value={formData.pwdTemporaryUntil || ""}
-                                          onChange={handleChange}
-                                          min={new Date().toISOString().split("T")[0]}
-                                          required={formData.pwdType === "Temporary"}
-                                        />
-                                      </div>
-                                
-
-                                    
+                                        <div className={`pwd-fields-section-valid ${formData.pwdType === "Temporary" ? "show" : "hidden"}`}>
+                                          <p className="pwd-label">
+                                            Valid Until <span className="required">*</span>
+                                          </p>
+                                          <input
+                                            type="date"
+                                            name="pwdTemporaryUntil"
+                                            className="pwd-input"
+                                            value={formData.pwdTemporaryUntil || ""}
+                                            onChange={handleChange}
+                                            min={new Date().toISOString().split("T")[0]}
+                                            required={formData.pwdType === "Temporary"}
+                                          />
                                         </div>
                                       </div>
                                   </div>

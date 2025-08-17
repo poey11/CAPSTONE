@@ -275,7 +275,7 @@ new
 
 
   .checkbox-container{
-    margin-bottom: 30px;
+    margin-bottom: 40px;
     margin-left: 30px;
   }
 
@@ -1000,12 +1000,24 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 100%;
 }
 
+/*
 .pwd-fields-section-valid{
   display: flex;
   flex-direction: column;
   width: 100%;
   padding-top: 10px;
+}*/
+.pwd-fields-section-valid {
+  margin-top: 15px;
+  display: none;
+  flex-direction: column;
 }
+
+.pwd-fields-section-valid.show {
+  display: flex;
+}
+
+
 
 .pwd-fields-section p,
 .pwd-fields-section-valid p{
@@ -1357,7 +1369,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 40px;
-  padding-bottom: 40px;
+  padding-bottom: 90px;
   margin-top: 20px;
 
   display: flex;
@@ -1396,6 +1408,12 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   height: 100px;
   border-top: #dedcdc 1px solid;
   padding-top: 15px;
+}
+
+.pwd-radio-row input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 
 
@@ -1471,9 +1489,8 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     align-items: center; 
     justify-content: center; 
     text-align: center;
-    height: 120px; 
+    height: 100px; 
     width: 330px;
-    overflow-y: auto;
     margin-top: 10px;
     align-self: center;
   }
@@ -1721,9 +1738,64 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 /* PWD form bits */
 .pwd-fields { width: 100%; max-width: 350px; display: grid; row-gap: 16px; }
-.pwd-label  { font-size: 12px; color: #2C3E50; font-weight: bold; }
-.pwd-radio-row { display: flex; align-items: center; gap: 24px; }
-.pwd-input { padding: 8px; height: 33px; width: 85%; border: 1px solid rgba(36,53,76,0.7); border-radius: 5px; color: #000; }
+/*.pwd-label  { font-size: 12px; color: #2C3E50; font-weight: bold; }*/
+.pwd-label {
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/*.pwd-radio-row { display: flex; align-items: center; gap: 24px; }*/
+.pwd-radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+
+/* Card style for radio buttons */
+.radio-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2C3E50;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  min-width: 100px; /* keeps consistent width */
+  text-align: center;
+}
+
+/* Hover effect */
+.radio-card:hover {
+  border-color: #ed7014;
+  box-shadow: 0 2px 6px rgba(237, 112, 20, 0.2);
+}
+/* Active state */
+.radio-card.active {
+  background-color: #ed7014;
+  color: white;
+  border-color: #ed7014;
+  box-shadow: 0 2px 6px rgba(237, 112, 20, 0.3);
+}
+
+
+
+/*.pwd-input { padding: 8px; height: 33px; width: 85%; border: 1px solid rgba(36,53,76,0.7); border-radius: 5px; color: #000; }*/
+
+.pwd-input {
+  padding: 8px;
+  height: 36px;
+  width: 100%;
+  border: 1px solid rgba(36,53,76,0.7);
+  border-radius: 6px;
+  color: #000;
+  font-size: 14px;
+}
 
 /* Keep vertical space when not showing the date field (prevents jump) */
 .pwd-valid-until.keep-space { visibility: hidden; height: 64px; }
