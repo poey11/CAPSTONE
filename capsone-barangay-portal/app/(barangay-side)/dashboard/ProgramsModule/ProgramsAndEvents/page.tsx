@@ -65,8 +65,7 @@ const computeProgress = (p: any): Program["progressStatus"] | null => {
 
   const today = startOfToday();
   const isSingle =
-    (p?.eventType === "single") ||
-    (!!s && !!e && s.getTime() === e?.getTime());
+    p?.eventType === "single" || (!!s && !!e && s.getTime() === e?.getTime());
 
   if (isSingle) {
     if (today.getTime() < s.getTime()) return "Upcoming";
@@ -108,13 +107,14 @@ export default function ProgramsModule() {
   const [programsAssignedData, setProgramsAssignedData] = useState<Program[]>([]);
   const [participantsListsData, setParticipantsListsData] = useState<Participant[]>([]);
 
-  const [activeSectionRedirection, setActiveSectionRedirection] = useState<"main" | "programs" | "participants">("main");
+  const [activeSectionRedirection, setActiveSectionRedirection] =
+    useState<"main" | "programs" | "participants">("main");
 
   // Main-page popup state (shared UI)
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
-  // Load Programs from Firestore (and auto-fix progressStatus)
+  // Load Programs from Firestore (and auto-fix progressStatus & activeStatus)
   useEffect(() => {
     const q = query(collection(db, "Programs"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(
@@ -125,29 +125,42 @@ export default function ProgramsModule() {
 
         snap.forEach((docu) => {
           const d = docu.data() as any;
-          const computed = computeProgress(d);
-          const progress = (computed ?? d.progressStatus ?? "Upcoming") as Program["progressStatus"];
 
-          // enqueue db update only when needed
-          if (computed && d.progressStatus !== computed) {
-            updates.push(updateDoc(doc(db, "Programs", docu.id), { progressStatus: computed }));
+          // Compute progress based on dates
+          const computedProgress = computeProgress(d);
+          const progress = (computedProgress ?? d.progressStatus ?? "Upcoming") as Program["progressStatus"];
+
+          // Determine desired Active/Inactive:
+          // - Completed => Inactive
+          // - Pending approval => Inactive
+          const approval: Program["approvalStatus"] = d.approvalStatus ?? "Pending";
+          const desiredActive: Program["activeStatus"] =
+            progress === "Completed" || approval === "Pending"
+              ? "Inactive"
+              : (d.activeStatus as Program["activeStatus"]) ?? "Inactive";
+
+          // enqueue db updates only when needed
+          if (computedProgress && d.progressStatus !== computedProgress) {
+            updates.push(updateDoc(doc(db, "Programs", docu.id), { progressStatus: computedProgress }));
+          }
+          if (d.activeStatus !== desiredActive) {
+            updates.push(updateDoc(doc(db, "Programs", docu.id), { activeStatus: desiredActive }));
           }
 
           const dateCreated = tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
           list.push({
             id: docu.id,
             programName: d.programName ?? "",
-            approvalStatus: d.approvalStatus ?? "Pending",
+            approvalStatus: approval,
             progressStatus: progress,
-            activeStatus: d.activeStatus ?? "Inactive",
+            activeStatus: desiredActive,
             createdAt: d.createdAt ?? null,
             dateCreated,
           });
         });
 
-        // apply updates in background (no await needed for UI to render quick)
         if (updates.length) {
-          Promise.allSettled(updates).catch(() => {/* noop */});
+          Promise.allSettled(updates).catch(() => { /* noop */ });
         }
 
         const nonPending = list.filter((p) => p.approvalStatus !== "Pending");
@@ -415,7 +428,9 @@ export default function ProgramsModule() {
                 className={`info-toggle-btn-pending-program assigned-tasks ${
                   activeSectionRedirection === sectionKey ? "active" : ""
                 }`}
-                onClick={() => handleSectionSwitch(sectionKey as "main" | "programs" | "participants")}
+                onClick={() =>
+                  handleSectionSwitch(sectionKey as "main" | "programs" | "participants")
+                }
               >
                 {sectionKey === "main" && "All Programs"}
                 {sectionKey === "programs" && (
@@ -429,9 +444,14 @@ export default function ProgramsModule() {
                 {sectionKey === "participants" && (
                   <span className="badge-container">
                     Pending Participants
-                    {participantsListsData.filter((p) => p.approvalStatus === "Pending").length > 0 && (
+                    {participantsListsData.filter((p) => p.approvalStatus === "Pending").length >
+                      0 && (
                       <span className="task-badge">
-                        {participantsListsData.filter((p) => p.approvalStatus === "Pending").length}
+                        {
+                          participantsListsData.filter(
+                            (p) => p.approvalStatus === "Pending"
+                          ).length
+                        }
                       </span>
                     )}
                   </span>
@@ -508,7 +528,11 @@ export default function ProgramsModule() {
               <p>Loading programs...</p>
             ) : currentPrograms.length === 0 ? (
               <div className="no-result-card-programs">
-                <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
+                />
                 <p className="no-results-programs">No Results Found</p>
               </div>
             ) : (
@@ -571,7 +595,11 @@ export default function ProgramsModule() {
                             className="action-programs-button"
                             onClick={() => handleDeleteProgram(program.id)}
                           >
-                            <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
                           </button>
                         </div>
                       </td>
@@ -626,7 +654,11 @@ export default function ProgramsModule() {
               <p>Loading participants...</p>
             ) : currentParticipants.length === 0 ? (
               <div className="no-result-card-programs">
-                <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
+                />
                 <p className="no-results-programs">No Results Found</p>
               </div>
             ) : (
@@ -652,7 +684,9 @@ export default function ProgramsModule() {
                       <td>{participant.location}</td>
                       <td>
                         <span
-                          className={`status-badge-programs ${String(participant.approvalStatus || "Pending")
+                          className={`status-badge-programs ${String(
+                            participant.approvalStatus || "Pending"
+                          )
                             .toLowerCase()
                             .replace(/\s*-\s*/g, "-")}`}
                         >
@@ -665,13 +699,21 @@ export default function ProgramsModule() {
                             className="action-programs-button"
                             onClick={() => openParticipantModal(participant)}
                           >
-                            <img src="/Images/edit.png" alt="Edit" className="action-programs-edit" />
+                            <img
+                              src="/Images/edit.png"
+                              alt="Edit"
+                              className="action-programs-edit"
+                            />
                           </button>
                           <button
                             className="action-programs-button"
                             onClick={() => handleDeleteParticipant(participant.id)}
                           >
-                            <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
                           </button>
                         </div>
                       </td>
@@ -760,7 +802,11 @@ export default function ProgramsModule() {
               <p>Loading programs...</p>
             ) : currentPendingPrograms.length === 0 ? (
               <div className="no-result-card-programs">
-                <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+                <img
+                  src="/images/no-results.png"
+                  alt="No results icon"
+                  className="no-result-icon-programs"
+                />
                 <p className="no-results-programs">No Results Found</p>
               </div>
             ) : (
@@ -803,7 +849,11 @@ export default function ProgramsModule() {
                             className="action-programs-button"
                             onClick={() => handleDeleteProgram(program.id)}
                           >
-                            <img src="/Images/delete.png" alt="Delete" className="action-programs-delete" />
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-programs-delete"
+                            />
                           </button>
                         </div>
                       </td>
