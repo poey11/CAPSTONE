@@ -23,7 +23,7 @@ type Program = {
   id: string;
   programName: string;
   approvalStatus: "Approved" | "Pending" | "Rejected";
-  progressStatus: "Ongoing" | "Upcoming" | "Completed";
+  progressStatus: "Ongoing" | "Upcoming" | "Completed" | "Rejected"; // includes Rejected
   activeStatus: "Active" | "Inactive";
   createdAt?: Timestamp | null;
   dateCreated: string;
@@ -44,12 +44,12 @@ type Participant = {
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
 
-// ---- helpers: safe date parsing & status computation ----
+// ---- helpers: safe date parsing & single status decider ----
 const parseYMD = (s?: string | null): Date | null => {
   if (!s || typeof s !== "string") return null;
-  const [y, m, d] = s.split("-").map((n) => Number(n));
+  const [y, m, d] = s.split("-").map(Number);
   if (!y || !m || !d) return null;
-  return new Date(y, m - 1, d); // local TZ midnight
+  return new Date(y, m - 1, d); // local midnight
 };
 
 const startOfToday = () => {
@@ -58,26 +58,46 @@ const startOfToday = () => {
   return t;
 };
 
-const computeProgress = (p: any): Program["progressStatus"] | null => {
-  const s = parseYMD(p?.startDate);
-  const e = parseYMD(p?.endDate);
-  if (!s) return null; // no dates -> don't change
+/** Decide BOTH progress and active in one shot (no date checks if Rejected) */
+const decideStatuses = (p: any): {
+  progress: Program["progressStatus"];
+  active: Program["activeStatus"];
+} => {
+  const approval: Program["approvalStatus"] = p?.approvalStatus ?? "Pending";
 
-  const today = startOfToday();
-  const isSingle =
-    p?.eventType === "single" || (!!s && !!e && s.getTime() === e?.getTime());
-
-  if (isSingle) {
-    if (today.getTime() < s.getTime()) return "Upcoming";
-    if (today.getTime() === s.getTime()) return "Ongoing";
-    return "Completed";
+  // 🔴 If rejected, stop here.
+  if (approval === "Rejected") {
+    return { progress: "Rejected", active: "Inactive" };
   }
 
-  // multiple days (needs both s & e)
-  if (!e) return null;
-  if (today.getTime() < s.getTime()) return "Upcoming";
-  if (today.getTime() > e.getTime()) return "Completed";
-  return "Ongoing";
+  // Otherwise compute date-based progress
+  const s = parseYMD(p?.startDate);
+  const e = parseYMD(p?.endDate);
+  let progress: Program["progressStatus"] =
+    (p?.progressStatus as Program["progressStatus"]) || "Upcoming";
+
+  if (s) {
+    const today = startOfToday();
+    const isSingle = p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
+
+    if (isSingle) {
+      if (today.getTime() < s.getTime()) progress = "Upcoming";
+      else if (today.getTime() === s.getTime()) progress = "Ongoing";
+      else progress = "Completed";
+    } else if (e) {
+      if (today.getTime() < s.getTime()) progress = "Upcoming";
+      else if (today.getTime() > e.getTime()) progress = "Completed";
+      else progress = "Ongoing";
+    }
+  }
+
+  // Active rule: Pending OR Completed => Inactive, else preserve/Active
+  const active: Program["activeStatus"] =
+    approval === "Pending" || progress === "Completed"
+      ? "Inactive"
+      : ((p?.activeStatus as Program["activeStatus"]) ?? "Inactive");
+
+  return { progress, active };
 };
 
 function tsToYMD(ts?: Timestamp | null): string {
@@ -114,7 +134,7 @@ export default function ProgramsModule() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
 
-  // Load Programs from Firestore (and auto-fix progressStatus & activeStatus)
+  // Load Programs from Firestore (and auto-fix progress/active atomically)
   useEffect(() => {
     const q = query(collection(db, "Programs"), orderBy("createdAt", "desc"));
     const unsub = onSnapshot(
@@ -126,25 +146,16 @@ export default function ProgramsModule() {
         snap.forEach((docu) => {
           const d = docu.data() as any;
 
-          // Compute progress based on dates
-          const computedProgress = computeProgress(d);
-          const progress = (computedProgress ?? d.progressStatus ?? "Upcoming") as Program["progressStatus"];
-
-          // Determine desired Active/Inactive:
-          // - Completed => Inactive
-          // - Pending approval => Inactive
+          const { progress, active } = decideStatuses(d);
           const approval: Program["approvalStatus"] = d.approvalStatus ?? "Pending";
-          const desiredActive: Program["activeStatus"] =
-            progress === "Completed" || approval === "Pending"
-              ? "Inactive"
-              : (d.activeStatus as Program["activeStatus"]) ?? "Inactive";
 
-          // enqueue db updates only when needed
-          if (computedProgress && d.progressStatus !== computedProgress) {
-            updates.push(updateDoc(doc(db, "Programs", docu.id), { progressStatus: computedProgress }));
-          }
-          if (d.activeStatus !== desiredActive) {
-            updates.push(updateDoc(doc(db, "Programs", docu.id), { activeStatus: desiredActive }));
+          // Prepare single atomic patch if needed
+          const patch: Record<string, any> = {};
+          if (d.progressStatus !== progress) patch.progressStatus = progress;
+          if (d.activeStatus !== active) patch.activeStatus = active;
+
+          if (Object.keys(patch).length) {
+            updates.push(updateDoc(doc(db, "Programs", docu.id), patch));
           }
 
           const dateCreated = tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
@@ -153,15 +164,13 @@ export default function ProgramsModule() {
             programName: d.programName ?? "",
             approvalStatus: approval,
             progressStatus: progress,
-            activeStatus: desiredActive,
+            activeStatus: active,
             createdAt: d.createdAt ?? null,
             dateCreated,
           });
         });
 
-        if (updates.length) {
-          Promise.allSettled(updates).catch(() => { /* noop */ });
-        }
+        if (updates.length) void Promise.allSettled(updates);
 
         const nonPending = list.filter((p) => p.approvalStatus !== "Pending");
         const pending = list.filter((p) => p.approvalStatus === "Pending");
@@ -510,6 +519,7 @@ export default function ProgramsModule() {
               <option value="Ongoing">Ongoing</option>
               <option value="Upcoming">Upcoming</option>
               <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
             </select>
 
             <select
@@ -785,6 +795,7 @@ export default function ProgramsModule() {
               <option value="Ongoing">Ongoing</option>
               <option value="Upcoming">Upcoming</option>
               <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
             </select>
             <select
               className="programs-module-filter"
