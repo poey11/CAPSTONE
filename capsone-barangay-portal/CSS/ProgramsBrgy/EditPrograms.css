@@ -1327,3 +1327,16 @@ animation: fadeSlideIn 0.5s ease-out;
   75% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
+
+/* Lock column widths to the <colgroup> percentages */
+.participants-table.fixed-columns {
+  table-layout: fixed;   /* key: stops content-based resizing */
+  width: 100%;
+}
+
+/* prevent long strings from blowing up a column */
+.participants-table.fixed-columns .td-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
