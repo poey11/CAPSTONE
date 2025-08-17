@@ -1025,17 +1025,17 @@ export default function EditResident() {
                                   </div>  
                                 </div>
                               </div> 
-                            </div>
 
 
-                            <div className="add-main-resident-section-2-bottom-side">
 
-                            {formData.isPWD && (
-                              <div className="pwd-outer" style={{ flex: "1 1 32rem" }}>
-                                <div className="pwd-title">PWD Information</div>
+                              {/* PWD Section */}
 
-                                <div className="pwd-card">
-                                  <div className={`pwd-upload ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
+                              {formData.isPWD && (
+                              <div className="box-container-outer-pwdpic">
+                                <div className="title-pwdpic">PWD Information</div>
+
+                                <div className="box-container-pwdpic">
+                                  <div className={`file-upload-container-pwd ${invalidFields.includes("pwdIdFile") ? "pwd-error" : ""}`}>
                                     <label htmlFor="pwd-id-file-upload" className="upload-link">Click to Upload PWD ID</label>
                                     <input
                                       id="pwd-id-file-upload"
@@ -1061,11 +1061,11 @@ export default function EditResident() {
                                     )}
                                   </div>
 
-                                  <div className="pwd-fields">
-                                    <div className={`fields-section ${invalidFields.includes("pwdType") ? "input-error" : ""}`}>
+                                  <div className="pwd-type-container">
+                                    <div className={`pwd-fields-section ${invalidFields.includes("pwdType") ? "input-error" : ""}`}>
                                       <p className="pwd-label">Type of PWD ID <span className="required">*</span></p>
                                       <div className="pwd-radio-row">
-                                        <label>
+                                        <label className={`radio-card ${formData.pwdType === "Permanent" ? "active" : ""}`}>
                                           <input
                                             type="radio"
                                             name="pwdType"
@@ -1074,7 +1074,7 @@ export default function EditResident() {
                                             onChange={(e) => setFormData(prev => ({ ...prev, pwdType: e.target.value, pwdTemporaryUntil: "" }))}
                                           /> Permanent
                                         </label>
-                                        <label>
+                                        <label className={`radio-card ${formData.pwdType === "Temporary" ? "active" : ""}`}>
                                           <input
                                             type="radio"
                                             name="pwdType"
@@ -1086,8 +1086,12 @@ export default function EditResident() {
                                       </div>
                                     </div>
 
-                                    {formData.pwdType === "Temporary" && (
-                                      <div className={`fields-section ${invalidFields.includes("pwdTemporaryUntil") ? "input-error" : ""}`}>
+                                    
+                                      <div
+                                        className={`pwd-fields-section-valid ${
+                                          formData.pwdType === "Temporary" ? "show" : "hidden"
+                                        } ${invalidFields.includes("pwdTemporaryUntil") ? "input-error" : ""}`}
+                                      >
                                         <p className="pwd-label">Valid Until <span className="required">*</span></p>
                                         <input
                                           type="date"
@@ -1099,13 +1103,15 @@ export default function EditResident() {
                                           required
                                         />
                                       </div>
-                                    )}
+                                    
                                   </div>
                                 </div>
                               </div>
                             )}
+                            </div>
 
 
+                            <div className="add-main-resident-section-2-bottom-side">
                             <div className="box-container-outer-resindentificationpic">
                                 <div className="title-resindentificationpic">
                                   Identification Picture
