@@ -171,7 +171,7 @@ export default function EditResident() {
                         <div className="program-redirection-icons-section">
                             <img src="/images/team.png" alt="user info" className="program-redirection-icons-info"/> 
                              </div>
-                         <h1>Partcipants</h1>
+                         <h1>Participants</h1>
                 </button>
 
 
