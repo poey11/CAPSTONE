@@ -12,7 +12,7 @@ const BMenu: React.FC = () => {
   return (
     <div className="side-bar-brgyside">
       <div className="logo-side-bar-brgyside">
-        <img src="/images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-brgyside" />
+        <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-brgyside" />
       </div>
 
       <div className="contents-side-bar-brgyside">
