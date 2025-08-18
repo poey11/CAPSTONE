@@ -429,7 +429,7 @@ export default function TopMenu() {
         <div className="dropdown-Container">
           <div className="dropdown-Container-no-hover-notifications-brgy">
             <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container-brgy">
-              <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon-brgyside" />
+              <img src="/Images/inbox.png" alt="Inbox Icon" className="header-inboxicon-brgyside" />
               {unreadCount > 0 && <span className="notification-badge-brgyside">{unreadCount}</span>}
             </p>
           </div>
@@ -459,12 +459,12 @@ export default function TopMenu() {
                         </div>
                         <div className="unread-icon-section-brgy">
                           {message.isRead === false && (
-                            <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
+                            <img src="/Images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
                           )}
                         </div>
                         <div className="delete-icon-section-brgy">
                           <button className="delete-btn-brgy" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
-                            <img src="/images/Delete.png" alt="Delete" className="delete-icon-image-brgy" />
+                            <img src="/Images/Delete.png" alt="Delete" className="delete-icon-image-brgy" />
                           </button>
                         </div>
                       </div>
@@ -483,7 +483,7 @@ export default function TopMenu() {
           {session?.user?.profileImage ? (
             <img src={session.user.profileImage} alt="User Icon" className="header-usericon" />
           ) : (
-            <img src="/images/user.png" alt="Default User" className="header-usericon" />
+            <img src="/Images/user.png" alt="Default User" className="header-usericon" />
           )}
         </section>
         <section className="user-section">
@@ -491,7 +491,7 @@ export default function TopMenu() {
           <p>{session?.user?.position || session?.user?.role || "User"}</p>
         </section>
         <section className="menu-section" ref={dropdownRef}>
-          <img src="/images/down-arrow.png" alt="Menu Icon" className="menuIcon" onClick={toggleDropdown} />
+          <img src="/Images/down-arrow.png" alt="Menu Icon" className="menuIcon" onClick={toggleDropdown} />
           {isDropdownOpen && (
             <div className="dropdown show">
               <ul>

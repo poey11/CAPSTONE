@@ -12,7 +12,7 @@ const BMenu: React.FC = () => {
   return (
     <div className="side-bar-brgyside">
       <div className="logo-side-bar-brgyside">
-        <img src="/Images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-brgyside" />
+        <img src="/images/QClogo.png" alt="Barangay Captain" className="logo-image-side-bar-brgyside" />
       </div>
 
       <div className="contents-side-bar-brgyside">
@@ -27,7 +27,7 @@ const BMenu: React.FC = () => {
         
           <Link href="/dashboard">Dashboard</Link>
           <img 
-              src={hoveredDropdown === "dashboard" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              src={hoveredDropdown === "dashboard" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
               alt="Menu Icon" 
               className="arrow-brgyside" 
             />
@@ -47,7 +47,7 @@ const BMenu: React.FC = () => {
           <div className="dropdown-button-brgyside">
             <Link href="/dashboard/admin/BarangayUsers">User and Roles</Link>
             <img 
-                src={hoveredDropdown === "user&roles" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                src={hoveredDropdown === "user&roles" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
                 alt="Menu Icon" 
                 className="arrow-brgyside" 
               />
@@ -70,7 +70,7 @@ const BMenu: React.FC = () => {
         <div className="dropdown-button-brgyside">
           <Link href="/dashboard/ResidentModule">Residents Management</Link>
           <img 
-              src={hoveredDropdown === "resident" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              src={hoveredDropdown === "resident" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
               alt="Menu Icon" 
               className="arrow-brgyside" 
             />
@@ -95,7 +95,7 @@ const BMenu: React.FC = () => {
         <div className="dropdown-button-brgyside">
           <Link  href="/dashboard/OfficialsModule">Officials Management</Link>
           <img 
-              src={hoveredDropdown === "officials" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              src={hoveredDropdown === "officials" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
               alt="Menu Icon" 
               className="arrow-brgyside" 
             />
@@ -118,7 +118,7 @@ const BMenu: React.FC = () => {
         <div className="dropdown-button-brgyside">
           <Link href="/dashboard/ServicesModule/InBarangayRequests">Services Management</Link>
           <img 
-              src={hoveredDropdown === "services" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              src={hoveredDropdown === "services" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
               alt="Menu Icon" 
               className="arrow-brgyside" 
             />
@@ -140,7 +140,7 @@ const BMenu: React.FC = () => {
         <div className="dropdown-button-brgyside">
           <Link href="/dashboard/IncidentModule/Department?id=Lupon">Incident Management</Link>
           <img 
-              src={hoveredDropdown === "incidents" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+              src={hoveredDropdown === "incidents" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
               alt="Menu Icon" 
               className="arrow-brgyside" 
             />
@@ -169,7 +169,7 @@ const BMenu: React.FC = () => {
             <div className="dropdown-button-brgyside">
               <Link href="/dashboard">Program</Link>
               <img 
-                  src={hoveredDropdown === "programs" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  src={hoveredDropdown === "programs" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
                   alt="Menu Icon" 
                   className="arrow-brgyside" 
                 />
@@ -190,7 +190,7 @@ const BMenu: React.FC = () => {
             <div className="dropdown-button-brgyside">
               <Link href="/dashboard">Events</Link>
               <img 
-                  src={hoveredDropdown === "events" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  src={hoveredDropdown === "events" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
                   alt="Menu Icon" 
                   className="arrow-brgyside" 
                 />
@@ -211,7 +211,7 @@ const BMenu: React.FC = () => {
             <div className="dropdown-button-brgyside">
               <Link href="/dashboard">Programs Management</Link>
               <img 
-                  src={hoveredDropdown === "programs" ? "/images/left-arrow.png" : "/images/down-arrow.png"} 
+                  src={hoveredDropdown === "programs" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
                   alt="Menu Icon" 
                   className="arrow-brgyside" 
                 />
