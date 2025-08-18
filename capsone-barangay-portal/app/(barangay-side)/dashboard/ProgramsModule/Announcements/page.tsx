@@ -150,7 +150,7 @@ useEffect(() => {
     };
 
     const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
+    router.push("/dashboard/ProgramsModule/Announcements/AnnouncementDetails");
   };
 
 
