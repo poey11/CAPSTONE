@@ -65,9 +65,9 @@ export default function Programs() {
         <p>PROGRAMS</p>
       </div>
 
-      <div className="TitlePage-programs">
-        <p>Discover Programs Offered by the Barangay</p>
-        
+      <div className="programs-header">
+        <h1 className="programs-title">Programs Offered by the Barangay</h1>
+        <div className="programs-underline"></div>
       </div>
 
       <section className="programs-section-programs">

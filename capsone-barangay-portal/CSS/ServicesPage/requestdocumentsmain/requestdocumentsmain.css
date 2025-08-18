@@ -356,23 +356,45 @@ to {
   }
 }
 
-.services-explore-title {
+.services-header {
   position: absolute;
   top: 15%; /* Adjust this to move up/down */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 3; /* Above the kapitan image */
-  width: 100%;
+  width: 1200px;
   text-align: center;
   animation: fadeSlideInServices 1s ease-out forwards;
 }
 
-.services-explore-title h1 {
-  font-size: 40px;
+.services-title {
+    font-size: 2.5rem;
+  font-weight: bold;
   color: #214666;
-  text-shadow:
-    1px 1px 3px rgba(0, 0, 0, 0.3),
-    0 0 4px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+}
+
+.services-title::before,
+.services-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.services-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
 }
 
 /* Button columns */

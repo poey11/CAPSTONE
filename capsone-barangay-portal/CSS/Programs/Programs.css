@@ -160,3 +160,50 @@
 .read-more-link:hover {
   color: #374151; /* darker grey */
 }
+
+  .programs-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .programs-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.programs-title::before,
+.programs-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.programs-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
