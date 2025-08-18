@@ -62,21 +62,30 @@ export default function SitioOfficersPage() {
         <p>MEET OUR SITIO OFFICERS</p>
       </div>
 
+      <div className="officials-header">
+        <h1 className="officials-title">Meet the HOA Officers</h1>
+        <div className="officials-underline"></div>
+      </div>
+
      
-      {/* Officials Section */}
-      <section className="Officials-section-sitio">
-        {officials.map((official, index) => (
-          <div key={index} className="official-card-sitio">
-            <img src={official.image} className="official-image-sitio" alt={official.Name} />
-            <div className="official-content-sitio">
-              <h2 className="official-name-sitio">{official.Name}</h2>
-              <p className="official-role-sitio">{official.Role}</p>
-              <p className="official-location-sitio">{official.Location}</p>
-              <p className="official-phonenumber-sitio">{official.Phonenumber}</p>
+      <div className="other-officials-section">
+          {officials.map((official, index) => (
+            <div key={index} className="official-card-officials">
+              <img
+                src={official.image}
+                alt={official.Name}
+                className="official-image-officials"
+              />
+              <div className="official-content-officials">
+                <p className="official-role-officials">{official.Role}</p>
+                <h2 className="official-name-officials">{official.Name}</h2>
+                <p className="official-phonenumber-officials">
+                  Contact Information: {official.Phonenumber}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </section>
+          ))}
+        </div>
 
     </main>
   );
