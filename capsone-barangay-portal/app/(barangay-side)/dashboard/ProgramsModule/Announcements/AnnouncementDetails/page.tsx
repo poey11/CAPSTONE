@@ -25,6 +25,11 @@ return (
                     </button>
                     <h1> Edit Announcement Details </h1>
                 </div>
+                <div className="action-btn-section-program">
+                    <button className="action-discard">Discard</button>
+                     <button className="action-save">Save</button>
+                </div>
+
 
             </div>
 
@@ -46,7 +51,7 @@ return (
 
                     <div className="edit-announcement-bottom-section-scroll">
 
-                        <div className="fields-section-edit-announcement">
+                        <div className="active-button-section-edit-announcement">
                                 <label className="switch-label">
                                     Featured in Announcements
                                     <label className="switch">
