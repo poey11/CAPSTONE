@@ -30,7 +30,7 @@ return (
 
             <div className="edit-announcement-bottom-section">
                     <nav className="edit-announcement-info-toggle-wrapper">
-                        {["details", "description"].map((section) => (
+                        {["details", "description", "others"].map((section) => (
                         <button
                             key={section}
                             type="button"
@@ -39,11 +39,23 @@ return (
                         >
                             {section === "details" && "Details"}
                             {section === "description" && "Description"}
+                            {section === "others" && "Others"}
                         </button>
                         ))}
                     </nav>
 
                     <div className="edit-announcement-bottom-section-scroll">
+
+                        <div className="fields-section-edit-announcement">
+                                <label className="switch-label">
+                                    Featured in Announcements
+                                    <label className="switch">
+                                    <input type="checkbox" defaultChecked />
+                                    <span className="slider round"></span>
+                                    </label>
+                                </label>
+                        </div>    
+
                         <form className="edit-announcement-section-2" >
                         {activeSection === "details" && (
                         <>
@@ -113,7 +125,53 @@ return (
 
                          </>
                         )}
+                        
+                        {activeSection === "others" && (
+                        <>
 
+                      <div className="box-container-outer-announcementpic">
+                        <div className="title-announcementpic">Photo</div>
+                        <div className="box-container-announcementpic">
+                          <div className="identificationpic-container-announcement">
+                            <label
+                              htmlFor="identification-file-upload"
+                              className="upload-link"
+
+                            >
+                              Click to Upload File
+                            </label>
+                            <input
+                              id="identification-file-upload"
+                              type="file"
+                              className="file-upload-input"
+                              accept=".jpg,.jpeg,.png"
+          
+                            />
+
+                            
+                              <div className="identificationpic-display-announcement">
+                                <div className="identification-picture-announcement">
+                                    <img  alt="Preview" style={{ height: "200px" }} />
+                                </div>
+                              </div>
+          
+                         
+                              <div className="delete-container">
+                                <button
+                                  type="button"
+                                  className="delete-button"
+
+                                >
+                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                </button>
+                              </div>
+                          
+                          </div>
+                        </div>
+                      </div>
+
+                          </>
+                        )}
                         </form>
 
                     </div>

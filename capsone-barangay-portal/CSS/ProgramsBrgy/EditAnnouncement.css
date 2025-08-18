@@ -277,3 +277,188 @@ animation: fadeSlideIn 0.5s ease-out;
     border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
     box-shadow: none;
   }
+
+
+
+
+
+
+/* Label for the switch with text */
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* more breathing space */
+  font-size: 15px;
+  font-weight: 600; /* stronger emphasis */
+  color: #2c3e50; /* darker shade for better contrast */
+  cursor: pointer; /* clickable feel */
+  user-select: none; /* prevent accidental text highlight */
+}
+/* Toggle Switch Container */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+
+/* Circle */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+/* Checked (ON) state */
+.switch input:checked + .slider {
+  background-color: #4caf50; /* Green ON */
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(24px);
+}
+
+/* Rounded style */
+.slider.round {
+  border-radius: 26px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+
+
+
+.box-container-outer-announcementpic {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+.title-announcementpic {
+  position: absolute;
+  left: 22%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+  text-align: center;
+}
+
+
+.box-container-announcementpic {
+  position: relative;
+  width: 500px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-top: 30px;
+  padding-right: 20px;
+  padding-bottom: 50px;
+  padding-left: 20px;
+  padding-top: 40px;
+  margin-top: 30px;
+
+  display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box-container-announcementpic:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+  .identificationpic-container-announcement {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 220px; 
+    width: 350px;
+    margin-top: 10px;
+    align-self: center;
+  }
+
+
+.upload-link {
+    color: rgb(245, 143, 88);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+    .file-upload-input {
+    display: none;
+  }
+
+
+
+    .identificationpic-display-announcement {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    }
+
+      .identification-picture-announcement{
+    width: 200px;
+    margin-top: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+    .delete-container {
+      flex-shrink: 0; /* Prevents the delete button from shrinking */
+  }
+
+    .delete-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      margin-top: 7px;
+  }
+
+    .delete-icon {
+      width: 20px;
+      height: 20px;
+  }
