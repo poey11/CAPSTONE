@@ -63,7 +63,7 @@ export default function SitioOfficersPage() {
       </div>
 
       <div className="officials-header">
-        <h1 className="officials-title">Meet the HOA Officers</h1>
+        <h1 className="officials-title">Meet the Sitio Officers</h1>
         <div className="officials-underline"></div>
       </div>
 
