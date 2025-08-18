@@ -16,6 +16,7 @@ import {
   query,
   Timestamp,
   updateDoc,
+  where
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
@@ -185,9 +186,13 @@ export default function ProgramsModule() {
     return () => unsub();
   }, []);
 
+
+  // wont show approved or rejected participants anymore
   // Load Participants from Firestore
   useEffect(() => {
-    const q = query(collection(db, "ProgramsParticipants"), orderBy("programName", "asc"));
+    const q = query(collection(db, "ProgramsParticipants"),
+    where("approvalStatus", "==", "Pending"),
+    orderBy("programName", "asc"));
     const unsub = onSnapshot(
       q,
       (snap) => {
