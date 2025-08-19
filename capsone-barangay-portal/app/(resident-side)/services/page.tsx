@@ -14,29 +14,6 @@ export default function Services() {
   const [isGuest, setIsGuest] = useState(!user);  // ✅ fix
   const [userData, setUserData] = useState<any>(null);  // ✅ optional
 
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const section = document.querySelector(".services-section-withbg");
-      if (!section) return;
-
-      const rect = section.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-
-      const sectionCenter = rect.top + rect.height / 2;
-      const windowCenter = windowHeight / 2;
-
-      const inMiddle = sectionCenter >= windowCenter - 100 && sectionCenter <= windowCenter + 100;
-
-      if (inMiddle && !hasAnimated) {
-        setHasAnimated(true); // Only trigger once
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasAnimated]);
 
 
   //  Fetch ResidentUser document to determine if guest
@@ -257,8 +234,9 @@ export default function Services() {
     <img src="/images/bluebg1.png" alt="Background" className="background-services" />
     <img src="/images/brgy_fairview_pic.png" alt="Kapitan" className="kap-services" />
 
-    <div className="services-explore-title">
-      <h1>Explore Our Document Services</h1>
+    <div className="services-header">
+        <h1 className="services-title">Offered Document Services</h1>
+        <div className="services-underline"></div>
     </div>
   </div>
 
