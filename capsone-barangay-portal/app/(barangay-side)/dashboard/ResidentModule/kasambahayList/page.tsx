@@ -379,7 +379,7 @@ const hasAnimatedOnce = useRef(false);
 
   ) : currentResidents.length === 0 ? (
     <div className="no-result-card">
-      <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+      <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
       <p className="no-results-department">No Results Found</p>
     </div>
   ) : (
