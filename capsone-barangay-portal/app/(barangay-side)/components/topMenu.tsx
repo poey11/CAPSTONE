@@ -464,7 +464,7 @@ export default function TopMenu() {
                         </div>
                         <div className="delete-icon-section-brgy">
                           <button className="delete-btn-brgy" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
-                            <img src="/images/delete.png" alt="Delete" className="delete-icon-image-brgy" />
+                            <img src="/Images/delete.png" alt="Delete" className="delete-icon-image-brgy" />
                           </button>
                         </div>
                       </div>
