@@ -74,60 +74,114 @@ export default function Announcement() {
   ];
 
 
+  const recentPosts = [
+    {
+      title: "CITY OF ISABELA, BASILAN LGU BENCHMARKING ACTIVITY",
+      date: "Jul 29, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
+      date: "Feb 12, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
+      date: "Feb 05, 2025",
+      image: "/Images/anak.jpg",
+    },
+  ];
+
 
   return (
     <main className="main-container-announcement">
+      {/* Header */}
       <div className="headerpic-announcement">
         <p>ANNOUNCEMENTS</p>
       </div>
 
-      <div className="TitlePage-announcement">
-        <p>Strengthening our community through information</p>
-        <img 
-          src="/images/QCLogo.png" 
-          alt="Barangay Captain" 
-          className="aboutus-image-announcement" 
-        />
+      <div className="officials-header">
+        <h1 className="officials-title">Latest News and Announcements</h1>
+        <div className="officials-underline"></div>
       </div>
 
-      <section className="announcements-section-announcement">
-        {announcements.map((announcement, index) => (
+      
+      <div className="layout-announcement">
+        
+        <div className="left-section-announcement">
+  {announcements.map((item, index) => (
+    <div key={index} className="announcement-card-announcement">
+      <img
+        src={item.image}
+        alt={item.title}
+        className="announcement-image-announcement"
+      />
+      <div className="announcement-content-announcement">
+        <h2 className="announcement-title-announcement">
+          {item.title}
+        </h2>
+        <p className="announcement-description-announcement">
+          {item.description}
+        </p>
+        <div className="announcement-footer-announcement">
+          <span className="announcement-date-announcement">
+            <img
+              src="/Images/calendar.png"
+              alt="Calendar"
+              className="calendar-icon"
+            />
+            {item.date}
+          </span>
           <Link
-            key={index}
             href={{
               pathname: `/Announcements/${index}`,
               query: {
-                title: announcement.title,
-                description: announcement.description,
-                date: announcement.date,
-                image: announcement.image,
+                title: item.title,
+                description: item.description,
+                date: item.date,
+                image: item.image,
               },
             }}
+            className="read-more-announcement"
           >
-            <div className="announcement-card-announcement">
-              <img
-                src={announcement.image}
-                alt={announcement.title}
-                className="announcement-image-announcement"
-              />
-              <div className="announcement-content-announcement">
-                <h2 className="announcement-title-announcement">{announcement.title}</h2>
-                <p className="announcement-description-announcement">
-                  {announcement.description.length > 300
-                    ? `${announcement.description.slice(0, 300)}...`
-                    : announcement.description}
-                </p>
-                {announcement.description.length > 300 && (
-                  <span className="read-more-announcement">Read more</span>
-                )}
-                <p className="announcement-date-announcement">{announcement.date}</p>
-              </div>
-            </div>
+            Read More
           </Link>
-        ))}
-      </section>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
 
-      
+        
+        <div className="right-section-announcement">
+          <div className="year-filter-announcement">
+            <h3>Year</h3>
+            <div className="year-buttons">
+              {[
+                2023, 2022, 2021, 2020, 2019, 2018,
+                2017, 2016
+              ].map((year) => (
+                <button key={year} className="year-btn">
+                  {year}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="recent-posts-announcement">
+            <h3>Recent Posts</h3>
+            {recentPosts.map((post, idx) => (
+              <div key={idx} className="recent-post-card">
+                <img src={post.image} alt={post.title}/>
+                <div>
+                  <p>{post.title}</p>
+                  <span>{post.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

@@ -97,9 +97,10 @@
 
   .announcement-image-announcement {
     width: 100%;
-    height: 12rem;
+    height: 100px;
     object-fit: cover;
   }
+
 
   .announcement-content-announcement {
     padding: 1rem;
@@ -109,30 +110,220 @@
     justify-content: space-between;
   }
 
-  .announcement-title-announcement {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-top: 15px;
-    color: #DF7426;
-    text-align: center;
-
-  }
-
-  .announcement-description-announcement {
-    font-size: 0.875rem;
-    color: #4a4a4a;
-   
-   
-  }
 
   .announcement-date-announcement {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 1rem;
     color: #9e9e9e;
   }
 
-  .read-more-announcement {
-    font-size: 0.875rem;
-    color: #0066cc;
-    cursor: pointer;
-    text-decoration: underline;
+  .calendar-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+
+
+    /* ADDED */
+
+  .officials-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .officials-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
+}
+
+.officials-title::before,
+.officials-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.officials-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
+
+/* Main container */
+.layout-announcement {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+/* Left Section (scrollable) */
+.left-section-announcement {
+  flex: 3;
+  height: calc(100vh - 250px); /* minus header */
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+/* Right Section (fixed) */
+.right-section-announcement {
+  flex: 1;
+  position: sticky;
+  top: 100px; /* fixed under header */
+  align-self: flex-start;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Year filter */
+.year-filter-announcement h3,
+.recent-posts-announcement h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #214666;
+}
+
+.year-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.year-btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.year-btn:hover {
+  background: #DF7426;
+  color: white;
+}
+
+/* Recent Posts */
+.recent-posts-announcement {
+  margin-top: 2rem;
+}
+
+.recent-post-card {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.recent-post-card img {
+  width: 100px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.recent-post-card p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.recent-post-card span {
+  font-size: 0.75rem;
+  color: gray;
+}
+
+/* Announcement Cards */
+.announcement-card-announcement {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  height: 600px;
+}
+
+.announcement-image-announcement {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+}
+
+.announcement-content-announcement {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.announcement-title-announcement {
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #214666;
+  text-align: left;
+}
+
+.announcement-description-announcement {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 1rem;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /*limit to 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.announcement-footer-announcement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.announcement-date-announcement {
+  font-size: 1.0rem;
+  color: #DF7426;
+}
+
+.read-more-announcement {
+  font-size: 0.9rem;
+  color: #0066cc;
+  text-decoration: underline;
+}
