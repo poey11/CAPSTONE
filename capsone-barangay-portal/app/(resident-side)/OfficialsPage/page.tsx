@@ -1,14 +1,8 @@
+"use client";
 
 
 import "@/CSS/OfficialsPage/OfficialsPage.css";
 
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Official Page for Residents",
-  description: "Stay updated with the latest lists of officials",
-};
 
 export default function Official() {
   const captain = {
@@ -64,6 +58,14 @@ export default function Official() {
         image: "/Images/anak.jpg",
         Phonenumber: "09176219127",
       }, 
+      {
+        Name: "Robert Black",
+        Role: "Barangay Councilor",
+        Term: "2024-2025",
+        image: "/Images/anak.jpg",
+        Phonenumber: "09176219127",
+      }, 
+      
 
   ];
 
@@ -73,37 +75,47 @@ export default function Official() {
     <main className="main-container-officials">
 
       <div className="headerpic-officials">
-        <p>MEET OUR BARANGAY OFFICIALS</p>
+        <p>BARANGAY OFFICIALS</p>
       </div>
 
-      {/* Captain Section */}
-      <section className="Captain-section-officials">
-        <div className="captain-card-officials">
-          <img src={captain.image} className="Captain-image-officials" alt="Captain" />
-          <div className="Captain-content-officials">
-            <h2 className="official-name-officials">{captain.Name}</h2>
-            <p className="official-role-officials">{captain.Role}</p>
-            <p className="official-term-officials">{captain.Term}</p>
-            <p className="official-phonenumber-officials">{captain.Phonenumber}</p>
-          </div>
-        </div>
-      </section>
+      <div className="officials-header">
+        <h1 className="officials-title">Elected Officials</h1>
+        <div className="officials-underline"></div>
+      </div>
 
-      {/* Officials Section */}
-      <section className="Officials-section-officials">
-        {officials.map((official, index) => (
-          <div key={index} className="official-card-officials">
-            <img src={official.image} className="official-image-officials" alt={official.Name} />
-            <div className="official-content-officials">
-              <h2 className="official-name-officials">{official.Name}</h2>
-              <p className="official-role-officials">{official.Role}</p>
-              <p className="official-term-officials">{official.Term}</p>
-              <p className="official-phonenumber-officials">{official.Phonenumber}</p>
+      <div className="officials-content">
+        <div className="officials-punong-brgy-section">
+          <div className="officials-punong-brgy-card">
+            <div className="officials-punong-brgy-image">
+              <img src={captain.image} className="Captain-image-officials" alt="Captain" />
+            </div>
+            <div className="officials-punong-brgy-details">
+              <p className="official-role-punong-brgy">{captain.Role}</p>
+              <h2 className="official-name-punong-brgy">{captain.Name}</h2>
+              <p className="official-phonenumber-punong-brgy">Contact Information: {captain.Phonenumber}</p>
             </div>
           </div>
-        ))}
-      </section>
+        </div>
 
+        <div className="other-officials-section">
+          {officials.map((official, index) => (
+            <div key={index} className="official-card-officials">
+              <img
+                src={official.image}
+                alt={official.Name}
+                className="official-image-officials"
+              />
+              <div className="official-content-officials">
+                <p className="official-role-officials">{official.Role}</p>
+                <h2 className="official-name-officials">{official.Name}</h2>
+                <p className="official-phonenumber-officials">
+                  Contact Information: {official.Phonenumber}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </main>
   );
 }

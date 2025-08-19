@@ -1,5 +1,5 @@
 .headerpic-sitio {
-  position: relative;
+   position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -8,44 +8,17 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
-  margin-bottom: 2rem;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
+   margin-bottom: 50px;
 }
 
-.headerpic-sitio::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-sitio::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-sitio > * {
-  position: relative;
-  z-index: 3;
-}
 
   .main-container-sitio {
-    background-color: #D8DFE5;
-    width: 100%;
     height: 100%;
+    width: 100%;
+    background-image: url('/Images/bghome.jpg');
   }
 
   /* Officials Section */
@@ -105,3 +78,125 @@
       grid-template-columns: 1fr;
     }
   }
+
+  /* ADDED */
+
+    .officials-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .officials-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.officials-title::before,
+.officials-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.officials-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
+.other-officials-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; 
+  gap: 3rem;
+  padding: 3rem;
+}
+
+.official-card-officials {
+  width: 300px; /* Fixed card width */
+  height: auto; /* Let content adjust height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.official-card-officials:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.official-image-officials {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .official-card-officials {
+    width: 250px;
+  }
+}
+
+@media (max-width: 600px) {
+  .official-card-officials {
+    width: 100%; /* full width on small screens */
+    max-width: 350px; /* but keep it from being too wide */
+  }
+}
+
+.official-content-officials{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.official-role-officials {
+  font-weight:bold;
+  font-size: 1.0rem;
+  color: #DF7426; 
+  text-transform: uppercase;
+}
+
+
+.official-name-officials{
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #214666;
+}
+
+.official-phonenumber-officials{
+  font-size: 0.9rem;
+  color: #434343;
+}

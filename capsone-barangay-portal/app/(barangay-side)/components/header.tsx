@@ -281,12 +281,28 @@ export default function Header() {
         breadcrumb: ["Programs Management", "Programs And Events", "Participants Lists"],
       },
 
+     //Edit Announcements
+      "/dashboard/ProgramsModule/Announcements/AnnouncementDetails": {
+        title: "Announcements",
+        breadcrumb: ["Programs Management", "Announcements", "Edit Announcement Details"],
+      },
+
+
 
       //Edit Sitio/HOA Officers
       "/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer": {
         title: "Sitio / HOA Officers",
         breadcrumb: ["Officials Management", "Sitio / HOA Officers", "Edit Officer"],
       },
+
+
+      //Announcements
+
+         "/dashboard/ProgramsModule/Announcements": {
+        title: "Announcements",
+        breadcrumb: ["Programs Management", "Announcements"],
+      },
+
 
       
 

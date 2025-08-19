@@ -8,45 +8,18 @@
   font-size: 50px;
   font-weight:bolder;
   overflow: hidden; 
-  margin-bottom: 2rem;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
+   margin-bottom: 50px;
 }
 
-.headerpic-officials::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
-}
-
-.headerpic-officials::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-officials > * {
-  position: relative;
-  z-index: 3;
-}
 
   
   .main-container-officials {
-    background-color: #D8DFE5;
-    height: 100%;
+   height: 100%;
     width: 100%;
+    background-image: url('/Images/bghome.jpg');
   }
 
   /* Captain Section */
@@ -77,29 +50,11 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
    }
 
-  .Captain-image-officials {
-    width: 350px; 
-    height: 350px; 
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    object-fit: cover;
-  }
-
   .Captain-content-officials {
     padding: 1rem;
   }
 
-  .Captain-content-officials .official-name-officials {
-    font-size: 2rem; 
-    font-weight: bold;
-    margin-bottom: 1rem;
-    color: #DF7426;
-  }
 
-  .Captain-content-officials .official-role-officials {
-      font-weight: bold;
-      color: grey;
-  }
 
   
   .Officials-section-officials {
@@ -108,44 +63,9 @@
     gap: 4rem;
     padding: 3rem;
   }
-  .official-card-officials {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    background-color: rgba(255, 255, 255, 0.7);
-    border: 2px solid #ddd;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-    transition: transform 0.3s ease, box-shadow 0.3s ease; 
-  }
 
-  .official-card-officials:hover {
-    transform: translateY(-10px); 
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-   }
 
-  .official-image-officials {
-    width: 350px; /* Slightly smaller image than captain */
-    height: 350px;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    object-fit: cover;
-  }
 
-  .official-content-officials .official-name-officials {
-    font-size: 1.5rem; /* Smaller font size than captain */
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-     color: #DF7426;
-  }
-
-  .official-content-officials .official-role-officials {
-     font-weight: bold;
-     color: grey;
-  }
 
   @media (max-width: 768px) {
     .Officials-section-officials {
@@ -158,3 +78,199 @@
       grid-template-columns: 1fr;
     }
   }
+
+
+
+  /* ADDED */
+
+  .officials-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .officials-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.officials-title::before,
+.officials-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.officials-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
+.officials-content{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.officials-punong-brgy-section{
+  width: 100%;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.officials-punong-brgy-card{
+  width: 600px;
+  height: 290px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 30px;
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.officials-punong-brgy-card:hover{
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+.official-content-officials{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.officials-punong-brgy-image{
+  width: 90%;
+  height: 250px;
+  display: flex;
+}
+
+  .Captain-image-officials {
+    width: 250px; 
+    height: 250px; 
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+.officials-punong-brgy-details{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.official-role-officials {
+  font-weight:bold;
+  font-size: 1.0rem;
+  color: #DF7426; 
+  text-transform: uppercase;
+}
+
+.official-name-officials{
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #214666;
+}
+
+.official-phonenumber-officials{
+  font-size: 0.9rem;
+  color: #434343;
+}
+
+.official-role-punong-brgy {
+  font-weight:bold;
+  font-size: 1.1rem;
+  color: #DF7426; 
+  text-transform: uppercase;
+}
+
+.official-name-punong-brgy{
+  font-weight: bold;
+  font-size: 2.1rem;
+  color: #214666;
+}
+
+.official-phonenumber-punong-brgy{
+  font-size: 1.0rem;
+  color: #434343;
+}
+
+.other-officials-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; 
+  gap: 3rem;
+  padding: 3rem;
+}
+
+.official-card-officials {
+  width: 300px; /* Fixed card width */
+  height: auto; /* Let content adjust height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.official-card-officials:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.official-image-officials {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+  .official-card-officials {
+    width: 250px;
+  }
+}
+
+@media (max-width: 600px) {
+  .official-card-officials {
+    width: 100%; /* full width on small screens */
+    max-width: 350px; /* but keep it from being too wide */
+  }
+}

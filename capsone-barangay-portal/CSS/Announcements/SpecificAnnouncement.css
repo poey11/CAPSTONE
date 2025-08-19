@@ -1,14 +1,12 @@
 
 .main-container-specific-announcement {
-  background-color: #d8dfe5;
-  flex-direction: column; /* Stack children vertically */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
   height: 100%;
+    width: 100%;
+    background-image: url('/Images/bghome.jpg');
 }
 
 .headerpic-specific-announcement {
-  position: relative; /* Required for pseudo-elements */
+  position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -16,40 +14,13 @@
   color: rgb(255, 255, 255);
   font-size: 50px;
   font-weight:bolder;
-  overflow: hidden; /* Ensures blur doesn't spill outside */
-  margin-bottom: 2rem;
+  overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
+  margin-bottom: 50px;
 }
 
-.headerpic-specific-announcement::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.jpg');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); /* Adjust the blur intensity */
-  z-index: 1; /* Place the blurred background below the text */
-}
-
-.headerpic-specific-announcement::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.173); /* Dark overlay */
-  z-index: 2; /* Ensure it overlays the background */
-}
-
-.headerpic-specific-announcement > * {
-  position: relative;
-  z-index: 3; /* Ensure text is above the overlays */
-}
 
  
 
@@ -145,3 +116,188 @@
 .announcement-description-specific-announcement {
   text-align: justify;
   }
+
+      /* ADDED */
+
+  .announcement-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .announcement-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.announcement-title::before,
+.announcement-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.announcement-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
+/* Main container */
+.layout-specificannouncement {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+/* Left Section */
+.left-section-specificannouncement {
+  flex: 3;
+  padding-right: 1rem;
+}
+
+/* Announcement Cards */
+.announcement-card-specificannouncement {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.announcement-image-specificannouncement {
+  width: 100%;
+  height: 450px;
+  object-fit: cover;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.announcement-content-specificannouncement {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.announcement-title-specificannouncement {
+  font-size: 1.7rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #214666;
+  text-align: left;
+}
+
+.announcement-description-specificannouncement {
+  font-size: 0.9rem;
+  color: #444;
+  margin-bottom: 1rem;
+  text-align: justify;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.announcement-header-specificannouncement {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: left;
+  padding-left: 20px;
+  padding-top: 20px;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #ccc;
+}
+
+.announcement-date-specificannouncement {
+  font-size: 1.0rem;
+  color: #DF7426;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 10px;
+}
+
+  .calendar-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Right Section (fixed) */
+.right-section-announcement {
+  flex: 1;
+  position: sticky;
+  top: 100px; /* fixed under header */
+  align-self: flex-start;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Recent Posts */
+.recent-posts-announcement {
+  margin-top: 2rem;
+}
+
+.recent-posts-announcement h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #214666;
+}
+
+.recent-post-card {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.recent-post-card img {
+  width: 100px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.recent-post-content{
+  width: 100%;
+}
+
+.recent-post-card p {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.recent-post-card span {
+  font-size: 0.75rem;
+  color: gray;
+}

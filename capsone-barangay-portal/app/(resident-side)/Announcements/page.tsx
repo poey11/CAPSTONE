@@ -1,12 +1,9 @@
+"use client";
 import "@/CSS/Announcements/Announcements.css";
-
-import type { Metadata } from "next";
 import Link from 'next/link';
+import { useState, useEffect, useRef } from "react";
 
-export const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+
 
 export default function Announcement() {
   const announcements = [
@@ -17,7 +14,7 @@ export default function Announcement() {
         We have witnessed your journey, the countless hours of study, the sacrifices made, and the resilience you showed during the preparation. This success is a reflection of not only your intelligence but your unwavering commitment to your profession. As you begin this next chapter in your career, we are excited to see the positive impact you will make in the legal field.
         Your achievements inspire others to pursue their dreams and to push through challenges, no matter how daunting they may seem. The legal world awaits your expertise, and we have no doubt that you will continue to excel and contribute meaningfully to society. This milestone marks just the beginning of a bright future, and we, your community, stand behind you as you take on this new and exciting chapter of your life.
       `,
-      date: "January 15, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -28,7 +25,7 @@ export default function Announcement() {
         She always finds time to support her friends, family, and colleagues, making them feel valued and appreciated. Her kindness and generosity make her a true role model to those who know her. Everyone who has had the privilege of working with Justine knows just how hard she works to make things happen. 
         She is always the first one to step up to the plate when something needs to be done, and her commitment to success is unwavering. Justine is the type of person who motivates others to be the best version of themselves, and her influence is far-reaching. With her dedication, passion, and charisma, she is destined for great things, and there is no limit to what she can achieve.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -39,7 +36,7 @@ export default function Announcement() {
         Her resilience and perseverance have been a guiding force for many, and her influence continues to have a profound effect on those around her. Justine’s passion for making a difference is evident in the way she interacts with people, offering support and encouragement whenever it is needed. Her ability to lead with empathy and kindness makes her not only a remarkable individual but also a true asset to any team or community she is a part of.
         Justine’s ambition and drive are only matched by her desire to help others achieve their potential, and she will undoubtedly continue to make a significant impact wherever she goes.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -50,7 +47,7 @@ export default function Announcement() {
         One of Justine’s greatest strengths is her ability to remain calm and focused in high-pressure situations. She handles challenges with grace and determination, never losing sight of her objectives. Her ability to think critically and problem-solve in creative ways has earned her the respect of her peers.
         Beyond her professional accomplishments, Justine is a compassionate and caring individual who is always willing to lend a helping hand. She is a true advocate for those in need and works tirelessly to make the world a better place. Justine’s authenticity and kindness make her someone who is deeply admired and respected by everyone who knows her.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -61,7 +58,7 @@ export default function Announcement() {
         Her infectious personality, combined with her strong sense of purpose, makes her someone who brings people together. Justine's support and encouragement help others to find the confidence they need to succeed and reach their goals. Her deep empathy and genuine care for those around her make her a beloved figure in every community she’s a part of.
         Justine is a role model in every sense of the word, and her impact will continue to be felt for years to come.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -72,66 +69,169 @@ export default function Announcement() {
         Her infectious personality, combined with her strong sense of purpose, makes her someone who brings people together. Justine's support and encouragement help others to find the confidence they need to succeed and reach their goals. Her deep empathy and genuine care for those around her make her a beloved figure in every community she’s a part of.
         Justine is a role model in every sense of the word, and her impact will continue to be felt for years to come.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
   ];
 
 
+  const recentPosts = [
+    {
+      title: "CITY OF ISABELA, BASILAN LGU BENCHMARKING ACTIVITY",
+      date: "Jul 29, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
+      date: "Feb 12, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
+      date: "Feb 05, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
+      date: "Feb 12, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
+      date: "Feb 05, 2025",
+      image: "/Images/anak.jpg",
+    },
+  ];
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+  const shouldScrollRef = useRef(false);
+
+
+  const totalPages = Math.ceil(announcements.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentAnnouncements = announcements.slice(startIndex, startIndex + itemsPerPage);
+
+
+  const goToPage = (page: number) => {
+    const clamped = Math.max(1, Math.min(totalPages, page));
+    if (clamped === currentPage) return; // no-op if same page
+    shouldScrollRef.current = true;      // mark that this change came from user action
+    setCurrentPage(clamped);
+  };
+
+  useEffect(() => {
+    if (!shouldScrollRef.current) return; // skip first render & non-user changes
+    shouldScrollRef.current = false;      // reset flag
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [currentPage]);
+
 
   return (
     <main className="main-container-announcement">
+      {/* Header */}
       <div className="headerpic-announcement">
         <p>ANNOUNCEMENTS</p>
       </div>
 
-      <div className="TitlePage-announcement">
-        <p>Strengthening our community through information</p>
-        <img 
-          src="/images/QCLogo.png" 
-          alt="Barangay Captain" 
-          className="aboutus-image-announcement" 
-        />
+      <div className="officials-header">
+        <h1 className="officials-title">Latest News and Announcements</h1>
+        <div className="officials-underline"></div>
       </div>
 
-      <section className="announcements-section-announcement">
-        {announcements.map((announcement, index) => (
-          <Link
-            key={index}
-            href={{
-              pathname: `/Announcements/${index}`,
-              query: {
-                title: announcement.title,
-                description: announcement.description,
-                date: announcement.date,
-                image: announcement.image,
-              },
-            }}
-          >
-            <div className="announcement-card-announcement">
+      
+      <div className="layout-announcement">
+        
+        <div className="left-section-announcement" ref={sectionRef}>
+          {currentAnnouncements.map((item, index) => (
+            <div key={startIndex + index} className="announcement-card-announcement">
               <img
-                src={announcement.image}
-                alt={announcement.title}
+                src={item.image}
+                alt={item.title}
                 className="announcement-image-announcement"
               />
               <div className="announcement-content-announcement">
-                <h2 className="announcement-title-announcement">{announcement.title}</h2>
+                <h2 className="announcement-title-announcement">
+                  {item.title}
+                </h2>
                 <p className="announcement-description-announcement">
-                  {announcement.description.length > 300
-                    ? `${announcement.description.slice(0, 300)}...`
-                    : announcement.description}
+                  {item.description}
                 </p>
-                {announcement.description.length > 300 && (
-                  <span className="read-more-announcement">Read more</span>
-                )}
-                <p className="announcement-date-announcement">{announcement.date}</p>
+                <div className="announcement-footer-announcement">
+                  <span className="announcement-date-announcement">
+                    <img
+                      src="/Images/calendar.png"
+                      alt="Calendar"
+                      className="calendar-icon"
+                    />
+                    {item.date}
+                  </span>
+                  <Link
+                    href={{
+                      pathname: `/Announcements/${index}`,
+                      query: {
+                        title: item.title,
+                        description: item.description,
+                        date: item.date,
+                        image: item.image,
+                      },
+                    }}
+                    className="read-more-announcement"
+                  >
+                    Read More
+                  </Link>
+                </div>
               </div>
             </div>
-          </Link>
-        ))}
-      </section>
+          ))}
 
-      
+          <div className="pagination-announcement">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => goToPage(currentPage - 1)}
+            >
+              Prev
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={currentPage === i + 1 ? "active-page" : ""}
+                onClick={() => goToPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => goToPage(currentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
+
+        </div>
+
+        
+
+        
+        <div className="right-section-announcement">
+          <div className="recent-posts-announcement">
+            <h3>Recent Posts</h3>
+            {recentPosts.map((post, idx) => (
+              <div key={idx} className="recent-post-card">
+                <img src={post.image} alt={post.title}/>
+                <div className="recent-post-content">
+                  <p>{post.title}</p>
+                  <span>{post.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

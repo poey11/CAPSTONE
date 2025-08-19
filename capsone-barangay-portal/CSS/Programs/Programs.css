@@ -1,5 +1,5 @@
 .headerpic-programs {
-  position: relative; /* Required for pseudo-elements */
+  position: relative;
   height: 250px;
   display: flex;
   align-items: center;
@@ -7,76 +7,60 @@
   color: rgb(255, 255, 255);
   font-size: 50px;
   font-weight:bolder;
-  overflow: hidden; /* Ensures blur doesn't spill outside */
-  margin-bottom: 2rem;
+  overflow: hidden; 
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+   background-position: center 55%; 
+   margin-bottom: 50px;
 }
 
-.headerpic-programs::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/brgyheaderpic.JPG');
-  background-size: cover;
-  background-position: 50% 60%;
-  background-repeat: no-repeat;
-  filter: blur(1.2px); 
-  z-index: 1;
+
+
+
+.TitlePage-programs {
+  transform: translateY(-20px);
+  opacity: 0;
+  animation: slideDown 1s ease forwards 0.3s;
+  display: flex;
+  justify-content: center;
 }
 
-.headerpic-programs::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.150); 
-  z-index: 2; 
-}
-
-.headerpic-programs > * {
-  position: relative;
-  z-index: 3; 
-}
-
-  .TitlePage-programs {
-    background-color: rgba(255, 255, 255, 0.7);
-    width: 800px;
-    height: 100px;
-    border-radius: 25px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 auto;
-    margin-bottom: 2rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    word-wrap: break-word; 
-    overflow: hidden; 
-    border: 2px solid #ddd;
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
+}
 
-  .TitlePage-programs p {
-    color: #DF7426;
-    font-size: 24px;
-    font-weight: bold;
-    text-overflow: ellipsis; 
-    white-space: normal; 
-    overflow: hidden;
-    width: 100%; 
-    margin-left: 3rem;
-  }
 
-  .aboutus-image-programs {
-    width: 160px;
-    height: 80px;
-  }
+.TitlePage-programs p {
+  font-size: 40px;
+  color: #214666;
+  text-shadow:
+    1px 1px 3px rgba(0, 0, 0, 0.3),
+    0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+
+.aboutus-image-programs {
+  width: 110px;
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: fadeInLogo 0.8s ease forwards 0.8s;
+}
+
+@keyframes fadeInLogo {
+  to { opacity: 1; transform: scale(1); }
+}
+
     
   .main-container-programs {
-    background-color: #D8DFE5;
+    /*background-color: #D8DFE5;*/
+    height: 100%;
+    width: 100%;
+    background-image: url('/Images/bghome.jpg');
   }
 
   .programs-section-programs {
@@ -101,47 +85,125 @@
     }
   }
 
-  .programs-card-programs {
-    background-color: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0.5rem;
-    overflow: hidden;
-    width: 100%;
-    height: 350px; /* Fixed height for consistency */
-    display: flex;
-    flex-direction: column;
-    border: 3px solid #ddd;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effects */
-  }
 
-  .programs-card-programs:hover {
-      transform: translateY(-10px); /* Slight lift effect */
-      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Enhanced shadow for hover */
-      border-color: #aaa; /* Optional: Change border color on hover */
-    }
 
-  .programs-image-programs {
-    width: 100%;
-    height: 12rem;
-    object-fit: cover;
-  }
 
-  .programs-content-programs {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-  }
+.programs-card-programs {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
-  .programs-title-programs {
-    font-size: 1.70rem;
-    font-weight: bold;
-    margin-top: 20px;
-    color: #DF7426;
-    text-align: center;
+.programs-card-programs:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
 
+.programs-title-programs {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #214666;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  
+}
+
+.programs-image-programs {
+   width: 100%;
+  height: 250px;
+  object-fit: cover;
+  margin-top: 10px;
+  margin-bottom: 0.75rem;
+  border-radius: 2px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+}
+
+.programs-date-programs {
+  font-size: 16px;
+  color: #DF7426;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+}
+
+.programs-desc-programs {
+  font-size: 0.95rem;
+  color: #444;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-top: auto;
+  text-align: justify;
+  height: 70px;
+
+}
+
+.programs-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.read-more-link {
+  color: #0066cc;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.read-more-link:hover {
+  color: #374151; /* darker grey */
+}
+
+  .programs-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .programs-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
-  .programs-date-programs {
-    font-size: 1rem;
-    color: #9e9e9e;
-    text-align: left;
-  }
+}
+
+.programs-title::before,
+.programs-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.programs-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}

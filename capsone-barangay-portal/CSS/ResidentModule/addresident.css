@@ -275,7 +275,8 @@ new
 
 
   .checkbox-container{
-    margin-bottom: 20px;
+    padding-top: 10px;
+    margin-bottom: 30px;
     margin-left: 30px;
   }
 
@@ -959,8 +960,8 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 .fields-section{
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
   width: 100%;
+  margin-top: 30px;
 }
 
 .fields-section-middle-section{
@@ -992,6 +993,39 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   font-weight: bold;
   align-self: flex-start; /* Left-aligns the label */
   margin-left: 8%;
+}
+
+.pwd-fields-section-type{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/*
+.pwd-fields-section-valid{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-top: 10px;
+}*/
+.pwd-fields-section-valid {
+  margin-top: 15px;
+  display: none;
+  flex-direction: column;
+}
+
+.pwd-fields-section-valid.show {
+  display: flex;
+}
+
+
+
+.pwd-fields-section p,
+.pwd-fields-section-valid p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start; /* Left-aligns the label */
 }
 
 
@@ -1148,14 +1182,13 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
   margin-top: 20px;
   width: 100%;
-
 }
 
 
-.add-main-resident-section-2-bottom-side{
+.add-main-resident-section-2-bottom-side,
+.add-main-resident-section-2-top-side{
   display:flex;
   flex-direction: row;
   gap:100px;
@@ -1174,13 +1207,19 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 /* Resident Classification Box */
 .box-container-resclassification {
   position: relative;
-  width: 320px;
+  width: 370px;
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
-  padding: 30px 20px 20px;
-  padding-top: 40px;
-  margin-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 95px;
+  padding-bottom: 70px;
+
+
+  display: flex;
+  flex-direction: column;
+
 }
 
 .title-resclassification {
@@ -1236,11 +1275,10 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
-  padding-top: 30px;
-  padding-right: 20px;
-  padding-bottom: 50px;
   padding-left: 20px;
+  padding-right: 20px;
   padding-top: 40px;
+  padding-bottom: 40px;
   margin-top: 30px;
 
   display: flex;
@@ -1266,7 +1304,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .box-container-outer-resindentificationpic {
   position: relative; 
-  margin-top: 20px;
   margin-bottom: 20px;
 }
 
@@ -1275,25 +1312,131 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 }
 
 
+
+
+.title-resclassification {
+  position: absolute;
+  left: 50%; 
+  top: 0; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;
+  text-align: center;
+}
+
+.title-remarks {
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 210px;
+  text-align: center;
+}
+
+.box-content-resclassification label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #2a2a2a;
+}
+
+.box-container-outer-resclassification {
+  position: relative; 
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+
+/* PWD Pic Box */
+.box-container-pwdpic {
+  position: relative;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 40px;
+  padding-bottom: 90px;
+  margin-top: 20px;
+
+  display: flex;
+  flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.title-pwdpic {
+  position: absolute;
+  left: 10%; 
+  top: -3%; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+  text-align: center;
+}
+
+.box-container-outer-pwdpic {
+  position: relative; 
+  margin-bottom: 20px;
+}
+
+.box-container-resindentificationpic:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+.pwd-type-container{
+  width: 100%;
+  height: 100px;
+  border-top: #dedcdc 1px solid;
+  padding-top: 15px;
+}
+
+.pwd-radio-row input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
 /* Verification Documents */
    .box-container-verificationdocs {
      position: relative;
-     width: 370px;
-     border: 1px solid #5a6b7c;
-     border-radius: 10px;
-     background-color: #ffffff;
-     padding-top: 30px;
-    padding-right: 20px;
-    padding-bottom: 50px;
-    padding-left: 20px;
-    padding-top: 40px;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  margin-top: 30px;
 
-     margin-top: 30px;
-
-     display: flex;
+  display: flex;
     justify-content: center;
     align-items: center;
    }
+
+   
 
    .title-verificationdocs {
      position: absolute;
@@ -1313,7 +1456,6 @@ FOR ADDITION OF NEW MAIN RESIDENTS
    
    .box-container-outer-verificationdocs {
      position: relative; 
-     margin-top: 20px;
      margin-bottom: 20px;
      display: flex;
      align-items: center;
@@ -1336,6 +1478,20 @@ FOR ADDITION OF NEW MAIN RESIDENTS
     height: 220px; 
     width: 350px;
     overflow-y: auto;
+    margin-top: 10px;
+    align-self: center;
+  }
+
+     .file-upload-container-pwd {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 100px; 
+    width: 330px;
     margin-top: 10px;
     align-self: center;
   }
@@ -1583,9 +1739,64 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 /* PWD form bits */
 .pwd-fields { width: 100%; max-width: 350px; display: grid; row-gap: 16px; }
-.pwd-label  { font-size: 15px; color: #2C3E50; font-weight: bold; }
-.pwd-radio-row { display: flex; align-items: center; gap: 24px; }
-.pwd-input { padding: 8px; width: 85%; border: 1px solid rgba(36,53,76,0.7); border-radius: 5px; color: #000; }
+/*.pwd-label  { font-size: 12px; color: #2C3E50; font-weight: bold; }*/
+.pwd-label {
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+/*.pwd-radio-row { display: flex; align-items: center; gap: 24px; }*/
+.pwd-radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+
+/* Card style for radio buttons */
+.radio-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2C3E50;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  min-width: 100px; /* keeps consistent width */
+  text-align: center;
+}
+
+/* Hover effect */
+.radio-card:hover {
+  border-color: #ed7014;
+  box-shadow: 0 2px 6px rgba(237, 112, 20, 0.2);
+}
+/* Active state */
+.radio-card.active {
+  background-color: #ed7014;
+  color: white;
+  border-color: #ed7014;
+  box-shadow: 0 2px 6px rgba(237, 112, 20, 0.3);
+}
+
+
+
+/*.pwd-input { padding: 8px; height: 33px; width: 85%; border: 1px solid rgba(36,53,76,0.7); border-radius: 5px; color: #000; }*/
+
+.pwd-input {
+  padding: 8px;
+  height: 36px;
+  width: 100%;
+  border: 1px solid rgba(36,53,76,0.7);
+  border-radius: 6px;
+  color: #000;
+  font-size: 14px;
+}
 
 /* Keep vertical space when not showing the date field (prevents jump) */
 .pwd-valid-until.keep-space { visibility: hidden; height: 64px; }
