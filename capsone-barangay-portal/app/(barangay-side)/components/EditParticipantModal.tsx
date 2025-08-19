@@ -99,37 +99,6 @@ export default function EditParticipantModal({
     return Object.keys(e).length === 0;
   };
 
-  const handleSave = async () => {
-    if (!participant) return;
-    if (!validate()) {
-      setActiveTab("details");
-      return;
-    }
-    setSaving(true);
-    try {
-      const updated: Participant = {
-        ...participant,
-        firstName,
-        lastName,
-        fullName: `${firstName} ${lastName}`.trim(),
-        contactNumber,
-        emailAddress: email,
-        email,
-        location: homeAddress,
-        address: homeAddress,
-        programName,
-      };
-      onSave?.(updated);
-
-      // Optional tiny success toast
-      setToastMsg("Participant details saved.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2500);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleApprove = () => {
     if (!participant) return;
     onApprove?.(participant.id);
@@ -241,6 +210,7 @@ export default function EditParticipantModal({
                             }`}
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
+                            readOnly
                           />
                         </div>
 
@@ -253,6 +223,7 @@ export default function EditParticipantModal({
                             }`}
                             value={contactNumber}
                             onChange={(e) => setContactNumber(e.target.value)}
+                            readOnly
                           />
                         </div>
 
@@ -265,6 +236,7 @@ export default function EditParticipantModal({
                             }`}
                             value={homeAddress}
                             onChange={(e) => setHomeAddress(e.target.value)}
+                            readOnly
                           />
                         </div>
 
@@ -277,6 +249,7 @@ export default function EditParticipantModal({
                             }`}
                             value={programName}
                             onChange={(e) => setProgramName(e.target.value)}
+                            readOnly
                           />
                         </div>
                       </div>
@@ -291,6 +264,7 @@ export default function EditParticipantModal({
                             }`}
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
+                            readOnly
                           />
                         </div>
 
@@ -303,18 +277,8 @@ export default function EditParticipantModal({
                             }`}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            readOnly
                           />
-                        </div>
-
-                        {/* Save button aligned with your styles */}
-                        <div className="view-participant-fields-section" style={{ marginTop: 16 }}>
-                          <button
-                            className="participant-action-accept"
-                            onClick={handleSave}
-                            disabled={saving}
-                          >
-                            {saving ? "Saving..." : "Save"}
-                          </button>
                         </div>
                       </div>
                     </>
