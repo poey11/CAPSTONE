@@ -1,5 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
+import { db } from "@/app/db/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 type Participant = {
   id: string;
@@ -7,28 +9,21 @@ type Participant = {
   firstName?: string;
   lastName?: string;
   contactNumber?: string;
-  emailAddress?: string; // kept to match your table
-  email?: string;        // optional alias
-  location?: string;     // "Home Address"
-  address?: string;      // optional alias
+  emailAddress?: string;
+  email?: string;
+  location?: string;
+  address?: string;
   programName?: string;
-  idImageUrl?: string;   // for the Requirements tab preview
-  role?: string;         // new field for role
+  idImageUrl?: string; // legacy single-ID field
+  role?: string;
 };
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-
   participant: Participant | null;
-
-  /** Called when user clicks Save. You’ll get the edited participant object back. */
   onSave?: (updated: Participant) => void;
-
-  /** Called when user clicks Approve. */
   onApprove?: (participantId: string) => void;
-
-  /** Called when user confirms rejection, with reason text. */
   onReject?: (participantId: string, reason: string) => void;
 };
 
@@ -36,78 +31,96 @@ export default function EditParticipantModal({
   isOpen,
   onClose,
   participant,
-  onSave,
   onApprove,
   onReject,
 }: Props) {
   // Tabs
   const [activeTab, setActiveTab] = useState<"details" | "reqs">("details");
 
-  // Local editable state
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName]   = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [email, setEmail]         = useState("");
-  const [homeAddress, setHomeAddress] = useState("");
-  const [programName, setProgramName] = useState("");
-  const [role, setRole] = useState(""); // new field for role
+  // Toast
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
 
-  // Reject popups state
+  // Reject modals
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
 
-  // Little success toast (reuse your classes)
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState("");
+  // Loaded full doc (includes fields/files/role)
+  const [fullDoc, setFullDoc] = useState<any | null>(null);
+  const [loadingFull, setLoadingFull] = useState(false);
 
-  // Simple field validation styles
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [saving, setSaving] = useState(false);
-
-  // Sync incoming participant → local editable fields
+  // Fetch the complete ProgramsParticipants doc when opened
   useEffect(() => {
-    if (!participant) return;
-    // Derive first/last if only fullName is present
-    const derivedFirst =
-      participant.firstName ??
-      (participant.fullName ? participant.fullName.split(" ").slice(0, -1).join(" ") : "");
-    const derivedLast =
-      participant.lastName ??
-      (participant.fullName ? participant.fullName.split(" ").slice(-1).join(" ") : "");
+    const load = async () => {
+      if (!isOpen || !participant?.id) {
+        setFullDoc(null);
+        return;
+      }
+      setLoadingFull(true);
+      try {
+        const snap = await getDoc(doc(db, "ProgramsParticipants", participant.id));
+        if (snap.exists()) {
+          setFullDoc({ id: snap.id, ...snap.data() });
+        } else {
+          // fallback to what we already have
+          setFullDoc({ ...participant });
+        }
+      } finally {
+        setLoadingFull(false);
+      }
+    };
+    load();
+  }, [isOpen, participant?.id]);
 
-    setFirstName(derivedFirst || "");
-    setLastName(derivedLast || "");
-    setContactNumber(participant.contactNumber || "");
-    setEmail(participant.emailAddress || participant.email || "");
-    setHomeAddress(participant.location || participant.address || "");
-    setProgramName(participant.programName || "");
-    setRole(participant.role || "Participant"); // new field for role
-    setActiveTab("details");
-    setErrors({});
-    setRejectReason("");
-    setShowRejectPopup(false);
-    setShowSubmitRejectPopup(false);
-  }, [participant, isOpen]);
+  // ---- Derived display data (no conditional hooks) ----
+  const fieldsMap: Record<string, string> = useMemo(() => {
+    const base = (fullDoc?.fields || {}) as Record<string, any>;
+    // promote meaningful fallbacks
+    const top: Record<string, any> = {
+      firstName: fullDoc?.firstName,
+      lastName: fullDoc?.lastName,
+      contactNumber: fullDoc?.contactNumber,
+      emailAddress: fullDoc?.emailAddress ?? fullDoc?.email,
+      location: fullDoc?.location ?? fullDoc?.address,
+      programName: fullDoc?.programName,
+      role: fullDoc?.role ?? participant?.role ?? "",
+    };
+    return { ...base, ...top };
+  }, [fullDoc, participant?.role]);
 
-  const validate = () => {
-    const e: Record<string, boolean> = {};
-    if (!firstName.trim()) e.firstName = true;
-    if (!lastName.trim()) e.lastName = true;
-    if (!contactNumber.trim()) e.contactNumber = true;
-    if (!email.trim()) e.email = true;
-    if (!homeAddress.trim()) e.homeAddress = true;
-    if (!programName.trim()) e.programName = true;
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
+  // Requirements: file URLs. validIDjpg first, then others alpha.
+  const filesMap: Record<string, string> = useMemo(() => {
+    const map = { ...(fullDoc?.files || {}) } as Record<string, string>;
+
+    // legacy support: top-level idImageUrl
+    if (fullDoc?.idImageUrl && !map.validIDjpg) {
+      map.validIDjpg = fullDoc.idImageUrl;
+    }
+
+    // Build ordered map: validIDjpg → rest (sorted)
+    const ordered: Record<string, string> = {};
+    if (map.validIDjpg) ordered.validIDjpg = map.validIDjpg;
+
+    Object.keys(map)
+      .filter((k) => k !== "validIDjpg")
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((k) => (ordered[k] = map[k]));
+
+    return ordered;
+  }, [fullDoc]);
+
+  const roleValue = fieldsMap.role || "";
+
+  // Helpers
+  const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
   const handleApprove = () => {
-    if (!participant) return;
+    if (!participant?.id) return;
     onApprove?.(participant.id);
     setToastMsg("Participant approved.");
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 2500);
+    setTimeout(() => setShowToast(false), 2200);
   };
 
   const handleRejectClick = () => {
@@ -116,25 +129,23 @@ export default function EditParticipantModal({
   };
 
   const handleConfirmReject = () => {
-    // open confirmation modal
     if (!rejectReason.trim()) {
-      // light inline validation
       setToastMsg("Please enter a reason before submitting.");
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 2000);
+      setTimeout(() => setShowToast(false), 1800);
       return;
     }
     setShowSubmitRejectPopup(true);
   };
 
   const handleRejectYes = () => {
-    if (!participant) return;
+    if (!participant?.id) return;
     onReject?.(participant.id, rejectReason.trim());
     setShowSubmitRejectPopup(false);
     setShowRejectPopup(false);
     setToastMsg("Reason for Rejection submitted successfully!");
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 2500);
+    setTimeout(() => setShowToast(false), 2200);
   };
 
   if (!isOpen || !participant) return null;
@@ -201,18 +212,20 @@ export default function EditParticipantModal({
             <div className="view-participant-header-body-bottom-section">
               <div className="view-participant-user-info-main-container">
                 <div className="view-participant-info-main-content">
+                  {/* ===== Full Details ===== */}
                   {activeTab === "details" && (
-                    <>
+                    <div style={{ display: "flex", width: "100%", padding: "20px 0" }}>
                       <div className="view-participant-user-content-left-side">
                         <div className="view-participant-fields-section">
                           <p>Last Name</p>
                           <input
                             type="text"
-                            className={`view-participant-input-field ${
-                              errors.lastName ? "error" : ""
-                            }`}
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
+                            className="view-participant-input-field"
+                            value={
+                              fieldsMap.lastName ??
+                              fullDoc?.lastName ??
+                              (fullDoc?.fullName ? fullDoc.fullName.split(" ").slice(-1).join(" ") : "")
+                            }
                             readOnly
                           />
                         </div>
@@ -221,11 +234,8 @@ export default function EditParticipantModal({
                           <p>Contact Number</p>
                           <input
                             type="tel"
-                            className={`view-participant-input-field ${
-                              errors.contactNumber ? "error" : ""
-                            }`}
-                            value={contactNumber}
-                            onChange={(e) => setContactNumber(e.target.value)}
+                            className="view-participant-input-field"
+                            value={fieldsMap.contactNumber ?? fullDoc?.contactNumber ?? ""}
                             readOnly
                           />
                         </div>
@@ -234,11 +244,13 @@ export default function EditParticipantModal({
                           <p>Home Address</p>
                           <input
                             type="text"
-                            className={`view-participant-input-field ${
-                              errors.homeAddress ? "error" : ""
-                            }`}
-                            value={homeAddress}
-                            onChange={(e) => setHomeAddress(e.target.value)}
+                            className="view-participant-input-field"
+                            value={
+                              fieldsMap.location ??
+                              fullDoc?.location ??
+                              fullDoc?.address ??
+                              ""
+                            }
                             readOnly
                           />
                         </div>
@@ -247,11 +259,8 @@ export default function EditParticipantModal({
                           <p>Program Name</p>
                           <input
                             type="text"
-                            className={`view-participant-input-field ${
-                              errors.programName ? "error" : ""
-                            }`}
-                            value={programName}
-                            onChange={(e) => setProgramName(e.target.value)}
+                            className="view-participant-input-field"
+                            value={fieldsMap.programName ?? fullDoc?.programName ?? ""}
                             readOnly
                           />
                         </div>
@@ -262,11 +271,12 @@ export default function EditParticipantModal({
                           <p>First Name</p>
                           <input
                             type="text"
-                            className={`view-participant-input-field ${
-                              errors.firstName ? "error" : ""
-                            }`}
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
+                            className="view-participant-input-field"
+                            value={
+                              fieldsMap.firstName ??
+                              fullDoc?.firstName ??
+                              (fullDoc?.fullName ? fullDoc.fullName.split(" ").slice(0, -1).join(" ") : "")
+                            }
                             readOnly
                           />
                         </div>
@@ -275,65 +285,113 @@ export default function EditParticipantModal({
                           <p>Email</p>
                           <input
                             type="email"
-                            className={`view-participant-input-field ${
-                              errors.email ? "error" : ""
-                            }`}
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            className="view-participant-input-field"
+                            value={fieldsMap.emailAddress ?? fullDoc?.emailAddress ?? fullDoc?.email ?? ""}
                             readOnly
                           />
                         </div>
+
                         <div className="view-participant-fields-section">
                           <p>Role</p>
                           <input
-                            type="role"
-                            className={`view-participant-input-field ${
-                              errors.role ? "error" : ""
-                            }`}
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
+                            type="text"
+                            className="view-participant-input-field"
+                            value={roleValue}
                             readOnly
                           />
                         </div>
                       </div>
-                    </>
+                    </div>
                   )}
 
+                  {/* ===== Requirements ===== */}
                   {activeTab === "reqs" && (
-                    <>
-                      <div className="participant-uploaded-photo-section">
-                        <div className="box-container-outer-participant">
-                          <div className="title-remarks-participant">Uploaded Valid ID</div>
-                          <div className="box-container-participant-2">
-                            {participant.idImageUrl ? (
-                              <a
-                                href={participant.idImageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <img
-                                  src={participant.idImageUrl}
-                                  alt="Verification Requirement"
-                                  className="participant-img-view uploaded-pic-participant"
-                                  style={{ cursor: "pointer" }}
-                                />
-                              </a>
-                            ) : (
-                              <div className="no-result-card-programs" style={{ padding: 16 }}>
-                                <img
-                                  src="/images/no-results.png"
-                                  alt="No results icon"
-                                  className="no-result-icon-programs"
-                                />
-                                <p className="no-results-programs">No ID uploaded</p>
-                              </div>
-                            )}
-                          </div>
+                    <div className="participant-uploaded-photo-section" style={{ width: "100%" }}>
+                      {/* If still loading, or nothing to show */}
+                      {loadingFull ? (
+                        <div className="no-result-card-programs" style={{ padding: 16 }}>
+                          <img
+                            src="/images/no-results.png"
+                            alt="Loading"
+                            className="no-result-icon-programs"
+                          />
+                          <p className="no-results-programs">Loading uploads…</p>
                         </div>
-                      </div>
+                      ) : Object.keys(filesMap).length === 0 ? (
+                        <div className="no-result-card-programs" style={{ padding: 16 }}>
+                          <img
+                            src="/images/no-results.png"
+                            alt="No results icon"
+                            className="no-result-icon-programs"
+                          />
+                          <p className="no-results-programs">No files uploaded</p>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Render Valid ID (always first if present) */}
+                          {filesMap.validIDjpg && (
+                            <div className="box-container-outer-participant" style={{ width: "100%" }}>
+                              <div className="title-remarks-participant">Uploaded Valid ID</div>
+                              <div className="box-container-participant-2">
+                                {isPdfUrl(filesMap.validIDjpg) ? (
+                                  <embed
+                                    src={filesMap.validIDjpg}
+                                    type="application/pdf"
+                                    className="uploaded-pic-participant"
+                                  />
+                                ) : (
+                                  <a
+                                    href={filesMap.validIDjpg}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <img
+                                      src={filesMap.validIDjpg}
+                                      alt="Valid ID"
+                                      className="participant-img-view uploaded-pic-participant"
+                                      style={{ cursor: "pointer" }}
+                                    />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
-                      {/* Room for more requirement blocks if you add them later */}
-                    </>
+                          {/* Other files */}
+                          {Object.entries(filesMap)
+                            .filter(([k]) => k !== "validIDjpg")
+                            .map(([key, url]) => (
+                              <div
+                                key={key}
+                                className="box-container-outer-participant"
+                                style={{ width: "100%" }}
+                              >
+                                <div className="title-remarks-participant">
+                                  {key}
+                                </div>
+                                <div className="box-container-participant-2">
+                                  {isPdfUrl(url) ? (
+                                    <embed
+                                      src={url}
+                                      type="application/pdf"
+                                      className="uploaded-pic-participant"
+                                    />
+                                  ) : (
+                                    <a href={url} target="_blank" rel="noopener noreferrer">
+                                      <img
+                                        src={url}
+                                        alt={key}
+                                        className="participant-img-view uploaded-pic-participant"
+                                        style={{ cursor: "pointer" }}
+                                      />
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                        </>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -356,7 +414,7 @@ export default function EditParticipantModal({
                     className="reasonforreject-input-field"
                     name="reason"
                     id="reason"
-                    placeholder="Enter the reason for rejecting the participant (e.g., incomplete requirements, invalid information, duplicate registration)..."
+                    placeholder="Enter the reason for rejecting the participant..."
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                   />
@@ -388,13 +446,10 @@ export default function EditParticipantModal({
       {showSubmitRejectPopup && (
         <div className="confirmation-popup-overlay-program-reject">
           <div className="confirmation-popup-program-status">
-            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-            <p>Are you sure you want to Submit? </p>
+            <img src="/Images/question.png" alt="question icon" className="successful-icon-popup" />
+            <p>Are you sure you want to Submit?</p>
             <div className="yesno-container-add">
-              <button
-                onClick={() => setShowSubmitRejectPopup(false)}
-                className="no-button-add"
-              >
+              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
                 No
               </button>
               <button onClick={handleRejectYes} className="yes-button-add">
@@ -405,7 +460,7 @@ export default function EditParticipantModal({
         </div>
       )}
 
-      {/* Success / small toast popup */}
+      {/* Success toast */}
       {showToast && (
         <div className="popup-overlay-participant show">
           <div className="popup-participant">
