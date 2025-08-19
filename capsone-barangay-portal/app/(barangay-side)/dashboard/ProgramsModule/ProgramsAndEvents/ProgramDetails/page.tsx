@@ -104,7 +104,6 @@ export default function ProgramDetails() {
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
 
-  // ===== Requirements state (custom, editable) =====
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -555,7 +554,7 @@ export default function ProgramDetails() {
 
         <button
           className="program-redirection-buttons"
-          onClick={() => router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists")}
+          onClick={() => router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)} 
         >
           <div className="program-redirection-icons-section">
             <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
