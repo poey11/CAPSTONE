@@ -35,7 +35,7 @@ export default function EditOfficial() {
                 <div className="edit-official-main-section1">
                     <div className="edit-official-main-section1-left">
                         <button onClick={handleBack}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> Edit Official </h1>

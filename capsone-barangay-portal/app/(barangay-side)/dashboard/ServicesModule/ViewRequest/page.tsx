@@ -2508,7 +2508,7 @@ Functions for Reason for Reject
                                 
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
-                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                      <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
                                   <h1>Reject Request</h1>
                                 </button>
@@ -2519,7 +2519,7 @@ Functions for Reason for Reject
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
-                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                      <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
                                   <h1>Reject Request</h1>
                                 </button>
@@ -2528,7 +2528,7 @@ Functions for Reason for Reject
                               <>
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
-                                      <img src="/images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                      <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
                                   <h1>Reject Request</h1>
                                 </button>
@@ -2542,7 +2542,7 @@ Functions for Reason for Reject
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
                               <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                  <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Approve Appointment</h1>
                             </button>
@@ -2553,7 +2553,7 @@ Functions for Reason for Reject
                                   <>
                                     <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
                                       <h1>Generate Document</h1>
                                     </button>
@@ -2562,7 +2562,7 @@ Functions for Reason for Reject
                                 {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
                                   <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
                                       <h1>Generate Document</h1>
                                   </button>
@@ -2570,7 +2570,7 @@ Functions for Reason for Reject
                                 {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
                                     <button className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
                                       <h1>Generate Document</h1>
                                   </button>
@@ -2585,7 +2585,7 @@ Functions for Reason for Reject
                           <>
                              <button className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
-                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                 </div>
                                   <h1>Upload ID Picture</h1>
                               </button>
@@ -2596,7 +2596,7 @@ Functions for Reason for Reject
                           <>
                             <button className="services-onlinereq-redirection-buttons" onClick={() => setShowInterviewForm(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
-                                    <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                    <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                 </div>
                                   <h1>Interview Remarks</h1>
                               </button>
@@ -2614,7 +2614,7 @@ Functions for Reason for Reject
                             }}
                             >
                               <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                  <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Notify Admin Staff</h1>
                             </button>
@@ -2628,7 +2628,7 @@ Functions for Reason for Reject
                               }}
                             >
                               <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                  <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Notify Requestor</h1>
                             </button>
@@ -2638,7 +2638,7 @@ Functions for Reason for Reject
                           <>
                             <button className="services-onlinereq-redirection-buttons" onClick={() => setShowReceivalForm(true)}>
                               <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                  <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Document Received</h1>
                             </button>
@@ -2648,7 +2648,7 @@ Functions for Reason for Reject
                         {/* {status === "Pick-up" && docPrinted && (
                           <button  onClick={handleSMS} className="services-onlinereq-redirection-buttons">
                               <div className="services-onlinereq-redirection-icons-section">
-                              <img src="/images/sendSMS.png" alt="user info" className="redirection-icons-info" />
+                              <img src="/Images/sendSMS.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Send SMS</h1>
                           </button>
@@ -2656,7 +2656,7 @@ Functions for Reason for Reject
                         {requestData?.appointmentDate && requestData?.approvedBySAS  && (
                           <button className="services-onlinereq-redirection-buttons" onClick={handleviewappointmentdetails}>
                               <div className="services-onlinereq-redirection-icons-section">
-                              <img src="/images/appointment.png" alt="user info" className="redirection-icons-info" />
+                              <img src="/Images/appointment.png" alt="user info" className="redirection-icons-info" />
                               </div>
                               <h1>Appointment Details</h1>
                           </button>
@@ -2687,7 +2687,7 @@ Functions for Reason for Reject
                 <div className="services-onlinereq-main-section1">
                     <div className="services-onlinereq-main-section1-left">
                         <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> {requestData?.reqType || "Online"} Document Request Details </h1>
@@ -3368,7 +3368,7 @@ Functions for Reason for Reject
                                   onClick={() => handlePhotoDelete(file.name)}
                                   className="p-2 hover:bg-red-100 rounded"
                                 >
-                                  <img src="/images/trash.png" alt="Delete" className="w-5 h-5" />
+                                  <img src="/Images/trash.png" alt="Delete" className="w-5 h-5" />
                                 </button>
                               </div>
                             ))}
