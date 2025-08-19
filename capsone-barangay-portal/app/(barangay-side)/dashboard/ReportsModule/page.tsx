@@ -1018,7 +1018,7 @@ const uploadForms = async (url: string): Promise<void> => {
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;
   
-      // Get footer images/drawings
+      // Get footer Images/drawings
       const footerDrawings = worksheet.getImages().filter(img => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
@@ -1280,7 +1280,7 @@ const uploadForms = async (url: string): Promise<void> => {
       const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
       const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
   
-      // Get footer drawings (images) in the footer rows
+      // Get footer drawings (Images) in the footer rows
       const footerDrawings = worksheet.getImages().filter(img => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
@@ -1794,7 +1794,7 @@ const uploadForms = async (url: string): Promise<void> => {
       const originalFooterStartRow = 24; // Original footer drawing start row (adjust if needed)
       const originalFooterEndRow = 28;   // Original footer drawing end row (adjust if needed)
   
-      // Get footer drawings (images) in the footer rows
+      // Get footer drawings (Images) in the footer rows
       const footerDrawings = worksheet.getImages().filter(img => {
         const row = img.range?.tl?.nativeRow;
         return row >= (originalFooterStartRow - 1) && row <= (originalFooterEndRow - 1);
@@ -2352,7 +2352,7 @@ const uploadForms = async (url: string): Promise<void> => {
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: false };
       totalRow.commit();
   
-      // Shift footer drawings/images down by number of inserted resident rows
+      // Shift footer drawings/Images down by number of inserted resident rows
       const totalInsertedRows = rowsNeeded - 4;
       const footerDrawings = worksheet.getImages().filter((img) => {
         const row = img.range?.tl?.nativeRow;
@@ -2670,7 +2670,7 @@ const uploadForms = async (url: string): Promise<void> => {
         insertionRow++;
       }
   
-      // Shift footer images
+      // Shift footer Images
       footerDrawings.forEach((drawing) => {
         if (drawing.range?.tl) drawing.range.tl.nativeRow += rowsNeeded;
         if (drawing.range?.br) drawing.range.br.nativeRow += rowsNeeded;
@@ -4021,7 +4021,7 @@ const generateDepartmentalReport = async (
       row.commit();
     }
 
-    // Shift footer images down
+    // Shift footer Images down
     footerDrawings.forEach(drawing => {
       const offset = Math.max(filteredReports.length - (footerStartRow - dataStartRow), 0);
       if (drawing.range?.tl) drawing.range.tl.nativeRow += offset;
@@ -5055,7 +5055,7 @@ const generateDepartmentalReport = async (
           row.commit();
         });
     
-        // Move signature images / footer if present
+        // Move signature Images / footer if present
         if (worksheet.getImages) {
           const footerDrawings = worksheet.getImages().filter((img) => img.range?.tl?.nativeRow >= 20);
           footerDrawings.forEach((drawing) => {
@@ -5209,7 +5209,7 @@ const generateDepartmentalReport = async (
           }}
         >
           <div className="generatereport-redirection-icons-section">
-            <img src="/images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
+            <img src="/Images/report.png" alt="user info" className="redirection-icons-generatereport"/> 
           </div>
           <h1>Generate Report</h1>
         </button>
@@ -5236,7 +5236,7 @@ const generateDepartmentalReport = async (
             }}
           >
             <div className="generatereport-redirection-icons-section">
-              <img src="/images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
+              <img src="/Images/form.png" alt="user info" className="redirection-icons-generatereport"/> 
             </div>
             <h1>Download Form</h1>
           </button>
@@ -5249,7 +5249,7 @@ const generateDepartmentalReport = async (
           <div className="generatereport-main-section1">
             <div className="generatereport-main-section1-left">
               <button onClick={handleBack}>
-                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>
               <h1> Generate Report </h1>
             </div>
@@ -5333,7 +5333,7 @@ const generateDepartmentalReport = async (
                       aria-label="Generate Monthly Resident Registration Summary Report"
                     >
                       <img
-                        src="/images/regresident.png" // You can change this to your desired icon
+                        src="/Images/regresident.png" // You can change this to your desired icon
                         alt="Resident Summary Icon"
                         className="report-icon"
                         aria-hidden="true"
@@ -5356,7 +5356,7 @@ const generateDepartmentalReport = async (
 
 
                       <button onClick={handleGenerateSeniorPDF} disabled={loadingResidentSeniorDemographic} className="report-tile">
-                        <img src="/images/senior.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/senior.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingResidentSeniorDemographic ? (
                             "Generating..."
@@ -5370,7 +5370,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGenerateStudentPDF} disabled={loadingResidentStudentDemographic} className="report-tile">
-                        <img src="/images/students.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/students.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingResidentStudentDemographic ? (
                             "Generating..."
@@ -5383,7 +5383,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGeneratePwdPDF} disabled={loadingResidentPWDDemographic} className="report-tile">
-                        <img src="/images/disabled.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/disabled.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingResidentPWDDemographic ? (
                             "Generating..."
@@ -5396,7 +5396,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGenerateSoloParentPDF} disabled={loadingResidentSoloParentDemographic} className="report-tile">
-                        <img src="/images/soloparent.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/soloparent.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingResidentSoloParentDemographic ? (
                             "Generating..."
@@ -5409,7 +5409,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGenerateResidentPDF} disabled={loadingMasterResident} className="report-tile">
-                        <img src="/images/form.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/form.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingMasterResident ? "Generating..." : "Masterlist Resident Inhabitant Record"}
                         </p>
@@ -5420,7 +5420,7 @@ const generateDepartmentalReport = async (
                   {currentPage === 2 && (
                     <div className="report-grid">
                       <button onClick={handleGenerateEastResidentPDF} disabled={loadingEastResident} className="report-tile">
-                        <img src="/images/east.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/east.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                         {loadingEastResident ? (
                           "Generating..."
@@ -5434,7 +5434,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGenerateWestResidentPDF} disabled={loadingWestResident} className="report-tile">
-                        <img src="/images/west.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/west.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingWestResident ? (
                             "Generating..."
@@ -5448,7 +5448,7 @@ const generateDepartmentalReport = async (
                       </button>
 
                       <button onClick={handleGenerateSouthResidentPDF} disabled={loadingSouthResident} className="report-tile">
-                        <img src="/images/south.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/south.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingSouthResident ? (
                             "Generating..."
@@ -5471,7 +5471,7 @@ const generateDepartmentalReport = async (
                           aria-label="Generate Kasambahay Masterlist Report"
                         >
                           <img
-                            src="/images/form.png"
+                            src="/Images/form.png"
                             alt="Kasambahay icon"
                             className="report-icon"
                             aria-hidden="true"
@@ -5499,7 +5499,7 @@ const generateDepartmentalReport = async (
 
 
                       <button onClick={handleGenerateJobSeekerPDF} disabled={loadingJobSeeker} className="report-tile">
-                        <img src="/images/jobseeker.png" alt="user info" className="report-icon-bigger"/> 
+                        <img src="/Images/jobseeker.png" alt="user info" className="report-icon-bigger"/> 
                         <p className="report-title">
                           {loadingJobSeeker ? "Generating..." : "First-Time Job Seeker List"}
                         </p>
@@ -5523,7 +5523,7 @@ const generateDepartmentalReport = async (
                         aria-label="Generate Incident Summary Report"
                       >
                         <img
-                          src="/images/incident.png"
+                          src="/Images/incident.png"
                           alt="Incident Summary Icon"
                           className="report-icon"
                           aria-hidden="true"
@@ -5548,7 +5548,7 @@ const generateDepartmentalReport = async (
 
 
                       <button onClick={handleGenerateIncidentStatusSummaryPDF} disabled={loadingIncidentStatuses} className="report-tile">
-                        <img src="/images/incidentstatus.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/incidentstatus.png" alt="user info" className="report-icon"/> 
                         <p className="report-title">
                           {loadingIncidentStatuses ? "Generating..." : "Incident Status Summary"}
                         </p>
@@ -5557,14 +5557,14 @@ const generateDepartmentalReport = async (
                       {(session?.user?.department === "Lupon" || session?.user?.position === "Assistant Secretary") && (
                         <>
                           <button onClick={handleGenerateLuponSettledPDF} disabled={loadingLuponSettledReport} className="report-tile">
-                            <img src="/images/incidentsettled.png" alt="user info" className="report-icon-bigger"/> 
+                            <img src="/Images/incidentsettled.png" alt="user info" className="report-icon-bigger"/> 
                             <p className="report-title">
                               {loadingLuponSettledReport ? "Generating..." : "Lupon Settled Report"}
                             </p>
                           </button>
 
                           <button onClick={handleGenerateLuponPendingPDF} disabled={loadingLuponPendingReport} className="report-tile">
-                            <img src="/images/incidentpending.png" alt="user info" className="report-icon-bigger"/> 
+                            <img src="/Images/incidentpending.png" alt="user info" className="report-icon-bigger"/> 
                             <p className="report-title">
                               {loadingLuponPendingReport ? "Generating..." : "Lupon Pending Report"}
                             </p>
@@ -5587,7 +5587,7 @@ const generateDepartmentalReport = async (
                                 aria-busy={loadingVAWCReport}
                                 aria-label="Generate Monthly Department Report"
                               >
-                                <img src="/images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
+                                <img src="/Images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
                                 <p className="report-title">
                                   {loadingVAWCReport ? "Generating..." : "Monthly Department Report"}
                                 </p>
@@ -5619,7 +5619,7 @@ const generateDepartmentalReport = async (
                               >
 
                                 {/* change icon */}
-                                <img src="/images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
+                                <img src="/Images/womenandchildren.png" alt="icon" className="report-icon-bigger" />
                                 <p className="report-title">
                                   {loadingVAWCReport ? "Generating..." : "Admin All Departments Monthly Report"}
                                 </p>
@@ -5640,7 +5640,7 @@ const generateDepartmentalReport = async (
                       {(session?.user?.department === "GAD" || session?.user?.department === "BCPC" || session?.user?.position === "Assistant Secretary")  && (
                         <>
                           {/* <button  className="report-tile">
-                            <img src="/images/genders.png" alt="user info" className="report-icon"/> 
+                            <img src="/Images/genders.png" alt="user info" className="report-icon"/> 
                             <p className="report-title">
                               GADRCO Quarterly Monitoring Report
                             </p>
@@ -5667,7 +5667,7 @@ const generateDepartmentalReport = async (
                           aria-label="Generate Custom Service Request Report"
                         >
                           <img
-                            src="/images/services.png"
+                            src="/Images/services.png"
                             alt="Service Icon"
                             className="report-icon"
                             aria-hidden="true"
@@ -5706,13 +5706,13 @@ const generateDepartmentalReport = async (
                   {currentPage === 1 && (
                     <div className="report-grid">
                       <button  className="report-tile">
-                        <img src="/images/participation.png" alt="user info" className="report-icon"/> 
+                        <img src="/Images/participation.png" alt="user info" className="report-icon"/> 
                           <p className="report-title">
                             Program Participation Report
                           </p>
                       </button>
                       <button  className="report-tile">
-                        <img src="/images/status.png" alt="user info" className="report-icon-bigger"/> 
+                        <img src="/Images/status.png" alt="user info" className="report-icon-bigger"/> 
                           <p className="report-title">
                             Program Completion Status Report
                           </p>
@@ -5758,7 +5758,7 @@ const generateDepartmentalReport = async (
           <div className="generatereport-main-section1">
             <div className="generatereport-main-section1-left">
               <button onClick={handleBack}>
-                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>
               <h1> Download Form </h1>
             </div>
@@ -5854,7 +5854,7 @@ const generateDepartmentalReport = async (
                       {paginatedFiles.slice(0, 4).map((file, index) => (
                         <div className="form-card" key={index}>
                           <div className="form-icon-label">
-                            <img src="/images/form.png" alt="Form Icon" />
+                            <img src="/Images/form.png" alt="Form Icon" />
                             <span>{file.name.replace(".docx", "")}</span>
                           </div>
                           <div className="form-buttons">
