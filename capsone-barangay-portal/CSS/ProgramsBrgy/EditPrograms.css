@@ -1327,3 +1327,161 @@ animation: fadeSlideIn 0.5s ease-out;
   75% { transform: translateX(-3px); }
   100% { transform: translateX(0); }
 }
+
+/* Lock column widths to the <colgroup> percentages */
+.participants-table.fixed-columns {
+  table-layout: fixed;   /* key: stops content-based resizing */
+  width: 100%;
+}
+
+/* prevent long strings from blowing up a column */
+.participants-table.fixed-columns .td-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* Resident Picker for Participants */
+
+/* ===== Residents Picker Popup (Program Participants) ===== */
+.program-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.program-popup {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  max-width: 1000px;
+  width: 100%;
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgb(168, 161, 158);
+}
+
+.program-popup h2 {
+  margin-top: 1rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  color: #214666;
+}
+
+.program-popup h1 {
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  text-align: center;
+  color: #dd3327;
+}
+
+.program-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  margin-top: 1rem;
+}
+
+.program-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.program-table th,
+.program-table td {
+  padding: 1.1rem;
+  text-align: center;
+  border-top: 1px solid #e2e2e2;
+  border-bottom: 1px solid #e2e2e2;
+}
+
+.program-table th {
+  background-color: #214666;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.program-table-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.program-table-row:hover {
+  background-color: #f1f1f1;
+}
+
+.program-list thead {
+  position: sticky;
+  top: 0;
+  background-color: #042a4b;
+  z-index: 10;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+  height: 60px;
+  width: 100%;
+}
+
+.program-search-input {
+  margin: 0.5rem 0 1rem;
+  padding: 8px;
+  width: 100%;
+  border-radius: 4px;
+  text-align: center;
+  border: 1.5px solid #f49028;
+}
+
+.program-search-input:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+/* ===== Toasts (Success & Error) ===== */
+.popup-overlay-add-program,
+.error-popup-overlay-add-program {
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  width: 440px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1002;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+.popup-overlay-add-program {
+  background: #777575;
+  color: white;
+  border-left: 10px solid #403f3e;
+}
+
+.error-popup-overlay-add-program {
+  background: #cc3434;
+  color: white;
+  border-left: 10px solid #8a0f0f;
+}
+
+.popup-add-program {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+

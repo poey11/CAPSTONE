@@ -16,6 +16,7 @@ import {
   query,
   Timestamp,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
@@ -130,9 +131,65 @@ export default function ProgramsModule() {
   const [activeSectionRedirection, setActiveSectionRedirection] =
     useState<"main" | "programs" | "participants">("main");
 
-  // Main-page popup state (shared UI)
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
+  // ===== Toasts (success / error) =====
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+  const [toastMsg, setToastMsg] = useState("");
+  const showToast = (type: "success" | "error", msg: string, ms = 1800) => {
+    setToastType(type);
+    setToastMsg(msg);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), ms);
+  };
+
+  // ===== Custom Delete Confirmation Modal =====
+  type ConfirmState =
+    | { open: false }
+    | {
+        open: true;
+        kind: "program" | "participant";
+        id: string;
+        label?: string; // e.g., Program Name: X / Participant: Y
+      };
+
+  const [confirmDel, setConfirmDel] = useState<ConfirmState>({ open: false });
+
+  const askConfirmDeleteProgram = (p: Program) => {
+    setConfirmDel({
+      open: true,
+      kind: "program",
+      id: p.id,
+      label: `Program Name: ${p.programName}`,
+    });
+  };
+  const askConfirmDeleteParticipant = (participant: Participant) => {
+    setConfirmDel({
+      open: true,
+      kind: "participant",
+      id: participant.id,
+      label: `Participant: ${participant.fullName || ""}`,
+    });
+  };
+
+  const handleConfirmNo = () => setConfirmDel({ open: false });
+
+  const handleConfirmYes = async () => {
+    if (!confirmDel.open) return;
+    const { kind, id } = confirmDel;
+
+    setConfirmDel({ open: false }); // close modal immediately
+    try {
+      if (kind === "program") {
+        await deleteDoc(doc(db, "Programs", id));
+        showToast("success", "Program deleted successfully!");
+      } else {
+        await deleteDoc(doc(db, "ProgramsParticipants", id));
+        showToast("success", "Participant deleted successfully!");
+      }
+    } catch {
+      showToast("error", kind === "program" ? "Failed to delete program." : "Failed to delete participant.");
+    }
+  };
 
   // Load Programs from Firestore (and auto-fix progress/active atomically)
   useEffect(() => {
@@ -185,9 +242,13 @@ export default function ProgramsModule() {
     return () => unsub();
   }, []);
 
-  // Load Participants from Firestore
+  // Load Participants from Firestore (only Pending)
   useEffect(() => {
-    const q = query(collection(db, "ProgramsParticipants"), orderBy("programName", "asc"));
+    const q = query(
+      collection(db, "ProgramsParticipants"),
+      where("approvalStatus", "==", "Pending"),
+      orderBy("programName", "asc")
+    );
     const unsub = onSnapshot(
       q,
       (snap) => {
@@ -240,17 +301,6 @@ export default function ProgramsModule() {
 
   const handleEditClick = (id: string) => {
     router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${id}`);
-  };
-
-  // Program delete
-  const handleDeleteProgram = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this program?")) return;
-    try {
-      await deleteDoc(doc(db, "Programs", id));
-      alert("Program deleted successfully!");
-    } catch (e) {
-      alert("Failed to delete program.");
-    }
   };
 
   // Add Program Modal
@@ -380,8 +430,9 @@ export default function ProgramsModule() {
       setParticipantsListsData((prev) =>
         prev.map((p) => (p.id === updated.id ? { ...p, ...updated } : p))
       );
+      showToast("success", "Participant changes saved.");
     } catch (e) {
-      alert("Failed to save participant changes.");
+      showToast("error", "Failed to save participant changes.");
     }
   };
 
@@ -391,9 +442,9 @@ export default function ProgramsModule() {
       await updateDoc(doc(db, "ProgramsParticipants", id), {
         approvalStatus: "Approved",
       });
-      alert("Participant approved.");
+      showToast("success", "Participant approved.");
     } catch {
-      alert("Failed to approve participant.");
+      showToast("error", "Failed to approve participant.");
     }
   };
 
@@ -404,20 +455,9 @@ export default function ProgramsModule() {
         approvalStatus: "Rejected",
         rejectionReason: reason,
       });
-      alert("Participant rejected.");
+      showToast("success", "Participant rejected.");
     } catch {
-      alert("Failed to reject participant.");
-    }
-  };
-
-  // Participant delete
-  const handleDeleteParticipant = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this participant?")) return;
-    try {
-      await deleteDoc(doc(db, "ProgramsParticipants", id));
-      alert("Participant deleted successfully!");
-    } catch {
-      alert("Failed to delete participant.");
+      showToast("error", "Failed to reject participant.");
     }
   };
 
@@ -480,11 +520,8 @@ export default function ProgramsModule() {
       <AddNewProgramModal
         isOpen={showAddProgramsPopup}
         onClose={() => setShowAddProgramsPopup(false)}
-        // When the modal saves successfully, show popup on main page
         onProgramSaved={(msg) => {
-          setPopupMessage(msg || "Program saved successfully.");
-          setShowPopup(true);
-          setTimeout(() => setShowPopup(false), 1500);
+          showToast("success", msg || "Program saved successfully.");
         }}
       />
 
@@ -603,7 +640,7 @@ export default function ProgramsModule() {
                           </button>
                           <button
                             className="action-programs-button"
-                            onClick={() => handleDeleteProgram(program.id)}
+                            onClick={() => askConfirmDeleteProgram(program)}
                           >
                             <img
                               src="/Images/delete.png"
@@ -717,7 +754,7 @@ export default function ProgramsModule() {
                           </button>
                           <button
                             className="action-programs-button"
-                            onClick={() => handleDeleteParticipant(participant.id)}
+                            onClick={() => askConfirmDeleteParticipant(participant)}
                           >
                             <img
                               src="/Images/delete.png"
@@ -858,7 +895,7 @@ export default function ProgramsModule() {
                           </button>
                           <button
                             className="action-programs-button"
-                            onClick={() => handleDeleteProgram(program.id)}
+                            onClick={() => askConfirmDeleteProgram(program)}
                           >
                             <img
                               src="/Images/delete.png"
@@ -895,12 +932,48 @@ export default function ProgramsModule() {
         </>
       )}
 
-      {/* Shared popup rendered on main page */}
-      {showPopup && (
-        <div className="popup-overlay-program show">
-          <div className="popup-program">
-            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-            <p>{popupMessage}</p>
+      {/* ===== Single Toast outlet (success/error) ===== */}
+      {toastVisible && (
+        <div
+          className={`${
+            toastType === "success"
+              ? "popup-overlay-add-program"
+              : "error-popup-overlay-add-program"
+          } show`}
+        >
+          <div className="popup-add-program">
+            <img
+              src={toastType === "success" ? "/Images/check.png" : "/Images/warning-1.png"}
+              alt="icon alert"
+              className="icon-alert"
+            />
+            <p>{toastMsg}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ===== Custom Confirmation Modal (matches your first screenshot) ===== */}
+      {confirmDel.open && (
+        <div className="confirmation-popup-overlay-add-program">
+          <div className="confirmation-popup-add-program">
+            <img
+              src="/Images/question.png"
+              alt="question icon"
+              className="successful-icon-popup"
+            />
+            <p>
+              Are you sure you want to delete this{" "}
+              {confirmDel.kind === "program" ? "program" : "participant"}?
+            </p>
+            {confirmDel.label && (
+              <div style={{ color: "#dd3327", marginTop: 6, fontWeight: 600 }}>
+                {confirmDel.label}
+              </div>
+            )}
+            <div className="yesno-container-add">
+              <button onClick={handleConfirmNo} className="no-button-add">No</button>
+              <button onClick={handleConfirmYes} className="yes-button-add">Yes</button>
+            </div>
           </div>
         </div>
       )}
