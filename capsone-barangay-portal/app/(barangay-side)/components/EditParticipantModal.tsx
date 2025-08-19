@@ -13,6 +13,7 @@ type Participant = {
   address?: string;      // optional alias
   programName?: string;
   idImageUrl?: string;   // for the Requirements tab preview
+  role?: string;         // new field for role
 };
 
 type Props = {
@@ -49,6 +50,7 @@ export default function EditParticipantModal({
   const [email, setEmail]         = useState("");
   const [homeAddress, setHomeAddress] = useState("");
   const [programName, setProgramName] = useState("");
+  const [role, setRole] = useState(""); // new field for role
 
   // Reject popups state
   const [showRejectPopup, setShowRejectPopup] = useState(false);
@@ -80,6 +82,7 @@ export default function EditParticipantModal({
     setEmail(participant.emailAddress || participant.email || "");
     setHomeAddress(participant.location || participant.address || "");
     setProgramName(participant.programName || "");
+    setRole(participant.role || "Participant"); // new field for role
     setActiveTab("details");
     setErrors({});
     setRejectReason("");
@@ -277,6 +280,18 @@ export default function EditParticipantModal({
                             }`}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            readOnly
+                          />
+                        </div>
+                        <div className="view-participant-fields-section">
+                          <p>Role</p>
+                          <input
+                            type="role"
+                            className={`view-participant-input-field ${
+                              errors.role ? "error" : ""
+                            }`}
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
                             readOnly
                           />
                         </div>
