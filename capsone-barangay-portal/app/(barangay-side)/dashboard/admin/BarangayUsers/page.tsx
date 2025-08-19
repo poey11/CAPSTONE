@@ -637,7 +637,7 @@ useEffect(() => {
    
     {currentUser.length === 0 ? (
       <div className="no-result-card" /* edited this class */>
-        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
+        <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
         <p className="no-results-department" /* edited this class */>No Results Found</p>
       </div>
     ) : (

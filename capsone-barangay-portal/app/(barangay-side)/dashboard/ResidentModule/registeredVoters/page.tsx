@@ -774,7 +774,7 @@ export default function RegisteredVotersModule() {
               <div className="view-user-header-body-top-section">
                   <div className="view-user-backbutton-container">
                     <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">
