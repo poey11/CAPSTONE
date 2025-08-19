@@ -14,7 +14,7 @@ export default function Announcement() {
         We have witnessed your journey, the countless hours of study, the sacrifices made, and the resilience you showed during the preparation. This success is a reflection of not only your intelligence but your unwavering commitment to your profession. As you begin this next chapter in your career, we are excited to see the positive impact you will make in the legal field.
         Your achievements inspire others to pursue their dreams and to push through challenges, no matter how daunting they may seem. The legal world awaits your expertise, and we have no doubt that you will continue to excel and contribute meaningfully to society. This milestone marks just the beginning of a bright future, and we, your community, stand behind you as you take on this new and exciting chapter of your life.
       `,
-      date: "January 15, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -25,7 +25,7 @@ export default function Announcement() {
         She always finds time to support her friends, family, and colleagues, making them feel valued and appreciated. Her kindness and generosity make her a true role model to those who know her. Everyone who has had the privilege of working with Justine knows just how hard she works to make things happen. 
         She is always the first one to step up to the plate when something needs to be done, and her commitment to success is unwavering. Justine is the type of person who motivates others to be the best version of themselves, and her influence is far-reaching. With her dedication, passion, and charisma, she is destined for great things, and there is no limit to what she can achieve.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -36,7 +36,7 @@ export default function Announcement() {
         Her resilience and perseverance have been a guiding force for many, and her influence continues to have a profound effect on those around her. Justine’s passion for making a difference is evident in the way she interacts with people, offering support and encouragement whenever it is needed. Her ability to lead with empathy and kindness makes her not only a remarkable individual but also a true asset to any team or community she is a part of.
         Justine’s ambition and drive are only matched by her desire to help others achieve their potential, and she will undoubtedly continue to make a significant impact wherever she goes.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -47,7 +47,7 @@ export default function Announcement() {
         One of Justine’s greatest strengths is her ability to remain calm and focused in high-pressure situations. She handles challenges with grace and determination, never losing sight of her objectives. Her ability to think critically and problem-solve in creative ways has earned her the respect of her peers.
         Beyond her professional accomplishments, Justine is a compassionate and caring individual who is always willing to lend a helping hand. She is a true advocate for those in need and works tirelessly to make the world a better place. Justine’s authenticity and kindness make her someone who is deeply admired and respected by everyone who knows her.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -58,7 +58,7 @@ export default function Announcement() {
         Her infectious personality, combined with her strong sense of purpose, makes her someone who brings people together. Justine's support and encouragement help others to find the confidence they need to succeed and reach their goals. Her deep empathy and genuine care for those around her make her a beloved figure in every community she’s a part of.
         Justine is a role model in every sense of the word, and her impact will continue to be felt for years to come.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
     {
@@ -69,7 +69,7 @@ export default function Announcement() {
         Her infectious personality, combined with her strong sense of purpose, makes her someone who brings people together. Justine's support and encouragement help others to find the confidence they need to succeed and reach their goals. Her deep empathy and genuine care for those around her make her a beloved figure in every community she’s a part of.
         Justine is a role model in every sense of the word, and her impact will continue to be felt for years to come.
       `,
-      date: "March 24, 2024",
+      date: "Wednesday, January 15, 2024",
       image: "/Images/anak.jpg",
     },
   ];
@@ -96,16 +96,23 @@ export default function Announcement() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  const isFirstRender = useRef(true);
 
   const totalPages = Math.ceil(announcements.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentAnnouncements = announcements.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
-  if (sectionRef.current) {
-    sectionRef.current.scrollTo({ top: 0, behavior: "smooth" });
-  }
-}, [currentPage]);
+    if (isFirstRender.current) {
+      // skip the first run
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (sectionRef.current) {
+      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [currentPage]);
 
 
   return (

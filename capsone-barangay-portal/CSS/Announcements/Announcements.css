@@ -95,29 +95,9 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
 
-  .announcement-image-announcement {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-  }
 
 
-  .announcement-content-announcement {
-    padding: 1rem;
-    flex-grow: 1; /* Ensures the content section fills available space */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
 
-
-  .announcement-date-announcement {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 1rem;
-    color: #9e9e9e;
-  }
 
   .calendar-icon {
   width: 16px;
@@ -189,8 +169,6 @@
 /* Left Section (scrollable) */
 .left-section-announcement {
   flex: 3;
-  height: calc(100vh - 250px); /* minus header */
-  overflow-y: auto;
   padding-right: 1rem;
 }
 
@@ -277,7 +255,7 @@
   margin-bottom: 1.5rem;
   border: 1px solid #ddd;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  height: 600px;
+  height: 570px;
 }
 
 .announcement-image-announcement {
@@ -325,6 +303,10 @@
 .announcement-date-announcement {
   font-size: 1.0rem;
   color: #DF7426;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
 }
 
 .read-more-announcement {
