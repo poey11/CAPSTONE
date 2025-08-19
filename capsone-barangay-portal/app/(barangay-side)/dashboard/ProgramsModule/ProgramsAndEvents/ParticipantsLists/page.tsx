@@ -122,7 +122,7 @@ export default function EditResident() {
     }
   };
 
-  // ===== Program meta =====
+  //  Program meta 
   useEffect(() => {
     let cancelled = false;
 
@@ -164,7 +164,7 @@ export default function EditResident() {
     };
   }, [programId]);
 
-  // ===== Live participants query (filtered by programId if provided) =====
+  //  Live participants query (filtered by programId if provided) 
   useEffect(() => {
     setLoading(true);
     const colRef = collection(db, "ProgramsParticipants");
@@ -244,7 +244,7 @@ export default function EditResident() {
     [programCapacity, participants.length]
   );
 
-  // ===== NEW: Open Add popup =====
+  //  NEW: Open Add popup 
   const openAddPopup = async () => {
     if (!programId) {
       setErrorToastMsg("To add a walk-in participant, open this page from a specific Program.");
@@ -308,7 +308,7 @@ export default function EditResident() {
     return [...arr].sort((a, b) => (Number(a.residentNumber || 0) - Number(b.residentNumber || 0)));
   }, [residents, resSearch]);
 
-  // ===== Add selected resident as participant (with all guards re-checked) =====
+  // Add selected resident as participant (with all guards re-checked) 
   const addResidentAsParticipant = async (resident: Resident) => {
     try {
       // 1) Re-check program status server-side

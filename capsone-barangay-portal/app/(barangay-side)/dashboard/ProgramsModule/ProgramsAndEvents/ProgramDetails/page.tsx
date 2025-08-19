@@ -77,7 +77,7 @@ export default function ProgramDetails() {
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
-  // ===== Photos (multiple) =====
+  //  Photos (multiple)
   // Existing photos from DB
   const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null); // cover
   const [existingPhotoURLs, setExistingPhotoURLs] = useState<string[]>([]); // gallery
@@ -167,7 +167,7 @@ export default function ProgramDetails() {
   // Read-only lock
   const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected";
 
-  // ===== Load program =====
+  //  Load program 
   useEffect(() => {
     const load = async () => {
       if (!programId) return;
@@ -254,7 +254,7 @@ export default function ProgramDetails() {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
   };
 
-  // ===== Multi file select =====
+  //  Multi file select 
   const handleFilesChange = (files: FileList | null) => {
     if (isReadOnly) return;
     setFileError(null);

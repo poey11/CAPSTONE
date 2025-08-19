@@ -131,7 +131,7 @@ export default function ProgramsModule() {
   const [activeSectionRedirection, setActiveSectionRedirection] =
     useState<"main" | "programs" | "participants">("main");
 
-  // ===== Toasts (success / error) =====
+  // Toasts (success / error)
   const [toastVisible, setToastVisible] = useState(false);
   const [toastType, setToastType] = useState<"success" | "error">("success");
   const [toastMsg, setToastMsg] = useState("");
@@ -142,7 +142,7 @@ export default function ProgramsModule() {
     setTimeout(() => setToastVisible(false), ms);
   };
 
-  // ===== Custom Delete Confirmation Modal =====
+  //  Custom Delete Confirmation Modal 
   type ConfirmState =
     | { open: false }
     | {

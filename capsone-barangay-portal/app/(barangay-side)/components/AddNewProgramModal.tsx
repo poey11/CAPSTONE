@@ -40,7 +40,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // ====== Details form state ======
+  // Details form state 
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
@@ -65,7 +65,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  // ====== Requirements ======
+  //  Requirements 
   const PREDEFINED_REQ_TEXT: SimpleField[] = [
     { name: "firstName" },
     { name: "lastName" },
