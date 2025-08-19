@@ -496,7 +496,7 @@ export default function TopMenu() {
             <div className="dropdown show">
               <ul>
                 <li className="options-topmenu" onClick={() => { setDropdownOpen(false); router.push(`/dashboard/settingsPage?id=${session?.user?.id}`); }}>Settings</li>
-                <li className="options-topmenu" onClick={() => { setDropdownOpen(false); signOut({ callbackUrl: "/" }); }}>Log Out</li>
+                <li className="options-topmenu" onClick={() => { setDropdownOpen(false); signOut(); }}>Log Out</li>
               </ul>
             </div>
           )}
