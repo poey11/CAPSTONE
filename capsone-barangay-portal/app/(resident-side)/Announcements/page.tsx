@@ -1,6 +1,7 @@
 "use client";
 import "@/CSS/Announcements/Announcements.css";
 import Link from 'next/link';
+import { useState, useEffect, useRef } from "react";
 
 
 
@@ -92,6 +93,20 @@ export default function Announcement() {
     },
   ];
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  const totalPages = Math.ceil(announcements.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentAnnouncements = announcements.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+  if (sectionRef.current) {
+    sectionRef.current.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}, [currentPage]);
+
 
   return (
     <main className="main-container-announcement">
@@ -108,49 +123,78 @@ export default function Announcement() {
       
       <div className="layout-announcement">
         
-        <div className="left-section-announcement">
-  {announcements.map((item, index) => (
-    <div key={index} className="announcement-card-announcement">
-      <img
-        src={item.image}
-        alt={item.title}
-        className="announcement-image-announcement"
-      />
-      <div className="announcement-content-announcement">
-        <h2 className="announcement-title-announcement">
-          {item.title}
-        </h2>
-        <p className="announcement-description-announcement">
-          {item.description}
-        </p>
-        <div className="announcement-footer-announcement">
-          <span className="announcement-date-announcement">
-            <img
-              src="/Images/calendar.png"
-              alt="Calendar"
-              className="calendar-icon"
-            />
-            {item.date}
-          </span>
-          <Link
-            href={{
-              pathname: `/Announcements/${index}`,
-              query: {
-                title: item.title,
-                description: item.description,
-                date: item.date,
-                image: item.image,
-              },
-            }}
-            className="read-more-announcement"
-          >
-            Read More
-          </Link>
+        <div className="left-section-announcement" ref={sectionRef}>
+          {currentAnnouncements.map((item, index) => (
+            <div key={startIndex + index} className="announcement-card-announcement">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="announcement-image-announcement"
+              />
+              <div className="announcement-content-announcement">
+                <h2 className="announcement-title-announcement">
+                  {item.title}
+                </h2>
+                <p className="announcement-description-announcement">
+                  {item.description}
+                </p>
+                <div className="announcement-footer-announcement">
+                  <span className="announcement-date-announcement">
+                    <img
+                      src="/Images/calendar.png"
+                      alt="Calendar"
+                      className="calendar-icon"
+                    />
+                    {item.date}
+                  </span>
+                  <Link
+                    href={{
+                      pathname: `/Announcements/${index}`,
+                      query: {
+                        title: item.title,
+                        description: item.description,
+                        date: item.date,
+                        image: item.image,
+                      },
+                    }}
+                    className="read-more-announcement"
+                  >
+                    Read More
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* PAGINATION BUTTONS */}
+          <div className="pagination-announcement">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Prev
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={currentPage === i + 1 ? "active-page" : ""}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
-  ))}
-</div>
+
+        
 
         
         <div className="right-section-announcement">
@@ -173,7 +217,7 @@ export default function Announcement() {
             {recentPosts.map((post, idx) => (
               <div key={idx} className="recent-post-card">
                 <img src={post.image} alt={post.title}/>
-                <div>
+                <div className="recent-post-content">
                   <p>{post.title}</p>
                   <span>{post.date}</span>
                 </div>

@@ -218,6 +218,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 .year-btn {
@@ -248,9 +249,13 @@
 
 .recent-post-card img {
   width: 100px;
-  height: 40px;
+  height: 55px;
   object-fit: cover;
   border-radius: 5px;
+}
+
+.recent-post-content{
+  width: 100%;
 }
 
 .recent-post-card p {
@@ -326,4 +331,36 @@
   font-size: 0.9rem;
   color: #0066cc;
   text-decoration: underline;
+}
+
+.pagination-announcement {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.pagination-announcement button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #ccc;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.2s;
+}
+
+.pagination-announcement button:hover:not(:disabled) {
+  background: #DF7426;
+  color: #fff;
+}
+
+.pagination-announcement .active-page {
+  background: #214666;
+  color: white;
+  font-weight: bold;
+}
+
+.pagination-announcement button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
