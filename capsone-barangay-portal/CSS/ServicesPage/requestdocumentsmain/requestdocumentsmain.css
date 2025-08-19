@@ -367,6 +367,13 @@ to {
   animation: fadeSlideInServices 1s ease-out forwards;
 }
 
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .services-title {
     font-size: 2.5rem;
   font-weight: bold;
@@ -388,6 +395,15 @@ to {
   flex: 1;
   border-top: 1px solid #ccc;
 }
+
+.services-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
 
 .services-underline {
   width: 100px;
