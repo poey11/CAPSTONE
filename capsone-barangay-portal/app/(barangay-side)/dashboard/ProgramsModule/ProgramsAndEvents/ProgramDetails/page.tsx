@@ -17,9 +17,7 @@ const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "location" },
 ];
 
-const PREDEFINED_REQ_FILES: SimpleField[] = [
-  { name: "validIDjpg" }, // Valid ID upload
-];
+const PREDEFINED_REQ_FILES: SimpleField[] = [{ name: "validIDjpg" }];
 
 const toSet = (arr: SimpleField[]) =>
   new Set(
@@ -49,13 +47,11 @@ export default function ProgramDetails() {
 
   const user = session?.user as any;
   const userPosition = user?.position || "";
-  const reviewerName = [userPosition, user?.fullName || user?.name || ""]
-    .filter(Boolean)
-    .join(" ");
+  const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
 
-  // Popups
+  // Popups / toasts
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false);
@@ -63,7 +59,7 @@ export default function ProgramDetails() {
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Form state (aligned with AddNewProgramModal)
+  // Form state
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
@@ -81,18 +77,23 @@ export default function ProgramDetails() {
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
-  // Photo upload
-  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
-  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
-  const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null);
+  // ===== Photos (multiple) =====
+  // Existing photos from DB
+  const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null); // cover
+  const [existingPhotoURLs, setExistingPhotoURLs] = useState<string[]>([]); // gallery
+
+  // Newly selected (not yet uploaded)
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [previewURLs, setPreviewURLs] = useState<string[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   // Statuses
   const [approvalStatus, setApprovalStatus] = useState<string>("Pending");
-  const [progressStatus, setProgressStatus] = useState<string>("Upcoming"); // NEW
-  const [activeStatus, setActiveStatus] = useState<"Active" | "Inactive">("Inactive"); // NEW
+  const [progressStatus, setProgressStatus] = useState<string>("Upcoming");
+  const [activeStatus, setActiveStatus] = useState<"Active" | "Inactive">("Inactive");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  // Who suggested (for notifications)
+  // Who suggested
   const [suggestedBy, setSuggestedBy] = useState<string>("");
   const [suggestedByUid, setSuggestedByUid] = useState<string | null>(null);
 
@@ -104,6 +105,7 @@ export default function ProgramDetails() {
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
 
+  // Requirements
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -162,10 +164,10 @@ export default function ProgramDetails() {
     return h * 60 + m;
   };
 
-  // Read-only when Completed
-  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected"; // NEW
+  // Read-only lock
+  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected";
 
-  // Load the program by id
+  // ===== Load program =====
   useEffect(() => {
     const load = async () => {
       if (!programId) return;
@@ -180,15 +182,13 @@ export default function ProgramDetails() {
         const data: any = snap.data() || {};
 
         setProgramName(data.programName ?? "");
-        setParticipants(
-          typeof data.participants === "number" ? String(data.participants) : data.participants ?? ""
-        );
+        setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
 
         setApprovalStatus(data.approvalStatus ?? "Pending");
-        setProgressStatus(data.progressStatus ?? "Upcoming"); // NEW
-        setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive"); // NEW
+        setProgressStatus(data.progressStatus ?? "Upcoming");
+        setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
 
         setSuggestedBy(data.suggestedBy ?? "");
         setSuggestedByUid(data.suggestedByUid ?? null);
@@ -220,14 +220,16 @@ export default function ProgramDetails() {
 
         setTimeStart(data.timeStart ?? "");
         setTimeEnd(data.timeEnd ?? "");
-
         setDescription(data.description ?? "");
         setSummary(data.summary ?? "");
 
-        setExistingPhotoURL(data.photoURL ?? null);
-        setIdentificationPreview(data.photoURL ?? null);
+        // Photos (existing)
+        const cover = data.photoURL ?? null;
+        const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : (cover ? [cover] : []);
+        setExistingPhotoURL(cover);
+        setExistingPhotoURLs(gallery);
 
-        // ----- Load Requirements (split into predefined vs custom) -----
+        // Requirements (split into predefined vs custom)
         const preTextSet = toSet(PREDEFINED_REQ_TEXT);
         const preFileSet = toSet(PREDEFINED_REQ_FILES);
 
@@ -252,18 +254,61 @@ export default function ProgramDetails() {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
   };
 
-  const handleDiscardClick = () => setShowDiscardPopup(true);
-  const handleRejectClick = () => setShowRejectPopup(true);
+  // ===== Multi file select =====
+  const handleFilesChange = (files: FileList | null) => {
+    if (isReadOnly) return;
+    setFileError(null);
 
-  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setIdentificationFile(file);
-    if (file) setIdentificationPreview(URL.createObjectURL(file));
+    // Clear previous previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
+
+    if (!files || files.length === 0) {
+      setPhotoFiles([]);
+      return;
+    }
+
+    const MAX_MB = 5;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
+    const MAX_FILES = 12;
+
+    const picked = Array.from(files);
+    const filtered: File[] = [];
+    const errs: string[] = [];
+
+    for (const f of picked.slice(0, MAX_FILES)) {
+      if (!f.type.startsWith("image/")) {
+        errs.push(`${f.name} is not an image.`);
+        continue;
+      }
+      if (f.size > MAX_BYTES) {
+        errs.push(`${f.name} exceeds ${MAX_MB}MB.`);
+        continue;
+      }
+      filtered.push(f);
+    }
+    if (picked.length > MAX_FILES) errs.push(`Only the first ${MAX_FILES} images were accepted.`);
+
+    const previews = filtered.map((f) => URL.createObjectURL(f));
+    setPhotoFiles(filtered);
+    setPreviewURLs(previews);
+    if (errs.length) setFileError(errs.join(" "));
   };
 
-  // Active/Inactive toggle (instant write)
+  useEffect(() => {
+    return () => {
+      // cleanup previews
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+    };
+  }, []);
+
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     const next = (e.target.value as "Active" | "Inactive") || "Inactive";
     const prev = activeStatus;
     setActiveStatus(next);
@@ -274,7 +319,7 @@ export default function ProgramDetails() {
       setShowPopup(true);
     } catch (err) {
       console.error(err);
-      setActiveStatus(prev); // rollback
+      setActiveStatus(prev);
       setPopupMessage("Failed to update status.");
       setShowPopup(true);
     } finally {
@@ -330,7 +375,7 @@ export default function ProgramDetails() {
   };
 
   const validate = () => {
-    if (isReadOnly) return false; // guard; shouldn't save anyway
+    if (isReadOnly) return false;
     const e: { [k: string]: boolean } = {};
     const need = (k: string, ok: boolean) => {
       if (!ok) {
@@ -378,7 +423,7 @@ export default function ProgramDetails() {
   };
 
   const handleSave = async () => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     if (!validate()) {
       setPopupMessage("Please correct the highlighted fields.");
       setShowPopup(true);
@@ -390,7 +435,6 @@ export default function ProgramDetails() {
       const normalizedStart = eventType === "single" ? singleDate : startDate;
       const normalizedEnd = eventType === "single" ? singleDate : endDate;
 
-      // merge requirements (predefined + custom) and dedupe
       const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
       const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
 
@@ -406,28 +450,46 @@ export default function ProgramDetails() {
         timeEnd,
         description: description.trim(),
         summary: summary.trim(),
-        activeStatus, // persist current toggle
+        activeStatus,
         requirements: {
           textFields: mergedText,
           fileFields: mergedFiles,
         },
       };
 
-      if (identificationFile) {
-        const storageRef = ref(
-          storage,
-          `Programs/${programId}/photo_${Date.now()}_${identificationFile.name}`
-        );
-        await uploadBytes(storageRef, identificationFile);
-        const url = await getDownloadURL(storageRef);
-        updates.photoURL = url;
-        setExistingPhotoURL(url);
+      // Upload any newly added images, then append to existing gallery
+      let newUrls: string[] = [];
+      if (photoFiles.length > 0) {
+        const uploadPromises = photoFiles.map(async (file, idx) => {
+          const storageRef = ref(storage, `Programs/${programId}/photos/${Date.now()}_${idx}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
+        });
+        newUrls = await Promise.all(uploadPromises);
+
+        const combined = [...existingPhotoURLs, ...newUrls];
+        updates.photoURLs = combined;
+
+        // Keep existing cover if present; otherwise set to first available
+        if (!existingPhotoURL && combined.length > 0) {
+          updates.photoURL = combined[0];
+          setExistingPhotoURL(combined[0]);
+        }
+        setExistingPhotoURLs(combined);
       }
 
       await updateDoc(doc(db, "Programs", programId), updates);
 
       setPopupMessage("Program saved successfully!");
       setShowPopup(true);
+
+      // clear local newly-selected previews after successful save
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+      setPhotoFiles([]);
+      setFileError(null);
     } catch (e) {
       console.error(e);
       setPopupMessage("Failed to save program.");
@@ -441,7 +503,7 @@ export default function ProgramDetails() {
   };
 
   const handleApprove = async () => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     try {
       setLoading(true);
 
@@ -501,11 +563,7 @@ export default function ProgramDetails() {
                 </div>
               </div>
               <div className="reject-reason-yesno-container">
-                <button
-                  type="button"
-                  onClick={() => setShowRejectPopup(false)}
-                  className="reject-reason-no-button"
-                >
+                <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
                   Cancel
                 </button>
                 <button
@@ -528,8 +586,12 @@ export default function ProgramDetails() {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to Submit? </p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
-              <button onClick={confirmSubmitReject} className="yes-button-add">Yes</button>
+              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
+                No
+              </button>
+              <button onClick={confirmSubmitReject} className="yes-button-add">
+                Yes
+              </button>
             </div>
           </div>
         </div>
@@ -554,7 +616,9 @@ export default function ProgramDetails() {
 
         <button
           className="program-redirection-buttons"
-          onClick={() => router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)} 
+          onClick={() =>
+            router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)
+          }
         >
           <div className="program-redirection-icons-section">
             <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
@@ -571,7 +635,7 @@ export default function ProgramDetails() {
               <h1>Approve Requested Program</h1>
             </button>
 
-            <button className="program-redirection-buttons" onClick={handleRejectClick}>
+            <button className="program-redirection-buttons" onClick={() => setShowRejectPopup(true)}>
               <div className="program-redirection-icons-section">
                 <img src="/images/rejected.png" alt="reject" className="program-redirection-icons-info" />
               </div>
@@ -590,9 +654,7 @@ export default function ProgramDetails() {
             <h1> Program Details </h1>
           </div>
 
-          {/* Header actions: Active/Inactive + Save/Discard */}
           <div className="action-btn-section-program">
-            {/* Active/Inactive toggle */}
             <select
               className="action-select-status"
               value={activeStatus}
@@ -607,7 +669,7 @@ export default function ProgramDetails() {
 
             {!isReadOnly && (
               <>
-                <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+                <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>Discard</button>
                 <button className="action-save" onClick={handleSave}>
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -628,21 +690,19 @@ export default function ProgramDetails() {
               fontSize: 14,
             }}
           >
-              {approvalStatus === "Rejected" ? (
-                <>
-                  This program has been <strong>Rejected</strong>
-                  {rejectionReason ? (
-                    <> — <em>{rejectionReason}</em></>
-                  ) : null}
-                  . Editing is disabled (view-only).
-                </>
-              ) : (
-                <>
-                  This program is <strong>Completed</strong>. Editing is disabled (view-only).
-                </>
-              )}
-            </div>
-          )}
+            {approvalStatus === "Rejected" ? (
+              <>
+                This program has been <strong>Rejected</strong>
+                {rejectionReason ? (
+                  <> — <em>{rejectionReason}</em></>
+                ) : null}
+                . Editing is disabled (view-only).
+              </>
+            ) : (
+              <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
+            )}
+          </div>
+        )}
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
@@ -837,12 +897,8 @@ export default function ProgramDetails() {
 
               {activeSection === "reqs" && (
                 <div className="edit-programs-upper-section">
-                  {/* Pre-defined Requirements */}
                   <div className="fields-section-edit-programs">
-                    <div
-                      className="predefined-header"
-                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                    >
+                    <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <p style={{ margin: 0, fontWeight: 600 }}>Pre-defined Requirements</p>
                       <button
                         type="button"
@@ -857,21 +913,16 @@ export default function ProgramDetails() {
                       <div style={{ marginTop: 8 }}>
                         <ul style={{ paddingLeft: 18, margin: 0 }}>
                           {PREDEFINED_REQ_TEXT.map((f, i) => (
-                            <li key={`pretext-${i}`}>
-                              {f.name} <span style={{ opacity: 0.6 }}>(text)</span>
-                            </li>
+                            <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
                           ))}
                           {PREDEFINED_REQ_FILES.map((f, i) => (
-                            <li key={`prefile-${i}`}>
-                              {f.name} <span style={{ opacity: 0.6 }}>(file)</span>
-                            </li>
+                            <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
                           ))}
                         </ul>
                       </div>
                     )}
                   </div>
 
-                  {/* Custom Text Requirements */}
                   <div className="fields-section-edit-programs">
                     <p style={{ fontWeight: 600 }}>Custom Text Requirements</p>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -889,18 +940,13 @@ export default function ProgramDetails() {
                         }}
                         disabled={isReadOnly}
                       />
-                      <button type="button" className="info-toggle-btn" onClick={addReqText} disabled={isReadOnly}>
-                        +
-                      </button>
+                      <button type="button" className="info-toggle-btn" onClick={addReqText} disabled={isReadOnly}>+</button>
                     </div>
 
                     {reqTextFields.length > 0 && (
                       <div style={{ marginTop: 10 }}>
                         {reqTextFields.map((f, i) => (
-                          <div
-                            key={`rt-${i}`}
-                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
-                          >
+                          <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                             <input
                               type="text"
                               className="edit-programs-input-field"
@@ -912,9 +958,7 @@ export default function ProgramDetails() {
                               disabled={isReadOnly}
                             />
                             {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>
-                                -
-                              </button>
+                              <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
                             )}
                           </div>
                         ))}
@@ -922,7 +966,6 @@ export default function ProgramDetails() {
                     )}
                   </div>
 
-                  {/* Custom File Requirements */}
                   <div className="fields-section-edit-programs">
                     <p style={{ fontWeight: 600 }}>Custom File Requirements</p>
                     <div style={{ display: "flex", gap: 8 }}>
@@ -940,18 +983,13 @@ export default function ProgramDetails() {
                         }}
                         disabled={isReadOnly}
                       />
-                      <button type="button" className="info-toggle-btn" onClick={addReqFile} disabled={isReadOnly}>
-                        +
-                      </button>
+                      <button type="button" className="info-toggle-btn" onClick={addReqFile} disabled={isReadOnly}>+</button>
                     </div>
 
                     {reqFileFields.length > 0 && (
                       <div style={{ marginTop: 10 }}>
                         {reqFileFields.map((f, i) => (
-                          <div
-                            key={`rf-${i}`}
-                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
-                          >
+                          <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                             <input
                               type="text"
                               className="edit-programs-input-field"
@@ -963,9 +1001,7 @@ export default function ProgramDetails() {
                               disabled={isReadOnly}
                             />
                             {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>
-                                -
-                              </button>
+                              <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
                             )}
                           </div>
                         ))}
@@ -990,9 +1026,7 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.description ? "input-error" : "",
                               shake.description ? "shake" : "",
-                            ]
-                              .join(" ")
-                              .trim()}
+                            ].join(" ").trim()}
                             placeholder="Enter Remarks"
                             name="programDescription"
                             value={description}
@@ -1010,9 +1044,7 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.summary ? "input-error" : "",
                               shake.summary ? "shake" : "",
-                            ]
-                              .join(" ")
-                              .trim()}
+                            ].join(" ").trim()}
                             placeholder="Enter Summary"
                             name="programSummary"
                             value={summary}
@@ -1022,8 +1054,9 @@ export default function ProgramDetails() {
                         </div>
                       </div>
 
+                      {/* ===== Photos UI (cover + gallery) ===== */}
                       <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">Photo</div>
+                        <div className="title-resindentificationpic">Photos</div>
                         <div className="box-container-resindentificationpic">
                           <div className="identificationpic-container">
                             <label
@@ -1031,46 +1064,87 @@ export default function ProgramDetails() {
                               className="upload-link"
                               style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
                             >
-                              Click to Upload File
+                              Click to Upload File(s)
                             </label>
                             <input
                               id="identification-file-upload"
                               type="file"
                               className="file-upload-input"
-                              accept=".jpg,.jpeg,.png"
-                              onChange={handleIdentificationFileChange}
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleFilesChange(e.target.files)}
                               disabled={isReadOnly}
                             />
 
-                            {(identificationFile || identificationPreview || existingPhotoURL) && (
-                              <div className="identificationpic-display">
-                                <div className="identification-picture">
-                                  {identificationPreview ? (
-                                    <img src={identificationPreview} alt="Preview" style={{ height: "200px" }} />
-                                  ) : existingPhotoURL ? (
-                                    <img src={existingPhotoURL} alt="Program" style={{ height: "200px" }} />
-                                  ) : null}
+                            {/* Cover preview: prioritize newly selected, else existing cover */}
+                            <div className="identificationpic-display" style={{ marginTop: 10 }}>
+                              <div className="identification-picture">
+                                <img
+                                  src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
+                                  alt="Program Cover"
+                                  style={{ height: "200px", objectFit: "cover", borderRadius: 8 }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Newly selected thumbnails */}
+                            {previewURLs.length > 1 && (
+                              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 10 }}>
+                                {previewURLs.slice(1).map((u, i) => (
+                                  <img
+                                    key={`new-${i}`}
+                                    src={u}
+                                    alt={`New ${i + 2}`}
+                                    style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
+                                  />
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Existing gallery thumbnails */}
+                            {existingPhotoURLs.length > 0 && (
+                              <div style={{ marginTop: 12 }}>
+                                <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6 }}>Existing Photos</div>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                                  {existingPhotoURLs.map((u, i) => (
+                                    <img
+                                      key={`old-${i}-${u}`}
+                                      src={u}
+                                      alt={`Existing ${i + 1}`}
+                                      style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
+                                    />
+                                  ))}
                                 </div>
                               </div>
                             )}
 
-                            {(identificationFile || identificationPreview) && !isReadOnly && (
-                              <div className="delete-container">
+                            {/* Clear newly selected (optional) */}
+                            {(previewURLs.length > 0 || photoFiles.length > 0) && !isReadOnly && (
+                              <div className="delete-container" style={{ marginTop: 10 }}>
                                 <button
                                   type="button"
                                   className="delete-button"
                                   onClick={() => {
-                                    setIdentificationFile(null);
-                                    setIdentificationPreview(null);
+                                    setPhotoFiles([]);
+                                    setPreviewURLs((old) => {
+                                      old.forEach((u) => URL.revokeObjectURL(u));
+                                      return [];
+                                    });
+                                    setFileError(null);
                                   }}
                                 >
                                   <img src="/images/trash.png" alt="Delete" className="delete-icon" />
                                 </button>
                               </div>
                             )}
+
+                            {(fileError) && (
+                              <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{fileError}</div>
+                            )}
                           </div>
                         </div>
                       </div>
+                      {/* ===== /Photos UI ===== */}
                     </div>
                   </div>
                 </>
@@ -1086,9 +1160,7 @@ export default function ProgramDetails() {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to discard the changes?</p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">
-                No
-              </button>
+              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
               <button
                 className="yes-button-add"
                 onClick={() => {
