@@ -96,23 +96,13 @@ export default function Announcement() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const isFirstRender = useRef(true);
+
 
   const totalPages = Math.ceil(announcements.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentAnnouncements = announcements.slice(startIndex, startIndex + itemsPerPage);
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      // skip the first run
-      isFirstRender.current = false;
-      return;
-    }
 
-    if (sectionRef.current) {
-      sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [currentPage]);
 
 
   return (
@@ -174,31 +164,53 @@ export default function Announcement() {
           ))}
 
           {/* PAGINATION BUTTONS */}
-          <div className="pagination-announcement">
-            <button
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((prev) => prev - 1)}
-            >
-              Prev
-            </button>
+<div className="pagination-announcement">
+  <button
+    disabled={currentPage === 1}
+    onClick={() => {
+      setCurrentPage((prev) => {
+        const newPage = prev - 1;
+        if (sectionRef.current) {
+          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return newPage;
+      });
+    }}
+  >
+    Prev
+  </button>
 
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                className={currentPage === i + 1 ? "active-page" : ""}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </button>
-            ))}
+  {Array.from({ length: totalPages }, (_, i) => (
+    <button
+      key={i}
+      className={currentPage === i + 1 ? "active-page" : ""}
+      onClick={() => {
+        setCurrentPage(i + 1);
+        if (sectionRef.current) {
+          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }}
+    >
+      {i + 1}
+    </button>
+  ))}
 
-            <button
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((prev) => prev + 1)}
-            >
-              Next
-            </button>
-          </div>
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => {
+      setCurrentPage((prev) => {
+        const newPage = prev + 1;
+        if (sectionRef.current) {
+          sectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        return newPage;
+      });
+    }}
+  >
+    Next
+  </button>
+</div>
+
         </div>
 
         
