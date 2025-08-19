@@ -32,6 +32,7 @@ type Participant = {
   programId?: string;
   programName?: string;
   residentId?: string;
+  role?: string; // Added role field
 };
 
 type Resident = {
@@ -49,6 +50,7 @@ type Resident = {
   sex?: string;
   age?: number;
   identificationFileURL?: string;
+
 };
 
 export default function EditResident() {
@@ -371,6 +373,7 @@ export default function EditResident() {
         emailAddress: resident.email || "",
         location: resident.address || resident.location || "",
         address: resident.address || resident.location || "",
+        role: "Participant", // default role
 
         // program linkage
         programId,
@@ -482,6 +485,7 @@ export default function EditResident() {
                   <col style={{ width: "25%" }} />
                   <col style={{ width: "25%" }} />
                   <col style={{ width: "25%" }} />
+                  <col style={{ width: "25%" }} />
                 </colgroup>
 
                 <thead>
@@ -490,6 +494,8 @@ export default function EditResident() {
                     <th>Contact Number</th>
                     <th>Email Address</th>
                     <th>Location</th>
+                    <th>Role</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -501,6 +507,8 @@ export default function EditResident() {
                         <td className="td-truncate">{p.contactNumber || ""}</td>
                         <td className="td-truncate">{p.emailAddress || p.email || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
+                        <td className="td-truncate">{p.role || "Participant"}</td>
+
                       </tr>
                     );
                   })}
