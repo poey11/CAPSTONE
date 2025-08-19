@@ -89,46 +89,8 @@ export default function AnnouncementDetails() {
             </div>
           )}
         </div>
-
-        <div className="right-section-announcement">
-          <div className="recent-posts-announcement">
-            <h3>Recent Posts</h3>
-            {recentPosts.map((post, idx) => (
-              <div key={idx} className="recent-post-card">
-                <img src={post.image} alt={post.title}/>
-                <div className="recent-post-content">
-                  <p>{post.title}</p>
-                  <span>{post.date}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
-{/*}
-      {title && description && date && image ? (
-        <div className="announcement-details-specific-announcement">
-
-          <div className="announcement-image-container-specific-announcement">
-            <img
-              src={image}
-              alt={title}
-              className="announcement-image-specific-announcement"
-            />
-          </div>
-
-          <div className="announcement-content-specific-announcement">
-            <h1 className="announcement-title-specific-announcement">{title}</h1>
-            <p className="announcement-date-specific-announcement">{date}</p>
-            <p className="announcement-description-specific-announcement">{description}</p>
-          </div>
-        </div>
-      ) : (
-        <p>Loading...</p>
-      )}
-*/}
-     
     </main>
   );
 }

@@ -91,6 +91,16 @@ export default function Announcement() {
       date: "Feb 05, 2025",
       image: "/Images/anak.jpg",
     },
+    {
+      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
+      date: "Feb 12, 2025",
+      image: "/Images/anak.jpg",
+    },
+    {
+      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
+      date: "Feb 05, 2025",
+      image: "/Images/anak.jpg",
+    },
   ];
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -208,20 +218,6 @@ export default function Announcement() {
 
         
         <div className="right-section-announcement">
-          <div className="year-filter-announcement">
-            <h3>Year</h3>
-            <div className="year-buttons">
-              {[
-                2023, 2022, 2021, 2020, 2019, 2018,
-                2017, 2016
-              ].map((year) => (
-                <button key={year} className="year-btn">
-                  {year}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="recent-posts-announcement">
             <h3>Recent Posts</h3>
             {recentPosts.map((post, idx) => (
