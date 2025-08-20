@@ -13,7 +13,6 @@ import {
   orderBy,
   query,
   where,
-  getCountFromServer,
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
@@ -33,7 +32,7 @@ type Participant = {
   programId?: string;
   programName?: string;
   residentId?: string;
-  role?: string;
+  role?: string; // "Participant" | "Volunteer"
   approvalStatus?: string;
 };
 
@@ -92,7 +91,8 @@ export default function ParticipantsList() {
   const [searchName, setSearchName] = useState("");
 
   // Program meta + requirements
-  const [programCapacity, setProgramCapacity] = useState<number | null>(null);
+  const [programCapacity, setProgramCapacity] = useState<number | null>(null); // participants max
+  const [programVolunteerCapacity, setProgramVolunteerCapacity] = useState<number | null>(null); // volunteers max
   const [programTitle, setProgramTitle] = useState<string>("");
   const [programStatus, setProgramStatus] = useState<string>("");
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
@@ -104,11 +104,11 @@ export default function ParticipantsList() {
   const [resSearch, setResSearch] = useState("");
   const residentPopUpRef = useRef<HTMLDivElement>(null);
 
-  // New: Walk-in modal
+  // Walk-in modal
   const [showAddWalkInModal, setShowAddWalkInModal] = useState(false);
   const [residentForAdd, setResidentForAdd] = useState<Resident | null>(null);
 
-  // Edit modal for table rows
+  // Edit modal
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
 
@@ -130,11 +130,13 @@ export default function ParticipantsList() {
     }
   };
 
+  // Load program meta (including both capacities)
   useEffect(() => {
     let cancelled = false;
     const loadProgram = async () => {
       if (!programId) {
         setProgramCapacity(null);
+        setProgramVolunteerCapacity(null);
         setProgramTitle("");
         setProgramStatus("");
         setReqTextFields([]);
@@ -146,8 +148,10 @@ export default function ParticipantsList() {
         const snap = await getDoc(refDoc);
         if (!cancelled && snap.exists()) {
           const d = snap.data() as any;
-          const cap = Number(d?.participants);
-          setProgramCapacity(Number.isFinite(cap) ? cap : null);
+          const capParticipants = Number(d?.participants);
+          const capVolunteers = Number(d?.volunteers);
+          setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
+          setProgramVolunteerCapacity(Number.isFinite(capVolunteers) ? capVolunteers : null);
           setProgramTitle(d?.programName || "");
           setProgramStatus((d?.progressStatus || "").toString());
 
@@ -161,6 +165,7 @@ export default function ParticipantsList() {
           setReqFileFields(ffs);
         } else if (!cancelled) {
           setProgramCapacity(null);
+          setProgramVolunteerCapacity(null);
           setProgramTitle("");
           setProgramStatus("");
           setReqTextFields([]);
@@ -169,6 +174,7 @@ export default function ParticipantsList() {
       } catch {
         if (!cancelled) {
           setProgramCapacity(null);
+          setProgramVolunteerCapacity(null);
           setProgramTitle("");
           setProgramStatus("");
           setReqTextFields([]);
@@ -182,11 +188,17 @@ export default function ParticipantsList() {
     };
   }, [programId]);
 
+  // Live list (Approved only)
   useEffect(() => {
     setLoading(true);
     const colRef = collection(db, "ProgramsParticipants");
     const qRef = programId
-      ? query(colRef, where("programId", "==", programId), where("approvalStatus", "==", "Approved"), orderBy("fullName", "asc"))
+      ? query(
+          colRef,
+          where("programId", "==", programId),
+          where("approvalStatus", "==", "Approved"),
+          orderBy("fullName", "asc")
+        )
       : query(colRef, where("approvalStatus", "==", "Approved"), orderBy("programName", "asc"));
 
     const unsub = onSnapshot(
@@ -225,6 +237,7 @@ export default function ParticipantsList() {
     return () => unsub();
   }, [programId]);
 
+  // Search filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
     if (!q) return participants;
@@ -234,19 +247,40 @@ export default function ParticipantsList() {
     });
   }, [searchName, participants]);
 
-  const badgeText = useMemo(() => {
-    const count = participants.length;
-    const cap = programCapacity;
-    return `${count} / ${cap ?? "—"}`;
-  }, [participants.length, programCapacity]);
+  // Role-specific counts (from the already-filtered Approved list)
+  const participantCount = useMemo(
+    () => participants.filter((p) => (p.role || "Participant").toLowerCase() === "participant").length,
+    [participants]
+  );
+  const volunteerCount = useMemo(
+    () => participants.filter((p) => (p.role || "").toLowerCase() === "volunteer").length,
+    [participants]
+  );
+
+  const badgeParticipantsText = useMemo(
+    () => `P ${participantCount} / ${programCapacity ?? "—"}`,
+    [participantCount, programCapacity]
+  );
+  const badgeVolunteersText = useMemo(
+    () => `V ${volunteerCount} / ${programVolunteerCapacity ?? "—"}`,
+    [volunteerCount, programVolunteerCapacity]
+  );
 
   const isProgramClosed = useMemo(
     () => ["rejected", "completed"].includes((programStatus || "").toLowerCase()),
     [programStatus]
   );
+
+  // Add button capacity reflects only Participant capacity
   const isAtCapacity = useMemo(
-    () => programCapacity !== null && participants.length >= programCapacity,
-    [programCapacity, participants.length]
+    () => programCapacity !== null && participantCount >= programCapacity,
+    [programCapacity, participantCount]
+  );
+
+  // ✅ Guard: show V badge only if volunteers capacity exists and > 0
+  const showVolunteerBadge = useMemo(
+    () => typeof programVolunteerCapacity === "number" && programVolunteerCapacity > 0,
+    [programVolunteerCapacity]
   );
 
   const openAddPopup = async () => {
@@ -268,13 +302,12 @@ export default function ParticipantsList() {
       setTimeout(() => setShowErrorToast(false), 3000);
       return;
     }
-    // Lazy-load residents on first open
     if (residents.length === 0) {
       try {
         const snap = await getDocs(collection(db, "Residents"));
         const list: Resident[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
         setResidents(list);
-      } catch (e) {
+      } catch {
         setErrorToastMsg("Failed to load Residents.");
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
@@ -310,7 +343,7 @@ export default function ParticipantsList() {
   );
   const fileFieldsToRender = useMemo<SimpleField[]>(() => reqFileFields, [reqFileFields]);
 
-  // When picking a resident → check duplicates first; block if already enlisted
+  // Duplicate guard on resident click
   const openResidentForm = async (resident: Resident) => {
     if (!programId) return;
     try {
@@ -324,28 +357,24 @@ export default function ParticipantsList() {
         setErrorToastMsg("This resident is already enlisted in this program.");
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
-        return; // 🚫 stop here – do not open the modal
+        return;
       }
-
-      // ✅ safe to proceed
       setResidentForAdd(resident);
       setShowResidentsPopup(false);
       setShowAddWalkInModal(true);
-    } catch (e) {
+    } catch {
       setErrorToastMsg("Failed to check resident status. Please try again.");
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 3000);
     }
   };
 
-  // Manual entry → open the new modal with resident=null
   const openManualEntry = () => {
     setResidentForAdd(null);
     setShowResidentsPopup(false);
     setShowAddWalkInModal(true);
   };
 
-  // After successful save from modal
   const handleWalkInSaved = (msg = "Participant added successfully!") => {
     setShowAddWalkInModal(false);
     setResidentForAdd(null);
@@ -354,14 +383,12 @@ export default function ParticipantsList() {
     setTimeout(() => setShowSuccessToast(false), 2500);
   };
 
-  // Bubble error from modal up to page toast
   const handleWalkInError = (msg: string) => {
     setErrorToastMsg(msg);
     setShowErrorToast(true);
     setTimeout(() => setShowErrorToast(false), 3000);
   };
 
-  /* Approve/Reject handlers for Edit modal (optional on Approved list) */
   const handleApprove = async (participantId: string) => {
     try {
       await updateDoc(doc(db, "ProgramsParticipants", participantId), {
@@ -385,7 +412,6 @@ export default function ParticipantsList() {
       setSuccessToastMsg("Participant rejected.");
       setShowSuccessToast(true);
       setTimeout(() => setShowSuccessToast(false), 2200);
-      // Optionally close modal
       setShowViewModal(false);
       setSelectedParticipant(null);
     } catch {
@@ -395,13 +421,11 @@ export default function ParticipantsList() {
     }
   };
 
-  /* Open Edit modal on table row click */
   const openEditModal = (p: Participant) => {
     setSelectedParticipant(p);
     setShowViewModal(true);
   };
 
-  /* UI */
   return (
     <main className="edit-program-main-container">
       <div className="program-redirectionpage-section">
@@ -432,8 +456,11 @@ export default function ParticipantsList() {
             </h1>
           </div>
 
-          <div className="action-btn-section-program">
-            <div className="participants-count">{badgeText}</div>
+          <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
+            <div className="participants-count">{badgeParticipantsText}</div>
+            {showVolunteerBadge && (
+              <div className="participants-count">{badgeVolunteersText}</div>
+            )}
           </div>
         </div>
 
@@ -517,7 +544,7 @@ export default function ParticipantsList() {
         </div>
       </div>
 
-      {/* Residents Picker Popup (kept) */}
+      {/* Residents Picker */}
       {showResidentsPopup && (
         <div className="program-popup-overlay">
           <div className="program-popup" ref={residentPopUpRef}>
