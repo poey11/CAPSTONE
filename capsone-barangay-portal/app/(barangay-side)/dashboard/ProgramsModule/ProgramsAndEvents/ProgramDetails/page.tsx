@@ -609,7 +609,7 @@ export default function ProgramDetails() {
       <div className="program-redirectionpage-section">
         <button className="program-redirection-buttons-selected">
           <div className="program-redirection-icons-section">
-            <img src="/images/profile-user.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
