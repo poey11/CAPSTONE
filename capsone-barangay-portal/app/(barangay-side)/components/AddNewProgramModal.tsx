@@ -29,7 +29,7 @@ const PREAPPROVED_NAMES = [
 
 const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
 
-type SimpleField = { name: string };
+type SimpleField = { name: string, description?: string };
 
 export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: Props) {
   const { data: session } = useSession();
@@ -65,15 +65,18 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  //  Requirements 
-  const PREDEFINED_REQ_TEXT: SimpleField[] = [
-    { name: "firstName" },
-    { name: "lastName" },
-    { name: "contactNumber" },
-    { name: "emailAddress" },
-    { name: "location" },
-  ];
-  const PREDEFINED_REQ_FILES: SimpleField[] = [{ name: "validIDjpg" }];
+// Requirements 
+const PREDEFINED_REQ_TEXT: SimpleField[] = [
+  { name: "firstName", description: "Used to save the first name of the participant" },
+  { name: "lastName", description: "Used to save the last name of the participant" },
+  { name: "contactNumber", description: "Used to save the contact number of the participant" },
+  { name: "emailAddress", description: "Used to save the email address of the participant" },
+  { name: "location", description: "Used to save the address of the participant" },
+];
+
+const PREDEFINED_REQ_FILES: SimpleField[] = [
+  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
+];
 
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -394,6 +397,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   if (!isOpen) return null;
 
   const hasPreviews = previewURLs.length > 0;
+
+  const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
 
   return (
     <div className="add-programs-popup-overlay">
@@ -757,42 +764,60 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
             )}
 
             {activeSection === "reqs" && (
-              <div className="add-programs-upper-section">
-                {/* Predefined requirements toggle */}
-                <div className="fields-section-add-programs">
-                  <div
-                    className="predefined-header"
-                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <p style={{ margin: 0 }}>Pre-defined Requirements</p>
-                    <button
-                      type="button"
-                      className="info-toggle-btn"
-                      onClick={() => setIsPredefinedOpen((s) => !s)}
-                      aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
-                    >
-                      {isPredefinedOpen ? "Hide" : "Show"}
-                    </button>
+              <div className="add-programs-requirements-container">
+                <div className="predefined-fields-notes-container">
+                  <div className="predefined-fields-notes-container-tile" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                    <div className="predefined-fields-title">
+                        <h1>Pre-defined Fields</h1>
+                    </div>
+                    <div className="predefined-fields-button-section">
+                      <button
+                        type="button"
+                        className="toggle-btn-predefined-fields"
+                        aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                      >
+                        <img
+                          src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                          alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                          style={{ width: '16px', height: '16px' }}
+                        />
+                        </button>
+                    </div>
                   </div>
+
                   {isPredefinedOpen && (
-                    <div className="predefined-list" style={{ marginTop: 8 }}>
-                      <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-                        (These will be auto-included when saving the program)
+                    <div className="predefined-list">
+                      <div className="predefined-list-note">
+                        * These will be auto-included when saving the program *
                       </div>
-                      <ul style={{ paddingLeft: 18, margin: 0 }}>
+                      <ul className="predefined-list-items">
                         {PREDEFINED_REQ_TEXT.length === 0 && PREDEFINED_REQ_FILES.length === 0 && (
                           <li style={{ opacity: 0.7 }}>No predefined requirements yet.</li>
                         )}
+
                         {PREDEFINED_REQ_TEXT.map((f, i) => (
-                          <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
+                          <li key={`pretext-${i}`} className="predefined-text">
+                            {i + 1}. {f.name} <span className="predefined-type">(text)</span>
+                            <span className="predefined-desc"> — {f.description}</span>
+                          </li>
                         ))}
+
                         {PREDEFINED_REQ_FILES.map((f, i) => (
-                          <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
+                          <li key={`prefile-${i}`} className="predefined-text">
+                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                            <span className="predefined-type">(file)</span>
+                            <span className="predefined-desc"> — {f.description}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
                   )}
+
                 </div>
+
+                <div className="box-container-outer-doc-fields">
+                </div>
+
 
                 {/* Custom TEXT requirements */}
                 <div className="fields-section-add-programs">

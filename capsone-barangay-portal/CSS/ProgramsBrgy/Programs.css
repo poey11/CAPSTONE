@@ -1865,3 +1865,92 @@ Popup in reject
     right: 12px;
     font-size: 20px;
   }
+
+.add-programs-requirements-container{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.predefined-fields-notes-container{
+    margin-top: 20px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.predefined-fields-notes-container-tile{
+    background-color: #214666; 
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.predefined-fields-title{
+    width: 90%;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.predefined-fields-button-section {
+    width: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-btn-predefined-fields {
+    padding: 3px 5px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #f49028;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    align-self: flex-end;
+    display: flex;
+}
+
+.predefined-list{
+  width: 100%;
+  text-align: left;
+}
+
+.predefined-list-note{
+  padding-top: 10px;
+  color: #de3030;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.predefined-list-items{
+  padding: 20px;
+}
+
+.predefined-text{
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.predefined-type{
+  font-size: 15px;
+  color: #de3030;
+}
+
+.predefined-desc {
+  font-size: 13px;
+  color: #555;
+  margin-left: 6px;
+  font-style: italic;
+}
