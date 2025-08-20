@@ -404,7 +404,7 @@ export default function EditResident() {
         <button className="program-redirection-buttons" onClick={handleEditClick}>
           <div className="program-redirection-icons-section">
             <img
-              src="/images/profile-user.png"
+              src="/images/audience.png"
               alt="user info"
               className="program-redirection-icons-info"
             />

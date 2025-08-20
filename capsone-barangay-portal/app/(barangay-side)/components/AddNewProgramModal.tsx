@@ -29,7 +29,7 @@ const PREAPPROVED_NAMES = [
 
 const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
 
-type SimpleField = { name: string };
+type SimpleField = { name: string, description?: string };
 
 export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: Props) {
   const { data: session } = useSession();
@@ -43,6 +43,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   // Details form state 
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
@@ -65,15 +66,18 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  //  Requirements 
-  const PREDEFINED_REQ_TEXT: SimpleField[] = [
-    { name: "firstName" },
-    { name: "lastName" },
-    { name: "contactNumber" },
-    { name: "emailAddress" },
-    { name: "location" },
-  ];
-  const PREDEFINED_REQ_FILES: SimpleField[] = [{ name: "validIDjpg" }];
+// Requirements 
+const PREDEFINED_REQ_TEXT: SimpleField[] = [
+  { name: "firstName", description: "Used to save the first name of the participant" },
+  { name: "lastName", description: "Used to save the last name of the participant" },
+  { name: "contactNumber", description: "Used to save the contact number of the participant" },
+  { name: "emailAddress", description: "Used to save the email address of the participant" },
+  { name: "location", description: "Used to save the address of the participant" },
+];
+
+const PREDEFINED_REQ_FILES: SimpleField[] = [
+  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
+];
 
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -130,6 +134,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setActiveSection("details");
     setProgramName("");
     setParticipants("");
+    setVolunteers("");
     setEligibleParticipants("");
     setLocation("");
     setEventType("single");
@@ -175,8 +180,15 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       Number.isFinite(participantsNum) &&
       participantsNum > 0;
 
+    const volunteersNum = Number(volunteers);
+    const validVolunteers =
+      volunteers.trim().length > 0 &&
+      Number.isFinite(volunteersNum) &&
+      volunteersNum >= 0;      
+
     need("programName", !!programName.trim());
     need("participants", validParticipants);
+    need("volunteers", validVolunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
     need("description", !!description.trim());
@@ -324,6 +336,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       const payload: any = {
         programName: programName.trim(),
         participants: Number(participants),
+        volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
@@ -394,6 +407,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   if (!isOpen) return null;
 
   const hasPreviews = previewURLs.length > 0;
+
+  const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
 
   return (
     <div className="add-programs-popup-overlay">
@@ -524,6 +541,24 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                         placeholder="E.g. 50"
                         value={participants}
                         onChange={(e) => setParticipants(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="fields-section-add-programs">
+                      <p>
+                        Number of Volunteers<span className="required">*</span>
+                      </p>
+                      <input
+                        type="number"
+                        min={1}
+                        className={[
+                          "add-programs-input-field",
+                          errors.volunteers ? "input-error" : "",
+                          shake.volunteers ? "shake" : "",
+                        ].join(" ").trim()}
+                        placeholder="E.g. 50"
+                        value={volunteers}
+                        onChange={(e) => setVolunteers(e.target.value)}
                       />
                     </div>
 
@@ -710,12 +745,34 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                 </div>
 
                 <div className="add-programs-lower-section">
+
                   <div className="programs-description-container">
                     <div className="box-container-outer-description">
                       <div className="title-description-programs">
-                        Description of Program<span className="required">*</span>
+                        Summary of Program
+                      </div>
+                      <div className="box-container-summary">
+                        <span className="required-asterisk">*</span>
+                        <textarea
+                          className={[
+                            "summary-input-field",
+                            errors.summary ? "input-error" : "",
+                            shake.summary ? "shake" : "",
+                          ].join(" ").trim()}
+                          value={summary}
+                          onChange={(e) => setSummary(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="programs-description-container">
+                    <div className="box-container-outer-description">
+                      <div className="title-description-programs">
+                        Full Description of Program
                       </div>
                       <div className="box-container-description">
+                        <span className="required-asterisk">*</span>
                         <textarea
                           className={[
                             "description-input-field",
@@ -729,137 +786,209 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                     </div>
                   </div>
 
-                  <div className="programs-description-container">
-                    <div className="box-container-outer-description">
-                      <div className="title-description-programs">
-                        Summary of Program<span className="required">*</span>
-                      </div>
-                      <div className="box-container-description">
-                        <textarea
-                          className={[
-                            "description-input-field",
-                            errors.summary ? "input-error" : "",
-                            shake.summary ? "shake" : "",
-                          ].join(" ").trim()}
-                          value={summary}
-                          onChange={(e) => setSummary(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  
                 </div>
               </>
             )}
 
             {activeSection === "reqs" && (
-              <div className="add-programs-upper-section">
-                {/* Predefined requirements toggle */}
-                <div className="fields-section-add-programs">
-                  <div
-                    className="predefined-header"
-                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <p style={{ margin: 0 }}>Pre-defined Requirements</p>
-                    <button
-                      type="button"
-                      className="info-toggle-btn"
-                      onClick={() => setIsPredefinedOpen((s) => !s)}
-                      aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
-                    >
-                      {isPredefinedOpen ? "Hide" : "Show"}
-                    </button>
+              <div className="add-programs-requirements-container">
+
+                {/* PREDEFINED fields */}
+                <div className="predefined-fields-notes-container-programs">
+                  <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                    <div className="predefined-fields-title-programs">
+                        <h1>Pre-defined Fields</h1>
+                    </div>
+                    <div className="predefined-fields-button-section-programs">
+                      <button
+                        type="button"
+                        className="toggle-btn-predefined-fields-programs"
+                        aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                      >
+                        <img
+                          src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                          alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                          style={{ width: '16px', height: '16px' }}
+                        />
+                        </button>
+                    </div>
                   </div>
+
                   {isPredefinedOpen && (
-                    <div className="predefined-list" style={{ marginTop: 8 }}>
-                      <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-                        (These will be auto-included when saving the program)
+                    <div className="predefined-list-programs">
+                      <div className="predefined-list-note-programs">
+                        * These will be auto-included when saving the program *
                       </div>
-                      <ul style={{ paddingLeft: 18, margin: 0 }}>
+                      <ul className="predefined-list-items-programs">
                         {PREDEFINED_REQ_TEXT.length === 0 && PREDEFINED_REQ_FILES.length === 0 && (
                           <li style={{ opacity: 0.7 }}>No predefined requirements yet.</li>
                         )}
+
                         {PREDEFINED_REQ_TEXT.map((f, i) => (
-                          <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
+                          <li key={`pretext-${i}`} className="predefined-text-programs">
+                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
                         ))}
+
                         {PREDEFINED_REQ_FILES.map((f, i) => (
-                          <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
+                          <li key={`prefile-${i}`} className="predefined-text-programs">
+                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                            <span className="predefined-type-programs">(file)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
                   )}
+
                 </div>
 
+
                 {/* Custom TEXT requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement Text Fields</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., guardianName"
-                      value={reqTextNew}
-                      onChange={(e) => setReqTextNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqText}>+</button>
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
+                    Text Fields
                   </div>
 
-                  {reqTextFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqTextFields.map((f, i) => (
-                        <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
+                      <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
+                            className="add-program-field-input"
+                            placeholder="e.g., guardianName"
+                            value={reqTextNew}
+                            onChange={(e) => setReqTextNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
                           />
-                          <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
                         </div>
-                      ))}
+                        <div className="row-button-section-programs">
+                          <button
+                            type="button"
+                            className="program-field-add-button"
+                            onClick={addReqText}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    
+                    <div className="added-program-field-container">
+                      {reqTextFields.length > 0 && (
+                        <>
+                          {reqTextFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqTextFields((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section-programs">
+                                <button
+                                  type="button"
+                                  className="program-field-remove-button"
+                                  onClick={() => removeReqText(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Custom FILE requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement File Uploads</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., medicalCertificateJpg"
-                      value={reqFileNew}
-                      onChange={(e) => setReqFileNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqFile}>+</button>
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
+                    File Upload Fields
                   </div>
 
-                  {reqFileFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqFileFields.map((f, i) => (
-                        <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
+                      <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
+                            className="add-program-field-input"
+                            placeholder="e.g., medicalCertificateJpg"
+                            value={reqFileNew}
+                            onChange={(e) => setReqFileNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
                           />
-                          <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
                         </div>
-                      ))}
+                        <div className="row-button-section-programs">
+                          <button
+                            type="button"
+                            className="program-field-add-button"
+                            onClick={addReqFile}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-                    Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.)
+                    
+                    <div className="added-doc-field-container">
+                      {reqFileFields.length > 0 && (
+                        <>
+                         {reqFileFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section-programs">
+                                <button
+                                  type="button"
+                                  className="program-field-remove-button"
+                                  onClick={() => removeReqFile(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
