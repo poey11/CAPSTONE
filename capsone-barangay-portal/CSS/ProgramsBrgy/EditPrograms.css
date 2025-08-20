@@ -171,7 +171,7 @@ animation: fadeSlideIn 0.5s ease-out;
 .edit-program-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
-  padding-bottom: 40px;
+  padding-bottom: 70px;
 }
 
   p .required {
@@ -198,13 +198,16 @@ animation: fadeSlideIn 0.5s ease-out;
     display: flex;
     flex-direction: column;
     width: 50%;
+    padding-left: 40px;
+    padding-right: 30px;
 } 
 
   .edit-program-section-2-right-side {
     display: flex;
     flex-direction: column;
     width: 50%;
-
+    padding-left: 30px;
+    padding-right: 40px;
   }
 
 .edit-program-section-2-left-side p,
@@ -231,14 +234,12 @@ animation: fadeSlideIn 0.5s ease-out;
   font-size: 15px;
   color: #2C3E50;
   font-weight: bold;
-  align-self: flex-start;
-  
 }
 
 
    .edit-programs-input-field {
     padding: 8px;
-    width: 85%;
+    width: 100%;
     margin-top: 10px;
     border: 1px solid rgba(36, 53, 76, 0.7);
     border-radius: 5px;

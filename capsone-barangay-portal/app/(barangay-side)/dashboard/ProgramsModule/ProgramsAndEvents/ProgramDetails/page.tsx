@@ -760,6 +760,23 @@ export default function ProgramDetails() {
                       </div>
 
                       <div className="fields-section-edit-programs">
+                        <p>Number of Volunteers<span className="required">*</span></p>
+                        <input
+                          type="number"
+                          min="1"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.participants ? "input-error" : "",
+                            shake.participants ? "shake" : "",
+                          ].join(" ").trim()}
+                          placeholder="E.g. 50"
+                          value={participants}
+                          onChange={(e) => setParticipants(e.target.value)}
+                          disabled={isReadOnly}
+                        />
+                      </div>
+
+                      <div className="fields-section-edit-programs">
                         <p>Eligible Participants<span className="required">*</span></p>
                         <select
                           className={[
