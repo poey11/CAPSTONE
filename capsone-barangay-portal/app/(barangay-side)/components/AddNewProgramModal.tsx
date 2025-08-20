@@ -765,6 +765,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
             {activeSection === "reqs" && (
               <div className="add-programs-requirements-container">
+
+                {/* PREDEFINED fields */}
                 <div className="predefined-fields-notes-container">
                   <div className="predefined-fields-notes-container-tile" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
                     <div className="predefined-fields-title">
@@ -815,44 +817,153 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                 </div>
 
-                <div className="box-container-outer-doc-fields">
-                </div>
-
 
                 {/* Custom TEXT requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement Text Fields</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., guardianName"
-                      value={reqTextNew}
-                      onChange={(e) => setReqTextNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqText}>+</button>
+                <div className="box-container-outer-doc-fields">
+                  <div className="title-doc-fields">
+                    Text Fields
                   </div>
 
-                  {reqTextFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqTextFields.map((f, i) => (
-                        <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                  <div className="box-container-doc-fields">
+                    <div className="instructions-container">
+                      <h1>* Enter the fields needed for the document. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-doc-field-container">
+                      <div className="add-doc-field-row">
+                        <div className="row-title-section">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section">
                           <input
                             type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
+                            className="add-program-field-input"
+                            placeholder="e.g., guardianName"
+                            value={reqTextNew}
+                            onChange={(e) => setReqTextNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
                           />
-                          <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
                         </div>
-                      ))}
+                        <div className="row-button-section">
+                          <button
+                            type="button"
+                            className="doc-field-add-button"
+                            onClick={addReqText}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    
+                    <div className="added-doc-field-container">
+                      {reqTextFields.length > 0 && (
+                        <div className="added-doc-field-row">
+                          {reqTextFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-doc-field-row">
+                              <div className="row-input-section-added">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section">
+                                <button 
+                                  type="button"
+                                  className="doc-field-remove-button"
+                                  onClick={() => removeReqText(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {/* Custom FILEEE requirements */}
+                <div className="box-container-outer-doc-fields">
+                  <div className="title-doc-fields">
+                    File Upload Fields
+                  </div>
+
+                  <div className="box-container-doc-fields">
+                    <div className="instructions-container">
+                      <h1>* Enter the fields needed for the document. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-doc-field-container">
+                      <div className="add-doc-field-row">
+                        <div className="row-title-section">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section">
+                          <input
+                            type="text"
+                            className="add-program-field-input"
+                            placeholder="e.g., guardianName"
+                            value={reqTextNew}
+                            onChange={(e) => setReqTextNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
+                          />
+                        </div>
+                        <div className="row-button-section">
+                          <button
+                            type="button"
+                            className="doc-field-add-button"
+                            onClick={addReqText}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    
+                    <div className="added-doc-field-container">
+                      {reqTextFields.length > 0 && (
+                        <div className="added-doc-field-row">
+                          {reqTextFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-doc-field-row">
+                              <div className="row-input-section-added">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section">
+                                <button 
+                                  type="button"
+                                  className="doc-field-remove-button"
+                                  onClick={() => removeReqText(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
 
                 {/* Custom FILE requirements */}
                 <div className="fields-section-add-programs">
