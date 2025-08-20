@@ -438,6 +438,7 @@ export default function ProgramDetails() {
       const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
       const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
 
+      // start preparing updates
       const updates: any = {
         programName: programName.trim(),
         participants: Number(participants),
@@ -457,7 +458,7 @@ export default function ProgramDetails() {
         },
       };
 
-      // Upload any newly added images, then append to existing gallery
+      // Upload newly added images
       let newUrls: string[] = [];
       if (photoFiles.length > 0) {
         const uploadPromises = photoFiles.map(async (file, idx) => {
@@ -466,24 +467,26 @@ export default function ProgramDetails() {
           return getDownloadURL(storageRef);
         });
         newUrls = await Promise.all(uploadPromises);
-
-        const combined = [...existingPhotoURLs, ...newUrls];
-        updates.photoURLs = combined;
-
-        // Keep existing cover if present; otherwise set to first available
-        if (!existingPhotoURL && combined.length > 0) {
-          updates.photoURL = combined[0];
-          setExistingPhotoURL(combined[0]);
-        }
-        setExistingPhotoURLs(combined);
       }
 
+      // ✅ Combine with currently kept existing photos
+      const combined = [...existingPhotoURLs, ...newUrls];
+      updates.photoURLs = combined;
+
+      // ✅ If cover is gone, reset cover
+      if (!combined.includes(existingPhotoURL || "")) {
+        updates.photoURL = combined.length > 0 ? combined[0] : null;
+        setExistingPhotoURL(updates.photoURL);
+      }
+
+      setExistingPhotoURLs(combined);
+
+      // Save to Firestore
       await updateDoc(doc(db, "Programs", programId), updates);
 
       setPopupMessage("Program saved successfully!");
       setShowPopup(true);
 
-      // clear local newly-selected previews after successful save
       setPreviewURLs((old) => {
         old.forEach((u) => URL.revokeObjectURL(u));
         return [];
@@ -501,6 +504,7 @@ export default function ProgramDetails() {
       }, 1200);
     }
   };
+
 
   const handleApprove = async () => {
     if (!programId || isReadOnly) return;
@@ -540,6 +544,14 @@ export default function ProgramDetails() {
       }, 1200);
     }
   };
+
+  const handleDeleteNew = (index: number) => {
+  setPreviewURLs(prev => prev.filter((_, i) => i !== index));
+};
+
+const handleDeleteExisting = (index: number) => {
+  setExistingPhotoURLs(prev => prev.filter((_, i) => i !== index));
+};
 
   return (
     <main className="edit-program-main-container">
@@ -1055,6 +1067,105 @@ export default function ProgramDetails() {
                 <>
                   <div className="edit-programs-upper-section">
                     <div className="edit-official-others-mainsection">
+
+                      {/* ===== Photos UI (cover + gallery) ===== */}
+                      <div className="box-container-outer-resindentificationpic">
+                        <div className="title-resindentificationpic">Photos</div>
+                        <div className="box-container-resindentificationpic">
+                          
+                          <div className="identificationpic-container">
+                            <label
+                              htmlFor="identification-file-upload"
+                              className="upload-link"
+                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
+                            >
+                              Click to Upload File(s)
+                            </label>
+                            <input
+                              id="identification-file-upload"
+                              type="file"
+                              className="file-upload-input"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleFilesChange(e.target.files)}
+                              disabled={isReadOnly}
+                            />
+
+                            {/* Flex container */}
+                            <div className="identificationpic-content">
+                              {/* Cover preview */}
+                              <div className="identificationpic-display">
+                                <div className="cover-photo">
+                                  <img
+                                    src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
+                                    alt="Program Cover"
+                                    className="program-cover"
+                                  />
+                                  {!isReadOnly && previewURLs[0] && (
+                                    <button
+                                      className="delete-btn"
+                                      onClick={() => handleDeleteNew(0)}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              
+
+                              {/* Thumbnails (new + existing) */}
+                              <div className="identification-thumbnails">
+                                {previewURLs.length > 1 && (
+                                  <div className="thumbs-grid">
+                                    {previewURLs.slice(1).map((u, i) => (
+                                      <div key={`new-${i}`} className="thumb-wrapper">
+                                        <img src={u} alt={`New ${i + 2}`} className="thumb-img" />
+                                        {!isReadOnly && (
+                                          <button
+                                            className="delete-btn"
+                                            onClick={() => handleDeleteNew(i + 1)}
+                                          >
+                                            ✕
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {existingPhotoURLs.length > 0 && (
+                                  <div className="thumbs-section">
+                                    <div className="thumbs-label">* Existing Photos *</div>
+                                    <div className="thumbs-grid">
+                                      {existingPhotoURLs.map((u, i) => (
+                                        <div key={`old-${i}-${u}`} className="thumb-wrapper">
+                                          <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
+                                          {!isReadOnly && (
+                                            <button
+                                              className="delete-btn"
+                                              onClick={() => handleDeleteExisting(i)}
+                                            >
+                                              ✕
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+
+                        </div>
+                      </div>
+                      {/* ===== /Photos UI ===== */}
+                    </div>
+                  </div>
+
+                  <div className="edit-programs-bottom-section">
+                    <div className="edit-official-others-mainsection">
                       <div className="edit-box-container-outer-programdesc">
                         <div className="title-remarks">Description of Program</div>
                         <div className="box-container-programdesc">
@@ -1090,98 +1201,6 @@ export default function ProgramDetails() {
                           />
                         </div>
                       </div>
-
-                      {/* ===== Photos UI (cover + gallery) ===== */}
-                      <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-resindentificationpic">
-                          <div className="identificationpic-container">
-                            <label
-                              htmlFor="identification-file-upload"
-                              className="upload-link"
-                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
-                            >
-                              Click to Upload File(s)
-                            </label>
-                            <input
-                              id="identification-file-upload"
-                              type="file"
-                              className="file-upload-input"
-                              accept="image/*"
-                              multiple
-                              onChange={(e) => handleFilesChange(e.target.files)}
-                              disabled={isReadOnly}
-                            />
-
-                            {/* Cover preview: prioritize newly selected, else existing cover */}
-                            <div className="identificationpic-display" style={{ marginTop: 10 }}>
-                              <div className="identification-picture">
-                                <img
-                                  src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
-                                  alt="Program Cover"
-                                  style={{ height: "200px", objectFit: "cover", borderRadius: 8 }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Newly selected thumbnails */}
-                            {previewURLs.length > 1 && (
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 10 }}>
-                                {previewURLs.slice(1).map((u, i) => (
-                                  <img
-                                    key={`new-${i}`}
-                                    src={u}
-                                    alt={`New ${i + 2}`}
-                                    style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                  />
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Existing gallery thumbnails */}
-                            {existingPhotoURLs.length > 0 && (
-                              <div style={{ marginTop: 12 }}>
-                                <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6 }}>Existing Photos</div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-                                  {existingPhotoURLs.map((u, i) => (
-                                    <img
-                                      key={`old-${i}-${u}`}
-                                      src={u}
-                                      alt={`Existing ${i + 1}`}
-                                      style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Clear newly selected (optional) */}
-                            {(previewURLs.length > 0 || photoFiles.length > 0) && !isReadOnly && (
-                              <div className="delete-container" style={{ marginTop: 10 }}>
-                                <button
-                                  type="button"
-                                  className="delete-button"
-                                  onClick={() => {
-                                    setPhotoFiles([]);
-                                    setPreviewURLs((old) => {
-                                      old.forEach((u) => URL.revokeObjectURL(u));
-                                      return [];
-                                    });
-                                    setFileError(null);
-                                  }}
-                                >
-                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                </button>
-                              </div>
-                            )}
-
-                            {(fileError) && (
-                              <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{fileError}</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      {/* ===== /Photos UI ===== */}
                     </div>
                   </div>
                 </>
