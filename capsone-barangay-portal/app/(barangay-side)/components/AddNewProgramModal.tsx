@@ -710,12 +710,34 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                 </div>
 
                 <div className="add-programs-lower-section">
+
                   <div className="programs-description-container">
                     <div className="box-container-outer-description">
                       <div className="title-description-programs">
-                        Description of Program<span className="required">*</span>
+                        Summary of Program
+                      </div>
+                      <div className="box-container-summary">
+                        <span className="required-asterisk">*</span>
+                        <textarea
+                          className={[
+                            "summary-input-field",
+                            errors.summary ? "input-error" : "",
+                            shake.summary ? "shake" : "",
+                          ].join(" ").trim()}
+                          value={summary}
+                          onChange={(e) => setSummary(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="programs-description-container">
+                    <div className="box-container-outer-description">
+                      <div className="title-description-programs">
+                        Full Description of Program
                       </div>
                       <div className="box-container-description">
+                        <span className="required-asterisk">*</span>
                         <textarea
                           className={[
                             "description-input-field",
@@ -729,24 +751,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                     </div>
                   </div>
 
-                  <div className="programs-description-container">
-                    <div className="box-container-outer-description">
-                      <div className="title-description-programs">
-                        Summary of Program<span className="required">*</span>
-                      </div>
-                      <div className="box-container-description">
-                        <textarea
-                          className={[
-                            "description-input-field",
-                            errors.summary ? "input-error" : "",
-                            shake.summary ? "shake" : "",
-                          ].join(" ").trim()}
-                          value={summary}
-                          onChange={(e) => setSummary(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  
                 </div>
               </>
             )}

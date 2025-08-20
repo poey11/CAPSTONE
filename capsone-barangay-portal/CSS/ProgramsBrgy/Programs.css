@@ -646,7 +646,9 @@ Add Programs
 
 .add-programs-lower-section {
   display: flex;
+  flex-direction: column;
   width: 100%;
+  padding-right: 10px;
   margin-top: 1rem;
 }
 
@@ -682,7 +684,7 @@ Add Programs
     text-align: center;
   }
   
-      .box-container-description {
+  .box-container-description {
     position: relative;
     width: 100%;
     border: 1px solid #5a6b7c;
@@ -690,20 +692,44 @@ Add Programs
     background-color: #ffffff;
     margin-top: 30px;
     height: 250px;
+
   }
 
-      .description-input-field {
+  .box-container-summary {
+    position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 175px;
+
+  }
+
+  .summary-input-field {
     padding: 8px;
     width: 100%;
     border-radius: 5px;
     color: #000000;
     text-align: left;
-    height: 120px;
-    margin-top: 20px;
+    height: 135px;
+    margin-top: 25px;
     resize: none;
   }
 
-  .description-input-field:focus {
+  .description-input-field {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 210px;
+    margin-top: 25px;
+    resize: none;
+  }
+
+  .description-input-field:focus,
+  .summary-input-field:focus {
     outline: none;
     border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
     box-shadow: none;
@@ -1830,3 +1856,12 @@ Popup in reject
 
 /* Error variant */
 .popup-overlay-program.error { background: #ad3b3b; border-left-color: #7e2929; }
+
+
+  .required-asterisk {
+    color: red;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
+  }
