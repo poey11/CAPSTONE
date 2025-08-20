@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 // Firestore
 import {
-  addDoc,
   collection,
   doc,
   getDoc,
@@ -13,11 +12,14 @@ import {
   onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
   where,
-  getCountFromServer, // ✅ for capacity re-check
+  getCountFromServer,
+  updateDoc,
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+
+import ViewApprovedParticipantModal from "@/app/(barangay-side)/components/ViewApprovedParticipantModal";
+import AddWalkInParticipantModal from "@/app/(barangay-side)/components/AddWalkInParticipantModal";
 
 type Participant = {
   id: string;
@@ -26,13 +28,13 @@ type Participant = {
   lastName?: string;
   contactNumber?: string;
   emailAddress?: string;
-  email?: string;
   location?: string;
   address?: string;
   programId?: string;
   programName?: string;
   residentId?: string;
-  role?: string; // Added role field
+  role?: string;
+  approvalStatus?: string;
 };
 
 type Resident = {
@@ -45,46 +47,39 @@ type Resident = {
   location?: string;
   contactNumber?: string;
   mobile?: string;
-  email?: string;
+  emailAddress?: string;
   dateOfBirth?: string;
   sex?: string;
   age?: number;
   identificationFileURL?: string;
-
 };
 
-export default function EditResident() {
+type SimpleField = { name: string };
+
+const PRETTY_LABELS: Record<string, string> = {
+  firstName: "First Name",
+  lastName: "Last Name",
+  contactNumber: "Contact Number",
+  emailAddress: "Email Address",
+  location: "Location",
+  validIDjpg: "Valid ID",
+};
+
+const FALLBACK_REQ_TEXT: SimpleField[] = [
+  { name: "firstName" },
+  { name: "lastName" },
+  { name: "contactNumber" },
+  { name: "emailAddress" },
+  { name: "location" },
+];
+
+export default function ParticipantsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const programId = searchParams.get("programId") || ""; // optional filter
+  const programId = searchParams.get("programId") || "";
 
-  // UI state you already had (left intact)
-  const [activeSection, setActiveSection] = useState("details");
-  const [showDiscardPopup, setShowDiscardPopup] = useState(false);
-  const [position, setPosition] = useState("");
-  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
-  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
-  const [showRejectPopup, setShowRejectPopup] = useState(false);
+  // UI state
   const [loading, setLoading] = useState(true);
-
-  const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
-  const [popupMessage, setPopupMessage] = useState("");
-
-  // Local state for participants + search
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [searchName, setSearchName] = useState("");
-
-  // Program meta (capacity + title + status)
-  const [programCapacity, setProgramCapacity] = useState<number | null>(null);
-  const [programTitle, setProgramTitle] = useState<string>("");
-  const [programStatus, setProgramStatus] = useState<string>(""); // ✅ Rejected/Completed guard
-
-  // Residents popup state
-  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
-  const [residents, setResidents] = useState<Resident[]>([]);
-  const [resSearch, setResSearch] = useState("");
-  const residentPopUpRef = useRef<HTMLDivElement>(null);
 
   // Toasts
   const [showSuccessToast, setShowSuccessToast] = useState(false);
@@ -92,22 +87,34 @@ export default function EditResident() {
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorToastMsg, setErrorToastMsg] = useState("");
 
+  // List + search
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [searchName, setSearchName] = useState("");
+
+  // Program meta + requirements
+  const [programCapacity, setProgramCapacity] = useState<number | null>(null);
+  const [programTitle, setProgramTitle] = useState<string>("");
+  const [programStatus, setProgramStatus] = useState<string>("");
+  const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
+  const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
+
+  // Residents picker
+  const [showResidentsPopup, setShowResidentsPopup] = useState(false);
+  const [residents, setResidents] = useState<Resident[]>([]);
+  const [resSearch, setResSearch] = useState("");
+  const residentPopUpRef = useRef<HTMLDivElement>(null);
+
+  // New: Walk-in modal
+  const [showAddWalkInModal, setShowAddWalkInModal] = useState(false);
+  const [residentForAdd, setResidentForAdd] = useState<Resident | null>(null);
+
+  // Edit modal for table rows
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+
   const handleBack = () => {
     window.location.href = "/dashboard/ProgramsModule/ProgramsAndEvents";
   };
-
-  const handleDiscardClick = async () => setShowDiscardPopup(true);
-  const handleRejectClick = () => setShowRejectPopup(true);
-
-  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setIdentificationFile(file);
-      setIdentificationPreview(URL.createObjectURL(file));
-    }
-  };
-
-  // If you later pass programId here, keep it; else this goes to the generic participants hub
   const handleParticipantsClick = () => {
     if (programId) {
       router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`);
@@ -115,7 +122,6 @@ export default function EditResident() {
       router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists");
     }
   };
-
   const handleEditClick = () => {
     if (programId) {
       router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programId}`);
@@ -124,69 +130,67 @@ export default function EditResident() {
     }
   };
 
-  //  Program meta 
   useEffect(() => {
     let cancelled = false;
-
     const loadProgram = async () => {
       if (!programId) {
         setProgramCapacity(null);
         setProgramTitle("");
         setProgramStatus("");
+        setReqTextFields([]);
+        setReqFileFields([]);
         return;
       }
       try {
-        const ref = doc(db, "Programs", programId);
-        const snap = await getDoc(ref);
+        const refDoc = doc(db, "Programs", programId);
+        const snap = await getDoc(refDoc);
         if (!cancelled && snap.exists()) {
           const d = snap.data() as any;
-          // In your AddNewProgramModal you saved capacity as "participants"
           const cap = Number(d?.participants);
           setProgramCapacity(Number.isFinite(cap) ? cap : null);
           setProgramTitle(d?.programName || "");
-          setProgramStatus((d?.progressStatus || "").toString()); // ✅ keep status
+          setProgramStatus((d?.progressStatus || "").toString());
+
+          const tfs: SimpleField[] = Array.isArray(d?.requirements?.textFields)
+            ? d.requirements.textFields
+            : [];
+          const ffs: SimpleField[] = Array.isArray(d?.requirements?.fileFields)
+            ? d.requirements.fileFields
+            : [];
+          setReqTextFields(tfs);
+          setReqFileFields(ffs);
         } else if (!cancelled) {
           setProgramCapacity(null);
           setProgramTitle("");
           setProgramStatus("");
+          setReqTextFields([]);
+          setReqFileFields([]);
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
         if (!cancelled) {
           setProgramCapacity(null);
           setProgramTitle("");
           setProgramStatus("");
+          setReqTextFields([]);
+          setReqFileFields([]);
         }
       }
     };
-
     loadProgram();
     return () => {
       cancelled = true;
     };
   }, [programId]);
 
-  //  Live participants query (filtered by programId if provided) 
   useEffect(() => {
     setLoading(true);
     const colRef = collection(db, "ProgramsParticipants");
-
-    // Build query
-    const q = programId
-      ? query(
-          colRef,
-          where("programId", "==", programId),
-          where("approvalStatus", "==", "Approved"),
-          orderBy("fullName", "asc")
-        )
-      : query(
-          colRef,
-          where("approvalStatus", "==", "Approved"), 
-          orderBy("programName", "asc")
-        );
+    const qRef = programId
+      ? query(colRef, where("programId", "==", programId), where("approvalStatus", "==", "Approved"), orderBy("fullName", "asc"))
+      : query(colRef, where("approvalStatus", "==", "Approved"), orderBy("programName", "asc"));
 
     const unsub = onSnapshot(
-      q,
+      qRef,
       (snap) => {
         const rows: Participant[] = [];
         snap.forEach((docu) => {
@@ -197,23 +201,24 @@ export default function EditResident() {
             firstName: d.firstName ?? "",
             lastName: d.lastName ?? "",
             contactNumber: d.contactNumber ?? "",
-            emailAddress: d.emailAddress ?? d.email ?? "",
-            email: d.email ?? d.emailAddress ?? "",
+            emailAddress: d.emailAddress ?? "",
             location: d.location ?? d.address ?? "",
             address: d.address ?? d.location ?? "",
             programId: d.programId ?? "",
             programName: d.programName ?? "",
             residentId: d.residentId ?? "",
+            role: d.role ?? "Participant",
+            approvalStatus: d.approvalStatus ?? "Approved",
           });
         });
         setParticipants(rows);
         setLoading(false);
       },
-      (err) => {
-        console.error(err);
+      () => {
         setLoading(false);
-        setPopupMessage("Failed to load participants.");
-        setShowPopup(true);
+        setErrorToastMsg("Failed to load participants.");
+        setShowErrorToast(true);
+        setTimeout(() => setShowErrorToast(false), 3000);
       }
     );
 
@@ -229,14 +234,12 @@ export default function EditResident() {
     });
   }, [searchName, participants]);
 
-  // Derive badge text e.g., "20 / 50" or "6 / —"
   const badgeText = useMemo(() => {
     const count = participants.length;
     const cap = programCapacity;
     return `${count} / ${cap ?? "—"}`;
   }, [participants.length, programCapacity]);
 
-  // Quick helpers for status/capacity guards
   const isProgramClosed = useMemo(
     () => ["rejected", "completed"].includes((programStatus || "").toLowerCase()),
     [programStatus]
@@ -246,7 +249,6 @@ export default function EditResident() {
     [programCapacity, participants.length]
   );
 
-  //  NEW: Open Add popup 
   const openAddPopup = async () => {
     if (!programId) {
       setErrorToastMsg("To add a walk-in participant, open this page from a specific Program.");
@@ -254,8 +256,6 @@ export default function EditResident() {
       setTimeout(() => setShowErrorToast(false), 3000);
       return;
     }
-
-    // Status/capacity guards (client-side)
     if (isProgramClosed) {
       setErrorToastMsg(`This program is ${programStatus}. You can’t add participants.`);
       setShowErrorToast(true);
@@ -268,18 +268,13 @@ export default function EditResident() {
       setTimeout(() => setShowErrorToast(false), 3000);
       return;
     }
-
-    // Lazy-load residents the first time we open the popup
+    // Lazy-load residents on first open
     if (residents.length === 0) {
       try {
         const snap = await getDocs(collection(db, "Residents"));
-        const list: Resident[] = snap.docs.map((d) => ({
-          id: d.id,
-          ...(d.data() as any),
-        }));
+        const list: Resident[] = snap.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
         setResidents(list);
       } catch (e) {
-        console.error(e);
         setErrorToastMsg("Failed to load Residents.");
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
@@ -289,7 +284,6 @@ export default function EditResident() {
     setShowResidentsPopup(true);
   };
 
-  // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (residentPopUpRef.current && !residentPopUpRef.current.contains(event.target as Node)) {
@@ -310,28 +304,16 @@ export default function EditResident() {
     return [...arr].sort((a, b) => (Number(a.residentNumber || 0) - Number(b.residentNumber || 0)));
   }, [residents, resSearch]);
 
-  // Add selected resident as participant (with all guards re-checked) 
-  const addResidentAsParticipant = async (resident: Resident) => {
-    try {
-      // 1) Re-check program status server-side
-      const progRef = doc(db, "Programs", programId);
-      const progSnap = await getDoc(progRef);
-      if (!progSnap.exists()) {
-        setErrorToastMsg("Program not found.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
-      const prog = progSnap.data() as any;
-      const statusNow = (prog?.progressStatus || "").toString().toLowerCase();
-      if (["rejected", "completed"].includes(statusNow)) {
-        setErrorToastMsg(`This program is ${prog?.progressStatus}. You can’t add participants.`);
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
+  const textFieldsToRender = useMemo<SimpleField[]>(
+    () => (reqTextFields.length > 0 ? reqTextFields : FALLBACK_REQ_TEXT),
+    [reqTextFields]
+  );
+  const fileFieldsToRender = useMemo<SimpleField[]>(() => reqFileFields, [reqFileFields]);
 
-      // 2) Duplicate check (same resident in same program)
+  // When picking a resident → check duplicates first; block if already enlisted
+  const openResidentForm = async (resident: Resident) => {
+    if (!programId) return;
+    try {
       const dupQ = query(
         collection(db, "ProgramsParticipants"),
         where("programId", "==", programId),
@@ -342,72 +324,90 @@ export default function EditResident() {
         setErrorToastMsg("This resident is already enlisted in this program.");
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
-        return;
+        return; // 🚫 stop here – do not open the modal
       }
 
-      // 3) Capacity re-check using count from server (avoids race)
-      const partQ = query(collection(db, "ProgramsParticipants"), where("programId", "==", programId));
-      const countSnap = await getCountFromServer(partQ);
-      const currentCount = countSnap.data().count || 0;
-      const capacity = Number(prog?.participants); // your field for capacity
-      if (Number.isFinite(capacity) && currentCount >= capacity) {
-        setErrorToastMsg("Program capacity reached. Cannot add more participants.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
-
-      // 4) Prepare fields
-      const fullName = `${resident.firstName || ""} ${resident.middleName ? resident.middleName + " " : ""}${resident.lastName || ""}`
-        .replace(/\s+/g, " ")
-        .trim();
-
-      // 5) Write
-      await addDoc(collection(db, "ProgramsParticipants"), {
-        // basics from resident
-        residentId: resident.id,
-        fullName,
-        firstName: resident.firstName || "",
-        lastName: resident.lastName || "",
-        contactNumber: resident.contactNumber || resident.mobile || "",
-        emailAddress: resident.email || "",
-        location: resident.address || resident.location || "",
-        address: resident.address || resident.location || "",
-        role: "Participant", // default role
-
-        // program linkage
-        programId,
-        programName: prog?.programName || programTitle || "",
-
-        // meta
-        addedVia: "walk-in",
-        approvalStatus: "Approved",
-        createdAt: serverTimestamp(),
-      });
-
+      // ✅ safe to proceed
+      setResidentForAdd(resident);
       setShowResidentsPopup(false);
-      setSuccessToastMsg("Participant added successfully!");
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 2500);
+      setShowAddWalkInModal(true);
     } catch (e) {
-      console.error(e);
-      setErrorToastMsg("Failed to add participant. Please try again.");
+      setErrorToastMsg("Failed to check resident status. Please try again.");
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 3000);
     }
   };
 
+  // Manual entry → open the new modal with resident=null
+  const openManualEntry = () => {
+    setResidentForAdd(null);
+    setShowResidentsPopup(false);
+    setShowAddWalkInModal(true);
+  };
+
+  // After successful save from modal
+  const handleWalkInSaved = (msg = "Participant added successfully!") => {
+    setShowAddWalkInModal(false);
+    setResidentForAdd(null);
+    setSuccessToastMsg(msg);
+    setShowSuccessToast(true);
+    setTimeout(() => setShowSuccessToast(false), 2500);
+  };
+
+  // Bubble error from modal up to page toast
+  const handleWalkInError = (msg: string) => {
+    setErrorToastMsg(msg);
+    setShowErrorToast(true);
+    setTimeout(() => setShowErrorToast(false), 3000);
+  };
+
+  /* Approve/Reject handlers for Edit modal (optional on Approved list) */
+  const handleApprove = async (participantId: string) => {
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", participantId), {
+        approvalStatus: "Approved",
+      });
+      setSuccessToastMsg("Participant approved.");
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 2200);
+    } catch {
+      setErrorToastMsg("Failed to approve participant.");
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 2500);
+    }
+  };
+  const handleReject = async (participantId: string, reason: string) => {
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", participantId), {
+        approvalStatus: "Rejected",
+        rejectionReason: reason,
+      });
+      setSuccessToastMsg("Participant rejected.");
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 2200);
+      // Optionally close modal
+      setShowViewModal(false);
+      setSelectedParticipant(null);
+    } catch {
+      setErrorToastMsg("Failed to reject participant.");
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 2500);
+    }
+  };
+
+  /* Open Edit modal on table row click */
+  const openEditModal = (p: Participant) => {
+    setSelectedParticipant(p);
+    setShowViewModal(true);
+  };
+
+  /* UI */
   return (
     <main className="edit-program-main-container">
       <div className="program-redirectionpage-section">
-        {/* MAIN REDIRECTION BUTTONS. */}
         <button className="program-redirection-buttons" onClick={handleEditClick}>
           <div className="program-redirection-icons-section">
-            <img
-              src="/images/audience.png"
-              alt="user info"
-              className="program-redirection-icons-info"
-            />
+            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
@@ -426,7 +426,6 @@ export default function EditResident() {
             <button onClick={handleBack}>
               <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-
             <h1>
               Participants Lists
               {programTitle ? ` — ${programTitle}` : ""}
@@ -434,9 +433,7 @@ export default function EditResident() {
           </div>
 
           <div className="action-btn-section-program">
-            <div className="participants-count">
-              {badgeText}
-            </div>
+            <div className="participants-count">{badgeText}</div>
           </div>
         </div>
 
@@ -448,8 +445,6 @@ export default function EditResident() {
             onChange={(e) => setSearchName(e.target.value)}
             className="programs-module-filter-participants"
           />
-
-          {/* Add button (opens Residents popup) */}
           <button
             type="button"
             title={
@@ -495,20 +490,23 @@ export default function EditResident() {
                     <th>Email Address</th>
                     <th>Location</th>
                     <th>Role</th>
-
                   </tr>
                 </thead>
                 <tbody>
                   {filteredParticipants.map((p) => {
                     const name = p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim();
                     return (
-                      <tr key={p.id}>
+                      <tr
+                        key={p.id}
+                        onClick={() => openEditModal(p)}
+                        style={{ cursor: "pointer" }}
+                        title="Click to view details"
+                      >
                         <td className="td-truncate">{name}</td>
                         <td className="td-truncate">{p.contactNumber || ""}</td>
-                        <td className="td-truncate">{p.emailAddress || p.email || ""}</td>
+                        <td className="td-truncate">{p.emailAddress || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
                         <td className="td-truncate">{p.role || "Participant"}</td>
-
                       </tr>
                     );
                   })}
@@ -519,21 +517,7 @@ export default function EditResident() {
         </div>
       </div>
 
-      {showPopup && (
-        <div className="add-programs-popup-overlay" onClick={() => setShowPopup(false)}>
-          <div className="add-programs-confirmation-popup" style={{ maxWidth: 420 }}>
-            <h3>Notice</h3>
-            <p style={{ marginTop: 8 }}>{popupMessage}</p>
-            <div className="programs-yesno-container" style={{ marginTop: 16 }}>
-              <button className="program-yes-button" onClick={() => setShowPopup(false)}>
-                OK
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Residents Picker Popup */}
+      {/* Residents Picker Popup (kept) */}
       {showResidentsPopup && (
         <div className="program-popup-overlay">
           <div className="program-popup" ref={residentPopUpRef}>
@@ -548,7 +532,7 @@ export default function EditResident() {
               onChange={(e) => setResSearch(e.target.value)}
             />
 
-            <div className="program-list">
+            <div className="program-list" style={{ maxHeight: 360, overflow: "auto" }}>
               {residents.length === 0 ? (
                 <p style={{ padding: 12 }}>No residents found.</p>
               ) : (
@@ -568,7 +552,7 @@ export default function EditResident() {
                         key={resident.id}
                         className="program-table-row"
                         style={{ cursor: "pointer" }}
-                        onClick={() => addResidentAsParticipant(resident)}
+                        onClick={() => openResidentForm(resident)}
                       >
                         <td>{resident.residentNumber ?? ""}</td>
                         <td>{resident.firstName ?? ""}</td>
@@ -581,11 +565,51 @@ export default function EditResident() {
                 </table>
               )}
             </div>
+
+            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+              <button
+                className="program-yes-button"
+                onClick={openManualEntry}
+                title="Add a non-resident walk-in"
+              >
+                Add Manually (Non-resident)
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Toasts */}
+      {showAddWalkInModal && (
+        <AddWalkInParticipantModal
+          isOpen={showAddWalkInModal}
+          onClose={() => {
+            setShowAddWalkInModal(false);
+            setResidentForAdd(null);
+          }}
+          programId={programId}
+          programName={programTitle}
+          textFields={textFieldsToRender}
+          fileFields={reqFileFields}
+          resident={residentForAdd}
+          onSaved={handleWalkInSaved}
+          onError={handleWalkInError}
+          prettyLabels={PRETTY_LABELS}
+        />
+      )}
+
+      {showViewModal && selectedParticipant && (
+        <ViewApprovedParticipantModal
+          isOpen={showViewModal}
+          onClose={() => {
+            setShowViewModal(false);
+            setSelectedParticipant(null);
+          }}
+          participant={selectedParticipant}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
+      )}
+
       {showSuccessToast && (
         <div className="popup-overlay-add-program show">
           <div className="popup-add-program">
