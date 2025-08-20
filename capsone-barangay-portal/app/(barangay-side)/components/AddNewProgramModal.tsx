@@ -910,7 +910,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                   </div>
                 </div>
 
-                {/* Custom FILEEE requirements */}
+                {/* Custom FILE requirements */}
                 <div className="box-container-outer-programs-fields">
                   <div className="title-programs-fields">
                     File Upload Fields

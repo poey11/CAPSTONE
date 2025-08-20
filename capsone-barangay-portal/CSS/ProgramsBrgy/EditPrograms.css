@@ -1604,3 +1604,245 @@ input:checked + .slider::before {
   border-right: 2px solid #dcdcdc;
   width: 230px;          
 }
+
+.add-programs-requirements-container{
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+}
+
+.predefined-fields-notes-container-programs{
+    margin-top: 20px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.predefined-fields-bottom-container-programs{
+   width: 100%;
+   display: flex;
+   flex-direction: row;
+   gap: 30px;
+}
+
+.predefined-fields-notes-container-tile-programs{
+    background-color: #214666; 
+    padding-top: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    padding-left: 60px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.predefined-fields-title-programs{
+    width: 90%;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+.predefined-fields-button-section-programs {
+    width: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-btn-predefined-fields-programs {
+    padding: 3px 5px;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #f49028;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    align-self: flex-end;
+    display: flex;
+}
+
+
+.predefined-list-programs{
+  width: 100%;
+  text-align: left;
+}
+
+.predefined-list-items-programs{
+  padding: 20px;
+}
+
+.predefined-text-programs{
+  font-size: 15px;
+  font-weight: 550;
+}
+
+.predefined-type-programs{
+  font-size: 15px;
+  color: #de3030;
+}
+
+.predefined-desc-programs {
+  font-size: 13px;
+  color: #555;
+  margin-left: 6px;
+  font-style: italic;
+}
+
+  .box-container-outer-programs-fields{
+    width: 100%;
+    height: 250px;
+    position: relative; 
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+
+  .title-programs-fields{
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 6;
+  width: 210px;
+  text-align: center;
+}
+
+.box-container-programs-fields{
+    position: relative;
+    width: 100%;
+    height: 250px;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    padding: 30px 20px 20px;
+    padding-top: 40px;
+    margin-top: 30px;
+    overflow-y: auto;
+}
+
+  .instructions-container-programs {
+    height: 50px;
+  }
+  .instructions-container-programs h1 {
+    color: #de3030;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+    .required-asterisk {
+    color: red;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 20px;
+  }
+  .add-programs-field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-programs-field-row {
+    display: flex;
+    gap: 30px;
+    flex-direction: row;
+    align-items: center;
+    height: 70px;
+}
+
+.add-programs-field-row h1{
+    font-size: 15px;
+    color: #2C3E50;
+    font-weight: bold;
+}
+
+.row-title-section-programs{
+    width: 25%;
+}
+
+.row-input-section-programs{
+    width: 65%;
+}
+
+.row-button-section-programs{
+    width: 10%;
+}
+
+.row-input-section-added-program{
+    width: 80%;
+}
+
+.add-program-field-input{
+    padding: 8px;
+    width: 100%;
+    height: 35px;
+    font-size: 15px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+}
+
+.add-program-field-input:focus {
+    border-color: #f49028;
+    outline: none;
+    box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+  }
+
+.program-field-remove-button,
+.program-field-add-button{
+    color: white;
+    height: 30px;
+    width: 30px;
+    border-radius: 0.375rem;  
+    transition: background-color 300ms;
+  }
+
+.program-field-remove-button {
+    background-color: #dc2626; 
+
+}
+  
+.program-field-add-button {
+    background-color:  #ED7014; 
+}
+  .program-field-remove-button:hover {
+    background-color: #991b1b; 
+  }
+
+  .program-field-add-button:hover {
+    background-color: #b1520e; 
+  }
+
+.added-program-field-container {
+    display: flex;
+    flex-direction: column;
+}
+
+  .added-program-field-row {
+    display: flex;
+    gap: 28px;
+    flex-direction: row;
+    align-items: center;
+    height: 70px;
+    width: 100%;
+    padding-left: 28%;
+  }
+
+  .added-program-field-row h1{
+    font-size: 15px;
+    color: #2C3E50;
+    font-weight: bold;
+}
