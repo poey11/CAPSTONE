@@ -24,6 +24,7 @@ type Notification = {
   incidentID: string;
   requestID: string;
   isRead?: boolean;
+  programId: string;
 };
 
 
@@ -284,6 +285,9 @@ const handleNotificationClick = async (notification: Notification) => {
   else if (type === "Verification") {
     router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
   }
+  else if (type === "Program Registration") {
+    router.push(`/Programs/${notification?.programId}`);
+  }  
   else {
     console.log("No navigation triggered for this notification type.");
   }

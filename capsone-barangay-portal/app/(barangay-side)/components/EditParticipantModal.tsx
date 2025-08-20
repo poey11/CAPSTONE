@@ -1,7 +1,13 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import { db } from "@/app/db/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 type Participant = {
   id: string;
@@ -73,7 +79,7 @@ export default function EditParticipantModal({
     load();
   }, [isOpen, participant?.id]);
 
-  // ---- Derived display data (no conditional hooks) ----
+  //  Derived display data (no conditional hooks) 
   const fieldsMap: Record<string, string> = useMemo(() => {
     const base = (fullDoc?.fields || {}) as Record<string, any>;
     // promote meaningful fallbacks
@@ -115,9 +121,30 @@ export default function EditParticipantModal({
   // Helpers
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
     if (!participant?.id) return;
     onApprove?.(participant.id);
+
+    
+    try {
+      const notificationRef = doc(collection(db, "Notifications"));
+      await setDoc(notificationRef, {
+        residentID: fullDoc?.residentId || null,               // who to notify
+        participantID: fullDoc?.id || participant.id,          // ProgramsParticipants UID
+        programId: fullDoc?.programId || null,
+        programName: fullDoc?.programName || "",
+        role: fullDoc?.role || "Participant",
+        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
+          fullDoc?.role || "Participant"
+        } has been approved.`,
+        timestamp: serverTimestamp(),
+        transactionType: "Program Registration",
+        isRead: false,
+      });
+    } catch (e) {
+      console.error("Failed to send approval notification:", e);
+    }
+
     setToastMsg("Participant approved.");
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2200);
@@ -138,9 +165,29 @@ export default function EditParticipantModal({
     setShowSubmitRejectPopup(true);
   };
 
-  const handleRejectYes = () => {
+  const handleRejectYes = async () => {
     if (!participant?.id) return;
     onReject?.(participant.id, rejectReason.trim());
+
+    try {
+      const notificationRef = doc(collection(db, "Notifications"));
+      await setDoc(notificationRef, {
+        residentID: fullDoc?.residentId || null,
+        participantID: fullDoc?.id || participant.id,
+        programId: fullDoc?.programId || null,
+        programName: fullDoc?.programName || "",
+        role: fullDoc?.role || "Participant",
+        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
+          fullDoc?.role || "Participant"
+        } has been rejected. Reason: ${rejectReason.trim()}`,
+        timestamp: serverTimestamp(),
+        transactionType: "Program Registration",
+        isRead: false,
+      });
+    } catch (e) {
+      console.error("Failed to send rejection notification:", e);
+    }
+
     setShowSubmitRejectPopup(false);
     setShowRejectPopup(false);
     setToastMsg("Reason for Rejection submitted successfully!");
