@@ -43,6 +43,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   // Details form state 
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
@@ -133,6 +134,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     setActiveSection("details");
     setProgramName("");
     setParticipants("");
+    setVolunteers("");
     setEligibleParticipants("");
     setLocation("");
     setEventType("single");
@@ -178,8 +180,15 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
       Number.isFinite(participantsNum) &&
       participantsNum > 0;
 
+    const volunteersNum = Number(volunteers);
+    const validVolunteers =
+      volunteers.trim().length > 0 &&
+      Number.isFinite(volunteersNum) &&
+      volunteersNum >= 0;      
+
     need("programName", !!programName.trim());
     need("participants", validParticipants);
+    need("volunteers", validVolunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
     need("description", !!description.trim());
@@ -327,6 +336,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
       const payload: any = {
         programName: programName.trim(),
         participants: Number(participants),
+        volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
@@ -543,12 +553,12 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                         min={1}
                         className={[
                           "add-programs-input-field",
-                          errors.participants ? "input-error" : "",
-                          shake.participants ? "shake" : "",
+                          errors.volunteers ? "input-error" : "",
+                          shake.volunteers ? "shake" : "",
                         ].join(" ").trim()}
                         placeholder="E.g. 50"
-                        value={participants}
-                        onChange={(e) => setParticipants(e.target.value)}
+                        value={volunteers}
+                        onChange={(e) => setVolunteers(e.target.value)}
                       />
                     </div>
 
