@@ -577,7 +577,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                       >
                         <option value="">Select requirement</option>
                         <option value="resident">Resident</option>
-                        <option value="non-resident">Non-Resident</option>
+                        {/* <option value="non-resident">Non-Resident</option> */}
                         <option value="both">Both</option>
                       </select>
                     </div>
