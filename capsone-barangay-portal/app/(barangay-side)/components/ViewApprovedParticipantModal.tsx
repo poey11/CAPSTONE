@@ -16,13 +16,14 @@ type Participant = {
   lastName?: string;
   contactNumber?: string;
   emailAddress?: string;
-  email?: string;
   location?: string;
   address?: string;
   programName?: string;
   idImageUrl?: string; // legacy single-ID field
   role?: string;
 };
+
+type SimpleField = { name: string };
 
 type Props = {
   isOpen: boolean;
@@ -31,6 +32,15 @@ type Props = {
   onSave?: (updated: Participant) => void;
   onApprove?: (participantId: string) => void;
   onReject?: (participantId: string, reason: string) => void;
+};
+
+const PRETTY_LABELS: Record<string, string> = {
+  firstName: "First Name",
+  lastName: "Last Name",
+  contactNumber: "Contact Number",
+  emailAddress: "Email Address",
+  location: "Location",
+  validIDjpg: "Valid ID",
 };
 
 export default function ViewApprovedParticipantModal({
@@ -56,6 +66,11 @@ export default function ViewApprovedParticipantModal({
   const [fullDoc, setFullDoc] = useState<any | null>(null);
   const [loadingFull, setLoadingFull] = useState(false);
 
+  // Program requirements (dynamic fields to display)
+  const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
+  const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
+  const [loadingReqs, setLoadingReqs] = useState(false);
+
   // Fetch the complete ProgramsParticipants doc when opened
   useEffect(() => {
     const load = async () => {
@@ -79,130 +94,116 @@ export default function ViewApprovedParticipantModal({
     load();
   }, [isOpen, participant?.id]);
 
-  //  Derived display data (no conditional hooks) 
+  // Load program requirements (textFields/fileFields) using programId from fullDoc
+  useEffect(() => {
+    const loadReqs = async () => {
+      if (!fullDoc?.programId) {
+        setReqTextFields([]);
+        setReqFileFields([]);
+        return;
+      }
+      setLoadingReqs(true);
+      try {
+        const pSnap = await getDoc(doc(db, "Programs", fullDoc.programId));
+        if (pSnap.exists()) {
+          const data = pSnap.data() as any;
+          const tfs: SimpleField[] = Array.isArray(data?.requirements?.textFields)
+            ? data.requirements.textFields
+            : [];
+          const ffs: SimpleField[] = Array.isArray(data?.requirements?.fileFields)
+            ? data.requirements.fileFields
+            : [];
+          setReqTextFields(tfs);
+          setReqFileFields(ffs);
+        } else {
+          setReqTextFields([]);
+          setReqFileFields([]);
+        }
+      } catch {
+        setReqTextFields([]);
+        setReqFileFields([]);
+      } finally {
+        setLoadingReqs(false);
+      }
+    };
+    loadReqs();
+  }, [fullDoc?.programId]);
+
+  const labelFor = (name: string) => PRETTY_LABELS[name] || name;
+
+  //  Derived display data (strict to emailAddress only)
   const fieldsMap: Record<string, string> = useMemo(() => {
     const base = (fullDoc?.fields || {}) as Record<string, any>;
-    // promote meaningful fallbacks
+    // promote meaningful fields & enforce emailAddress only
     const top: Record<string, any> = {
       firstName: fullDoc?.firstName,
       lastName: fullDoc?.lastName,
       contactNumber: fullDoc?.contactNumber,
-      emailAddress: fullDoc?.emailAddress ?? fullDoc?.email,
+      emailAddress: fullDoc?.emailAddress ?? participant?.emailAddress ?? "",
       location: fullDoc?.location ?? fullDoc?.address,
       programName: fullDoc?.programName,
       role: fullDoc?.role ?? participant?.role ?? "",
+      fullName: fullDoc?.fullName ?? participant?.fullName ?? "",
     };
     return { ...base, ...top };
-  }, [fullDoc, participant?.role]);
+  }, [fullDoc, participant?.emailAddress, participant?.role, participant?.fullName]);
 
-  // Requirements: file URLs. validIDjpg first, then others alpha.
+  // Files map with legacy support. We'll render by program order later.
   const filesMap: Record<string, string> = useMemo(() => {
     const map = { ...(fullDoc?.files || {}) } as Record<string, string>;
-
     // legacy support: top-level idImageUrl
     if (fullDoc?.idImageUrl && !map.validIDjpg) {
       map.validIDjpg = fullDoc.idImageUrl;
     }
-
-    // Build ordered map: validIDjpg → rest (sorted)
-    const ordered: Record<string, string> = {};
-    if (map.validIDjpg) ordered.validIDjpg = map.validIDjpg;
-
-    Object.keys(map)
-      .filter((k) => k !== "validIDjpg")
-      .sort((a, b) => a.localeCompare(b))
-      .forEach((k) => (ordered[k] = map[k]));
-
-    return ordered;
+    return map;
   }, [fullDoc]);
 
-  const roleValue = fieldsMap.role || "";
+  // Build ordered text fields to show: program-defined order; if none, fallback to common fields
+  const orderedTextNames: string[] = useMemo(() => {
+    if (reqTextFields.length > 0) return reqTextFields.map((f) => f.name);
+    // fallback order if program has no config
+    return ["firstName", "lastName", "contactNumber", "emailAddress", "location"];
+  }, [reqTextFields]);
 
-  // Helpers
+  // Build ordered file keys to show: program-defined first (keeping any present), then any extras (alpha)
+  const orderedFileNames: string[] = useMemo(() => {
+    const seen = new Set<string>();
+    const out: string[] = [];
+    // If program specifies order, use it first
+    for (const f of reqFileFields) {
+      if (filesMap[f.name]) {
+        out.push(f.name);
+        seen.add(f.name);
+      }
+    }
+    // Ensure validIDjpg is first if present and not already
+    if (filesMap.validIDjpg && !seen.has("validIDjpg")) {
+      out.unshift("validIDjpg");
+      seen.add("validIDjpg");
+    }
+    // Add any other uploaded file keys not listed, alphabetically
+    Object.keys(filesMap)
+      .filter((k) => !seen.has(k))
+      .sort((a, b) => a.localeCompare(b))
+      .forEach((k) => out.push(k));
+    return out;
+  }, [reqFileFields, filesMap]);
+
+  const roleValue = fieldsMap.role || "";
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
-  const handleApprove = async () => {
-    if (!participant?.id) return;
-    onApprove?.(participant.id);
 
-    
-    try {
-      const notificationRef = doc(collection(db, "Notifications"));
-      await setDoc(notificationRef, {
-        residentID: fullDoc?.residentId || null,               // who to notify
-        participantID: fullDoc?.id || participant.id,          // ProgramsParticipants UID
-        programId: fullDoc?.programId || null,
-        programName: fullDoc?.programName || "",
-        role: fullDoc?.role || "Participant",
-        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
-          fullDoc?.role || "Participant"
-        } has been approved.`,
-        timestamp: serverTimestamp(),
-        transactionType: "Program Registration",
-        isRead: false,
-      });
-    } catch (e) {
-      console.error("Failed to send approval notification:", e);
-    }
 
-    setToastMsg("Participant approved.");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2200);
-  };
 
-  const handleRejectClick = () => {
-    setRejectReason("");
-    setShowRejectPopup(true);
-  };
 
-  const handleConfirmReject = () => {
-    if (!rejectReason.trim()) {
-      setToastMsg("Please enter a reason before submitting.");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 1800);
-      return;
-    }
-    setShowSubmitRejectPopup(true);
-  };
 
-  const handleRejectYes = async () => {
-    if (!participant?.id) return;
-    onReject?.(participant.id, rejectReason.trim());
-
-    try {
-      const notificationRef = doc(collection(db, "Notifications"));
-      await setDoc(notificationRef, {
-        residentID: fullDoc?.residentId || null,
-        participantID: fullDoc?.id || participant.id,
-        programId: fullDoc?.programId || null,
-        programName: fullDoc?.programName || "",
-        role: fullDoc?.role || "Participant",
-        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
-          fullDoc?.role || "Participant"
-        } has been rejected. Reason: ${rejectReason.trim()}`,
-        timestamp: serverTimestamp(),
-        transactionType: "Program Registration",
-        isRead: false,
-      });
-    } catch (e) {
-      console.error("Failed to send rejection notification:", e);
-    }
-
-    setShowSubmitRejectPopup(false);
-    setShowRejectPopup(false);
-    setToastMsg("Reason for Rejection submitted successfully!");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2200);
-  };
 
   if (!isOpen || !participant) return null;
 
   return (
     <>
-      {/* Main modal */}
       <div className="participants-view-popup-overlay add-incident-animated">
         <div className="view-barangayuser-popup">
-          {/* Header */}
           <div className="view-user-main-section1">
             <div className="view-user-header-first-section">
               <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
@@ -218,7 +219,6 @@ export default function ViewApprovedParticipantModal({
             </div>
           </div>
 
-          {/* Body */}
           <div className="view-participant-header-body">
             <div className="view-participant-header-body-top-section">
               <div className="view-participant-backbutton-container">
@@ -243,56 +243,14 @@ export default function ViewApprovedParticipantModal({
                   </button>
                 ))}
               </div>
-
-
             </div>
 
             <div className="view-participant-header-body-bottom-section">
               <div className="view-participant-user-info-main-container">
                 <div className="view-participant-info-main-content">
-                  {/* ===== Full Details ===== */}
                   {activeTab === "details" && (
-                    <div style={{ display: "flex", width: "100%", padding: "20px 0" }}>
-                      <div className="view-participant-user-content-left-side">
-                        <div className="view-participant-fields-section">
-                          <p>Last Name</p>
-                          <input
-                            type="text"
-                            className="view-participant-input-field"
-                            value={
-                              fieldsMap.lastName ??
-                              fullDoc?.lastName ??
-                              (fullDoc?.fullName ? fullDoc.fullName.split(" ").slice(-1).join(" ") : "")
-                            }
-                            readOnly
-                          />
-                        </div>
-
-                        <div className="view-participant-fields-section">
-                          <p>Contact Number</p>
-                          <input
-                            type="tel"
-                            className="view-participant-input-field"
-                            value={fieldsMap.contactNumber ?? fullDoc?.contactNumber ?? ""}
-                            readOnly
-                          />
-                        </div>
-
-                        <div className="view-participant-fields-section">
-                          <p>Home Address</p>
-                          <input
-                            type="text"
-                            className="view-participant-input-field"
-                            value={
-                              fieldsMap.location ??
-                              fullDoc?.location ??
-                              fullDoc?.address ??
-                              ""
-                            }
-                            readOnly
-                          />
-                        </div>
-
+                    <div style={{ width: "100%", padding: "20px 0" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 12 }}>
                         <div className="view-participant-fields-section">
                           <p>Program Name</p>
                           <input
@@ -302,33 +260,6 @@ export default function ViewApprovedParticipantModal({
                             readOnly
                           />
                         </div>
-                      </div>
-
-                      <div className="view-participant-user-content-right-side">
-                        <div className="view-participant-fields-section">
-                          <p>First Name</p>
-                          <input
-                            type="text"
-                            className="view-participant-input-field"
-                            value={
-                              fieldsMap.firstName ??
-                              fullDoc?.firstName ??
-                              (fullDoc?.fullName ? fullDoc.fullName.split(" ").slice(0, -1).join(" ") : "")
-                            }
-                            readOnly
-                          />
-                        </div>
-
-                        <div className="view-participant-fields-section">
-                          <p>Email</p>
-                          <input
-                            type="email"
-                            className="view-participant-input-field"
-                            value={fieldsMap.emailAddress ?? fullDoc?.emailAddress ?? fullDoc?.email ?? ""}
-                            readOnly
-                          />
-                        </div>
-
                         <div className="view-participant-fields-section">
                           <p>Role</p>
                           <input
@@ -339,86 +270,71 @@ export default function ViewApprovedParticipantModal({
                           />
                         </div>
                       </div>
+
+                      {loadingReqs ? (
+                        <div style={{ padding: 16, opacity: 0.8 }}>Loading fields…</div>
+                      ) : (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                          {orderedTextNames.map((name) => {
+                            const label = labelFor(name);
+                            const value = (fieldsMap[name] ?? "").toString();
+                            return (
+                              <div key={`tf-${name}`} className="view-participant-fields-section">
+                                <p>{label}</p>
+                                <input
+                                  type={
+                                    name.toLowerCase().includes("email")
+                                      ? "email"
+                                      : name.toLowerCase().includes("contact") || name.toLowerCase().includes("phone")
+                                      ? "tel"
+                                      : "text"
+                                  }
+                                  className="view-participant-input-field"
+                                  value={value}
+                                  readOnly
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* ===== Requirements ===== */}
                   {activeTab === "reqs" && (
                     <div className="participant-uploaded-photo-section" style={{ width: "100%" }}>
-                      {/* If still loading, or nothing to show */}
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
-                          <img
-                            src="/images/no-results.png"
-                            alt="Loading"
-                            className="no-result-icon-programs"
-                          />
+                          <img src="/images/no-results.png" alt="Loading" className="no-result-icon-programs" />
                           <p className="no-results-programs">Loading uploads…</p>
                         </div>
                       ) : Object.keys(filesMap).length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
-                          <img
-                            src="/images/no-results.png"
-                            alt="No results icon"
-                            className="no-result-icon-programs"
-                          />
+                          <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
                           <p className="no-results-programs">No files uploaded</p>
                         </div>
                       ) : (
                         <>
-                          {/* Render Valid ID (always first if present) */}
-                          {filesMap.validIDjpg && (
-                            <div className="box-container-outer-participant" style={{ width: "100%" }}>
-                              <div className="title-remarks-participant">Uploaded Valid ID</div>
-                              <div className="box-container-participant-2">
-                                {isPdfUrl(filesMap.validIDjpg) ? (
-                                  <embed
-                                    src={filesMap.validIDjpg}
-                                    type="application/pdf"
-                                    className="uploaded-pic-participant"
-                                  />
-                                ) : (
-                                  <a
-                                    href={filesMap.validIDjpg}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <img
-                                      src={filesMap.validIDjpg}
-                                      alt="Valid ID"
-                                      className="participant-img-view uploaded-pic-participant"
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          )}
+                          {orderedFileNames.map((key) => {
+                            const url = filesMap[key];
+                            if (!url) return null;
+                            const label = labelFor(key);
+                            const isPdf = isPdfUrl(url);
 
-                          {/* Other files */}
-                          {Object.entries(filesMap)
-                            .filter(([k]) => k !== "validIDjpg")
-                            .map(([key, url]) => (
-                              <div
-                                key={key}
-                                className="box-container-outer-participant"
-                                style={{ width: "100%" }}
-                              >
+                            // Put Valid ID at the top visually if present (we already biased order)
+                            return (
+                              <div key={key} className="box-container-outer-participant" style={{ width: "100%" }}>
                                 <div className="title-remarks-participant">
-                                  {key}
+                                  {key === "validIDjpg" ? "Uploaded Valid ID" : label}
                                 </div>
                                 <div className="box-container-participant-2">
-                                  {isPdfUrl(url) ? (
-                                    <embed
-                                      src={url}
-                                      type="application/pdf"
-                                      className="uploaded-pic-participant"
-                                    />
+                                  {isPdf ? (
+                                    <embed src={url} type="application/pdf" className="uploaded-pic-participant" />
                                   ) : (
                                     <a href={url} target="_blank" rel="noopener noreferrer">
                                       <img
                                         src={url}
-                                        alt={key}
+                                        alt={label}
                                         className="participant-img-view uploaded-pic-participant"
                                         style={{ cursor: "pointer" }}
                                       />
@@ -426,7 +342,8 @@ export default function ViewApprovedParticipantModal({
                                   )}
                                 </div>
                               </div>
-                            ))}
+                            );
+                          })}
                         </>
                       )}
                     </div>
@@ -438,75 +355,10 @@ export default function ViewApprovedParticipantModal({
         </div>
       </div>
 
-      {/* Reject reason modal */}
-      {showRejectPopup && (
-        <div className="reasonfor-recject-popup-overlay">
-          <div className="reasonfor-reject-confirmation-popup">
-            <h2>Reject Participant</h2>
 
-            <form className="reject-container" onSubmit={(e) => e.preventDefault()}>
-              <div className="box-container-outer-reasonforreject">
-                <div className="title-remarks-reasonforreject">Reason For Reject</div>
-                <div className="box-container-reasonforreject">
-                  <textarea
-                    className="reasonforreject-input-field"
-                    name="reason"
-                    id="reason"
-                    placeholder="Enter the reason for rejecting the participant..."
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                  />
-                </div>
-              </div>
 
-              <div className="reject-reason-yesno-container">
-                <button
-                  type="button"
-                  onClick={() => setShowRejectPopup(false)}
-                  className="reject-reason-no-button"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="reject-reason-yes-button"
-                  onClick={handleConfirmReject}
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Confirm submit reject modal */}
-      {showSubmitRejectPopup && (
-        <div className="confirmation-popup-overlay-program-reject">
-          <div className="confirmation-popup-program-status">
-            <img src="/Images/question.png" alt="question icon" className="successful-icon-popup" />
-            <p>Are you sure you want to Submit?</p>
-            <div className="yesno-container-add">
-              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
-                No
-              </button>
-              <button onClick={handleRejectYes} className="yes-button-add">
-                Yes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Success toast */}
-      {showToast && (
-        <div className="popup-overlay-participant show">
-          <div className="popup-participant">
-            <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
-            <p>{toastMsg}</p>
-          </div>
-        </div>
-      )}
     </>
   );
 }
