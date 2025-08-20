@@ -32,6 +32,7 @@ type Participant = {
   programId?: string;
   programName?: string;
   residentId?: string;
+  role?: string; // Added role field
 };
 
 type Resident = {
@@ -49,6 +50,7 @@ type Resident = {
   sex?: string;
   age?: number;
   identificationFileURL?: string;
+
 };
 
 export default function EditResident() {
@@ -122,7 +124,7 @@ export default function EditResident() {
     }
   };
 
-  // ===== Program meta =====
+  //  Program meta 
   useEffect(() => {
     let cancelled = false;
 
@@ -164,7 +166,7 @@ export default function EditResident() {
     };
   }, [programId]);
 
-  // ===== Live participants query (filtered by programId if provided) =====
+  //  Live participants query (filtered by programId if provided) 
   useEffect(() => {
     setLoading(true);
     const colRef = collection(db, "ProgramsParticipants");
@@ -244,7 +246,7 @@ export default function EditResident() {
     [programCapacity, participants.length]
   );
 
-  // ===== NEW: Open Add popup =====
+  //  NEW: Open Add popup 
   const openAddPopup = async () => {
     if (!programId) {
       setErrorToastMsg("To add a walk-in participant, open this page from a specific Program.");
@@ -308,7 +310,7 @@ export default function EditResident() {
     return [...arr].sort((a, b) => (Number(a.residentNumber || 0) - Number(b.residentNumber || 0)));
   }, [residents, resSearch]);
 
-  // ===== Add selected resident as participant (with all guards re-checked) =====
+  // Add selected resident as participant (with all guards re-checked) 
   const addResidentAsParticipant = async (resident: Resident) => {
     try {
       // 1) Re-check program status server-side
@@ -371,6 +373,7 @@ export default function EditResident() {
         emailAddress: resident.email || "",
         location: resident.address || resident.location || "",
         address: resident.address || resident.location || "",
+        role: "Participant", // default role
 
         // program linkage
         programId,
@@ -482,6 +485,7 @@ export default function EditResident() {
                   <col style={{ width: "25%" }} />
                   <col style={{ width: "25%" }} />
                   <col style={{ width: "25%" }} />
+                  <col style={{ width: "25%" }} />
                 </colgroup>
 
                 <thead>
@@ -490,6 +494,8 @@ export default function EditResident() {
                     <th>Contact Number</th>
                     <th>Email Address</th>
                     <th>Location</th>
+                    <th>Role</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -501,6 +507,8 @@ export default function EditResident() {
                         <td className="td-truncate">{p.contactNumber || ""}</td>
                         <td className="td-truncate">{p.emailAddress || p.email || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
+                        <td className="td-truncate">{p.role || "Participant"}</td>
+
                       </tr>
                     );
                   })}

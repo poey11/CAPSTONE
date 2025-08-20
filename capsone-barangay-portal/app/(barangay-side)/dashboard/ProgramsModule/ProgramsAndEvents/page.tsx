@@ -45,7 +45,7 @@ type Participant = {
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
 
-// ---- helpers: safe date parsing & single status decider ----
+//  helpers: safe date parsing & single status decider 
 const parseYMD = (s?: string | null): Date | null => {
   if (!s || typeof s !== "string") return null;
   const [y, m, d] = s.split("-").map(Number);
@@ -131,7 +131,7 @@ export default function ProgramsModule() {
   const [activeSectionRedirection, setActiveSectionRedirection] =
     useState<"main" | "programs" | "participants">("main");
 
-  // ===== Toasts (success / error) =====
+  // Toasts (success / error)
   const [toastVisible, setToastVisible] = useState(false);
   const [toastType, setToastType] = useState<"success" | "error">("success");
   const [toastMsg, setToastMsg] = useState("");
@@ -142,7 +142,7 @@ export default function ProgramsModule() {
     setTimeout(() => setToastVisible(false), ms);
   };
 
-  // ===== Custom Delete Confirmation Modal =====
+  //  Custom Delete Confirmation Modal 
   type ConfirmState =
     | { open: false }
     | {
@@ -932,16 +932,11 @@ export default function ProgramsModule() {
         </>
       )}
 
-      {/* ===== Single Toast outlet (success/error) ===== */}
       {toastVisible && (
         <div
-          className={`${
-            toastType === "success"
-              ? "popup-overlay-add-program"
-              : "error-popup-overlay-add-program"
-          } show`}
+          className={`popup-overlay-program show${toastType === "error" ? " error" : ""}`}
         >
-          <div className="popup-add-program">
+          <div className="popup-program">
             <img
               src={toastType === "success" ? "/Images/check.png" : "/Images/warning-1.png"}
               alt="icon alert"
@@ -952,7 +947,6 @@ export default function ProgramsModule() {
         </div>
       )}
 
-      {/* ===== Custom Confirmation Modal (matches your first screenshot) ===== */}
       {confirmDel.open && (
         <div className="confirmation-popup-overlay-add-program">
           <div className="confirmation-popup-add-program">

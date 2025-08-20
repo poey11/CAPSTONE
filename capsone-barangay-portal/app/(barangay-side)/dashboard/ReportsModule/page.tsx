@@ -2873,7 +2873,7 @@ const uploadForms = async (url: string): Promise<void> => {
       worksheet.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       worksheet.getCell("A2").value = reportTitle;
   
-      // === Footer rows and drawings ===
+      //  Footer rows and drawings 
       // Adjust these to your actual footer row numbers in the template
       const originalFooterStartRow = 24;
       const originalFooterEndRow = 28;

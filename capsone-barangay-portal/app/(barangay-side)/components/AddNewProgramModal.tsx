@@ -14,10 +14,9 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onProgramSaved?: (msg: string) => void; // notify parent to show main-page popup
+  onProgramSaved?: (msg: string) => void;
 };
 
-// Pre-approved program names (case-insensitive)
 const PREAPPROVED_NAMES = [
   "medical mission",
   "caravan",
@@ -28,7 +27,6 @@ const PREAPPROVED_NAMES = [
   "scholarship program",
 ];
 
-// Positions that can auto-approve pre-approved names
 const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
 
 type SimpleField = { name: string };
@@ -42,7 +40,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // ====== Details form state ======
+  // Details form state 
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
@@ -57,15 +55,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [previewURL, setPreviewURL] = useState<string | null>(null);
+
+  // ⬇️ multiple image support
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [previewURLs, setPreviewURLs] = useState<string[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  // ====== Requirements state (like AddNewDoc) ======
-  // Predefined arrays (leave empty for now; we’ll fill when you send the screenshot)
+  //  Requirements 
   const PREDEFINED_REQ_TEXT: SimpleField[] = [
     { name: "firstName" },
     { name: "lastName" },
@@ -73,13 +73,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     { name: "emailAddress" },
     { name: "location" },
   ];
-  const PREDEFINED_REQ_FILES: SimpleField[] = [
-    { name: "validIDjpg" },
-  ];
+  const PREDEFINED_REQ_FILES: SimpleField[] = [{ name: "validIDjpg" }];
 
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
-
-  // Custom (user-added) requirement fields
   const [reqTextNew, setReqTextNew] = useState("");
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileNew, setReqFileNew] = useState("");
@@ -94,7 +90,6 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const removeReqText = (i: number) => {
     setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   };
-
   const addReqFile = () => {
     const v = reqFileNew.trim();
     if (!v) return;
@@ -105,13 +100,11 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  // ===== util =====
   const triggerShake = (field: string, durationMs = 300) => {
     setShake((prev) => ({ ...prev, [field]: true }));
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), durationMs);
   };
 
-  // Min date (tomorrow)
   const minDate = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 1);
@@ -147,13 +140,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setTimeEnd("");
     setDescription("");
     setSummary("");
-    setPhotoFile(null);
+
+    // revoke and clear previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
+    setPhotoFiles([]);
+    setFileError(null);
+
     setErrors({});
     setShake({});
-    setPreviewURL((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return null;
-    });
 
     // requirements
     setReqTextNew("");
@@ -184,7 +181,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     need("location", !!location.trim());
     need("description", !!description.trim());
     need("summary", !!summary.trim());
-    need("photoFile", !!photoFile);
+    need("photoFiles", photoFiles.length > 0);
     need("timeStart", !!timeStart);
     need("timeEnd", !!timeEnd);
 
@@ -224,66 +221,91 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     return nameOk && roleOk;
   };
 
-  const handleFileChange = (file: File | null) => {
-    if (!file) {
-      setPhotoFile(null);
-      setPreviewURL((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return null;
+  // ⬇️ handle multi-file selection (images only)
+  const handleFilesChange = (files: FileList | null) => {
+    setFileError(null);
+    if (!files || files.length === 0) {
+      // clear
+      setPhotoFiles([]);
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
       });
       return;
     }
-    const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      alert("Image too large. Max 5MB.");
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
-      return;
+
+    // Constraints
+    const MAX_MB = 5;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
+    const MAX_FILES = 4;
+
+    const picked = Array.from(files);
+    const filtered: File[] = [];
+    const errors: string[] = [];
+
+    for (const f of picked.slice(0, MAX_FILES)) {
+      if (!f.type.startsWith("image/")) {
+        errors.push(`${f.name} is not an image.`);
+        continue;
+      }
+      if (f.size > MAX_BYTES) {
+        errors.push(`${f.name} exceeds ${MAX_MB}MB.`);
+        continue;
+      }
+      filtered.push(f);
     }
 
-    const url = URL.createObjectURL(file);
-    setPhotoFile(file);
-    setPreviewURL((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return url;
+    if (picked.length > MAX_FILES) {
+      errors.push(`Only the first ${MAX_FILES} images were accepted.`);
+    }
+
+    // Build previews
+    const newPreviews = filtered.map((f) => URL.createObjectURL(f));
+
+    // Revoke old previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return newPreviews;
     });
+    setPhotoFiles(filtered);
 
-    // clear any old photo error
+    if (errors.length) {
+      setFileError(errors.join(" "));
+    }
+
+    // clear any old photo error flag
     setErrors((prev) => {
-      const { photoFile, ...rest } = prev;
+      const { photoFiles, ...rest } = prev;
       return rest;
     });
   };
 
   useEffect(() => {
     return () => {
-      setPreviewURL((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return null;
+      // cleanup on unmount
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
       });
     };
   }, []);
 
-const addMinutes = (hhmm: string, minutes: number) => {
-  const [h, m] = hhmm.split(":").map(Number);
-  if (Number.isNaN(h) || Number.isNaN(m)) return "";
-  const total = h * 60 + m + minutes;
-  const newH = Math.floor((total % (24 * 60)) / 60);
-  const newM = total % 60;
-  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
-};
+  const addMinutes = (hhmm: string, minutes: number) => {
+    const [h, m] = hhmm.split(":").map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return "";
+    const total = h * 60 + m + minutes;
+    const newH = Math.floor((total % (24 * 60)) / 60);
+    const newM = total % 60;
+    return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+  };
 
-const isSameDay = () => {
-  if (eventType === "single") return true;
-  if (!startDate || !endDate) return false;
-  return startDate === endDate;
-};
+  const isSameDay = () => {
+    if (eventType === "single") return true;
+    if (!startDate || !endDate) return false;
+    return startDate === endDate;
+  };
 
-// For End Time’s min attribute
-const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
-
+  const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
 
   const handleSave = async () => {
     if (saving) return;
@@ -317,8 +339,6 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
         createdAt: serverTimestamp(),
         suggestedBy: staffDisplayName || null,
         suggestedByUid: userUid,
-
-        // NEW: requirements schema saved with the program
         requirements: {
           textFields: [...PREDEFINED_REQ_TEXT, ...reqTextFields],
           fileFields: [...PREDEFINED_REQ_FILES, ...reqFileFields],
@@ -327,14 +347,22 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
 
       const programRef = await addDoc(collection(db, "Programs"), payload);
 
-      if (photoFile) {
-        const storageRef = ref(
-          storage,
-          `Programs/${programRef.id}/photo_${Date.now()}_${photoFile.name}`
-        );
-        await uploadBytes(storageRef, photoFile);
-        const photoURL = await getDownloadURL(storageRef);
-        await updateDoc(doc(db, "Programs", programRef.id), { photoURL });
+      // ⬇️ upload all selected images
+      if (photoFiles.length > 0) {
+        const uploadPromises = photoFiles.map(async (file, idx) => {
+          const storageRef = ref(
+            storage,
+            `Programs/${programRef.id}/photos/${Date.now()}_${idx}_${file.name}`
+          );
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
+        });
+
+        const urls = await Promise.all(uploadPromises);
+        await updateDoc(doc(db, "Programs", programRef.id), {
+          photoURL: urls[0] || null,     // main/cover image
+          photoURLs: urls,               // gallery
+        });
       }
 
       if (!autoApproved) {
@@ -356,7 +384,8 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Failed to save program. Please try again.");
+      // keep inline errors/UI instead of alert
+      setFileError("Failed to save program. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -364,7 +393,7 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
 
   if (!isOpen) return null;
 
-  const hasPhoto = !!previewURL;
+  const hasPreviews = previewURLs.length > 0;
 
   return (
     <div className="add-programs-popup-overlay">
@@ -372,36 +401,74 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
         <h2>Add New Program</h2>
 
         <div className="add-programs-main-container">
-          {/* Left: Photo */}
+          {/* Left: Photo / Gallery */}
           <div className="add-programs-photo-section">
             <span className="add-programs-details-label">
-              Photo <span className="required">*</span>
+              Photos <span className="required">*</span>
             </span>
+
+            {/* Main preview (first image) */}
             <div className="add-programs-profile-container">
               <img
-                src={hasPhoto ? previewURL! : "/Images/thumbnail.png"}
+                src={hasPreviews ? previewURLs[0]! : "/Images/thumbnail.png"}
                 alt="Program"
                 className={[
                   "add-program-photo",
-                  !hasPhoto ? "placeholder" : "",
-                  errors.photoFile ? "input-error" : "",
-                  shake.photoFile ? "shake" : "",
+                  !hasPreviews ? "placeholder" : "",
+                  errors.photoFiles ? "input-error" : "",
+                  shake.photoFiles ? "shake" : "",
                 ].join(" ").trim()}
               />
             </div>
+
+            {/* Thumbnails for the rest */}
+            {previewURLs.length > 1 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 8,
+                  marginTop: 10,
+                }}
+              >
+                {previewURLs.slice(1).map((u, i) => (
+                  <img
+                    key={u}
+                    src={u}
+                    alt={`Preview ${i + 2}`}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      border: "1px solid #e5e7eb",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
             <input
               type="file"
               accept="image/*"
+              multiple
               style={{ display: "none" }}
               id="identification-file-upload"
-              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+              onChange={(e) => handleFilesChange(e.target.files)}
             />
-            <label
-              htmlFor="identification-file-upload"
-              className="add-programs-upload-link"
-            >
-              Click to Upload File
+            <label htmlFor="identification-file-upload" className="add-programs-upload-link">
+              Click to Upload File(s)
             </label>
+
+            {/* Inline file errors (kept subtle) */}
+            {(errors.photoFiles || fileError) && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                {errors.photoFiles && "Please upload at least one image."}
+                {fileError && (
+                  <span style={{ display: "block", marginTop: 4 }}>{fileError}</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right: Form */}
@@ -558,11 +625,9 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                             onChange={(e) => {
                               const newStart = e.target.value;
                               setStartDate(newStart);
-                              // If endDate is set and is before newStart, bump it to newStart
                               if (endDate && new Date(endDate) < new Date(newStart)) {
                                 setEndDate(newStart);
                               }
-                              // If times are same-day and endTime < startTime, bump endTime
                               if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
                                 setTimeEnd(timeStart);
                               }
@@ -580,18 +645,15 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                               errors.endDate ? "input-error" : "",
                               shake.endDate ? "shake" : "",
                             ].join(" ").trim()}
-                            // Prevent picking an end date before the start date
                             min={startDate || minDate}
                             value={endDate}
                             onChange={(e) => {
                               const newEnd = e.target.value;
-                              // If user tries to pick before start, clamp to start
                               if (startDate && new Date(newEnd) < new Date(startDate)) {
                                 setEndDate(startDate);
                               } else {
                                 setEndDate(newEnd);
                               }
-                              // If same day after change, also ensure end time >= start time
                               if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
                                 setTimeEnd(timeStart);
                               }
@@ -693,7 +755,10 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
               <div className="add-programs-upper-section">
                 {/* Predefined requirements toggle */}
                 <div className="fields-section-add-programs">
-                  <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div
+                    className="predefined-header"
+                    style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                  >
                     <p style={{ margin: 0 }}>Pre-defined Requirements</p>
                     <button
                       type="button"
