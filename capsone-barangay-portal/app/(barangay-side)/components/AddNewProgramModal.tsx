@@ -536,6 +536,24 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                     <div className="fields-section-add-programs">
                       <p>
+                        Number of Volunteers<span className="required">*</span>
+                      </p>
+                      <input
+                        type="number"
+                        min={1}
+                        className={[
+                          "add-programs-input-field",
+                          errors.participants ? "input-error" : "",
+                          shake.participants ? "shake" : "",
+                        ].join(" ").trim()}
+                        placeholder="E.g. 50"
+                        value={participants}
+                        onChange={(e) => setParticipants(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="fields-section-add-programs">
+                      <p>
                         Eligible Participants<span className="required">*</span>
                       </p>
                       <select
@@ -767,15 +785,15 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
               <div className="add-programs-requirements-container">
 
                 {/* PREDEFINED fields */}
-                <div className="predefined-fields-notes-container">
-                  <div className="predefined-fields-notes-container-tile" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
-                    <div className="predefined-fields-title">
+                <div className="predefined-fields-notes-container-programs">
+                  <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                    <div className="predefined-fields-title-programs">
                         <h1>Pre-defined Fields</h1>
                     </div>
-                    <div className="predefined-fields-button-section">
+                    <div className="predefined-fields-button-section-programs">
                       <button
                         type="button"
-                        className="toggle-btn-predefined-fields"
+                        className="toggle-btn-predefined-fields-programs"
                         aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
                       >
                         <img
@@ -788,27 +806,27 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                   </div>
 
                   {isPredefinedOpen && (
-                    <div className="predefined-list">
-                      <div className="predefined-list-note">
+                    <div className="predefined-list-programs">
+                      <div className="predefined-list-note-programs">
                         * These will be auto-included when saving the program *
                       </div>
-                      <ul className="predefined-list-items">
+                      <ul className="predefined-list-items-programs">
                         {PREDEFINED_REQ_TEXT.length === 0 && PREDEFINED_REQ_FILES.length === 0 && (
                           <li style={{ opacity: 0.7 }}>No predefined requirements yet.</li>
                         )}
 
                         {PREDEFINED_REQ_TEXT.map((f, i) => (
-                          <li key={`pretext-${i}`} className="predefined-text">
-                            {i + 1}. {f.name} <span className="predefined-type">(text)</span>
-                            <span className="predefined-desc"> — {f.description}</span>
+                          <li key={`pretext-${i}`} className="predefined-text-programs">
+                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
                           </li>
                         ))}
 
                         {PREDEFINED_REQ_FILES.map((f, i) => (
-                          <li key={`prefile-${i}`} className="predefined-text">
+                          <li key={`prefile-${i}`} className="predefined-text-programs">
                             {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
-                            <span className="predefined-type">(file)</span>
-                            <span className="predefined-desc"> — {f.description}</span>
+                            <span className="predefined-type-programs">(file)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
                           </li>
                         ))}
                       </ul>
@@ -819,22 +837,22 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
 
                 {/* Custom TEXT requirements */}
-                <div className="box-container-outer-doc-fields">
-                  <div className="title-doc-fields">
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
                     Text Fields
                   </div>
 
-                  <div className="box-container-doc-fields">
-                    <div className="instructions-container">
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
                       <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
                     </div>
                     <span className="required-asterisk">*</span>
-                    <div className="add-doc-field-container">
-                      <div className="add-doc-field-row">
-                        <div className="row-title-section">
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
                           <h1>Add Field:</h1>
                         </div>
-                        <div className="row-input-section">
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
                             className="add-program-field-input"
@@ -844,10 +862,10 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
                           />
                         </div>
-                        <div className="row-button-section">
+                        <div className="row-button-section-programs">
                           <button
                             type="button"
-                            className="doc-field-add-button"
+                            className="program-field-add-button"
                             onClick={addReqText}
                             >
                             +
@@ -857,12 +875,12 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                     </div>
 
                     
-                    <div className="added-doc-field-container">
+                    <div className="added-program-field-container">
                       {reqTextFields.length > 0 && (
                         <>
                           {reqTextFields.map((f, i) => (
-                            <div key={`rt-${i}`} className="added-doc-field-row">
-                              <div className="row-input-section-added">
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
                                 <input
                                   type="text"
                                   className="add-program-field-input"
@@ -875,10 +893,10 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                                   }}
                                 />
                               </div>
-                              <div className="row-button-section">
+                              <div className="row-button-section-programs">
                                 <button
                                   type="button"
-                                  className="doc-field-remove-button"
+                                  className="program-field-remove-button"
                                   onClick={() => removeReqText(i)}
                                 >
                                   -
@@ -893,22 +911,22 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                 </div>
 
                 {/* Custom FILEEE requirements */}
-                <div className="box-container-outer-doc-fields">
-                  <div className="title-doc-fields">
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
                     File Upload Fields
                   </div>
 
-                  <div className="box-container-doc-fields">
-                    <div className="instructions-container">
-                      <h1>* Enter the file upload fields needed for the document. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
+                      <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
                     </div>
                     <span className="required-asterisk">*</span>
-                    <div className="add-doc-field-container">
-                      <div className="add-doc-field-row">
-                        <div className="row-title-section">
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
                           <h1>Add Field:</h1>
                         </div>
-                        <div className="row-input-section">
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
                             className="add-program-field-input"
@@ -918,10 +936,10 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
                           />
                         </div>
-                        <div className="row-button-section">
+                        <div className="row-button-section-programs">
                           <button
                             type="button"
-                            className="doc-field-add-button"
+                            className="program-field-add-button"
                             onClick={addReqFile}
                             >
                             +
@@ -935,8 +953,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                       {reqFileFields.length > 0 && (
                         <>
                          {reqFileFields.map((f, i) => (
-                            <div key={`rt-${i}`} className="added-doc-field-row">
-                              <div className="row-input-section-added">
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
                                 <input
                                   type="text"
                                   className="add-program-field-input"
@@ -947,10 +965,10 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                                   }}
                                 />
                               </div>
-                              <div className="row-button-section">
+                              <div className="row-button-section-programs">
                                 <button
                                   type="button"
-                                  className="doc-field-remove-button"
+                                  className="program-field-remove-button"
                                   onClick={() => removeReqFile(i)}
                                 >
                                   -
