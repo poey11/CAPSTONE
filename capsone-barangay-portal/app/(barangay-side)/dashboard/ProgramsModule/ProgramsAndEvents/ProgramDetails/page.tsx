@@ -7,17 +7,20 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
-type SimpleField = { name: string };
+type SimpleField = { name: string, description?: string};
 
+// Requirements 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
-  { name: "firstName" },
-  { name: "lastName" },
-  { name: "contactNumber" },
-  { name: "emailAddress" },
-  { name: "location" },
+  { name: "firstName", description: "Used to save the first name of the participant" },
+  { name: "lastName", description: "Used to save the last name of the participant" },
+  { name: "contactNumber", description: "Used to save the contact number of the participant" },
+  { name: "emailAddress", description: "Used to save the email address of the participant" },
+  { name: "location", description: "Used to save the address of the participant" },
 ];
 
-const PREDEFINED_REQ_FILES: SimpleField[] = [{ name: "validIDjpg" }];
+const PREDEFINED_REQ_FILES: SimpleField[] = [
+  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
+];
 
 const toSet = (arr: SimpleField[]) =>
   new Set(
@@ -438,6 +441,7 @@ export default function ProgramDetails() {
       const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
       const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
 
+      // start preparing updates
       const updates: any = {
         programName: programName.trim(),
         participants: Number(participants),
@@ -457,7 +461,7 @@ export default function ProgramDetails() {
         },
       };
 
-      // Upload any newly added images, then append to existing gallery
+      // Upload newly added images
       let newUrls: string[] = [];
       if (photoFiles.length > 0) {
         const uploadPromises = photoFiles.map(async (file, idx) => {
@@ -466,24 +470,26 @@ export default function ProgramDetails() {
           return getDownloadURL(storageRef);
         });
         newUrls = await Promise.all(uploadPromises);
-
-        const combined = [...existingPhotoURLs, ...newUrls];
-        updates.photoURLs = combined;
-
-        // Keep existing cover if present; otherwise set to first available
-        if (!existingPhotoURL && combined.length > 0) {
-          updates.photoURL = combined[0];
-          setExistingPhotoURL(combined[0]);
-        }
-        setExistingPhotoURLs(combined);
       }
 
+      // ✅ Combine with currently kept existing photos
+      const combined = [...existingPhotoURLs, ...newUrls];
+      updates.photoURLs = combined;
+
+      // ✅ If cover is gone, reset cover
+      if (!combined.includes(existingPhotoURL || "")) {
+        updates.photoURL = combined.length > 0 ? combined[0] : null;
+        setExistingPhotoURL(updates.photoURL);
+      }
+
+      setExistingPhotoURLs(combined);
+
+      // Save to Firestore
       await updateDoc(doc(db, "Programs", programId), updates);
 
       setPopupMessage("Program saved successfully!");
       setShowPopup(true);
 
-      // clear local newly-selected previews after successful save
       setPreviewURLs((old) => {
         old.forEach((u) => URL.revokeObjectURL(u));
         return [];
@@ -501,6 +507,7 @@ export default function ProgramDetails() {
       }, 1200);
     }
   };
+
 
   const handleApprove = async () => {
     if (!programId || isReadOnly) return;
@@ -540,6 +547,18 @@ export default function ProgramDetails() {
       }, 1200);
     }
   };
+
+  const handleDeleteNew = (index: number) => {
+  setPreviewURLs(prev => prev.filter((_, i) => i !== index));
+};
+
+const handleDeleteExisting = (index: number) => {
+  setExistingPhotoURLs(prev => prev.filter((_, i) => i !== index));
+};
+
+const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
 
   return (
     <main className="edit-program-main-container">
@@ -609,7 +628,7 @@ export default function ProgramDetails() {
       <div className="program-redirectionpage-section">
         <button className="program-redirection-buttons-selected">
           <div className="program-redirection-icons-section">
-            <img src="/images/profile-user.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
@@ -655,6 +674,7 @@ export default function ProgramDetails() {
           </div>
 
           <div className="action-btn-section-program">
+            {/*
             <select
               className="action-select-status"
               value={activeStatus}
@@ -665,7 +685,26 @@ export default function ProgramDetails() {
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-            </select>
+            </select>*/}
+
+            <label className="switch-toggle" title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"} style={{ marginRight: 12 }}>
+              <input
+                type="checkbox"
+                checked={activeStatus === "Active"}
+                onChange={(e) =>
+                  handleStatusChange(
+                    e.target.checked
+                      ? { target: { value: "Active" } } as any
+                      : { target: { value: "Inactive" } } as any
+                  )
+                }
+                disabled={isReadOnly}
+              />
+              <span className="slider"></span>
+              <span className="toggle-label">{activeStatus}</span>
+            </label>
+
+           
 
             {!isReadOnly && (
               <>
@@ -744,6 +783,23 @@ export default function ProgramDetails() {
 
                       <div className="fields-section-edit-programs">
                         <p>Number of Participants<span className="required">*</span></p>
+                        <input
+                          type="number"
+                          min="1"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.participants ? "input-error" : "",
+                            shake.participants ? "shake" : "",
+                          ].join(" ").trim()}
+                          placeholder="E.g. 50"
+                          value={participants}
+                          onChange={(e) => setParticipants(e.target.value)}
+                          disabled={isReadOnly}
+                        />
+                      </div>
+
+                      <div className="fields-section-edit-programs">
+                        <p>Number of Volunteers<span className="required">*</span></p>
                         <input
                           type="number"
                           min="1"
@@ -896,127 +952,306 @@ export default function ProgramDetails() {
               )}
 
               {activeSection === "reqs" && (
-                <div className="edit-programs-upper-section">
-                  <div className="fields-section-edit-programs">
-                    <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <p style={{ margin: 0, fontWeight: 600 }}>Pre-defined Requirements</p>
-                      <button
-                        type="button"
-                        className="info-toggle-btn"
-                        onClick={() => setIsPredefinedOpen((s) => !s)}
-                        aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
-                      >
-                        {isPredefinedOpen ? "Hide" : "Show"}
-                      </button>
+
+                
+                <div className="add-programs-requirements-container">
+                  <div className="predefined-fields-notes-container-programs">
+                    <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                      <div className="predefined-fields-title-programs">
+                        <h1>Pre-defined Fields</h1>
+                      </div>
+                      <div className="predefined-fields-button-section-programs">
+                        <button
+                          type="button"
+                          className="toggle-btn-predefined-fields-programs"
+                          aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                        >
+                          <img
+                            src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                            alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                        </button>
+                      </div>
                     </div>
+
                     {isPredefinedOpen && (
-                      <div style={{ marginTop: 8 }}>
-                        <ul style={{ paddingLeft: 18, margin: 0 }}>
-                          {PREDEFINED_REQ_TEXT.map((f, i) => (
-                            <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
-                          ))}
-                          {PREDEFINED_REQ_FILES.map((f, i) => (
-                            <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
-                          ))}
+                      <div className="predefined-list-programs">
+                        <ul className="predefined-list-items-programs">
+                         {PREDEFINED_REQ_TEXT.map((f, i) => (
+                          <li key={`pretext-${i}`} className="predefined-text-programs">
+                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
+                        ))}
+
+                        {PREDEFINED_REQ_FILES.map((f, i) => (
+                          <li key={`prefile-${i}`} className="predefined-text-programs">
+                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                            <span className="predefined-type-programs">(file)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
+                        ))}
                         </ul>
                       </div>
                     )}
                   </div>
 
-                  <div className="fields-section-edit-programs">
-                    <p style={{ fontWeight: 600 }}>Custom Text Requirements</p>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <input
-                        type="text"
-                        className="edit-programs-input-field"
-                        placeholder="e.g., guardianName"
-                        value={reqTextNew}
-                        onChange={(e) => setReqTextNew(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addReqText();
-                          }
-                        }}
-                        disabled={isReadOnly}
-                      />
-                      <button type="button" className="info-toggle-btn" onClick={addReqText} disabled={isReadOnly}>+</button>
+                  <div className="predefined-fields-bottom-container-programs">
+                    {/* Custom TEXT requirements */}
+                    <div className="box-container-outer-programs-fields">
+                      <div className="title-programs-fields">
+                        Text Fields
+                      </div>
+                      <div className="box-container-programs-fields">
+                        <div className="instructions-container-programs">
+                          <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                        </div>
+                        <span className="required-asterisk">*</span>
+                        <div className="add-programs-field-container">
+                          <div className="add-programs-field-row">
+                            <div className="row-title-section-programs">
+                              <h1>Add Field:</h1>
+                            </div>
+                            <div className="row-input-section-programs">
+                              <input
+                                type="text"
+                                className="add-program-field-input"
+                                placeholder="e.g., guardianName"
+                                value={reqTextNew}
+                                onChange={(e) => setReqTextNew(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addReqText();
+                                  }
+                                }}
+                                disabled={isReadOnly}
+                              />
+                            </div>
+                            <div className="row-button-section-programs">
+                              <button
+                                type="button"
+                                className="program-field-add-button"
+                                onClick={addReqText}
+                                >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="added-program-field-container">
+                          {reqTextFields.length > 0 && (
+                            <>
+                              {reqTextFields.map((f, i) => (
+                                <div key={`rt-${i}`} className="added-program-field-row">
+                                  <div className="row-input-section-added-program">
+                                    <input
+                                      type="text"
+                                      className="add-program-field-input"
+                                      value={f.name}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                      }}
+                                      disabled={isReadOnly}
+                                    />
+                                  </div>
+                                  <div className="row-button-section-programs">
+                                    {!isReadOnly && (
+                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqText(i)}>-</button>
+                                    )}
+                                  </div>
+                                  
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {reqTextFields.length > 0 && (
-                      <div style={{ marginTop: 10 }}>
-                        {reqTextFields.map((f, i) => (
-                          <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                            <input
-                              type="text"
-                              className="edit-programs-input-field"
-                              value={f.name}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
-                              }}
-                              disabled={isReadOnly}
-                            />
-                            {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
-                            )}
-                          </div>
-                        ))}
+                    {/* Custom FIELD requirements */}
+                    <div className="box-container-outer-programs-fields">
+                      <div className="title-programs-fields">
+                        File Upload Fields
                       </div>
-                    )}
+                      <div className="box-container-programs-fields">
+                        <div className="instructions-container-programs">
+                          <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                        </div>
+                        <span className="required-asterisk">*</span>
+                        <div className="add-programs-field-container">
+                          <div className="add-programs-field-row">
+                            <div className="row-title-section-programs">
+                              <h1>Add Field:</h1>
+                            </div>
+                            <div className="row-input-section-programs">
+                              <input
+                                type="text"
+                                className="add-program-field-input"
+                                placeholder="e.g., medicalCertificateJpg"
+                                value={reqFileNew}
+                                onChange={(e) => setReqFileNew(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addReqFile();
+                                  }
+                                }}
+                                disabled={isReadOnly}
+                              />
+                            </div>
+                            <div className="row-button-section-programs">
+                              <button
+                                type="button"
+                                className="program-field-add-button"
+                                onClick={addReqFile}
+                                >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="added-program-field-container">
+                          {reqFileFields.length > 0 && (
+                            <>
+                              {reqFileFields.map((f, i) => (
+                                <div key={`rt-${i}`} className="added-program-field-row">
+                                  <div className="row-input-section-added-program">
+                                    <input
+                                      type="text"
+                                      className="add-program-field-input"
+                                      value={f.name}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                      }}
+                                      disabled={isReadOnly}
+                                    />
+                                  </div>
+                                  <div className="row-button-section-programs">
+                                    {!isReadOnly && (
+                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqFile(i)}>-</button>
+                                    )}
+                                  </div>
+                                  
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="fields-section-edit-programs">
-                    <p style={{ fontWeight: 600 }}>Custom File Requirements</p>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <input
-                        type="text"
-                        className="edit-programs-input-field"
-                        placeholder="e.g., medicalCertificateJpg"
-                        value={reqFileNew}
-                        onChange={(e) => setReqFileNew(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addReqFile();
-                          }
-                        }}
-                        disabled={isReadOnly}
-                      />
-                      <button type="button" className="info-toggle-btn" onClick={addReqFile} disabled={isReadOnly}>+</button>
-                    </div>
-
-                    {reqFileFields.length > 0 && (
-                      <div style={{ marginTop: 10 }}>
-                        {reqFileFields.map((f, i) => (
-                          <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                            <input
-                              type="text"
-                              className="edit-programs-input-field"
-                              value={f.name}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
-                              }}
-                              disabled={isReadOnly}
-                            />
-                            {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-                      Tip: keep names consistent (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>)
-                    </div>
-                  </div>
                 </div>
               )}
 
               {activeSection === "others" && (
                 <>
                   <div className="edit-programs-upper-section">
+                    <div className="edit-official-others-mainsection">
+
+                      {/* ===== Photos UI (cover + gallery) ===== */}
+                      <div className="box-container-outer-resindentificationpic">
+                        <div className="title-resindentificationpic">Photos</div>
+                        <div className="box-container-resindentificationpic">
+                          
+                          <div className="identificationpic-container">
+                            <label
+                              htmlFor="identification-file-upload"
+                              className="upload-link"
+                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
+                            >
+                              Click to Upload File(s)
+                            </label>
+                            <input
+                              id="identification-file-upload"
+                              type="file"
+                              className="file-upload-input"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleFilesChange(e.target.files)}
+                              disabled={isReadOnly}
+                            />
+
+                            {/* Flex container */}
+                            <div className="identificationpic-content">
+                              {/* Cover preview */}
+                              <div className="identificationpic-display">
+                                <div className="cover-photo">
+                                  <img
+                                    src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
+                                    alt="Program Cover"
+                                    className="program-cover"
+                                  />
+                                  {!isReadOnly && previewURLs[0] && (
+                                    <button
+                                      className="delete-btn"
+                                      onClick={() => handleDeleteNew(0)}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              
+
+                              {/* Thumbnails (new + existing) */}
+                              <div className="identification-thumbnails">
+                                {previewURLs.length > 1 && (
+                                  <div className="thumbs-grid">
+                                    {previewURLs.slice(1).map((u, i) => (
+                                      <div key={`new-${i}`} className="thumb-wrapper">
+                                        <img src={u} alt={`New ${i + 2}`} className="thumb-img" />
+                                        {!isReadOnly && (
+                                          <button
+                                            className="delete-btn"
+                                            onClick={() => handleDeleteNew(i + 1)}
+                                          >
+                                            ✕
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {existingPhotoURLs.length > 0 && (
+                                  <div className="thumbs-section">
+                                    <div className="thumbs-label">* Existing Photos *</div>
+                                    <div className="thumbs-grid">
+                                      {existingPhotoURLs.map((u, i) => (
+                                        <div key={`old-${i}-${u}`} className="thumb-wrapper">
+                                          <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
+                                          {!isReadOnly && (
+                                            <button
+                                              className="delete-btn"
+                                              onClick={() => handleDeleteExisting(i)}
+                                            >
+                                              ✕
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+
+                        </div>
+                      </div>
+                      {/* ===== /Photos UI ===== */}
+                    </div>
+                  </div>
+
+                  <div className="edit-programs-bottom-section">
                     <div className="edit-official-others-mainsection">
                       <div className="edit-box-container-outer-programdesc">
                         <div className="title-remarks">Description of Program</div>
@@ -1053,98 +1288,6 @@ export default function ProgramDetails() {
                           />
                         </div>
                       </div>
-
-                      {/* ===== Photos UI (cover + gallery) ===== */}
-                      <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-resindentificationpic">
-                          <div className="identificationpic-container">
-                            <label
-                              htmlFor="identification-file-upload"
-                              className="upload-link"
-                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
-                            >
-                              Click to Upload File(s)
-                            </label>
-                            <input
-                              id="identification-file-upload"
-                              type="file"
-                              className="file-upload-input"
-                              accept="image/*"
-                              multiple
-                              onChange={(e) => handleFilesChange(e.target.files)}
-                              disabled={isReadOnly}
-                            />
-
-                            {/* Cover preview: prioritize newly selected, else existing cover */}
-                            <div className="identificationpic-display" style={{ marginTop: 10 }}>
-                              <div className="identification-picture">
-                                <img
-                                  src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
-                                  alt="Program Cover"
-                                  style={{ height: "200px", objectFit: "cover", borderRadius: 8 }}
-                                />
-                              </div>
-                            </div>
-
-                            {/* Newly selected thumbnails */}
-                            {previewURLs.length > 1 && (
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginTop: 10 }}>
-                                {previewURLs.slice(1).map((u, i) => (
-                                  <img
-                                    key={`new-${i}`}
-                                    src={u}
-                                    alt={`New ${i + 2}`}
-                                    style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                  />
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Existing gallery thumbnails */}
-                            {existingPhotoURLs.length > 0 && (
-                              <div style={{ marginTop: 12 }}>
-                                <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 6 }}>Existing Photos</div>
-                                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
-                                  {existingPhotoURLs.map((u, i) => (
-                                    <img
-                                      key={`old-${i}-${u}`}
-                                      src={u}
-                                      alt={`Existing ${i + 1}`}
-                                      style={{ width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 8, border: "1px solid #e5e7eb" }}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Clear newly selected (optional) */}
-                            {(previewURLs.length > 0 || photoFiles.length > 0) && !isReadOnly && (
-                              <div className="delete-container" style={{ marginTop: 10 }}>
-                                <button
-                                  type="button"
-                                  className="delete-button"
-                                  onClick={() => {
-                                    setPhotoFiles([]);
-                                    setPreviewURLs((old) => {
-                                      old.forEach((u) => URL.revokeObjectURL(u));
-                                      return [];
-                                    });
-                                    setFileError(null);
-                                  }}
-                                >
-                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                </button>
-                              </div>
-                            )}
-
-                            {(fileError) && (
-                              <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>{fileError}</div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      {/* ===== /Photos UI ===== */}
                     </div>
                   </div>
                 </>
