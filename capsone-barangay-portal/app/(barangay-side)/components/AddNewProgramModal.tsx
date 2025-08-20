@@ -826,7 +826,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                   <div className="box-container-doc-fields">
                     <div className="instructions-container">
-                      <h1>* Enter the fields needed for the document. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                      <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
                     </div>
                     <span className="required-asterisk">*</span>
                     <div className="add-doc-field-container">
@@ -859,7 +859,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                     
                     <div className="added-doc-field-container">
                       {reqTextFields.length > 0 && (
-                        <div className="added-doc-field-row">
+                        <>
                           {reqTextFields.map((f, i) => (
                             <div key={`rt-${i}`} className="added-doc-field-row">
                               <div className="row-input-section-added">
@@ -869,12 +869,14 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                                   value={f.name}
                                   onChange={(e) => {
                                     const v = e.target.value;
-                                    setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                    setReqTextFields((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                    );
                                   }}
                                 />
                               </div>
                               <div className="row-button-section">
-                                <button 
+                                <button
                                   type="button"
                                   className="doc-field-remove-button"
                                   onClick={() => removeReqText(i)}
@@ -883,9 +885,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                                 </button>
                               </div>
                             </div>
-
                           ))}
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -899,7 +900,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                   <div className="box-container-doc-fields">
                     <div className="instructions-container">
-                      <h1>* Enter the fields needed for the document. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                      <h1>* Enter the file upload fields needed for the document. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
                     </div>
                     <span className="required-asterisk">*</span>
                     <div className="add-doc-field-container">
@@ -911,17 +912,17 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                           <input
                             type="text"
                             className="add-program-field-input"
-                            placeholder="e.g., guardianName"
-                            value={reqTextNew}
-                            onChange={(e) => setReqTextNew(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
+                            placeholder="e.g., medicalCertificateJpg"
+                            value={reqFileNew}
+                            onChange={(e) => setReqFileNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
                           />
                         </div>
                         <div className="row-button-section">
                           <button
                             type="button"
                             className="doc-field-add-button"
-                            onClick={addReqText}
+                            onClick={addReqFile}
                             >
                             +
                           </button>
@@ -931,9 +932,9 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                     
                     <div className="added-doc-field-container">
-                      {reqTextFields.length > 0 && (
-                        <div className="added-doc-field-row">
-                          {reqTextFields.map((f, i) => (
+                      {reqFileFields.length > 0 && (
+                        <>
+                         {reqFileFields.map((f, i) => (
                             <div key={`rt-${i}`} className="added-doc-field-row">
                               <div className="row-input-section-added">
                                 <input
@@ -942,65 +943,24 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                                   value={f.name}
                                   onChange={(e) => {
                                     const v = e.target.value;
-                                    setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                    setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
                                   }}
                                 />
                               </div>
                               <div className="row-button-section">
-                                <button 
+                                <button
                                   type="button"
                                   className="doc-field-remove-button"
-                                  onClick={() => removeReqText(i)}
+                                  onClick={() => removeReqFile(i)}
                                 >
                                   -
                                 </button>
                               </div>
                             </div>
-
                           ))}
-                        </div>
+                        </>
                       )}
                     </div>
-                  </div>
-                </div>
-
-
-                {/* Custom FILE requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement File Uploads</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., medicalCertificateJpg"
-                      value={reqFileNew}
-                      onChange={(e) => setReqFileNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqFile}>+</button>
-                  </div>
-
-                  {reqFileFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqFileFields.map((f, i) => (
-                        <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                          <input
-                            type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
-                          />
-                          <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-                    Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.)
                   </div>
                 </div>
               </div>
