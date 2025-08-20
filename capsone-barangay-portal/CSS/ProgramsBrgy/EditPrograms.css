@@ -1486,3 +1486,51 @@ animation: fadeSlideIn 0.5s ease-out;
   gap: 20px;
 }
 
+/* toggle active inactive state */
+.switch-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.switch-toggle input {
+  display: none;
+}
+
+.slider {
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 20px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input:checked + .slider {
+  background-color: #2ecc71;
+}
+
+input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  margin-left: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}

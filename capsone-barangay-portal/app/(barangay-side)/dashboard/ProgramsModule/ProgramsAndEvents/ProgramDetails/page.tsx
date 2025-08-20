@@ -655,6 +655,7 @@ export default function ProgramDetails() {
           </div>
 
           <div className="action-btn-section-program">
+            {/*
             <select
               className="action-select-status"
               value={activeStatus}
@@ -665,7 +666,26 @@ export default function ProgramDetails() {
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-            </select>
+            </select>*/}
+
+            <label className="switch-toggle" title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"} style={{ marginRight: 12 }}>
+              <input
+                type="checkbox"
+                checked={activeStatus === "Active"}
+                onChange={(e) =>
+                  handleStatusChange(
+                    e.target.checked
+                      ? { target: { value: "Active" } } as any
+                      : { target: { value: "Inactive" } } as any
+                  )
+                }
+                disabled={isReadOnly}
+              />
+              <span className="slider"></span>
+              <span className="toggle-label">{activeStatus}</span>
+            </label>
+
+           
 
             {!isReadOnly && (
               <>
