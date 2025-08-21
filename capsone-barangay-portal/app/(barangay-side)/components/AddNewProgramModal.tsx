@@ -66,6 +66,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
+  // Agency
+  const [agency, setAgency] = useState("");
+  const [otherAgency, setOtherAgency] = useState("");
+
 // Requirements 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "firstName", description: "Used to save the first name of the participant" },
@@ -412,8 +416,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
         setIsPredefinedOpen(prev => !prev);
     };
 
-  const [agency, setAgency] = useState("");
-  const [otherAgency, setOtherAgency] = useState("");
+  
 
   return (
     <div className="add-programs-popup-overlay">
@@ -614,6 +617,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                   {/* Right column */}
                   <div className="add-programs-content-right-side">
+
+                    {/* pa gawa nalang ng backend */}
                     <div className="fields-section-add-programs">
                       <p>
                         Partnered Agency<span className="required">*</span>
@@ -623,6 +628,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                         value={agency}
                         onChange={(e) => setAgency(e.target.value)}
                       >
+                        <option value="">Select agency</option>
+                        <option value="none">None</option>
                         <option value="cityhall">City Hall</option>
                         <option value="others">Others</option>
                       </select>
@@ -631,7 +638,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
                       {agency === "others" && (
                         <input
                           type="text"
-                          placeholder="Enter other agency"
+                          placeholder="Enter agency"
                           className="add-programs-input-field"
                           value={otherAgency}
                           onChange={(e) => setOtherAgency(e.target.value)}
