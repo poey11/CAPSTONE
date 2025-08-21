@@ -7,9 +7,8 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
-type SimpleField = { name: string, description?: string};
+type SimpleField = { name: string; description?: string };
 
-// Requirements 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "firstName", description: "Used to save the first name of the participant" },
   { name: "lastName", description: "Used to save the last name of the participant" },
@@ -52,6 +51,13 @@ export default function ProgramDetails() {
   const userPosition = user?.position || "";
   const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
 
+  // Roles
+  const isPunongBarangay = userPosition === "Punong Barangay";
+  const isHigherUp =
+    userPosition === "Punong Barangay" ||
+    userPosition === "Assistant Secretary" ||
+    userPosition === "Secretary";
+
   const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
 
   // Popups / toasts
@@ -81,8 +87,6 @@ export default function ProgramDetails() {
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
-  //  Photos (multiple)
-  // Existing photos from DB
   const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null); // cover
   const [existingPhotoURLs, setExistingPhotoURLs] = useState<string[]>([]); // gallery
 
@@ -110,8 +114,8 @@ export default function ProgramDetails() {
   };
 
   // Agency
-    const [agency, setAgency] = useState("");
-    const [otherAgency, setOtherAgency] = useState("");
+  const [agency, setAgency] = useState("");
+  const [otherAgency, setOtherAgency] = useState("");
 
   // Requirements
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
@@ -148,34 +152,26 @@ export default function ProgramDetails() {
   };
   const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
+  
 
-  // Min date (tomorrow)
-  const minDate = useMemo(() => {
-    const t = new Date();
-    t.setDate(t.getDate() + 1);
-    t.setHours(0, 0, 0, 0);
-    return t.toISOString().split("T")[0];
-  }, []);
+  // EDIT RULES:
+  // Only Punong Barangay can edit WHEN the program is PENDING.
+  // Once Approved/Rejected/Completed => read-only for everyone.
+  const canEdit =
+    isPunongBarangay && approvalStatus === "Pending" && progressStatus !== "Completed";
+  const isReadOnly = !canEdit;
 
-  const isFutureDate = (dateStr: string) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const d = new Date(dateStr);
-    return d > today;
-  };
+  // If later allowing PB/AS/Secretary to edit when progressStatus is Upcoming, use this instead:
+  // const canEdit =
+  //   (["Punong Barangay", "Assistant Secretary", "Secretary"].includes(userPosition) && progressStatus === "Upcoming")
+  //   || (isPunongBarangay && approvalStatus === "Pending");
+  // const isReadOnly = !canEdit;
 
-  const toMinutes = (hhmm: string) => {
-    if (!hhmm || !hhmm.includes(":")) return -1;
-    const [h, m] = hhmm.split(":").map(Number);
-    if (Number.isNaN(h) || Number.isNaN(m)) return -1;
-    return h * 60 + m;
-  };
+  // ACTIVE/INACTIVE TOGGLE:
+  // Stays editable for 'isHigherUp' regardless of other edit locks.
+  const canToggleActive = isHigherUp;
 
-  // Read-only lock
-  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected";
-
-  //  Load program 
+  // Load program
   useEffect(() => {
     const load = async () => {
       if (!programId) return;
@@ -190,8 +186,12 @@ export default function ProgramDetails() {
         const data: any = snap.data() || {};
 
         setProgramName(data.programName ?? "");
-        setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
-        setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
+        setParticipants(
+          typeof data.participants === "number" ? String(data.participants) : data.participants ?? ""
+        );
+        setVolunteers(
+          typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? ""
+        );
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
 
@@ -234,7 +234,7 @@ export default function ProgramDetails() {
 
         // Photos (existing)
         const cover = data.photoURL ?? null;
-        const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : (cover ? [cover] : []);
+        const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : cover ? [cover] : [];
         setExistingPhotoURL(cover);
         setExistingPhotoURLs(gallery);
 
@@ -263,7 +263,7 @@ export default function ProgramDetails() {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
   };
 
-  //  Multi file select 
+  // Multi file select
   const handleFilesChange = (files: FileList | null) => {
     if (isReadOnly) return;
     setFileError(null);
@@ -316,8 +316,85 @@ export default function ProgramDetails() {
     };
   }, []);
 
-  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!programId || isReadOnly) return;
+  const isFutureDate = (dateStr: string) => {
+    if (!dateStr) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(dateStr);
+    return d > today;
+  };
+
+  const toMinutes = (hhmm: string) => {
+    if (!hhmm || !hhmm.includes(":")) return -1;
+    const [h, m] = hhmm.split(":").map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return -1;
+    return h * 60 + m;
+  };
+
+  // Min date (tomorrow)
+  const minDate = useMemo(() => {
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    t.setHours(0, 0, 0, 0);
+    return t.toISOString().split("T")[0];
+  }, []);
+
+  // Build the full update payload for current form state (including uploads)
+  const buildUpdatesWithUploads = async () => {
+    const normalizedStart = eventType === "single" ? singleDate : startDate;
+    const normalizedEnd = eventType === "single" ? singleDate : endDate;
+
+    const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
+    const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
+
+    const updates: any = {
+      programName: programName.trim(),
+      participants: Number(participants),
+      volunteers: Number(volunteers),
+      eligibleParticipants,
+      location: location.trim(),
+      eventType,
+      startDate: normalizedStart,
+      endDate: normalizedEnd,
+      timeStart,
+      timeEnd,
+      description: description.trim(),
+      summary: summary.trim(),
+      activeStatus,
+      requirements: {
+        textFields: mergedText,
+        fileFields: mergedFiles,
+      },
+    };
+
+    // Upload any newly added photos and merge with existing
+    let newUrls: string[] = [];
+    if (photoFiles.length > 0) {
+      const uploadPromises = photoFiles.map(async (file, idx) => {
+        const storageRef = ref(
+          storage,
+          `Programs/${programId}/photos/${Date.now()}_${idx}_${file.name}`
+        );
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      });
+      newUrls = await Promise.all(uploadPromises);
+    }
+
+    const combined = [...existingPhotoURLs, ...newUrls];
+    updates.photoURLs = combined;
+
+    if (!combined.includes(existingPhotoURL || "")) {
+      updates.photoURL = combined.length > 0 ? combined[0] : null;
+    }
+
+    return updates;
+  };
+
+  const handleStatusChange = async (
+    e: React.ChangeEvent<HTMLSelectElement> | { target: { value: "Active" | "Inactive" } }
+  ) => {
+    if (!programId || !canToggleActive) return;
     const next = (e.target.value as "Active" | "Inactive") || "Inactive";
     const prev = activeStatus;
     setActiveStatus(next);
@@ -353,7 +430,7 @@ export default function ProgramDetails() {
         rejectionReason,
         reviewedAt: new Date(),
         reviewedBy: reviewerName,
-        activeStatus: "Inactive",
+        activeStatus: "Rejected",
         progressStatus: "Rejected",
       });
 
@@ -442,62 +519,18 @@ export default function ProgramDetails() {
 
     setLoading(true);
     try {
-      const normalizedStart = eventType === "single" ? singleDate : startDate;
-      const normalizedEnd = eventType === "single" ? singleDate : endDate;
+      const updates = await buildUpdatesWithUploads();
 
-      const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
-      const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
+      // Reflect photo state locally if changed
+      if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
+      if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
 
-      // start preparing updates
-      const updates: any = {
-        programName: programName.trim(),
-        participants: Number(participants),
-        volunteers: Number(volunteers),
-        eligibleParticipants,
-        location: location.trim(),
-        eventType,
-        startDate: normalizedStart,
-        endDate: normalizedEnd,
-        timeStart,
-        timeEnd,
-        description: description.trim(),
-        summary: summary.trim(),
-        activeStatus,
-        requirements: {
-          textFields: mergedText,
-          fileFields: mergedFiles,
-        },
-      };
-
-      // Upload newly added images
-      let newUrls: string[] = [];
-      if (photoFiles.length > 0) {
-        const uploadPromises = photoFiles.map(async (file, idx) => {
-          const storageRef = ref(storage, `Programs/${programId}/photos/${Date.now()}_${idx}_${file.name}`);
-          await uploadBytes(storageRef, file);
-          return getDownloadURL(storageRef);
-        });
-        newUrls = await Promise.all(uploadPromises);
-      }
-
-      // ✅ Combine with currently kept existing photos
-      const combined = [...existingPhotoURLs, ...newUrls];
-      updates.photoURLs = combined;
-
-      // ✅ If cover is gone, reset cover
-      if (!combined.includes(existingPhotoURL || "")) {
-        updates.photoURL = combined.length > 0 ? combined[0] : null;
-        setExistingPhotoURL(updates.photoURL);
-      }
-
-      setExistingPhotoURLs(combined);
-
-      // Save to Firestore
       await updateDoc(doc(db, "Programs", programId), updates);
 
       setPopupMessage("Program saved successfully!");
       setShowPopup(true);
 
+      // Cleanup previews
       setPreviewURLs((old) => {
         old.forEach((u) => URL.revokeObjectURL(u));
         return [];
@@ -516,19 +549,29 @@ export default function ProgramDetails() {
     }
   };
 
-
+  // Approve AND persist any unsaved changes from the form in the same write.
   const handleApprove = async () => {
     if (!programId || isReadOnly) return;
     try {
       setLoading(true);
 
-      await updateDoc(doc(db, "Programs", programId), {
+      // Build full updates based on current UI state (so PB edits are saved)
+      const updates = await buildUpdatesWithUploads();
+
+      // Also reflect photo state locally if changed
+      if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
+      if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
+
+      // Add approval fields
+      Object.assign(updates, {
         approvalStatus: "Approved",
         approvedAt: new Date(),
         approvedBy: reviewerName,
         activeStatus: "Active",
         progressStatus: "Upcoming",
       });
+
+      await updateDoc(doc(db, "Programs", programId), updates);
 
       await addDoc(collection(db, "BarangayNotifications"), {
         message: `Your program (${programName}) has been approved by ${reviewerName}.`,
@@ -542,8 +585,18 @@ export default function ProgramDetails() {
       });
 
       setApprovalStatus("Approved");
+      setActiveStatus("Active");
+      setProgressStatus("Upcoming");
       setPopupMessage("Program approved successfully.");
       setShowPopup(true);
+
+      // Cleanup previews after approval
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+      setPhotoFiles([]);
+      setFileError(null);
     } catch (e) {
       console.error(e);
       setPopupMessage("Failed to approve program.");
@@ -557,16 +610,16 @@ export default function ProgramDetails() {
   };
 
   const handleDeleteNew = (index: number) => {
-  setPreviewURLs(prev => prev.filter((_, i) => i !== index));
-};
+    setPreviewURLs((prev) => prev.filter((_, i) => i !== index));
+  };
 
-const handleDeleteExisting = (index: number) => {
-  setExistingPhotoURLs(prev => prev.filter((_, i) => i !== index));
-};
+  const handleDeleteExisting = (index: number) => {
+    setExistingPhotoURLs((prev) => prev.filter((_, i) => i !== index));
+  };
 
-const togglePredefinedOpen = () => {
-        setIsPredefinedOpen(prev => !prev);
-    };
+  const togglePredefinedOpen = () => {
+    setIsPredefinedOpen((prev) => !prev);
+  };
 
   return (
     <main className="edit-program-main-container">
@@ -616,7 +669,7 @@ const togglePredefinedOpen = () => {
               <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
                 No
               </button>
-              <button onClick={confirmSubmitReject} className="yes-button-add">
+                <button onClick={confirmSubmitReject} className="yes-button-add">
                 Yes
               </button>
             </div>
@@ -641,19 +694,23 @@ const togglePredefinedOpen = () => {
           <h1>Program Details</h1>
         </button>
 
-        <button
-          className="program-redirection-buttons"
-          onClick={() =>
-            router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)
-          }
-        >
-          <div className="program-redirection-icons-section">
-            <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
-          </div>
-          <h1>Participants</h1>
-        </button>
+        {approvalStatus === "Approved" && (
+          <button
+            className="program-redirection-buttons"
+            onClick={() =>
+              router.push(
+                `/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`
+              )
+            }
+          >
+            <div className="program-redirection-icons-section">
+              <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
+            </div>
+            <h1>Participants</h1>
+          </button>
+        )}
 
-        {approvalStatus === "Pending" && userPosition === "Punong Barangay" && !isReadOnly && (
+        {approvalStatus === "Pending" && isPunongBarangay && !isReadOnly && (
           <>
             <button className="program-redirection-buttons" onClick={handleApprove}>
               <div className="program-redirection-icons-section">
@@ -682,41 +739,37 @@ const togglePredefinedOpen = () => {
           </div>
 
           <div className="action-btn-section-program">
-            {/*
-            <select
-              className="action-select-status"
-              value={activeStatus}
-              onChange={handleStatusChange}
-              disabled={isReadOnly}
-              title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"}
-              style={{ marginRight: 12 }}
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>*/}
-
-            <label className="switch-toggle" title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"} style={{ marginRight: 12 }}>
-              <input
-                type="checkbox"
-                checked={activeStatus === "Active"}
-                onChange={(e) =>
-                  handleStatusChange(
-                    e.target.checked
-                      ? { target: { value: "Active" } } as any
-                      : { target: { value: "Inactive" } } as any
-                  )
+            {canToggleActive && (
+              <label
+                className="switch-toggle"
+                title={
+                  !canToggleActive ? "You don't have permission to toggle visibility" : "Toggle visibility on resident side"
                 }
-                disabled={isReadOnly}
-              />
-              <span className="slider"></span>
-              <span className="toggle-label">{activeStatus}</span>
-            </label>
-
-           
+                style={{ marginRight: 12 }}
+              >
+                <input
+                  type="checkbox"
+                  checked={activeStatus === "Active"}
+                  onChange={(e) =>
+                    handleStatusChange(
+                      e.target.checked
+                        ? ({ target: { value: "Active" } } as any)
+                        : ({ target: { value: "Inactive" } } as any)
+                    )
+                  }
+                  // IMPORTANT: toggle stays enabled for isHigherUp even if page is read-only
+                  disabled={!canToggleActive}
+                />
+                <span className="slider"></span>
+                <span className="toggle-label">{activeStatus}</span>
+              </label>
+            )}
 
             {!isReadOnly && (
               <>
-                <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>Discard</button>
+                <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>
+                  Discard
+                </button>
                 <button className="action-save" onClick={handleSave}>
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -737,17 +790,18 @@ const togglePredefinedOpen = () => {
               fontSize: 14,
             }}
           >
-            {approvalStatus === "Rejected" ? (
+            {approvalStatus === "Approved" ? (
+              <>This program has been <strong>Approved</strong>. Editing is disabled for everyone.</>
+            ) : approvalStatus === "Rejected" ? (
               <>
                 This program has been <strong>Rejected</strong>
-                {rejectionReason ? (
-                  <> — <em>{rejectionReason}</em></>
-                ) : null}
-                . Editing is disabled (view-only).
+                {rejectionReason ? <> — <em>{rejectionReason}</em></> : null}. Editing is disabled (view-only).
               </>
-            ) : (
+            ) : progressStatus === "Completed" ? (
               <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
-            )}
+            ) : !isPunongBarangay ? (
+              <>Only the <strong>Punong Barangay</strong> can edit Pending programs. You have view-only access.</>
+            ) : null}
           </div>
         )}
 
@@ -774,7 +828,9 @@ const togglePredefinedOpen = () => {
                   <div className="edit-programs-upper-section">
                     <div className="edit-program-section-2-left-side">
                       <div className="fields-section-edit-programs">
-                        <p>Program Name<span className="required">*</span></p>
+                        <p>
+                          Program Name<span className="required">*</span>
+                        </p>
                         <input
                           type="text"
                           className={[
@@ -790,7 +846,9 @@ const togglePredefinedOpen = () => {
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Number of Participants<span className="required">*</span></p>
+                        <p>
+                          Number of Participants<span className="required">*</span>
+                        </p>
                         <input
                           type="number"
                           min="1"
@@ -807,7 +865,9 @@ const togglePredefinedOpen = () => {
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Number of Volunteers<span className="required">*</span></p>
+                        <p>
+                          Number of Volunteers<span className="required">*</span>
+                        </p>
                         <input
                           type="number"
                           min="1"
@@ -824,7 +884,9 @@ const togglePredefinedOpen = () => {
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Eligible Participants<span className="required">*</span></p>
+                        <p>
+                          Eligible Participants<span className="required">*</span>
+                        </p>
                         <select
                           className={[
                             "edit-programs-input-field",
@@ -843,7 +905,9 @@ const togglePredefinedOpen = () => {
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Time Start<span className="required">*</span></p>
+                        <p>
+                          Time Start<span className="required">*</span>
+                        </p>
                         <input
                           type="time"
                           className={[
@@ -859,7 +923,6 @@ const togglePredefinedOpen = () => {
                     </div>
 
                     <div className="edit-program-section-2-right-side">
-
                       <div className="fields-section-edit-programs">
                         <p>
                           Partnered Agency<span className="required">*</span>
@@ -868,6 +931,7 @@ const togglePredefinedOpen = () => {
                           className="edit-programs-input-field"
                           value={agency}
                           onChange={(e) => setAgency(e.target.value)}
+                          disabled={isReadOnly}
                         >
                           <option value="">Select agency</option>
                           <option value="none">None</option>
@@ -875,7 +939,6 @@ const togglePredefinedOpen = () => {
                           <option value="others">Others</option>
                         </select>
 
-                        
                         {agency === "others" && (
                           <input
                             type="text"
@@ -883,12 +946,15 @@ const togglePredefinedOpen = () => {
                             className="edit-programs-input-field"
                             value={otherAgency}
                             onChange={(e) => setOtherAgency(e.target.value)}
+                            disabled={isReadOnly}
                           />
                         )}
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Event Type<span className="required">*</span></p>
+                        <p>
+                          Event Type<span className="required">*</span>
+                        </p>
                         <select
                           className="edit-programs-input-field"
                           value={eventType}
@@ -902,7 +968,9 @@ const togglePredefinedOpen = () => {
 
                       {eventType === "single" ? (
                         <div className="fields-section-edit-programs">
-                          <p>Event Date<span className="required">*</span></p>
+                          <p>
+                            Event Date<span className="required">*</span>
+                          </p>
                           <input
                             type="date"
                             className={[
@@ -919,7 +987,9 @@ const togglePredefinedOpen = () => {
                       ) : (
                         <>
                           <div className="fields-section-edit-programs">
-                            <p>Program Start Date<span className="required">*</span></p>
+                            <p>
+                              Program Start Date<span className="required">*</span>
+                            </p>
                             <input
                               type="date"
                               className={[
@@ -935,7 +1005,9 @@ const togglePredefinedOpen = () => {
                           </div>
 
                           <div className="fields-section-edit-programs">
-                            <p>Program End Date<span className="required">*</span></p>
+                            <p>
+                              Program End Date<span className="required">*</span>
+                            </p>
                             <input
                               type="date"
                               className={[
@@ -953,7 +1025,9 @@ const togglePredefinedOpen = () => {
                       )}
 
                       <div className="fields-section-edit-programs">
-                        <p>Time End<span className="required">*</span></p>
+                        <p>
+                          Time End<span className="required">*</span>
+                        </p>
                         <input
                           type="time"
                           className={[
@@ -968,7 +1042,9 @@ const togglePredefinedOpen = () => {
                       </div>
 
                       <div className="fields-section-edit-programs">
-                        <p>Program Location<span className="required">*</span></p>
+                        <p>
+                          Program Location<span className="required">*</span>
+                        </p>
                         <input
                           type="text"
                           className={[
@@ -988,11 +1064,13 @@ const togglePredefinedOpen = () => {
               )}
 
               {activeSection === "reqs" && (
-
-                
                 <div className="add-programs-requirements-container">
                   <div className="predefined-fields-notes-container-programs">
-                    <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                    <div
+                      className="predefined-fields-notes-container-tile-programs"
+                      style={{ cursor: "pointer" }}
+                      onClick={togglePredefinedOpen}
+                    >
                       <div className="predefined-fields-title-programs">
                         <h1>Pre-defined Fields</h1>
                       </div>
@@ -1000,12 +1078,12 @@ const togglePredefinedOpen = () => {
                         <button
                           type="button"
                           className="toggle-btn-predefined-fields-programs"
-                          aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                          aria-label={isPredefinedOpen ? "Hide details" : "Show details"}
                         >
                           <img
-                            src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
-                            alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
-                            style={{ width: '16px', height: '16px' }}
+                            src={isPredefinedOpen ? "/Images/up.png" : "/Images/down.png"}
+                            alt={isPredefinedOpen ? "Hide details" : "Show details"}
+                            style={{ width: "16px", height: "16px" }}
                           />
                         </button>
                       </div>
@@ -1014,34 +1092,34 @@ const togglePredefinedOpen = () => {
                     {isPredefinedOpen && (
                       <div className="predefined-list-programs">
                         <ul className="predefined-list-items-programs">
-                         {PREDEFINED_REQ_TEXT.map((f, i) => (
-                          <li key={`pretext-${i}`} className="predefined-text-programs">
-                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
-                            <span className="predefined-desc-programs"> — {f.description}</span>
-                          </li>
-                        ))}
+                          {PREDEFINED_REQ_TEXT.map((f, i) => (
+                            <li key={`pretext-${i}`} className="predefined-text-programs">
+                              {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                              <span className="predefined-desc-programs"> — {f.description}</span>
+                            </li>
+                          ))}
 
-                        {PREDEFINED_REQ_FILES.map((f, i) => (
-                          <li key={`prefile-${i}`} className="predefined-text-programs">
-                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
-                            <span className="predefined-type-programs">(file)</span>
-                            <span className="predefined-desc-programs"> — {f.description}</span>
-                          </li>
-                        ))}
+                          {PREDEFINED_REQ_FILES.map((f, i) => (
+                            <li key={`prefile-${i}`} className="predefined-text-programs">
+                              {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                              <span className="predefined-type-programs">(file)</span>
+                              <span className="predefined-desc-programs"> — {f.description}</span>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     )}
                   </div>
 
                   <div className="predefined-fields-bottom-container-programs">
-                    {/* Custom TEXT requirements */}
                     <div className="box-container-outer-programs-fields">
-                      <div className="title-programs-fields">
-                        Text Fields
-                      </div>
+                      <div className="title-programs-fields">Text Fields</div>
                       <div className="box-container-programs-fields">
                         <div className="instructions-container-programs">
-                          <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                          <h1>
+                            * Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT:
+                            sampleField *
+                          </h1>
                         </div>
                         <span className="required-asterisk">*</span>
                         <div className="add-programs-field-container">
@@ -1066,11 +1144,7 @@ const togglePredefinedOpen = () => {
                               />
                             </div>
                             <div className="row-button-section-programs">
-                              <button
-                                type="button"
-                                className="program-field-add-button"
-                                onClick={addReqText}
-                                >
+                              <button type="button" className="program-field-add-button" onClick={addReqText}>
                                 +
                               </button>
                             </div>
@@ -1089,17 +1163,24 @@ const togglePredefinedOpen = () => {
                                       value={f.name}
                                       onChange={(e) => {
                                         const v = e.target.value;
-                                        setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                        setReqTextFields((prev) =>
+                                          prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                        );
                                       }}
                                       disabled={isReadOnly}
                                     />
                                   </div>
                                   <div className="row-button-section-programs">
                                     {!isReadOnly && (
-                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqText(i)}>-</button>
+                                      <button
+                                        type="button"
+                                        className="program-field-remove-button"
+                                        onClick={() => removeReqText(i)}
+                                      >
+                                        -
+                                      </button>
                                     )}
                                   </div>
-                                  
                                 </div>
                               ))}
                             </>
@@ -1108,14 +1189,15 @@ const togglePredefinedOpen = () => {
                       </div>
                     </div>
 
-                    {/* Custom FIELD requirements */}
                     <div className="box-container-outer-programs-fields">
-                      <div className="title-programs-fields">
-                        File Upload Fields
-                      </div>
+                      <div className="title-programs-fields">File Upload Fields</div>
                       <div className="box-container-programs-fields">
                         <div className="instructions-container-programs">
-                          <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                          <h1>
+                            * Enter the file upload fields needed for the program. No need to input pre-defined fields.
+                            Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>,
+                            etc.) *
+                          </h1>
                         </div>
                         <span className="required-asterisk">*</span>
                         <div className="add-programs-field-container">
@@ -1140,11 +1222,7 @@ const togglePredefinedOpen = () => {
                               />
                             </div>
                             <div className="row-button-section-programs">
-                              <button
-                                type="button"
-                                className="program-field-add-button"
-                                onClick={addReqFile}
-                                >
+                              <button type="button" className="program-field-add-button" onClick={addReqFile}>
                                 +
                               </button>
                             </div>
@@ -1163,17 +1241,24 @@ const togglePredefinedOpen = () => {
                                       value={f.name}
                                       onChange={(e) => {
                                         const v = e.target.value;
-                                        setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                        setReqFileFields((prev) =>
+                                          prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                        );
                                       }}
                                       disabled={isReadOnly}
                                     />
                                   </div>
                                   <div className="row-button-section-programs">
                                     {!isReadOnly && (
-                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqFile(i)}>-</button>
+                                      <button
+                                        type="button"
+                                        className="program-field-remove-button"
+                                        onClick={() => removeReqFile(i)}
+                                      >
+                                        -
+                                      </button>
                                     )}
                                   </div>
-                                  
                                 </div>
                               ))}
                             </>
@@ -1182,7 +1267,6 @@ const togglePredefinedOpen = () => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               )}
 
@@ -1190,12 +1274,9 @@ const togglePredefinedOpen = () => {
                 <>
                   <div className="edit-programs-upper-section">
                     <div className="edit-official-others-mainsection">
-
-                      {/* ===== Photos UI (cover + gallery) ===== */}
                       <div className="box-container-outer-photosprogram">
                         <div className="title-resindentificationpic">Photos</div>
                         <div className="box-container-photosprogram">
-                          
                           <div className="photosprogram-container">
                             <label
                               htmlFor="identification-file-upload"
@@ -1214,9 +1295,7 @@ const togglePredefinedOpen = () => {
                               disabled={isReadOnly}
                             />
 
-                            {/* Flex container */}
                             <div className="identificationpic-content">
-                              {/* Cover preview */}
                               <div className="identificationpic-display">
                                 <div className="cover-photo">
                                   <img
@@ -1225,18 +1304,13 @@ const togglePredefinedOpen = () => {
                                     className="program-cover"
                                   />
                                   {!isReadOnly && previewURLs[0] && (
-                                    <button
-                                      className="delete-btn"
-                                      onClick={() => handleDeleteNew(0)}
-                                    >
+                                    <button className="delete-btn" onClick={() => handleDeleteNew(0)}>
                                       ✕
                                     </button>
                                   )}
                                 </div>
                               </div>
-                              
 
-                              {/* Thumbnails (new + existing) */}
                               <div className="photosprogram-thumbnails">
                                 {previewURLs.length > 1 && (
                                   <div className="thumbs-grid">
@@ -1244,10 +1318,7 @@ const togglePredefinedOpen = () => {
                                       <div key={`new-${i}`} className="thumb-wrapper">
                                         <img src={u} alt={`New ${i + 2}`} className="thumb-img" />
                                         {!isReadOnly && (
-                                          <button
-                                            className="delete-btn"
-                                            onClick={() => handleDeleteNew(i + 1)}
-                                          >
+                                          <button className="delete-btn" onClick={() => handleDeleteNew(i + 1)}>
                                             ✕
                                           </button>
                                         )}
@@ -1264,10 +1335,7 @@ const togglePredefinedOpen = () => {
                                         <div key={`old-${i}-${u}`} className="thumb-wrapper">
                                           <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
                                           {!isReadOnly && (
-                                            <button
-                                              className="delete-btn"
-                                              onClick={() => handleDeleteExisting(i)}
-                                            >
+                                            <button className="delete-btn" onClick={() => handleDeleteExisting(i)}>
                                               ✕
                                             </button>
                                           )}
@@ -1279,11 +1347,9 @@ const togglePredefinedOpen = () => {
                               </div>
                             </div>
                           </div>
-
-
                         </div>
                       </div>
-                      {/* ===== /Photos UI ===== */}
+                      {/* /Photos */}
                     </div>
                   </div>
 
@@ -1339,7 +1405,9 @@ const togglePredefinedOpen = () => {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to discard the changes?</p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">
+                No
+              </button>
               <button
                 className="yes-button-add"
                 onClick={() => {
