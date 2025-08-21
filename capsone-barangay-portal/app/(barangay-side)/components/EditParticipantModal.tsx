@@ -29,8 +29,8 @@ type Props = {
   onClose: () => void;
   participant: Participant | null;
   onSave?: (updated: Participant) => void;
-  onApprove?: (participantId: string) => void;
-  onReject?: (participantId: string, reason: string) => void;
+  onApprove?: (participantId: string) => void | Promise<void>;
+  onReject?: (participantId: string, reason: string) => void | Promise<void>;
 };
 
 export default function EditParticipantModal({
@@ -43,7 +43,6 @@ export default function EditParticipantModal({
   // Tabs
   const [activeTab, setActiveTab] = useState<"details" | "reqs">("details");
 
-  // Toast
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
 
@@ -51,6 +50,9 @@ export default function EditParticipantModal({
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+
+  // Prevent double submits while approving/rejecting
+  const [acting, setActing] = useState(false);
 
   // Loaded full doc (includes fields/files/role)
   const [fullDoc, setFullDoc] = useState<any | null>(null);
@@ -69,7 +71,6 @@ export default function EditParticipantModal({
         if (snap.exists()) {
           setFullDoc({ id: snap.id, ...snap.data() });
         } else {
-          // fallback to what we already have
           setFullDoc({ ...participant });
         }
       } finally {
@@ -79,10 +80,9 @@ export default function EditParticipantModal({
     load();
   }, [isOpen, participant?.id]);
 
-  //  Derived display data (no conditional hooks) 
+  // Derived display data (no conditional hooks)
   const fieldsMap: Record<string, string> = useMemo(() => {
     const base = (fullDoc?.fields || {}) as Record<string, any>;
-    // promote meaningful fallbacks
     const top: Record<string, any> = {
       firstName: fullDoc?.firstName,
       lastName: fullDoc?.lastName,
@@ -104,7 +104,6 @@ export default function EditParticipantModal({
       map.validIDjpg = fullDoc.idImageUrl;
     }
 
-    // Build ordered map: validIDjpg → rest (sorted)
     const ordered: Record<string, string> = {};
     if (map.validIDjpg) ordered.validIDjpg = map.validIDjpg;
 
@@ -122,32 +121,41 @@ export default function EditParticipantModal({
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
   const handleApprove = async () => {
-    if (!participant?.id) return;
-    onApprove?.(participant.id);
-
-    
+    if (!participant?.id || acting) return;
+    setActing(true);
     try {
-      const notificationRef = doc(collection(db, "Notifications"));
-      await setDoc(notificationRef, {
-        residentID: fullDoc?.residentId || null,               // who to notify
-        participantID: fullDoc?.id || participant.id,          // ProgramsParticipants UID
-        programId: fullDoc?.programId || null,
-        programName: fullDoc?.programName || "",
-        role: fullDoc?.role || "Participant",
-        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
-          fullDoc?.role || "Participant"
-        } has been approved.`,
-        timestamp: serverTimestamp(),
-        transactionType: "Program Registration",
-        isRead: false,
-      });
-    } catch (e) {
-      console.error("Failed to send approval notification:", e);
-    }
+      // Parent handles Firestore approve + parent toast
+      await onApprove?.(participant.id);
 
-    setToastMsg("Participant approved.");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2200);
+      // Resident-facing notification
+      try {
+        const notificationRef = doc(collection(db, "Notifications"));
+        await setDoc(notificationRef, {
+          residentID: fullDoc?.residentId || null,
+          participantID: fullDoc?.id || participant.id,
+          programId: fullDoc?.programId || null,
+          programName: fullDoc?.programName || "",
+          role: fullDoc?.role || "Participant",
+          message: `Your registration for ${fullDoc?.programName || "the program"} as ${
+            fullDoc?.role || "Participant"
+          } has been approved.`,
+          timestamp: serverTimestamp(),
+          transactionType: "Program Registration",
+          isRead: false,
+        });
+      } catch (e) {
+        // Non-blocking
+        console.error("Failed to send approval notification:", e);
+      }
+
+      // Close modal immediately after success
+      onClose();
+    } catch (e) {
+      // If parent throws, keep modal open so user can retry
+      console.error("Approve failed:", e);
+    } finally {
+      setActing(false);
+    }
   };
 
   const handleRejectClick = () => {
@@ -166,33 +174,43 @@ export default function EditParticipantModal({
   };
 
   const handleRejectYes = async () => {
-    if (!participant?.id) return;
-    onReject?.(participant.id, rejectReason.trim());
-
+    if (!participant?.id || acting) return;
+    setActing(true);
     try {
-      const notificationRef = doc(collection(db, "Notifications"));
-      await setDoc(notificationRef, {
-        residentID: fullDoc?.residentId || null,
-        participantID: fullDoc?.id || participant.id,
-        programId: fullDoc?.programId || null,
-        programName: fullDoc?.programName || "",
-        role: fullDoc?.role || "Participant",
-        message: `Your registration for ${fullDoc?.programName || "the program"} as ${
-          fullDoc?.role || "Participant"
-        } has been rejected. Reason: ${rejectReason.trim()}`,
-        timestamp: serverTimestamp(),
-        transactionType: "Program Registration",
-        isRead: false,
-      });
-    } catch (e) {
-      console.error("Failed to send rejection notification:", e);
-    }
+      // Parent handles Firestore reject + parent toast
+      await onReject?.(participant.id, rejectReason.trim());
 
-    setShowSubmitRejectPopup(false);
-    setShowRejectPopup(false);
-    setToastMsg("Reason for Rejection submitted successfully!");
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 2200);
+      // Resident-facing notification
+      try {
+        const notificationRef = doc(collection(db, "Notifications"));
+        await setDoc(notificationRef, {
+          residentID: fullDoc?.residentId || null,
+          participantID: fullDoc?.id || participant.id,
+          programId: fullDoc?.programId || null,
+          programName: fullDoc?.programName || "",
+          role: fullDoc?.role || "Participant",
+          message: `Your registration for ${fullDoc?.programName || "the program"} as ${
+            fullDoc?.role || "Participant"
+          } has been rejected. Reason: ${rejectReason.trim()}`,
+          timestamp: serverTimestamp(),
+          transactionType: "Program Registration",
+          isRead: false,
+        });
+      } catch (e) {
+        // Non-blocking
+        console.error("Failed to send rejection notification:", e);
+      }
+
+      // Close nested popups then main modal
+      setShowSubmitRejectPopup(false);
+      setShowRejectPopup(false);
+      onClose();
+    } catch (e) {
+      // If parent throws, keep modal open so user can retry
+      console.error("Reject failed:", e);
+    } finally {
+      setActing(false);
+    }
   };
 
   if (!isOpen || !participant) return null;
@@ -238,6 +256,7 @@ export default function EditParticipantModal({
                     type="button"
                     className={`participant-info-toggle-btn ${activeTab === tab ? "active" : ""}`}
                     onClick={() => setActiveTab(tab as "details" | "reqs")}
+                    disabled={acting}
                   >
                     {tab === "details" ? "Full Details" : "Requirements"}
                   </button>
@@ -246,11 +265,19 @@ export default function EditParticipantModal({
 
               <div className="action-btn-section-verify-section-participant">
                 <div className="action-btn-section-verify">
-                  <button className="participant-action-reject" onClick={handleRejectClick}>
+                  <button
+                    className="participant-action-reject"
+                    onClick={handleRejectClick}
+                    disabled={acting}
+                  >
                     Reject
                   </button>
-                  <button className="participant-action-accept" onClick={handleApprove}>
-                    Approve
+                  <button
+                    className="participant-action-accept"
+                    onClick={handleApprove}
+                    disabled={acting}
+                  >
+                    {acting ? "Processing..." : "Approve"}
                   </button>
                 </div>
               </div>
@@ -354,7 +381,6 @@ export default function EditParticipantModal({
                   {/* ===== Requirements ===== */}
                   {activeTab === "reqs" && (
                     <div className="participant-uploaded-photo-section" style={{ width: "100%" }}>
-                      {/* If still loading, or nothing to show */}
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
@@ -375,7 +401,6 @@ export default function EditParticipantModal({
                         </div>
                       ) : (
                         <>
-                          {/* Render Valid ID (always first if present) */}
                           {filesMap.validIDjpg && (
                             <div className="box-container-outer-participant" style={{ width: "100%" }}>
                               <div className="title-remarks-participant">Uploaded Valid ID</div>
@@ -404,7 +429,6 @@ export default function EditParticipantModal({
                             </div>
                           )}
 
-                          {/* Other files */}
                           {Object.entries(filesMap)
                             .filter(([k]) => k !== "validIDjpg")
                             .map(([key, url]) => (
@@ -473,6 +497,7 @@ export default function EditParticipantModal({
                   type="button"
                   onClick={() => setShowRejectPopup(false)}
                   className="reject-reason-no-button"
+                  disabled={acting}
                 >
                   Cancel
                 </button>
@@ -480,6 +505,7 @@ export default function EditParticipantModal({
                   type="button"
                   className="reject-reason-yes-button"
                   onClick={handleConfirmReject}
+                  disabled={acting}
                 >
                   Save
                 </button>
@@ -489,17 +515,16 @@ export default function EditParticipantModal({
         </div>
       )}
 
-      {/* Confirm submit reject modal */}
       {showSubmitRejectPopup && (
         <div className="confirmation-popup-overlay-program-reject">
           <div className="confirmation-popup-program-status">
             <img src="/Images/question.png" alt="question icon" className="successful-icon-popup" />
             <p>Are you sure you want to Submit?</p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
+              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add" disabled={acting}>
                 No
               </button>
-              <button onClick={handleRejectYes} className="yes-button-add">
+              <button onClick={handleRejectYes} className="yes-button-add" disabled={acting}>
                 Yes
               </button>
             </div>
@@ -507,7 +532,6 @@ export default function EditParticipantModal({
         </div>
       )}
 
-      {/* Success toast */}
       {showToast && (
         <div className="popup-overlay-participant show">
           <div className="popup-participant">

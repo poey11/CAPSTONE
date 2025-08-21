@@ -4,7 +4,7 @@ import "@/CSS/barangaySide/topMenu.css";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useRef } from "react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { db } from "../../db/firebase";
 import {
   collection,
@@ -17,38 +17,32 @@ import {
   getDoc,
   deleteDoc,
   Timestamp,
+  Query,
+  Unsubscribe,
 } from "firebase/firestore";
-import { usePathname } from "next/navigation";
 
 type BarangayNotification = {
   id: string;
   reportID?: string;
-  recipientRole: string; // can be a role or a specific userId
+  recipientRole?: string;
+  recipientUid?: string;
   message: string;
-  status: "read" | "unread";
-  timestamp?: any;
+  status?: "read" | "unread";
+  timestamp?: any; // Firestore Timestamp | Date | string
   transactionType: string;
-  incidentID: string;
+  incidentID?: string;
   isRead?: boolean;
-  requestID: string;
-  department: string;
-  accID: string;
-  respondentID: string;
-  programID: string;
+  requestID?: string;
+  department?: string;
+  accID?: string;
+  respondentID?: string;
+  programID?: string;
 };
-
-interface User {
-  name: string;
-  role: string;
-  position: string;
-  profileImage?: string;
-  createdAt: Timestamp | string | Date;
-}
 
 export default function TopMenu() {
   const [notifications, setNotifications] = useState<BarangayNotification[]>([]);
   const [tasks, setTasks] = useState<BarangayNotification[]>([]);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<"all" | "false" | "tasks" | "department" | "users">("all");
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [createdDate, setCreatedDate] = useState<Date | null>(null);
@@ -63,34 +57,161 @@ export default function TopMenu() {
   const userId = session?.user?.id as string | undefined;
 
   const router = useRouter();
+  const pathname = usePathname();
 
+  // Helpers
+  const toJSDate = (v: any): Date => {
+    if (!v) return new Date(0);
+    if (typeof v?.toDate === "function") return v.toDate();
+    if (v instanceof Date) return v;
+    return new Date(v);
+  };
+
+  const tsNumber = (v: any): number => toJSDate(v).getTime();
+
+  const mergeUniqueById = (base: BarangayNotification[], incoming: BarangayNotification[]) => {
+    const map = new Map<string, BarangayNotification>();
+    for (const n of base) map.set(n.id, n);
+    for (const n of incoming) map.set(n.id, n);
+    return Array.from(map.values());
+  };
+
+  // Load user's createdAt from BarangayUsers
   useEffect(() => {
-    console.log("Session Data:", session);
-  }, [session]);
+    if (!session?.user?.id) return;
+    const userDocRef = doc(db, "BarangayUsers", session.user.id);
+    getDoc(userDocRef).then((docSnap) => {
+      if (!docSnap.exists()) return;
+      const userData = docSnap.data() as any;
 
-  // 🚀 LOAD REAL createdAt from BarangayUsers collection
+      let cDate = new Date();
+      if (userData?.createdAt?.toDate) cDate = userData.createdAt.toDate();
+      else if (typeof userData?.createdAt === "string") cDate = new Date(userData.createdAt);
+
+      setCreatedDate(cDate);
+    });
+  }, [session?.user?.id]);
+
+  // Subscription builder to reduce duplication
+  const attachSubscription = (
+    q: Query,
+    onData: (rows: BarangayNotification[]) => void
+  ): Unsubscribe => {
+    return onSnapshot(q, (snapshot) => {
+      const rows = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as BarangayNotification[];
+      onData(rows);
+    });
+  };
+
+  // Realtime subscriptions:
+  // - by recipientRole (role-based fanout)
+  // - by recipientUid (direct user notifications, e.g., creator of a program)
+  // - by respondentID (legacy/assigned flows)
   useEffect(() => {
-    if (session?.user?.id) {
-      const userDocRef = doc(db, "BarangayUsers", session.user.id);
-      getDoc(userDocRef).then((docSnap) => {
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          console.log("Loaded Firestore user data:", userData);
+    if (!session?.user?.id || !userPosition || !createdDate) return;
 
-          let cDate = new Date();
-          if ((userData.createdAt as any)?.toDate) {
-            cDate = (userData.createdAt as any).toDate();
-          } else if (typeof userData.createdAt === "string") {
-            cDate = new Date(userData.createdAt);
-          }
+    const unsubs: Unsubscribe[] = [];
 
-          console.log("Parsed createdDate:", cDate);
-          setCreatedDate(cDate);
+    // Role-based query
+    // Secretary should also receive Assistant Secretary role notifications.
+    // We do NOT put userId into recipientRole; user-specific notifications use recipientUid.
+    const roleIn: string[] =
+      userPosition === "Secretary"
+        ? ["Secretary", "Assistant Secretary"]
+        : [userPosition];
+
+    // Firestore doesn't allow an empty "in" array
+    if (roleIn.length > 0) {
+      const qRole = query(
+        collection(db, "BarangayNotifications"),
+        where("recipientRole", "in", roleIn),
+        orderBy("timestamp", "desc")
+      );
+
+      const unsubRole = attachSubscription(qRole, async (rows) => {
+        // Filter out invalid/settled related docs
+        const filtered = await filterValidNotifications(rows);
+        const afterCreated = filtered.filter((notif) => {
+          const notifDate = toJSDate(notif.timestamp);
+          const sameDay = notifDate.toDateString() === createdDate.toDateString();
+          return notifDate >= createdDate || sameDay;
+        });
+
+        if (
+          userPosition === "Assistant Secretary" ||
+          userPosition === "Admin Staff" ||
+          userPosition === "Punong Barangay" ||
+          userPosition === "Secretary"
+        ) {
+          setTasks((prev) =>
+            mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+          );
         }
-      });
-    }
-  }, [session]);
 
+        setNotifications((prev) =>
+          mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+        );
+      });
+
+      unsubs.push(unsubRole);
+    }
+
+    // Direct recipient (creator/assignee specific)
+    if (userId) {
+      const qDirect = query(
+        collection(db, "BarangayNotifications"),
+        where("recipientUid", "==", userId),
+        orderBy("timestamp", "desc")
+      );
+
+      const unsubDirect = attachSubscription(qDirect, async (rows) => {
+        const filtered = await filterValidNotifications(rows);
+        const afterCreated = filtered.filter((notif) => {
+          const notifDate = toJSDate(notif.timestamp);
+          const sameDay = notifDate.toDateString() === createdDate.toDateString();
+          return notifDate >= createdDate || sameDay;
+        });
+
+        setTasks((prev) =>
+          mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+        );
+
+        setNotifications((prev) =>
+          mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+        );
+      });
+
+      unsubs.push(unsubDirect);
+    }
+
+    // Respondent-based (legacy/assigned)
+    if (userId) {
+      const qRespondent = query(
+        collection(db, "BarangayNotifications"),
+        where("respondentID", "==", userId),
+        orderBy("timestamp", "desc")
+      );
+
+      const unsubRespondent = attachSubscription(qRespondent, async (rows) => {
+        const filtered = await filterValidNotifications(rows);
+        const afterCreated = filtered.filter((notif) => toJSDate(notif.timestamp) > createdDate);
+
+        setTasks((prev) =>
+          mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+        );
+
+        setNotifications((prev) =>
+          mergeUniqueById(prev, afterCreated).sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp))
+        );
+      });
+
+      unsubs.push(unsubRespondent);
+    }
+
+    return () => unsubs.forEach((u) => u());
+  }, [session, createdDate, userPosition, userId]);
+
+  // Validate related entities so we don't show already-settled/archived things
   const filterValidNotifications = async (notifs: BarangayNotification[]) => {
     return Promise.all(
       notifs.map(async (notif) => {
@@ -129,114 +250,14 @@ export default function TopMenu() {
     ).then((results) => results.filter((n): n is BarangayNotification => n !== null));
   };
 
-  // 🔔 Realtime subscriptions
-  useEffect(() => {
-    if (session && session?.user?.id && userPosition && createdDate) {
-      console.log("Fetching notifications for user:", userPosition, "created after:", createdDate);
-
-      // Include role + specific user UID in recipientRole
-      let qRole;
-      if (userPosition === "Secretary") {
-        const inList = ["Secretary", "Assistant Secretary", ...(userId ? [userId] : [])];
-        qRole = query(
-          collection(db, "BarangayNotifications"),
-          where("recipientRole", "in", inList),
-          orderBy("timestamp", "desc")
-        );
-      } else {
-        const inList = [userPosition, ...(userId ? [userId] : [])];
-        qRole = query(
-          collection(db, "BarangayNotifications"),
-          where("recipientRole", "in", inList),
-          orderBy("timestamp", "desc")
-        );
-      }
-
-      const qRespondent = query(
-        collection(db, "BarangayNotifications"),
-        where("respondentID", "==", session?.user?.id),
-        orderBy("timestamp", "desc")
-      );
-
-      const unsubRole = onSnapshot(qRole, async (snapshot) => {
-        const notifs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as BarangayNotification[];
-
-        const filtered = await filterValidNotifications(notifs);
-        const afterCreated = filtered.filter((notif) => {
-          const notifDate =
-            notif.timestamp?.toDate?.() ??
-            (notif.timestamp instanceof Date ? notif.timestamp : new Date(notif.timestamp));
-          const sameDay = notifDate.toDateString() === createdDate.toDateString();
-          return notifDate >= createdDate || sameDay;
-        });
-
-        if (
-          userPosition === "Assistant Secretary" ||
-          userPosition === "Admin Staff" ||
-          userPosition === "Punong Barangay" ||
-          userPosition === "Secretary"
-        ) {
-          setTasks((prev) => {
-            const merged = [...prev, ...afterCreated];
-            const unique = Array.from(new Map(merged.map((item) => [item.id, item])).values());
-            return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-          });
-        }
-
-        setNotifications((prev) => {
-          const merged = [...prev, ...afterCreated];
-          const unique = Array.from(new Map(merged.map((item) => [item.id, item])).values());
-          return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-        });
-      });
-
-      const unsubRespondent = onSnapshot(qRespondent, async (snapshot) => {
-        const notifs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as BarangayNotification[];
-
-        const filtered = await filterValidNotifications(notifs);
-        const afterCreated = filtered.filter((notif) => {
-          const notifDate =
-            notif.timestamp?.toDate?.() ??
-            (notif.timestamp instanceof Date ? notif.timestamp : new Date(notif.timestamp));
-          console.log("Checking respondent notification:", {
-            notifDate,
-            createdDate,
-            passed: notifDate > createdDate,
-          });
-          return notifDate > createdDate;
-        });
-
-        setTasks((prev) => {
-          const merged = [...prev, ...afterCreated];
-          const unique = Array.from(new Map(merged.map((item) => [item.id, item])).values());
-          return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-        });
-
-        setNotifications((prev) => {
-          const merged = [...prev, ...afterCreated];
-          const unique = Array.from(new Map(merged.map((item) => [item.id, item])).values());
-          return unique.sort((a, b) => b.timestamp.seconds - a.timestamp.seconds);
-        });
-      });
-
-      return () => {
-        unsubRole();
-        unsubRespondent();
-      };
-    }
-  }, [session, createdDate, userPosition, userId]);
-
-  // 🔥 Everything below is your JSX unchanged, with routing + role/uid checks adjusted
-
+  // Click handling
   const handleNotificationClick = async (notification: BarangayNotification) => {
     if (!notification.isRead) {
       try {
         const notificationRef = doc(db, "BarangayNotifications", notification.id);
         await updateDoc(notificationRef, { isRead: true });
-        setNotifications((prevNotifications) =>
-          prevNotifications.map((notif) =>
-            notif.id === notification.id ? { ...notif, isRead: true } : notif
-          )
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n))
         );
       } catch (error) {
         console.error("Error marking notification as read:", error);
@@ -253,16 +274,19 @@ export default function TopMenu() {
       router.push(`/dashboard/admin/viewResidentUser?id=${accID}`);
     } else if (
       transactionType === "Program Suggestion" ||
-      transactionType === "Program Decision" // ⬅️ same destination
+      transactionType === "Program Decision" ||
+      transactionType === "Program Enrollment" ||
+      transactionType === "Program Added" || 
+      transactionType === "Program Submission"
     ) {
       router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programID}`);
     } else if (
       ["Online Service Request", "Online Assigned Service Request", "Service Request", "Assigned Service Request"].includes(
         transactionType
       )
-    )
+    ) {
       try {
-        const requestRef = doc(db, "ServiceRequests", requestID);
+        const requestRef = doc(db, "ServiceRequests", requestID!);
         const requestSnap = await getDoc(requestRef);
 
         if (requestSnap.exists()) {
@@ -291,115 +315,111 @@ export default function TopMenu() {
       } catch (err) {
         console.error("Error fetching service request for redirection:", err);
       }
+    }
   };
 
-  const mergedNotifs = Array.from(new Map([...notifications, ...tasks].map((msg) => [msg.id, msg])).values());
+  // Merge
+  const mergedNotifs = mergeUniqueById(notifications, tasks);
 
+  // Unread count with proper gating
   const unreadFiltered = mergedNotifs.filter((msg) => {
     if (msg.isRead) return false;
 
-    const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
+    const notifDate = toJSDate(msg.timestamp);
     const isAfterCreated =
       !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
 
     const isMyDeptOrOnline = msg.department === userDepartment || msg.transactionType === "Online Incident";
 
     const isSecretaryGroup =
-      userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+      userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole || "");
 
     const isDirectlyAssignedToMe = msg.respondentID === userId;
+    const isDirectToMyUid = msg.recipientUid === userId;
 
     const isGenericToMyRole =
       msg.recipientRole === userPosition ||
-      msg.recipientRole === userId ||
       isDirectlyAssignedToMe ||
       (msg.recipientRole === userPosition && !msg.respondentID && isMyDeptOrOnline);
 
-    const passes = isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isMyDeptOrOnline);
-
-    if (!passes) {
-      console.warn("🔍 Notification excluded from unreadCount:", {
-        id: msg.id,
-        isRead: msg.isRead,
-        timestamp: msg.timestamp,
-        recipientRole: msg.recipientRole,
-        department: msg.department,
-        respondentID: msg.respondentID,
-        userPosition,
-        userID: userId,
-        userDepartment,
-        isGenericToMyRole,
-        isDirectlyAssignedToMe,
-        isSecretaryGroup,
-        isAfterCreated,
-      });
-    }
+    const passes =
+      isAfterCreated &&
+      (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isDirectToMyUid || isMyDeptOrOnline);
 
     return passes;
   });
 
   const unreadCount = unreadFiltered.length;
 
+  // Filtered messages for panel
+  const baseList = mergeUniqueById(notifications, tasks);
+  const sortByTsDesc = (arr: BarangayNotification[]) =>
+    arr.sort((a, b) => tsNumber(b.timestamp) - tsNumber(a.timestamp));
+
   const filteredMessages =
     filter === "all"
-      ? Array.from(new Map([...notifications, ...tasks].map((msg) => [msg.id, msg])).values())
-          .filter((msg) => {
-            const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
+      ? sortByTsDesc(
+          baseList.filter((msg) => {
+            const notifDate = toJSDate(msg.timestamp);
             const isAfterCreated =
               !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
 
             const isSecretaryGroup =
-              userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+              userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole || "");
 
             const isDirectlyAssignedToMe = msg.respondentID === userId;
+            const isDirectToMyUid = msg.recipientUid === userId;
 
             const isGenericToMyRole =
               msg.recipientRole === userPosition ||
-              msg.recipientRole === userId ||
+              isDirectlyAssignedToMe ||
+              isDirectToMyUid ||
               (msg.recipientRole === userPosition &&
                 !msg.respondentID &&
-                (msg.department === userDepartment || msg.transactionType === "Online Incident")) ||
-              isDirectlyAssignedToMe;
+                (msg.department === userDepartment || msg.transactionType === "Online Incident"));
 
             const isTaskAdded = tasks.find((t) => t.id === msg.id) !== undefined;
 
-            return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isTaskAdded);
+            return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isDirectToMyUid || isTaskAdded);
           })
-          .sort((a, b) => b.timestamp.seconds - a.timestamp.seconds)
+        )
       : filter === "false"
-      ? Array.from(new Map([...notifications, ...tasks].map((msg) => [msg.id, msg])).values()).filter((msg) => {
-          if (msg.isRead) return false;
+      ? sortByTsDesc(
+          baseList.filter((msg) => {
+            if (msg.isRead) return false;
 
-          const notifDate = msg.timestamp?.toDate?.() ?? new Date(msg.timestamp);
-          const isAfterCreated =
-            !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
+            const notifDate = toJSDate(msg.timestamp);
+            const isAfterCreated =
+              !createdDate || notifDate >= createdDate || notifDate.toDateString() === createdDate.toDateString();
 
-          const isMyDeptOrOnline = msg.department === userDepartment || msg.transactionType === "Online Incident";
+            const isMyDeptOrOnline = msg.department === userDepartment || msg.transactionType === "Online Incident";
 
-          const isSecretaryGroup =
-            userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole);
+            const isSecretaryGroup =
+              userPosition === "Secretary" && ["Secretary", "Assistant Secretary"].includes(msg.recipientRole || "");
 
-          const isDirectlyAssignedToMe = msg.respondentID === userId;
+            const isDirectlyAssignedToMe = msg.respondentID === userId;
+            const isDirectToMyUid = msg.recipientUid === userId;
 
-          const isGenericToMyRole =
-            msg.recipientRole === userPosition ||
-            msg.recipientRole === userId ||
-            isDirectlyAssignedToMe ||
-            (msg.recipientRole === userPosition && !msg.respondentID && isMyDeptOrOnline);
+            const isGenericToMyRole =
+              msg.recipientRole === userPosition ||
+              isDirectlyAssignedToMe ||
+              isDirectToMyUid ||
+              (msg.recipientRole === userPosition && !msg.respondentID && isMyDeptOrOnline);
 
-          return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe);
-        })
+            return isAfterCreated && (isSecretaryGroup || isGenericToMyRole || isDirectlyAssignedToMe || isDirectToMyUid);
+          })
+        )
       : filter === "tasks"
-      ? tasks
+      ? sortByTsDesc(tasks)
       : filter === "department"
-      ? notifications.filter(
-          (msg) => msg.department === userDepartment && (!msg.respondentID || msg.respondentID === userId)
+      ? sortByTsDesc(
+          notifications.filter(
+            (msg) => msg.department === userDepartment && (!msg.respondentID || msg.respondentID === userId)
+          )
         )
       : filter === "users"
-      ? notifications.filter((msg) => msg.transactionType === "Resident Registration")
-      : notifications;
-
-  const pathname = usePathname();
+      ? sortByTsDesc(notifications.filter((msg) => msg.transactionType === "Resident Registration"))
+      : sortByTsDesc(baseList);
 
   const toggleNotificationSection = () => {
     setNotificationOpen((prev) => !prev);
@@ -429,6 +449,7 @@ export default function TopMenu() {
     try {
       await deleteDoc(doc(db, "BarangayNotifications", id));
       setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+      setTasks((prev) => prev.filter((notif) => notif.id !== id));
     } catch (error) {
       console.error("Error deleting notification:", error);
     }
@@ -525,6 +546,7 @@ export default function TopMenu() {
             </div>
           )}
         </div>
+
         <section className="icon-section">
           {session?.user?.profileImage ? (
             <img src={session.user.profileImage} alt="User Icon" className="header-usericon" />

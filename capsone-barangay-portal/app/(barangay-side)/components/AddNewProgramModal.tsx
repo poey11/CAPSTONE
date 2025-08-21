@@ -40,7 +40,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // Details form state 
+  // Details form state
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [volunteers, setVolunteers] = useState<string>("");
@@ -69,18 +69,18 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [agency, setAgency] = useState("");
   const [otherAgency, setOtherAgency] = useState("");
 
-// Requirements 
-const PREDEFINED_REQ_TEXT: SimpleField[] = [
-  { name: "firstName", description: "Used to save the first name of the participant" },
-  { name: "lastName", description: "Used to save the last name of the participant" },
-  { name: "contactNumber", description: "Used to save the contact number of the participant" },
-  { name: "emailAddress", description: "Used to save the email address of the participant" },
-  { name: "location", description: "Used to save the address of the participant" },
-];
+  // Requirements
+  const PREDEFINED_REQ_TEXT: SimpleField[] = [
+    { name: "firstName", description: "Used to save the first name of the participant" },
+    { name: "lastName", description: "Used to save the last name of the participant" },
+    { name: "contactNumber", description: "Used to save the contact number of the participant" },
+    { name: "emailAddress", description: "Used to save the email address of the participant" },
+    { name: "location", description: "Used to save the address of the participant" },
+  ];
 
-const PREDEFINED_REQ_FILES: SimpleField[] = [
-  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
-];
+  const PREDEFINED_REQ_FILES: SimpleField[] = [
+    { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
+  ];
 
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -112,19 +112,22 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), durationMs);
   };
 
-  const minDate = useMemo(() => {
+  // Minimum start date is 3 days from today
+  const minStartDate = useMemo(() => {
     const t = new Date();
-    t.setDate(t.getDate() + 1);
+    t.setDate(t.getDate() + 4);
     t.setHours(0, 0, 0, 0);
     return t.toISOString().split("T")[0];
   }, []);
 
-  const isFutureDate = (dateStr: string) => {
+  const isAtLeastDaysFromToday = (dateStr: string, days: number) => {
     if (!dateStr) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const min = new Date(today);
+    min.setDate(min.getDate() + days);
     const d = new Date(dateStr);
-    return d > today;
+    return d >= min; // allow same-day as min threshold
   };
 
   const toMinutes = (hhmm: string) => {
@@ -169,7 +172,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
   };
 
   const validate = () => {
-    const e: { [k: string]: boolean } = {};
+    const e: { [key: string]: boolean } = {};
     const need = (key: string, ok: boolean) => {
       if (!ok) {
         e[key] = true;
@@ -187,7 +190,7 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     const validVolunteers =
       volunteers.trim().length > 0 &&
       Number.isFinite(volunteersNum) &&
-      volunteersNum >= 0;      
+      volunteersNum >= 0;
 
     need("programName", !!programName.trim());
     need("participants", validParticipants);
@@ -201,10 +204,10 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     need("timeEnd", !!timeEnd);
 
     if (eventType === "single") {
-      need("singleDate", !!singleDate && isFutureDate(singleDate));
+      need("singleDate", !!singleDate && isAtLeastDaysFromToday(singleDate, 3));
     } else {
-      need("startDate", !!startDate && isFutureDate(startDate));
-      need("endDate", !!endDate && isFutureDate(endDate));
+      need("startDate", !!startDate && isAtLeastDaysFromToday(startDate, 3));
+      need("endDate", !!endDate && isAtLeastDaysFromToday(endDate, 3));
       if (startDate && endDate) {
         const s = new Date(startDate);
         const eDate = new Date(endDate);
@@ -230,14 +233,12 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     return Object.keys(e).length === 0;
   };
 
-const normalize = (s: string) => s?.toString().trim().toLowerCase();
+  const normalize = (s: string) => s?.toString().trim().toLowerCase();
 
-const isAutoApprovedByPolicy = () => {
-  const roleOk = AUTO_POSITIONS.map(normalize).includes(normalize(userPosition));
-  return roleOk;
-};
-
-  
+  const isAutoApprovedByPolicy = () => {
+    const roleOk = AUTO_POSITIONS.map(normalize).includes(normalize(userPosition));
+    return roleOk;
+  };
 
   // handle multi-file selection (images only)
   const handleFilesChange = (files: FileList | null) => {
@@ -378,12 +379,41 @@ const isAutoApprovedByPolicy = () => {
 
         const urls = await Promise.all(uploadPromises);
         await updateDoc(doc(db, "Programs", programRef.id), {
-          photoURL: urls[0] || null,     // main/cover image
-          photoURLs: urls,               // gallery
+          photoURL: urls[0] || null,     
+          photoURLs: urls,               
         });
       }
 
-      if (!autoApproved) {
+      await addDoc(collection(db, "BarangayNotifications"), {
+        message: `Your program (${programName}) was submitted successfully.`,
+        timestamp: new Date(),
+        isRead: false,
+        recipientUid: userUid,
+        transactionType: "Program Submission",
+        programID: programRef.id,
+        programName: programName.trim(),
+        suggestedBy: staffDisplayName || null,
+        suggestedByUid: userUid,
+      });
+
+      const pos = normalize(userPosition);
+      const isSecOrAsst =
+        pos === "secretary" || pos === "assistant secretary";
+      const isPB = pos === "punong barangay";
+
+      if (isSecOrAsst) {
+        await addDoc(collection(db, "BarangayNotifications"), {
+          message: `A new program (${programName}) was added by ${staffDisplayName}.`,
+          timestamp: new Date(),
+          isRead: false,
+          recipientRole: "Punong Barangay",
+          transactionType: "Program Added",
+          programID: programRef.id,
+          programName: programName.trim(),
+          suggestedBy: staffDisplayName || null,
+          suggestedByUid: userUid,
+        });
+      } else if (!autoApproved && !isPB) {
         await addDoc(collection(db, "BarangayNotifications"), {
           message: `A new program (${programName}) has been suggested by ${staffDisplayName}.`,
           timestamp: new Date(),
@@ -402,7 +432,6 @@ const isAutoApprovedByPolicy = () => {
       onClose();
     } catch (err) {
       console.error(err);
-      // keep inline errors/UI instead of alert
       setFileError("Failed to save program. Please try again.");
     } finally {
       setSaving(false);
@@ -414,10 +443,8 @@ const isAutoApprovedByPolicy = () => {
   const hasPreviews = previewURLs.length > 0;
 
   const togglePredefinedOpen = () => {
-        setIsPredefinedOpen(prev => !prev);
-    };
-
-  
+    setIsPredefinedOpen((prev) => !prev);
+  };
 
   return (
     <div className="add-programs-popup-overlay">
@@ -635,7 +662,6 @@ const isAutoApprovedByPolicy = () => {
                         <option value="others">Others</option>
                       </select>
 
-                      
                       {agency === "others" && (
                         <input
                           type="text"
@@ -673,7 +699,7 @@ const isAutoApprovedByPolicy = () => {
                             errors.singleDate ? "input-error" : "",
                             shake.singleDate ? "shake" : "",
                           ].join(" ").trim()}
-                          min={minDate}
+                          min={minStartDate}
                           value={singleDate}
                           onChange={(e) => setSingleDate(e.target.value)}
                         />
@@ -691,7 +717,7 @@ const isAutoApprovedByPolicy = () => {
                               errors.startDate ? "input-error" : "",
                               shake.startDate ? "shake" : "",
                             ].join(" ").trim()}
-                            min={minDate}
+                            min={minStartDate}
                             value={startDate}
                             onChange={(e) => {
                               const newStart = e.target.value;
@@ -716,7 +742,7 @@ const isAutoApprovedByPolicy = () => {
                               errors.endDate ? "input-error" : "",
                               shake.endDate ? "shake" : "",
                             ].join(" ").trim()}
-                            min={startDate || minDate}
+                            min={startDate || minStartDate}
                             value={endDate}
                             onChange={(e) => {
                               const newEnd = e.target.value;
@@ -822,7 +848,6 @@ const isAutoApprovedByPolicy = () => {
                     </div>
                   </div>
 
-                  
                 </div>
               </>
             )}
@@ -881,7 +906,6 @@ const isAutoApprovedByPolicy = () => {
 
                 </div>
 
-
                 {/* Custom TEXT requirements */}
                 <div className="box-container-outer-programs-fields">
                   <div className="title-programs-fields">
@@ -920,7 +944,6 @@ const isAutoApprovedByPolicy = () => {
                       </div>
                     </div>
 
-                    
                     <div className="added-program-field-container">
                       {reqTextFields.length > 0 && (
                         <>
@@ -994,7 +1017,6 @@ const isAutoApprovedByPolicy = () => {
                       </div>
                     </div>
 
-                    
                     <div className="added-doc-field-container">
                       {reqFileFields.length > 0 && (
                         <>

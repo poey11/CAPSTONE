@@ -45,7 +45,7 @@ type Participant = {
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
 
-//  helpers: safe date parsing & single status decider 
+//  helpers: safe date parsing & single status decider
 const parseYMD = (s?: string | null): Date | null => {
   if (!s || typeof s !== "string") return null;
   const [y, m, d] = s.split("-").map(Number);
@@ -79,7 +79,8 @@ const decideStatuses = (p: any): {
 
   if (s) {
     const today = startOfToday();
-    const isSingle = p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
+    const isSingle =
+      p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
 
     if (isSingle) {
       if (today.getTime() < s.getTime()) progress = "Upcoming";
@@ -119,17 +120,37 @@ export default function ProgramsModule() {
   const { data: session } = useSession();
   const user = session?.user as any;
 
+  // ── Role gates
+  const position: string = user?.position ?? "";
+  const canViewPendingPrograms = position === "Punong Barangay";
+  const canViewPendingParticipants =
+    position === "Assistant Secretary" || position === "Secretary";
+
+  const allowedSections = useMemo<
+    Array<"main" | "programs" | "participants">
+  >(() => {
+    const base: Array<"main" | "programs" | "participants"> = ["main"];
+    if (canViewPendingPrograms) base.push("programs");
+    if (canViewPendingParticipants) base.push("participants");
+    return base;
+  }, [canViewPendingPrograms, canViewPendingParticipants]);
+
   const searchParams = useSearchParams();
 
   const [loadingPrograms, setLoadingPrograms] = useState(true);
   const [loadingParticipants, setLoadingParticipants] = useState(true);
 
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [programsAssignedData, setProgramsAssignedData] = useState<Program[]>([]);
-  const [participantsListsData, setParticipantsListsData] = useState<Participant[]>([]);
+  const [programsAssignedData, setProgramsAssignedData] = useState<Program[]>(
+    []
+  );
+  const [participantsListsData, setParticipantsListsData] = useState<
+    Participant[]
+  >([]);
 
-  const [activeSectionRedirection, setActiveSectionRedirection] =
-    useState<"main" | "programs" | "participants">("main");
+  const [activeSectionRedirection, setActiveSectionRedirection] = useState<
+    "main" | "programs" | "participants"
+  >("main");
 
   // Toasts (success / error)
   const [toastVisible, setToastVisible] = useState(false);
@@ -142,7 +163,7 @@ export default function ProgramsModule() {
     setTimeout(() => setToastVisible(false), ms);
   };
 
-  //  Custom Delete Confirmation Modal 
+  //  Custom Delete Confirmation Modal
   type ConfirmState =
     | { open: false }
     | {
@@ -187,7 +208,12 @@ export default function ProgramsModule() {
         showToast("success", "Participant deleted successfully!");
       }
     } catch {
-      showToast("error", kind === "program" ? "Failed to delete program." : "Failed to delete participant.");
+      showToast(
+        "error",
+        kind === "program"
+          ? "Failed to delete program."
+          : "Failed to delete participant."
+      );
     }
   };
 
@@ -204,7 +230,8 @@ export default function ProgramsModule() {
           const d = docu.data() as any;
 
           const { progress, active } = decideStatuses(d);
-          const approval: Program["approvalStatus"] = d.approvalStatus ?? "Pending";
+          const approval: Program["approvalStatus"] =
+            d.approvalStatus ?? "Pending";
 
           // Prepare single atomic patch if needed
           const patch: Record<string, any> = {};
@@ -215,7 +242,8 @@ export default function ProgramsModule() {
             updates.push(updateDoc(doc(db, "Programs", docu.id), patch));
           }
 
-          const dateCreated = tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
+          const dateCreated =
+            tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
           list.push({
             id: docu.id,
             programName: d.programName ?? "",
@@ -280,19 +308,29 @@ export default function ProgramsModule() {
     return () => unsub();
   }, []);
 
-  // Section routing sync
+  // Section routing sync — enforce role access on URL
   useEffect(() => {
-    const section = searchParams.get("section");
-    if (!section) {
+    const section = searchParams.get("section") as
+      | "main"
+      | "programs"
+      | "participants"
+      | null;
+
+    const target: "main" | "programs" | "participants" =
+      section && allowedSections.includes(section) ? section : "main";
+
+    setActiveSectionRedirection(target);
+
+    // Keep URL in sync (correct if user isn't allowed)
+    if (section !== target) {
       const params = new URLSearchParams(searchParams.toString());
-      params.set("section", "main");
+      params.set("section", target);
       router.replace(`?${params.toString()}`, { scroll: false });
-    } else if (section === "main" || section === "programs" || section === "participants") {
-      setActiveSectionRedirection(section);
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, allowedSections]);
 
   const handleSectionSwitch = (section: "main" | "programs" | "participants") => {
+    if (!allowedSections.includes(section)) return; // hard guard
     setActiveSectionRedirection(section);
     const params = new URLSearchParams(searchParams.toString());
     params.set("section", section);
@@ -300,7 +338,9 @@ export default function ProgramsModule() {
   };
 
   const handleEditClick = (id: string) => {
-    router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${id}`);
+    router.push(
+      `/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${id}`
+    );
   };
 
   // Add Program Modal
@@ -315,10 +355,16 @@ export default function ProgramsModule() {
 
   useEffect(() => {
     let filtered = [...programs];
-    if (searchName) filtered = filtered.filter((p) => p.programName.toLowerCase().includes(searchName.toLowerCase()));
-    if (approvalFilter) filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
-    if (progressFilter) filtered = filtered.filter((p) => p.progressStatus === progressFilter);
-    if (activeFilter) filtered = filtered.filter((p) => p.activeStatus === activeFilter);
+    if (searchName)
+      filtered = filtered.filter((p) =>
+        p.programName.toLowerCase().includes(searchName.toLowerCase())
+      );
+    if (approvalFilter)
+      filtered = filtered.filter((p) => p.approvalStatus === approvalFilter);
+    if (progressFilter)
+      filtered = filtered.filter((p) => p.progressStatus === progressFilter);
+    if (activeFilter)
+      filtered = filtered.filter((p) => p.activeStatus === activeFilter);
     setFilteredPrograms(filtered);
   }, [searchName, approvalFilter, progressFilter, activeFilter, programs]);
 
@@ -330,14 +376,23 @@ export default function ProgramsModule() {
   const currentPrograms = filteredPrograms.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const nextPage = () =>
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () =>
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
   const getPageNumbers = () => {
     const pageNumbersToShow: (number | string)[] = [];
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
         pageNumbersToShow.push(i);
-      } else if ((i === currentPage - 2 || i === currentPage + 2) && pageNumbersToShow[pageNumbersToShow.length - 1] !== "...") {
+      } else if (
+        (i === currentPage - 2 || i === currentPage + 2) &&
+        pageNumbersToShow[pageNumbersToShow.length - 1] !== "..."
+      ) {
         pageNumbersToShow.push("...");
       }
     }
@@ -347,61 +402,115 @@ export default function ProgramsModule() {
   // Participants filtering
   const [participantNameSearch, setParticipantNameSearch] = useState("");
   const [participantProgramSearch, setParticipantProgramSearch] = useState("");
-  const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
+  const [filteredParticipants, setFilteredParticipants] = useState<
+    Participant[]
+  >([]);
 
   useEffect(() => {
     let filtered = [...participantsListsData];
     if (participantNameSearch.trim()) {
-      filtered = filtered.filter((p) => (p.fullName || "").toLowerCase().includes(participantNameSearch.toLowerCase()));
+      filtered = filtered.filter((p) =>
+        (p.fullName || "")
+          .toLowerCase()
+          .includes(participantNameSearch.toLowerCase())
+      );
     }
     if (participantProgramSearch.trim()) {
-      filtered = filtered.filter((p) => (p.programName || "").toLowerCase().includes(participantProgramSearch.toLowerCase()));
+      filtered = filtered.filter((p) =>
+        (p.programName || "")
+          .toLowerCase()
+          .includes(participantProgramSearch.toLowerCase())
+      );
     }
     setFilteredParticipants(filtered);
     setParticipantsPage(1);
-  }, [participantNameSearch, participantProgramSearch, participantsListsData]);
+  }, [
+    participantNameSearch,
+    participantProgramSearch,
+    participantsListsData,
+  ]);
 
   // Participants pagination
   const [participantsPage, setParticipantsPage] = useState(1);
   const participantsPerPage = 10;
   const indexOfLastParticipant = participantsPage * participantsPerPage;
   const indexOfFirstParticipant = indexOfLastParticipant - participantsPerPage;
-  const currentParticipants = filteredParticipants.slice(indexOfFirstParticipant, indexOfLastParticipant);
-  const participantsTotalPages = Math.ceil(filteredParticipants.length / participantsPerPage);
-  const paginateParticipants = (pageNumber: number) => setParticipantsPage(pageNumber);
-  const nextParticipantsPage = () => setParticipantsPage((prev) => (prev < participantsTotalPages ? prev + 1 : prev));
-  const prevParticipantsPage = () => setParticipantsPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const currentParticipants = filteredParticipants.slice(
+    indexOfFirstParticipant,
+    indexOfLastParticipant
+  );
+  const participantsTotalPages = Math.ceil(
+    filteredParticipants.length / participantsPerPage
+  );
+  const paginateParticipants = (pageNumber: number) =>
+    setParticipantsPage(pageNumber);
+  const nextParticipantsPage = () =>
+    setParticipantsPage((prev) =>
+      prev < participantsTotalPages ? prev + 1 : prev
+    );
+  const prevParticipantsPage = () =>
+    setParticipantsPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   // Pending programs filtering
   const [pendingSearchName, setPendingSearchName] = useState("");
-  const [pendingApprovalFilter, setPendingApprovalFilter] = useState("Pending");
+  const [pendingApprovalFilter, setPendingApprovalFilter] =
+    useState("Pending");
   const [pendingProgressFilter, setPendingProgressFilter] = useState("");
   const [pendingActiveFilter, setPendingActiveFilter] = useState("");
-  const [filteredPendingPrograms, setFilteredPendingPrograms] = useState<Program[]>([]);
+  const [filteredPendingPrograms, setFilteredPendingPrograms] = useState<
+    Program[]
+  >([]);
 
   useEffect(() => {
     let filtered = [...programsAssignedData];
-    if (pendingSearchName) filtered = filtered.filter((p) => p.programName.toLowerCase().includes(pendingSearchName.toLowerCase()));
-    if (pendingApprovalFilter) filtered = filtered.filter((p) => p.approvalStatus === pendingApprovalFilter);
-    if (pendingProgressFilter) filtered = filtered.filter((p) => p.progressStatus === pendingProgressFilter);
-    if (pendingActiveFilter) filtered = filtered.filter((p) => p.activeStatus === pendingActiveFilter);
+    if (pendingSearchName)
+      filtered = filtered.filter((p) =>
+        p.programName.toLowerCase().includes(pendingSearchName.toLowerCase())
+      );
+    if (pendingApprovalFilter)
+      filtered = filtered.filter(
+        (p) => p.approvalStatus === pendingApprovalFilter
+      );
+    if (pendingProgressFilter)
+      filtered = filtered.filter(
+        (p) => p.progressStatus === pendingProgressFilter
+      );
+    if (pendingActiveFilter)
+      filtered = filtered.filter((p) => p.activeStatus === pendingActiveFilter);
     setFilteredPendingPrograms(filtered);
-  }, [pendingSearchName, pendingApprovalFilter, pendingProgressFilter, pendingActiveFilter, programsAssignedData]);
+  }, [
+    pendingSearchName,
+    pendingApprovalFilter,
+    pendingProgressFilter,
+    pendingActiveFilter,
+    programsAssignedData,
+  ]);
 
   // Pending programs pagination
   const [pendingProgramsPage, setPendingProgramsPage] = useState(1);
   const pendingProgramsPerPage = 10;
   const indexOfLastPending = pendingProgramsPage * pendingProgramsPerPage;
   const indexOfFirstPending = indexOfLastPending - pendingProgramsPerPage;
-  const currentPendingPrograms = filteredPendingPrograms.slice(indexOfFirstPending, indexOfLastPending);
-  const pendingTotalPages = Math.ceil(filteredPendingPrograms.length / pendingProgramsPerPage);
-  const paginatePending = (pageNumber: number) => setPendingProgramsPage(pageNumber);
-  const nextPendingPage = () => setPendingProgramsPage((prev) => (prev < pendingTotalPages ? prev + 1 : prev));
-  const prevPendingPage = () => setPendingProgramsPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const currentPendingPrograms = filteredPendingPrograms.slice(
+    indexOfFirstPending,
+    indexOfLastPending
+  );
+  const pendingTotalPages = Math.ceil(
+    filteredPendingPrograms.length / pendingProgramsPerPage
+  );
+  const paginatePending = (pageNumber: number) =>
+    setPendingProgramsPage(pageNumber);
+  const nextPendingPage = () =>
+    setPendingProgramsPage((prev) =>
+      prev < pendingTotalPages ? prev + 1 : prev
+    );
+  const prevPendingPage = () =>
+    setPendingProgramsPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   // Participant modal state
   const [isParticipantModalOpen, setIsParticipantModalOpen] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState<Participant | null>(null);
+  const [selectedParticipant, setSelectedParticipant] =
+    useState<Participant | null>(null);
 
   const openParticipantModal = (participant: Participant) => {
     setSelectedParticipant(participant);
@@ -419,7 +528,9 @@ export default function ProgramsModule() {
       await updateDoc(doc(db, "ProgramsParticipants", updated.id), {
         firstName: updated.firstName ?? "",
         lastName: updated.lastName ?? "",
-        fullName: updated.fullName ?? `${updated.firstName || ""} ${updated.lastName || ""}`.trim(),
+        fullName:
+          updated.fullName ??
+          `${updated.firstName || ""} ${updated.lastName || ""}`.trim(),
         contactNumber: updated.contactNumber ?? "",
         emailAddress: updated.emailAddress ?? updated.email ?? "",
         email: updated.email ?? updated.emailAddress ?? "",
@@ -470,7 +581,7 @@ export default function ProgramsModule() {
               user?.position === "Assistant Secretary" ? "with-add-request" : ""
             }`}
           >
-            {["main", "programs", "participants"].map((sectionKey) => (
+            {allowedSections.map((sectionKey) => (
               <button
                 key={sectionKey}
                 type="button"
@@ -478,7 +589,9 @@ export default function ProgramsModule() {
                   activeSectionRedirection === sectionKey ? "active" : ""
                 }`}
                 onClick={() =>
-                  handleSectionSwitch(sectionKey as "main" | "programs" | "participants")
+                  handleSectionSwitch(
+                    sectionKey as "main" | "programs" | "participants"
+                  )
                 }
               >
                 {sectionKey === "main" && "All Programs"}
@@ -486,15 +599,18 @@ export default function ProgramsModule() {
                   <span className="badge-container">
                     Pending Programs
                     {programsAssignedData.length > 0 && (
-                      <span className="task-badge">{programsAssignedData.length}</span>
+                      <span className="task-badge">
+                        {programsAssignedData.length}
+                      </span>
                     )}
                   </span>
                 )}
                 {sectionKey === "participants" && (
                   <span className="badge-container">
                     Pending Participants
-                    {participantsListsData.filter((p) => p.approvalStatus === "Pending").length >
-                      0 && (
+                    {participantsListsData.filter(
+                      (p) => p.approvalStatus === "Pending"
+                    ).length > 0 && (
                       <span className="task-badge">
                         {
                           participantsListsData.filter(
@@ -511,7 +627,10 @@ export default function ProgramsModule() {
         </div>
 
         <div className="section-add-program">
-          <button className="add-programs-btn" onClick={() => setShowAddProgramsPopup(true)}>
+          <button
+            className="add-programs-btn"
+            onClick={() => setShowAddProgramsPopup(true)}
+          >
             Add New Program
           </button>
         </div>
@@ -525,6 +644,7 @@ export default function ProgramsModule() {
         }}
       />
 
+      {/* All Programs */}
       {activeSectionRedirection === "main" && (
         <>
           <div className="programs-module-section-2">
@@ -677,133 +797,144 @@ export default function ProgramsModule() {
         </>
       )}
 
-      {activeSectionRedirection === "participants" && (
-        <>
-          <div className="programs-module-section-2">
-            <input
-              type="text"
-              className="programs-module-filter"
-              placeholder="Search by Full Name"
-              value={participantNameSearch}
-              onChange={(e) => setParticipantNameSearch(e.target.value)}
-            />
-            <input
-              type="text"
-              className="programs-module-filter"
-              placeholder="Search by Program Name"
-              value={participantProgramSearch}
-              onChange={(e) => setParticipantProgramSearch(e.target.value)}
-            />
-          </div>
+      {/* Pending Participants — Assistant Secretary / Secretary only */}
+      {activeSectionRedirection === "participants" &&
+        canViewPendingParticipants && (
+          <>
+            <div className="programs-module-section-2">
+              <input
+                type="text"
+                className="programs-module-filter"
+                placeholder="Search by Full Name"
+                value={participantNameSearch}
+                onChange={(e) => setParticipantNameSearch(e.target.value)}
+              />
+              <input
+                type="text"
+                className="programs-module-filter"
+                placeholder="Search by Program Name"
+                value={participantProgramSearch}
+                onChange={(e) => setParticipantProgramSearch(e.target.value)}
+              />
+            </div>
 
-          <div className="programs-module-main-section">
-            {loadingParticipants ? (
-              <p>Loading participants...</p>
-            ) : currentParticipants.length === 0 ? (
-              <div className="no-result-card-programs">
-                <img
-                  src="/images/no-results.png"
-                  alt="No results icon"
-                  className="no-result-icon-programs"
-                />
-                <p className="no-results-programs">No Results Found</p>
-              </div>
-            ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Program Name</th>
-                    <th>Contact Number</th>
-                    <th>Email Address</th>
-                    <th>Location</th>
-                    <th>Approval</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentParticipants.map((participant) => (
-                    <tr key={participant.id}>
-                      <td>{participant.fullName}</td>
-                      <td>{participant.programName}</td>
-                      <td>{participant.contactNumber}</td>
-                      <td>{participant.emailAddress}</td>
-                      <td>{participant.location}</td>
-                      <td>
-                        <span
-                          className={`status-badge-programs ${String(
-                            participant.approvalStatus || "Pending"
-                          )
-                            .toLowerCase()
-                            .replace(/\s*-\s*/g, "-")}`}
-                        >
-                          <p>{participant.approvalStatus || "Pending"}</p>
-                        </span>
-                      </td>
-                      <td>
-                        <div className="actions-programs">
-                          <button
-                            className="action-programs-button"
-                            onClick={() => openParticipantModal(participant)}
-                          >
-                            <img
-                              src="/Images/edit.png"
-                              alt="Edit"
-                              className="action-programs-edit"
-                            />
-                          </button>
-                          <button
-                            className="action-programs-button"
-                            onClick={() => askConfirmDeleteParticipant(participant)}
-                          >
-                            <img
-                              src="/Images/delete.png"
-                              alt="Delete"
-                              className="action-programs-delete"
-                            />
-                          </button>
-                        </div>
-                      </td>
+            <div className="programs-module-main-section">
+              {loadingParticipants ? (
+                <p>Loading participants...</p>
+              ) : currentParticipants.length === 0 ? (
+                <div className="no-result-card-programs">
+                  <img
+                    src="/images/no-results.png"
+                    alt="No results icon"
+                    className="no-result-icon-programs"
+                  />
+                  <p className="no-results-programs">No Results Found</p>
+                </div>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Full Name</th>
+                      <th>Program Name</th>
+                      <th>Contact Number</th>
+                      <th>Email Address</th>
+                      <th>Location</th>
+                      <th>Approval</th>
+                      <th>Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                  </thead>
+                  <tbody>
+                    {currentParticipants.map((participant) => (
+                      <tr key={participant.id}>
+                        <td>{participant.fullName}</td>
+                        <td>{participant.programName}</td>
+                        <td>{participant.contactNumber}</td>
+                        <td>{participant.emailAddress}</td>
+                        <td>{participant.location}</td>
+                        <td>
+                          <span
+                            className={`status-badge-programs ${String(
+                              participant.approvalStatus || "Pending"
+                            )
+                              .toLowerCase()
+                              .replace(/\s*-\s*/g, "-")}`}
+                          >
+                            <p>{participant.approvalStatus || "Pending"}</p>
+                          </span>
+                        </td>
+                        <td>
+                          <div className="actions-programs">
+                            <button
+                              className="action-programs-button"
+                              onClick={() => openParticipantModal(participant)}
+                            >
+                              <img
+                                src="/Images/edit.png"
+                                alt="Edit"
+                                className="action-programs-edit"
+                              />
+                            </button>
+                            <button
+                              className="action-programs-button"
+                              onClick={() =>
+                                askConfirmDeleteParticipant(participant)
+                              }
+                            >
+                              <img
+                                src="/Images/delete.png"
+                                alt="Delete"
+                                className="action-programs-delete"
+                              />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
 
-          <div className="redirection-section">
-            <button onClick={prevParticipantsPage} disabled={participantsPage === 1}>
-              &laquo;
-            </button>
-            {Array.from({ length: participantsTotalPages }, (_, i) => i + 1).map((num) => (
+            <div className="redirection-section">
               <button
-                key={num}
-                onClick={() => paginateParticipants(num)}
-                className={participantsPage === num ? "active" : ""}
+                onClick={prevParticipantsPage}
+                disabled={participantsPage === 1}
               >
-                {num}
+                &laquo;
               </button>
-            ))}
-            <button
-              onClick={nextParticipantsPage}
-              disabled={participantsPage === participantsTotalPages}
-            >
-              &raquo;
-            </button>
-          </div>
+              {Array.from(
+                { length: participantsTotalPages },
+                (_, i) => i + 1
+              ).map((num) => (
+                <button
+                  key={num}
+                  onClick={() => paginateParticipants(num)}
+                  className={participantsPage === num ? "active" : ""}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                onClick={nextParticipantsPage}
+                disabled={participantsPage === participantsTotalPages}
+              >
+                &raquo;
+              </button>
 
-          <EditParticipantModal
-            isOpen={isParticipantModalOpen}
-            onClose={closeParticipantModal}
-            participant={selectedParticipant}
-            onSave={handleParticipantSave}
-            onApprove={handleParticipantApprove}
-            onReject={handleParticipantReject}
-          />
-        </>
-      )}
+              <EditParticipantModal
+                isOpen={isParticipantModalOpen}
+                onClose={closeParticipantModal}
+                participant={selectedParticipant}
+                onSave={handleParticipantSave}
+                onApprove={handleParticipantApprove}
+                onReject={handleParticipantReject}
+              />
+            </div>
+          </>
+        )}
 
-      {activeSectionRedirection === "programs" && (
+      {/* Pending Programs — Punong Barangay only */}
+      {activeSectionRedirection === "programs" && canViewPendingPrograms && (
         <>
           <div className="programs-module-section-2">
             <input
@@ -916,16 +1047,21 @@ export default function ProgramsModule() {
             <button onClick={prevPendingPage} disabled={pendingProgramsPage === 1}>
               &laquo;
             </button>
-            {Array.from({ length: pendingTotalPages }, (_, i) => i + 1).map((num) => (
-              <button
-                key={num}
-                onClick={() => paginatePending(num)}
-                className={pendingProgramsPage === num ? "active" : ""}
-              >
-                {num}
-              </button>
-            ))}
-            <button onClick={nextPendingPage} disabled={pendingProgramsPage === pendingTotalPages}>
+            {Array.from({ length: pendingTotalPages }, (_, i) => i + 1).map(
+              (num) => (
+                <button
+                  key={num}
+                  onClick={() => paginatePending(num)}
+                  className={pendingProgramsPage === num ? "active" : ""}
+                >
+                  {num}
+                </button>
+              )
+            )}
+            <button
+              onClick={nextPendingPage}
+              disabled={pendingProgramsPage === pendingTotalPages}
+            >
               &raquo;
             </button>
           </div>
@@ -934,11 +1070,15 @@ export default function ProgramsModule() {
 
       {toastVisible && (
         <div
-          className={`popup-overlay-program show${toastType === "error" ? " error" : ""}`}
+          className={`popup-overlay-program show${
+            toastType === "error" ? " error" : ""
+          }`}
         >
           <div className="popup-program">
             <img
-              src={toastType === "success" ? "/Images/check.png" : "/Images/warning-1.png"}
+              src={
+                toastType === "success" ? "/Images/check.png" : "/Images/warning-1.png"
+              }
               alt="icon alert"
               className="icon-alert"
             />
@@ -965,8 +1105,12 @@ export default function ProgramsModule() {
               </div>
             )}
             <div className="yesno-container-add">
-              <button onClick={handleConfirmNo} className="no-button-add">No</button>
-              <button onClick={handleConfirmYes} className="yes-button-add">Yes</button>
+              <button onClick={handleConfirmNo} className="no-button-add">
+                No
+              </button>
+              <button onClick={handleConfirmYes} className="yes-button-add">
+                Yes
+              </button>
             </div>
           </div>
         </div>

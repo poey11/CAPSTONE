@@ -585,7 +585,6 @@ export default function ParticipantsList() {
                 title="Add a non-resident walk-in"
               >
                 Manual Entry <br/>
-                <p>(non-residents)</p>
               </button>
             </div>
 
