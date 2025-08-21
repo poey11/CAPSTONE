@@ -52,7 +52,9 @@ export default function ProgramDetails() {
   const userPosition = user?.position || "";
   const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
 
-  const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
+  type Section = "details" | "reqs" | "others" | "reject";
+
+const [activeSection, setActiveSection] = useState<Section>("details");
 
   // Popups / toasts
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
@@ -198,6 +200,8 @@ export default function ProgramDetails() {
         setApprovalStatus(data.approvalStatus ?? "Pending");
         setProgressStatus(data.progressStatus ?? "Upcoming");
         setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
+
+        setRejectionReason(data.rejectionReason ?? "");
 
         setSuggestedBy(data.suggestedBy ?? "");
         setSuggestedByUid(data.suggestedByUid ?? null);
@@ -753,12 +757,12 @@ const togglePredefinedOpen = () => {
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
-            {["details", "reqs", "others", "reject"].map((section) => (
+            {["details", "reqs", "others", ...(approvalStatus === "Rejected" ? ["reject"] : [])].map((section) => (
               <button
                 key={section}
                 type="button"
                 className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                onClick={() => setActiveSection(section as "details" | "reqs" | "others")}
+                onClick={() => setActiveSection(section as "details" | "reqs" | "others" | "reject")}
               >
                 {section === "details" && "Details"}
                 {section === "reqs" && "Requirements"}
@@ -1321,6 +1325,26 @@ const togglePredefinedOpen = () => {
                             name="programSummary"
                             value={summary}
                             onChange={(e) => setSummary(e.target.value)}
+                            disabled={isReadOnly}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeSection === "reject" && (
+                <>
+                  <div className="edit-programs-upper-section">
+                    <div className="edit-official-others-mainsection">
+                      <div className="edit-box-container-outer-programdesc">
+                        <div className="title-remarks">Reason for Reject</div>
+                        <div className="box-container-programdesc">
+                          <textarea
+                            className="programdesc-input-field"
+                            name="reasonForReject"
+                            value={rejectionReason}                  
                             disabled={isReadOnly}
                           />
                         </div>
