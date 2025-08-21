@@ -8,7 +8,6 @@ import { db } from "@/app/db/firebase";
 import { getLocalDateString, getLocalDateTimeString } from "@/app/helpers/helpers";
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 import { list } from "firebase/storage";
-import { set } from "date-fns";
 
 export default function GenerateDialogueLetter() {
     const user = useSession().data?.user;
@@ -1058,7 +1057,7 @@ export default function GenerateDialogueLetter() {
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
-                    <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
+                    <img src="/Images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
                     </div>
                     <h1>Incident Information</h1>
                 </button>
@@ -1072,7 +1071,7 @@ export default function GenerateDialogueLetter() {
                         }
                     >
                         <div className="edit-incident-redirection-icons-section">
-                            <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
+                            <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
                         </div>
                         <h1>Dialogue Meeting</h1>
                     </button>
@@ -1110,7 +1109,7 @@ export default function GenerateDialogueLetter() {
                         }
                     >
                     <div className="edit-incident-redirection-icons-section">
-                        <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
+                        <img src="/Images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
                     </div>
                     <h1>Hearing Section</h1>
                     </button>
@@ -1188,7 +1187,7 @@ export default function GenerateDialogueLetter() {
 
                             <div className="section-left-side-letter">
                                 <button type="button" onClick={handleAddLupon}>
-                                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
+                                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
                                 </button>
 
                                 {actionId === "summon" ? <h1 className="NewOfficial">Summon Letter ({hearingB} Hearing)</h1> : <h1 className="NewOfficial">Dialogue Letter</h1>}

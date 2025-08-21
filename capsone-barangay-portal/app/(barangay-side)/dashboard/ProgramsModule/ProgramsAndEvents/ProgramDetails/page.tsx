@@ -632,7 +632,7 @@ const togglePredefinedOpen = () => {
       <div className="program-redirectionpage-section">
         <button className="program-redirection-buttons-selected">
           <div className="program-redirection-icons-section">
-            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/Images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
@@ -644,7 +644,7 @@ const togglePredefinedOpen = () => {
           }
         >
           <div className="program-redirection-icons-section">
-            <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/Images/team.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Participants</h1>
         </button>
@@ -653,14 +653,14 @@ const togglePredefinedOpen = () => {
           <>
             <button className="program-redirection-buttons" onClick={handleApprove}>
               <div className="program-redirection-icons-section">
-                <img src="/images/generatedoc.png" alt="approve" className="program-redirection-icons-info" />
+                <img src="/Images/generatedoc.png" alt="approve" className="program-redirection-icons-info" />
               </div>
               <h1>Approve Requested Program</h1>
             </button>
 
             <button className="program-redirection-buttons" onClick={() => setShowRejectPopup(true)}>
               <div className="program-redirection-icons-section">
-                <img src="/images/rejected.png" alt="reject" className="program-redirection-icons-info" />
+                <img src="/Images/rejected.png" alt="reject" className="program-redirection-icons-info" />
               </div>
               <h1>Reject Requested Program</h1>
             </button>
@@ -672,7 +672,7 @@ const togglePredefinedOpen = () => {
         <div className="edit-program-main-section1">
           <div className="edit-program-main-section1-left">
             <button onClick={handleBack}>
-              <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+              <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
             <h1> Program Details </h1>
           </div>
