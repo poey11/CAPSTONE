@@ -1129,7 +1129,8 @@ For Reason of reject
 
 
 .filter-section {
-  margin-bottom: 15px;
+  margin-top: 15px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1170,9 +1171,26 @@ For Reason of reject
     height: 35px; /* added this line */
   }
 
+     .programs-module-filter-role{
+    padding: 8px;
+    width: 15%;
+    max-width: 700%;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    margin-right: 20px;
 
 
-  .programs-module-filter-participants:focus {
+    font-size: 15px; /* added this line */
+    height: 35px; /* added this line */
+  }
+
+
+
+  .programs-module-filter-participants:focus,
+  .programs-module-filter-role:focus {
     border-color: #f49028;
     outline: none;
     box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
