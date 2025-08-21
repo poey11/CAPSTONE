@@ -21,7 +21,6 @@ import {
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-/* --- schedule formatting --- */
 const MONTHS = [
   "January","February","March","April","May","June",
   "July","August","September","October","November","December"
@@ -70,7 +69,6 @@ function buildScheduleParts(p: {
   return { datePart, timePart };
 }
 
-/* --- file validation (image or pdf) --- */
 const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".svg"];
 const isImageMime = (t: string) => t.startsWith("image/");
 const isPdfMime = (t: string) => t === "application/pdf";
@@ -89,7 +87,6 @@ const isAllowedFile = (f: File) => {
   return hasAllowedExt(f.name);
 };
 
-/* --- types + predefined volunteer fields --- */
 type SimpleField = { name: string; description?: string };
 
 const PRETTY_LABELS: Record<string, string> = {
@@ -143,7 +140,6 @@ type Program = {
 
 type Role = "Volunteer" | "Participant";
 
-/* --- page --- */
 export default function SpecificProgram() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -179,9 +175,12 @@ export default function SpecificProgram() {
   const [residentId, setResidentId] = useState<string | null>(null);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
-  // role-specific approved counts (init to 0 so labels are always numeric)
+  // role-specific approved counts
   const [approvedParticipantCount, setApprovedParticipantCount] = useState<number>(0);
   const [approvedVolunteerCount, setApprovedVolunteerCount] = useState<number>(0);
+
+  // prefilled ID for verified users (first URL from verificationFilesURLs)
+  const [preVerifiedIdUrl, setPreVerifiedIdUrl] = useState<string | null>(null);
 
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -193,7 +192,6 @@ export default function SpecificProgram() {
     setTimeout(() => setToastVisible(false), ms);
   };
 
-  /* load program + images + role counts */
   useEffect(() => {
     const load = async () => {
       const snap = await getDoc(doc(db, "Programs", id as string));
@@ -234,20 +232,19 @@ export default function SpecificProgram() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  /* slideshow */
   useEffect(() => {
     if (!images.length) return;
     const t = setInterval(() => setCurrentSlide((s) => (s + 1) % images.length), 6000);
     return () => clearInterval(t);
   }, [images]);
 
-  /* autofill for verified resident (mirrors your Services flow) */
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user?.uid) {
         setIsVerifiedResident(false);
         setResidentId(null);
         setAlreadyRegistered(false);
+        setPreVerifiedIdUrl(null);
         return;
       }
 
@@ -262,24 +259,56 @@ export default function SpecificProgram() {
       setIsVerifiedResident(Boolean(verified && rId));
       setResidentId(rId);
 
+      // Try to harvest a pre-verified ID URL from either doc
+      let candidateUrl: string | null = null;
+      const userUrls: unknown = u?.verificationFilesURLs;
+      if (Array.isArray(userUrls) && userUrls.length > 0 && typeof userUrls[0] === "string") {
+        candidateUrl = userUrls[0] as string;
+      }
+
       if (verified && rId) {
         const resRef = doc(db, "Residents", rId);
         const resSnap = await getDoc(resRef);
-        if (!resSnap.exists()) return;
-        const rd: any = resSnap.data();
-        const fullName = `${rd.firstName || ""} ${rd.middleName || ""} ${rd.lastName || ""}`.replace(/\s+/g, " ").trim();
+        if (resSnap.exists()) {
+          const rd: any = resSnap.data();
 
-        setFormData((prev) => ({
-          ...prev,
-          firstName: rd.firstName || prev.firstName || "",
-          lastName: rd.lastName || prev.lastName || "",
-          contactNumber: rd.contactNumber || prev.contactNumber || "",
-          emailAddress: u.email || prev.emailAddress || "",
-          location: rd.address || prev.location || "",
-          fullName: fullName || prev.fullName || "",
-        }));
+          // Prefer resident doc if it has URLs, otherwise keep candidate from user doc
+          const resUrls: unknown = rd?.verificationFilesURLs;
+          if (Array.isArray(resUrls) && resUrls.length > 0 && typeof resUrls[0] === "string") {
+            candidateUrl = (resUrls[0] as string) || candidateUrl;
+          }
+
+          const fullName = `${rd.firstName || ""} ${rd.middleName || ""} ${rd.lastName || ""}`
+            .replace(/\s+/g, " ")
+            .trim();
+
+          setFormData((prev) => ({
+            ...prev,
+            firstName: rd.firstName || prev.firstName || "",
+            lastName: rd.lastName || prev.lastName || "",
+            contactNumber: rd.contactNumber || prev.contactNumber || "",
+            emailAddress: u.email || prev.emailAddress || "",
+            location: rd.address || prev.location || "",
+            fullName: fullName || prev.fullName || "",
+          }));
+        } else {
+          const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
+            .replace(/\s+/g, " ")
+            .trim();
+          setFormData((prev) => ({
+            ...prev,
+            firstName: u.first_name || prev.firstName || "",
+            lastName: u.last_name || prev.lastName || "",
+            contactNumber: u.phone || prev.contactNumber || "",
+            emailAddress: u.email || prev.emailAddress || "",
+            location: u.address || prev.location || "",
+            fullName: fullName || prev.fullName || "",
+          }));
+        }
       } else {
-        const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`.replace(/\s+/g, " ").trim();
+        const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
+          .replace(/\s+/g, " ")
+          .trim();
         setFormData((prev) => ({
           ...prev,
           firstName: u.first_name || prev.firstName || "",
@@ -290,6 +319,8 @@ export default function SpecificProgram() {
           fullName: fullName || prev.fullName || "",
         }));
       }
+
+      setPreVerifiedIdUrl(candidateUrl || null);
     };
     fetchUserData();
   }, [user]);
@@ -327,7 +358,6 @@ export default function SpecificProgram() {
     setFiles((p) => ({ ...p, [field]: f }));
   };
 
-  /* role + capacity helpers (single source of truth) */
   const maxParticipants = Number(program?.participants ?? 0);
   const volunteersCap   = Number(program?.volunteers ?? 0);
   const hasVolunteerCap = volunteersCap > 0;
@@ -348,14 +378,11 @@ export default function SpecificProgram() {
       ? "Max limit of participants has been reached!"
       : "Max limit of volunteers has been reached!";
 
-  /* audience gating
-     - guests and non-verified logged-in users are treated as NON-RESIDENTS
-     - only verified resident counts as resident
-  */
+  /* audience gating */
   const ep = program?.eligibleParticipants || "both";
   const isGuest = !user?.uid;
   const isResident = isVerifiedResident;
-  const isNonResident = !isResident; // includes guests + non-verified logged-in users
+  const isNonResident = !isResident; 
 
   const userAllowedAtAll =
     ep === "both" ||
@@ -386,7 +413,6 @@ export default function SpecificProgram() {
       return { ok: false, msg: "Enrollment is closed for this program." };
     }
 
-    // global audience gate applies to both roles with our resident/non-resident logic
     if (!userAllowedAtAll) {
       return {
         ok: false,
@@ -397,7 +423,6 @@ export default function SpecificProgram() {
       };
     }
 
-    // role-specific rules
     if (role === "Volunteer") {
       if (!isResident) return { ok: false, msg: "Only Verified Resident Users can volunteer." };
       if (!hasVolunteerCap) return { ok: false, msg: "Volunteering is not available for this program." };
@@ -410,9 +435,15 @@ export default function SpecificProgram() {
     return { ok: true };
   };
 
-  const uploadAllFiles = async (programId: string, uidOrGuest: string) => {
-    const urls: Record<string, string> = {};
+  const uploadAllFiles = async (
+    programId: string,
+    uidOrGuest: string,
+    prefilled: Record<string, string>
+  ) => {
+    const urls: Record<string, string> = { ...prefilled };
+
     for (const key of Object.keys(files)) {
+      if (urls[key]) continue; // skip if we already have a URL
       const f = files[key];
       const sref = ref(
         storage,
@@ -433,8 +464,13 @@ export default function SpecificProgram() {
       return showToast("You are already enlisted in this program.", true);
     }
 
+    const prefilled: Record<string, string> = {};
+    if (isVerifiedResident && preVerifiedIdUrl) {
+      prefilled["validIDjpg"] = preVerifiedIdUrl;
+    }
+
     const uidOrGuest = user?.uid || "guest";
-    const uploadedFiles = await uploadAllFiles(program.id, uidOrGuest);
+    const uploadedFiles = await uploadAllFiles(program.id, uidOrGuest, prefilled);
 
     try {
       await addDoc(collection(db, "ProgramsParticipants"), {
@@ -457,9 +493,9 @@ export default function SpecificProgram() {
         files: uploadedFiles,
       });
 
-      showToast(`You have successfully registered as a ${role.toLowerCase()}!`);
-      setSelectedAction(null);
-      setFiles({});
+      if (typeof window !== "undefined") {
+        window.location.reload();
+      }
     } catch {
       showToast("Something went wrong. Please try again.", true);
     }
@@ -488,7 +524,7 @@ export default function SpecificProgram() {
   const participantsLabel = `${approvedParticipantCount}/${Math.max(0, maxParticipants)}`;
   const volunteersLabel   = hasVolunteerCap ? `${approvedVolunteerCount}/${volunteersCap}` : "";
 
-  // force toast to top-right (in case CSS elsewhere overrides it)
+  // force toast to top-right
   const toastPosStyle: React.CSSProperties = { top: "13%", right: 12, left: "auto", bottom: "auto" };
 
   // derive which cards to show based on audience + verification + volunteer cap
@@ -510,12 +546,10 @@ export default function SpecificProgram() {
         <p>PROGRAMS</p>
       </div>
 
-      {/* Title + Description */}
       <section className="programs-header-specific">
         <h1 className="programs-title-specific">{program.programName}</h1>
         <div className="programs-underline-specific"></div>
 
-        {/* Slideshow */}
         <div className="slideshow-container-specific">
           {images.length > 0 && (
             <div className="slideshow-specific">
@@ -535,7 +569,6 @@ export default function SpecificProgram() {
           {program.description || program.summary}
         </p>
 
-        {/* Details */}
         <div className="programs-details-specific">
           <div className="program-detail-card-specific">
             <h3>Schedule</h3>
@@ -564,7 +597,6 @@ export default function SpecificProgram() {
         </div>
       </section>
 
-      {/* Actions */}
       <section className="get-involved">
         <h2 className="section-title">Get Involved</h2>
         <div className="programs-underline-specific"></div>
@@ -587,7 +619,6 @@ export default function SpecificProgram() {
                 const reached = capacityReached(action.key);
                 const disabledReason = reached ? capacityMessage(action.key) : "";
 
-                // choose fields depending on role
                 const textFields: SimpleField[] =
                   action.key === "Volunteer"
                     ? PREDEFINED_REQ_TEXT
@@ -666,19 +697,42 @@ export default function SpecificProgram() {
                           })}
 
                           {fileFields.map((f, i) => {
-                            const label = labelFor(f.name);
+                            const nm = f.name;
+                            const nmLower = nm.toLowerCase();
+                            const label = labelFor(nm);
+
+                            const isValidIdField = nmLower === "valididjpg";
+                            const usePrefill = isVerifiedResident && !!preVerifiedIdUrl && isValidIdField;
+
                             return (
                               <div className="form-group-specific" key={`ff-${i}`}>
                                 <label className="form-label-specific">
                                   {label} <span className="required">*</span>
                                 </label>
-                                <input
-                                  type="file"
-                                  accept="image/*,application/pdf,.pdf"
-                                  className="form-input-specific"
-                                  required
-                                  onChange={(e) => onFileChange(f.name, e.currentTarget)}
-                                />
+
+                                {usePrefill ? (
+                                  <div className="prefilled-file-notice">
+                                    <div style={{ fontSize: 14, opacity: 0.9 }}>
+                                      Using your verified ID on file.
+                                    </div>
+                                    <a
+                                      href={preVerifiedIdUrl as string}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="prefilled-file-link"
+                                    >
+                                      View file
+                                    </a>
+                                  </div>
+                                ) : (
+                                  <input
+                                    type="file"
+                                    accept="image/*,application/pdf,.pdf"
+                                    className="form-input-specific"
+                                    required 
+                                    onChange={(e) => onFileChange(nm, e.currentTarget)}
+                                  />
+                                )}
                               </div>
                             );
                           })}
@@ -696,7 +750,6 @@ export default function SpecificProgram() {
         )}
       </section>
 
-      {/* Toast (fixed to top-right) */}
       {toastVisible && (
         <div
           className={`popup-overlay-program show${toastError ? " error" : ""}`}
@@ -711,7 +764,7 @@ export default function SpecificProgram() {
               alt="icon alert"
               className="icon-alert"
             />
-            <p>{toastMsg}</p>
+          <p>{toastMsg}</p>
           </div>
         </div>
       )}
