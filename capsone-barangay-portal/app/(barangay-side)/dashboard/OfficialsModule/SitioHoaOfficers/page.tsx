@@ -377,7 +377,7 @@ export default function SitioHoaOfficersModule() {
           <div className="view-barangayuser-popup">
             <div className="view-user-main-section1">
                 <div className="view-user-header-first-section">
-                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                  <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
                 </div>
                 <div className="view-user-header-second-section">
                   <h2 className="gov-info">Republic of the Philippines</h2>
@@ -393,7 +393,7 @@ export default function SitioHoaOfficersModule() {
               <div className="view-user-header-body-top-section">
                   <div className="view-user-backbutton-container">
                     <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">

@@ -58,7 +58,7 @@ export default function SettingsPage() {
                     sex: docSnap.data().sex || "",
                     phone: docSnap.data().phone || "",
                     position: docSnap.data().position || "",
-                    profileImage: docSnap.data().profileImage || "/images/user.png",
+                    profileImage: docSnap.data().profileImage || "/Images/user.png",
                     department: docSnap.data().department || "",
                     userid: docSnap.data().userid || "",
                 });
@@ -231,7 +231,7 @@ export default function SettingsPage() {
                 <div className="modifyaccsettings-main-section1-settings">
                     <div className="modifyaccsettings-main-section1-left-settings">
                         <button onClick={handleBack}>   
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-settings" />
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-settings" />
                         </button>
                         <h1>Edit Account Settings</h1>
                     </div>

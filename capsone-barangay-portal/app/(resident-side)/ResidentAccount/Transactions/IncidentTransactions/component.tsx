@@ -32,10 +32,10 @@ interface IncidentReport {
   
 }
 
-export default function IncidentTransactionsDetails() {
-  const searchParams = useSearchParams();
+export default function IncidentTransactionsDetails({referenceId}:any) {
+  // const searchParams = useSearchParams();
   const router = useRouter();
-  const referenceId = searchParams.get("id");
+  // const referenceId = searchParams.get("id");
 
   const [transactionData, setTransactionData] = useState<IncidentReport | null>(null);
   const [loading, setLoading] = useState(true);

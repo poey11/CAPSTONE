@@ -341,7 +341,7 @@ export default function AddFirstTimeJobSeeker() {
           <div className="add-resident-main-section1">
             <div className="add-resident-main-section1-left">
               <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                <img src="/I  mages/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
               </button>
 
               <h1> Add New First-Time Job Seeker </h1>

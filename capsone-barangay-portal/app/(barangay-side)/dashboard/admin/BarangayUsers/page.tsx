@@ -637,7 +637,7 @@ useEffect(() => {
    
     {currentUser.length === 0 ? (
       <div className="no-result-card" /* edited this class */>
-        <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
+        <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" /* edited this class *//>
         <p className="no-results-department" /* edited this class */>No Results Found</p>
       </div>
     ) : (
@@ -844,7 +844,7 @@ useEffect(() => {
                 <div className="view-barangayuser-popup" ref={popupRef}>
                     <div className="view-user-main-section1">
                         <div className="view-user-header-first-section">
-                            <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                            <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
                         </div>
                         <div className="view-user-header-second-section">
                             <h2 className="gov-info">Republic of the Philippines</h2>
@@ -860,7 +860,7 @@ useEffect(() => {
                         <div className="view-user-header-body-top-section">
                             <div className="view-user-backbutton-container">
                                 <button onClick={handleBack}>
-                                    <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+                                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
                                 </button>
                             </div>
                             <div className="view-resident-user-info-toggle-wrapper">

@@ -6,7 +6,6 @@ import { getSpecificDocument, generateDownloadLink } from "../../../../../helper
 import { collection,doc, getDocs, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import Dialogue from "@/app/(barangay-side)/components/dialogueForm"
-import { set } from "date-fns";
 
 export default function DialogueSection() {
     const router = useRouter();
@@ -131,7 +130,7 @@ export default function DialogueSection() {
             <div className="edit-incident-redirectionpage-section">
                 <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
                     <div className="edit-incident-redirection-icons-section">
-                    <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
+                    <img src="/Images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
                     </div>
                     <h1>Incident Information</h1>
                 </button>
@@ -139,7 +138,7 @@ export default function DialogueSection() {
                 <div className="dialogue-dropdown">
                     <button className="edit-incident-redirection-buttons-selected-dialogue-hearing">
                         <div className="edit-incident-redirection-icons-section">
-                            <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
+                            <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
                         </div>
                         <h1>Dialogue Meeting</h1>
                     </button>
@@ -171,7 +170,7 @@ export default function DialogueSection() {
                 <div className="hearing-dropdown">
                     <button className="edit-incident-redirection-buttons">
                     <div className="edit-incident-redirection-icons-section">
-                        <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
+                        <img src="/Images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
                     </div>
                     <h1>Hearing Section</h1>
                     </button>

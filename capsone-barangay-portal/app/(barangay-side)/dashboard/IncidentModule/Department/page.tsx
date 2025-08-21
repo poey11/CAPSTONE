@@ -1134,7 +1134,7 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
         <div className="view-incident-popup">
           <div className="view-incident-main-section1">
             <div className="view-user-header-first-section">
-              <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+              <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
             </div>
             <div className="incident-view-header-second-section">
               <h2 className="gov-info">Republic of the Philippines</h2>
@@ -1150,7 +1150,7 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
               <div className="incident-view-header-body-top-section">
                   <div className="incident-view-backbutton-container">
                     <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="incident-back-btn" />
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="incident-back-btn" />
                     </button>
                   </div>
                   <div className="view-incident-user-info-toggle-wrapper">

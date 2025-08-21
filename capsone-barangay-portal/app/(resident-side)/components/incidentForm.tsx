@@ -293,7 +293,7 @@ const formRef = useRef<HTMLFormElement>(null);
           message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
           timestamp: new Date(),
           isRead: false,
-          transactionType: "Online Incident",
+          transactionType: "IncidentReport",
           recipientRole: "LF Staff",
           incidentID: incidentID,
           ...(currentUser !== "Guest" && { reportID: currentUser }), 

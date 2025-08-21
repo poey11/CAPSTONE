@@ -123,7 +123,7 @@ export default function GenerateDocument() {
                 <div className="generatedocument-inbrgy-main-section1">
                     <div className="generatedocument-inbrgy-main-section1-left">
                         <button onClick={handleBack} >
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
 
                         <h1> New Document Request </h1>

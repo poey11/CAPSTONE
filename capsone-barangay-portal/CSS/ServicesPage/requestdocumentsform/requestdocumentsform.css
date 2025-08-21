@@ -25,7 +25,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/images/brgyheaderpic.JPG');
+    background-image: url('/Images/brgyheaderpic.JPG');
     background-size: cover;
     background-position: 50% 60%;
     background-repeat: no-repeat;
@@ -427,7 +427,7 @@ accent-color: #f49028;
      font-weight:bolder;
      overflow: hidden; 
        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                 url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+                 url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
       background-position: center 55%; 
    
    }

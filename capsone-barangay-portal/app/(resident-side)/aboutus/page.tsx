@@ -204,7 +204,7 @@ export default function AboutUs() {
               <div className="contactinfo-container">
                 <div className="aboutus-contactinfo-email-section">
                   <img src="/images/email1.png" alt="Image 1" className="aboutus-contacticon" />
-                  <p>barangay fairview park @gmail.com</p>
+                  <p>barangayfairviewpark@gmail.com</p>
                 </div>
                 <div className="aboutus-contactinfo-phone-section">
                   <img src="/images/phone1.png" alt="Image 2" className="aboutus-contacticon" />

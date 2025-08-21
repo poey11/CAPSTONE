@@ -105,7 +105,7 @@ export default function ViewVoter() {
 
       <div className="view-resident-main-section1">
           <div className="view-resident-header-first-section">
-            <img src="/Images/QClogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
+            <img src="/Images/QCLogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
           </div>
 
           <div className="view-resident-header-second-section">
@@ -128,7 +128,7 @@ export default function ViewVoter() {
       <div className="view-resident-header-body-top-section">
           <div className="view-resident-backbutton-container">
             <button onClick={handleBack}>
-              <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
+              <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
             </button>
           </div>
               
