@@ -753,7 +753,7 @@ const togglePredefinedOpen = () => {
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
-            {["details", "reqs", "others"].map((section) => (
+            {["details", "reqs", "others", "reject"].map((section) => (
               <button
                 key={section}
                 type="button"
@@ -763,6 +763,7 @@ const togglePredefinedOpen = () => {
                 {section === "details" && "Details"}
                 {section === "reqs" && "Requirements"}
                 {section === "others" && "Others"}
+                {section === "reject" && "Rejected"}
               </button>
             ))}
           </nav>
@@ -1192,9 +1193,9 @@ const togglePredefinedOpen = () => {
                     <div className="edit-official-others-mainsection">
 
                       {/* ===== Photos UI (cover + gallery) ===== */}
-                      <div className="box-container-outer-photosprogram">
-                        <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-photosprogram">
+                      <div className="box-container-outer-others-photosprogram">
+                        <div className="title-others-photos">Photos</div>
+                        <div className="box-container-photosprogram-others">
                           
                           <div className="photosprogram-container">
                             <label
