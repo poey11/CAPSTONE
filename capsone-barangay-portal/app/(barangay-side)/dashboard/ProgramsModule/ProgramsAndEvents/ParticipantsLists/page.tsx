@@ -570,7 +570,7 @@ export default function ParticipantsList() {
           <div className="program-popup" ref={residentPopUpRef}>
 
             <div className="view-participant-backbutton-container">
-                <button onClick={handleBack}>
+                <button onClick={() => setShowResidentsPopup(false)}>
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
                 </button>
               </div>    
@@ -642,6 +642,11 @@ export default function ParticipantsList() {
           onClose={() => {
             setShowAddWalkInModal(false);
             setResidentForAdd(null);
+          }}
+
+          onBack={() => {
+            setShowAddWalkInModal(false);
+            setShowResidentsPopup(true);  //reopen residents popup
           }}
           programId={programId}
           programName={programTitle}

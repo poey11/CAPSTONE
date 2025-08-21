@@ -32,6 +32,7 @@ type Resident = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  onBack: () => void;
 
   programId: string;
   programName?: string;
@@ -61,6 +62,7 @@ type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 export default function AddWalkInParticipantModal({
   isOpen,
   onClose,
+  onBack,
   programId,
   programName = "",
   textFields,
@@ -315,7 +317,7 @@ export default function AddWalkInParticipantModal({
       <div className="program-popup-overlay">
         <div className="program-popup">
           <div className="walkin-participant-backbutton-container">
-                <button onClick={onClose}>
+                <button onClick={onBack}>
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
                 </button>
               </div>    
@@ -344,7 +346,7 @@ export default function AddWalkInParticipantModal({
                   {activeSection === "details" && (
                     <>
                       
-                      <div className="walkin-upper-section">
+                      <div className="walkin-details-section">
                         {/* Left column */}
                         <div className="walkin-content-left-side">
                           {textFieldsToRender
@@ -421,96 +423,87 @@ export default function AddWalkInParticipantModal({
 
                   {activeSection === "reqs" && (
                     <>
+                    <div className="walkin-requirements-section">
+                      {fileFieldsToRender.map((f, idx) => {
+                        const name = f.name;
+                        const isValidId = name === "validIDjpg";
+                        // Format: capitalize first + add space before uppercase letters
+                        const formattedLabel = name
+                          .replace(/([A-Z])/g, " $1")   // add space before capital letters
+                          .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
 
-{fileFieldsToRender.map((f) => {
-                      const name = f.name;
-                      const isValidId = name === "validIDjpg";
-                      const label = labelFor(name);
-                      const preview = filePreviews[name];
+                        const preview = filePreviews[name];
 
-                      const hasManual = !!formFiles[name];
-                      const statusText = hasManual
-                        ? formFiles[name]?.name || "File selected"
-                        : isValidId && !!residentValidIdUrl
-                        ? "Auto-attached from resident"
-                        : "No file chosen";
+                        const hasManual = !!formFiles[name];
+                        const statusText = hasManual
+                          ? formFiles[name]?.name || "File selected"
+                          : isValidId && !!residentValidIdUrl
+                          ? "Auto-attached from resident"
+                          : "No file chosen";
 
-                      return (
-                        <div className="form-group-specific" key={`ff-${name}`} style={{ marginBottom: 12 }}>
-                          <label className="form-label-specific">
-                            {label} <span className="required-asterisk">*</span>
-                          </label>
+                        return (
+                          <div
+                            key={`ff-${name}`}
+                            className="box-container-outer-resindentificationpic"
+                            style={{ flex: "0 0 calc(50% - 20px)" }} // 2 per row
+                          >
+                            <div className="title-resindentificationpic">
+                              {formattedLabel}
+                            </div>
 
-                          <input
-                            ref={(el) => { fileInputRefs.current[name] = el; }}
-                            id={`file-${name}`}
-                            type="file"
-                            accept="image/*,application/pdf,.pdf"
-                            style={{
-                              position: "absolute",
-                              opacity: 0,
-                              width: 0,
-                              height: 0,
-                              pointerEvents: "none",
-                            }}
-                            onChange={(e) => handleFormFileChange(name, e.currentTarget)}
-                          />
+                            <div className="box-container-resindentificationpic">
+                              {/* File Upload Section */}
+                              <div className="file-upload-container">
+                                <label
+                                  htmlFor={`file-${name}`}
+                                  className="upload-link"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {hasManual ? "Replace File" : "Click to Upload File"}
+                                </label>
 
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <button
-                              type="button"
-                              onClick={() => fileInputRefs.current[name]?.click()}
-                              className="participant-action-accept"
-                              style={{ padding: "6px 10px" }}
-                            >
-                              {hasManual ? "Replace file" : "Choose file"}
-                            </button>
-                            <span style={{ fontSize: 13, opacity: 0.85 }}>{statusText}</span>
-                          </div>
+                                <input
+                                  ref={(el) => { fileInputRefs.current[name] = el; }}
+                                  id={`file-${name}`}
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept="image/*,application/pdf,.pdf"
+                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                                  style={{ display: "none" }}
+                                />
 
-                          {isValidId && !!residentValidIdUrl && !hasManual && (
-                            <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
-                              A resident Valid ID will be auto-attached.
-                            </small>
-                          )}
-
-                          {preview?.url && (
-                            <div className="box-container-outer-participant" style={{ width: "100%", marginTop: 10 }}>
-                              <div className="title-remarks-participant">{label} Preview</div>
-                              <div className="box-container-participant-2">
-                                {preview.isPdf ? (
-                                  <>
-                                    <a
-                                      href={preview.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{ display: "inline-block", marginBottom: 8 }}
-                                    >
-                                      Open {label} (PDF)
-                                    </a>
-                                    <embed
-                                      src={preview.url}
-                                      type="application/pdf"
-                                      className="uploaded-pic-participant"
-                                    />
-                                  </>
-                                ) : (
-                                  <a href={preview.url} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                      src={preview.url}
-                                      alt={`${label} preview`}
-                                      className="participant-img-view uploaded-pic-participant"
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  </a>
+                                {/* File Selected */}
+                                {hasManual && formFiles[name] && (
+                                  <div className="file-name-image-display">
+                                    <div className="file-name-image-display-indiv">
+                                      {preview?.url && !preview.isPdf && (
+                                        <img
+                                          src={preview.url}
+                                          alt="Preview"
+                                          style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                        />
+                                      )}
+                                      <span>{formFiles[name]?.name}</span>
+                                      
+                                    </div>
+                                  </div>
                                 )}
+
+                                {/* Auto-attach notice */}
+                                {isValidId && !!residentValidIdUrl && !hasManual && (
+                                  <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                                    A resident Valid ID will be auto-attached.
+                                  </small>
+                                )}
+
+
                               </div>
                             </div>
-                          )}
-                        </div>
-                      );
-                    })}
-        
+                          </div>
+                        );
+                      })}
+                    </div>
+
 
                     </>
                   )}

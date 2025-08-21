@@ -2030,11 +2030,29 @@ input:checked + .slider::before {
   background-color: transparent;
 }
 
-.walkin-upper-section {
+.walkin-details-section {
   display: flex;
   width: 100%;
   overflow-y: auto;
   padding-left: 50px;
+}
+
+
+/*
+.walkin-requirements-section {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 20px;
+  background-color: pink;
+}*/
+
+.walkin-requirements-section {
+  display: flex;
+  flex-wrap: wrap;  /* allows wrapping */
+  margin-left: 45px;
+  gap: 20px;
+  width: 100%;
 }
 
 .walkin-content-left-side {
@@ -2084,4 +2102,80 @@ input:checked + .slider::before {
 
   .walkin-input-field option:disabled {
     color: grey;
+  }
+
+.box-container-outer-resindentificationpic {
+  position: relative; 
+  margin-bottom: 20px;
+}
+
+.title-resindentificationpic {
+  position: absolute;
+  left: 10%; 
+  top: 0; 
+  transform: translate(25%, 25%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: 192px;
+  text-align: center;
+}
+
+.box-container-resindentificationpic {
+  position: relative;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  margin-top: 30px;
+
+  display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.box-container-resindentificationpic:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+   .file-upload-container {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    display: block;
+    align-items: center; 
+    justify-content: center; 
+    text-align: center;
+    height: 220px; 
+    width: 350px;
+    overflow-y: auto;
+    margin-top: 10px;
+    align-self: center;
+  }
+
+    .file-name-image-display {
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+  }
+
+      .file-name-image-display-indiv {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      background-color: #F0F2F8;
+      border-radius: 5px;
+      gap: 10px;
+      margin-bottom: 10px;
   }
