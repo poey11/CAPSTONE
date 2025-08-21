@@ -57,7 +57,6 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
-  // ⬇️ multiple image support
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [previewURLs, setPreviewURLs] = useState<string[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -231,13 +230,17 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     return Object.keys(e).length === 0;
   };
 
-  const isAutoApprovedByPolicy = () => {
-    const nameOk = PREAPPROVED_NAMES.includes(programName.trim().toLowerCase());
-    const roleOk = AUTO_POSITIONS.includes(userPosition);
-    return nameOk && roleOk;
-  };
+const isAutoApprovedByPolicy = () => {
+  const roleOk = AUTO_POSITIONS.includes(userPosition);
+  const nameOk = PREAPPROVED_NAMES.some((needle) =>
+    programName.toLowerCase().includes(needle) // needles are already lowercase
+  );
+  return roleOk && nameOk;
+};
 
-  // ⬇️ handle multi-file selection (images only)
+  
+
+  // handle multi-file selection (images only)
   const handleFilesChange = (files: FileList | null) => {
     setFileError(null);
     if (!files || files.length === 0) {
@@ -364,7 +367,6 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
       const programRef = await addDoc(collection(db, "Programs"), payload);
 
-      // ⬇️ upload all selected images
       if (photoFiles.length > 0) {
         const uploadPromises = photoFiles.map(async (file, idx) => {
           const storageRef = ref(
