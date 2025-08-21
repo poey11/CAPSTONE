@@ -647,11 +647,26 @@ export default function SpecificProgram() {
                               lower.includes("email") ? "email" :
                               lower.includes("contact") || lower.includes("phone") ? "tel" :
                               "text";
-                            const label = labelFor(name);
+                            
+                              // Format: capitalize first + add space before uppercase letters
+                              const formattedLabel = name
+                                // 1. Remove "jpg" or other extensions at the end
+                                .replace(/jpg$/i, "")
+                                .replace(/jpeg$/i, "")
+                                .replace(/png$/i, "")
+                                .replace(/pdf$/i, "")
+                                // 2. Insert spaces correctly
+                                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                                .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+                                // 3. Capitalize first letter
+                                .replace(/^./, (s) => s.toUpperCase())
+                                // 4. Ensure "Id" → "ID"
+                                .replace(/\bId\b/g, "ID");
+
                             return (
                               <div className="form-group-specific" key={`tf-${i}`}>
                                 <label className="form-label-specific">
-                                  {label} <span className="required">*</span>
+                                  {formattedLabel} <span className="required">*</span>
                                 </label>
                                 <input
                                   type={type}
@@ -659,14 +674,27 @@ export default function SpecificProgram() {
                                   required
                                   value={formData[name] || ""}
                                   onChange={(e) => onTextChange(name, e.target.value)}
-                                  placeholder={`Enter ${label}`}
+                                  placeholder={`Enter ${formattedLabel}`}
                                 />
                               </div>
                             );
                           })}
 
                           {fileFields.map((f, i) => {
-                            const label = labelFor(f.name);
+                            const label = f.name
+                            // 1. Remove "jpg" or other extensions at the end
+                            .replace(/jpg$/i, "")
+                            .replace(/jpeg$/i, "")
+                            .replace(/png$/i, "")
+                            .replace(/pdf$/i, "")
+                            // 2. Insert spaces correctly
+                            .replace(/([a-z])([A-Z])/g, "$1 $2")
+                            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+                            // 3. Capitalize first letter
+                            .replace(/^./, (s) => s.toUpperCase())
+                            // 4. Ensure "Id" → "ID"
+                            .replace(/\bId\b/g, "ID");
+
                             return (
                               <div className="form-group-specific" key={`ff-${i}`}>
                                 <label className="form-label-specific">
