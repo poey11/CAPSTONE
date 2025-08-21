@@ -441,10 +441,11 @@ animation: fadeSlideIn 0.5s ease-out;
   width: 100%;
 }
 
-.box-container-outer-resindentificationpic {
+.box-container-outer-photosprogram {
   position: relative; 
   margin-top: 20px;
   margin-bottom: 20px;
+  width: 700px;
 }
 
 .title-resindentificationpic {
@@ -463,9 +464,9 @@ animation: fadeSlideIn 0.5s ease-out;
   text-align: center;
 }
 
-.box-container-resindentificationpic {
+.box-container-photosprogram {
   position: relative;
-  width: 630px;
+  width: 100%;
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
@@ -484,7 +485,7 @@ animation: fadeSlideIn 0.5s ease-out;
   background-color: rgba(245, 143, 88, 0.2);
 }
 
-  .identificationpic-container {
+  .photosprogram-container {
     margin-bottom: 20px;
     border-radius: 8px;
     transition: background-color 0.3s ease;
@@ -496,6 +497,8 @@ animation: fadeSlideIn 0.5s ease-out;
     height: 280px;
     margin-top: 10px;
     align-self: center;
+    padding-left: 20px;
+    padding-left: 20px;
   }
 
 .upload-link {
@@ -1566,8 +1569,9 @@ input:checked + .slider::before {
   flex: 0 0 auto; /* fixed width for cover */
 }
 
-.identification-thumbnails {
+.photosprogram-thumbnails {
   flex: 1; /* take remaining space */
+  overflow-y: auto;
 }
 
 .thumbs-grid {
@@ -2104,14 +2108,11 @@ input:checked + .slider::before {
     color: grey;
   }
 
-.box-container-outer-resindentificationpic {
-  position: relative; 
-  margin-bottom: 20px;
-}
+
 
 .title-resindentificationpic {
   position: absolute;
-  left: 10%; 
+  left: 30%; 
   top: 0; 
   transform: translate(25%, 25%);
   background-color: #1f3b57;

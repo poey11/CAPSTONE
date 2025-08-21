@@ -1192,11 +1192,11 @@ const togglePredefinedOpen = () => {
                     <div className="edit-official-others-mainsection">
 
                       {/* ===== Photos UI (cover + gallery) ===== */}
-                      <div className="box-container-outer-resindentificationpic">
+                      <div className="box-container-outer-photosprogram">
                         <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-resindentificationpic">
+                        <div className="box-container-photosprogram">
                           
-                          <div className="identificationpic-container">
+                          <div className="photosprogram-container">
                             <label
                               htmlFor="identification-file-upload"
                               className="upload-link"
@@ -1237,7 +1237,7 @@ const togglePredefinedOpen = () => {
                               
 
                               {/* Thumbnails (new + existing) */}
-                              <div className="identification-thumbnails">
+                              <div className="photosprogram-thumbnails">
                                 {previewURLs.length > 1 && (
                                   <div className="thumbs-grid">
                                     {previewURLs.slice(1).map((u, i) => (
