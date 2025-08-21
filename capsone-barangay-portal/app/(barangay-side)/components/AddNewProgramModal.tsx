@@ -14,10 +14,9 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  onProgramSaved?: (msg: string) => void; // notify parent to show main-page popup
+  onProgramSaved?: (msg: string) => void;
 };
 
-// Pre-approved program names (case-insensitive)
 const PREAPPROVED_NAMES = [
   "medical mission",
   "caravan",
@@ -28,10 +27,9 @@ const PREAPPROVED_NAMES = [
   "scholarship program",
 ];
 
-// Positions that can auto-approve pre-approved names
 const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
 
-type SimpleField = { name: string };
+type SimpleField = { name: string, description?: string };
 
 export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: Props) {
   const { data: session } = useSession();
@@ -42,9 +40,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // ====== Details form state ======
+  // Details form state 
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
@@ -57,29 +56,30 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [previewURL, setPreviewURL] = useState<string | null>(null);
+
+  // ⬇️ multiple image support
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [previewURLs, setPreviewURLs] = useState<string[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  // ====== Requirements state (like AddNewDoc) ======
-  // Predefined arrays (leave empty for now; we’ll fill when you send the screenshot)
-  const PREDEFINED_REQ_TEXT: SimpleField[] = [
-    { name: "firstName" },
-    { name: "lastName" },
-    { name: "contactNumber" },
-    { name: "emailAddress" },
-    { name: "location" },
-  ];
-  const PREDEFINED_REQ_FILES: SimpleField[] = [
-    { name: "validIDjpg" },
-  ];
+// Requirements 
+const PREDEFINED_REQ_TEXT: SimpleField[] = [
+  { name: "firstName", description: "Used to save the first name of the participant" },
+  { name: "lastName", description: "Used to save the last name of the participant" },
+  { name: "contactNumber", description: "Used to save the contact number of the participant" },
+  { name: "emailAddress", description: "Used to save the email address of the participant" },
+  { name: "location", description: "Used to save the address of the participant" },
+];
+
+const PREDEFINED_REQ_FILES: SimpleField[] = [
+  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
+];
 
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
-
-  // Custom (user-added) requirement fields
   const [reqTextNew, setReqTextNew] = useState("");
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileNew, setReqFileNew] = useState("");
@@ -94,7 +94,6 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const removeReqText = (i: number) => {
     setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   };
-
   const addReqFile = () => {
     const v = reqFileNew.trim();
     if (!v) return;
@@ -105,13 +104,11 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
   };
 
-  // ===== util =====
   const triggerShake = (field: string, durationMs = 300) => {
     setShake((prev) => ({ ...prev, [field]: true }));
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), durationMs);
   };
 
-  // Min date (tomorrow)
   const minDate = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 1);
@@ -137,6 +134,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setActiveSection("details");
     setProgramName("");
     setParticipants("");
+    setVolunteers("");
     setEligibleParticipants("");
     setLocation("");
     setEventType("single");
@@ -147,13 +145,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setTimeEnd("");
     setDescription("");
     setSummary("");
-    setPhotoFile(null);
+
+    // revoke and clear previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
+    setPhotoFiles([]);
+    setFileError(null);
+
     setErrors({});
     setShake({});
-    setPreviewURL((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return null;
-    });
 
     // requirements
     setReqTextNew("");
@@ -178,13 +180,20 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       Number.isFinite(participantsNum) &&
       participantsNum > 0;
 
+    const volunteersNum = Number(volunteers);
+    const validVolunteers =
+      volunteers.trim().length > 0 &&
+      Number.isFinite(volunteersNum) &&
+      volunteersNum >= 0;      
+
     need("programName", !!programName.trim());
     need("participants", validParticipants);
+    need("volunteers", validVolunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
     need("description", !!description.trim());
     need("summary", !!summary.trim());
-    need("photoFile", !!photoFile);
+    need("photoFiles", photoFiles.length > 0);
     need("timeStart", !!timeStart);
     need("timeEnd", !!timeEnd);
 
@@ -224,66 +233,91 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     return nameOk && roleOk;
   };
 
-  const handleFileChange = (file: File | null) => {
-    if (!file) {
-      setPhotoFile(null);
-      setPreviewURL((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return null;
+  // ⬇️ handle multi-file selection (images only)
+  const handleFilesChange = (files: FileList | null) => {
+    setFileError(null);
+    if (!files || files.length === 0) {
+      // clear
+      setPhotoFiles([]);
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
       });
       return;
     }
-    const maxBytes = 5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      alert("Image too large. Max 5MB.");
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
-      return;
+
+    // Constraints
+    const MAX_MB = 5;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
+    const MAX_FILES = 4;
+
+    const picked = Array.from(files);
+    const filtered: File[] = [];
+    const errors: string[] = [];
+
+    for (const f of picked.slice(0, MAX_FILES)) {
+      if (!f.type.startsWith("image/")) {
+        errors.push(`${f.name} is not an image.`);
+        continue;
+      }
+      if (f.size > MAX_BYTES) {
+        errors.push(`${f.name} exceeds ${MAX_MB}MB.`);
+        continue;
+      }
+      filtered.push(f);
     }
 
-    const url = URL.createObjectURL(file);
-    setPhotoFile(file);
-    setPreviewURL((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return url;
+    if (picked.length > MAX_FILES) {
+      errors.push(`Only the first ${MAX_FILES} images were accepted.`);
+    }
+
+    // Build previews
+    const newPreviews = filtered.map((f) => URL.createObjectURL(f));
+
+    // Revoke old previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return newPreviews;
     });
+    setPhotoFiles(filtered);
 
-    // clear any old photo error
+    if (errors.length) {
+      setFileError(errors.join(" "));
+    }
+
+    // clear any old photo error flag
     setErrors((prev) => {
-      const { photoFile, ...rest } = prev;
+      const { photoFiles, ...rest } = prev;
       return rest;
     });
   };
 
   useEffect(() => {
     return () => {
-      setPreviewURL((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return null;
+      // cleanup on unmount
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
       });
     };
   }, []);
 
-const addMinutes = (hhmm: string, minutes: number) => {
-  const [h, m] = hhmm.split(":").map(Number);
-  if (Number.isNaN(h) || Number.isNaN(m)) return "";
-  const total = h * 60 + m + minutes;
-  const newH = Math.floor((total % (24 * 60)) / 60);
-  const newM = total % 60;
-  return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
-};
+  const addMinutes = (hhmm: string, minutes: number) => {
+    const [h, m] = hhmm.split(":").map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return "";
+    const total = h * 60 + m + minutes;
+    const newH = Math.floor((total % (24 * 60)) / 60);
+    const newM = total % 60;
+    return `${String(newH).padStart(2, "0")}:${String(newM).padStart(2, "0")}`;
+  };
 
-const isSameDay = () => {
-  if (eventType === "single") return true;
-  if (!startDate || !endDate) return false;
-  return startDate === endDate;
-};
+  const isSameDay = () => {
+    if (eventType === "single") return true;
+    if (!startDate || !endDate) return false;
+    return startDate === endDate;
+  };
 
-// For End Time’s min attribute
-const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
-
+  const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
 
   const handleSave = async () => {
     if (saving) return;
@@ -302,6 +336,7 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
       const payload: any = {
         programName: programName.trim(),
         participants: Number(participants),
+        volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
@@ -317,8 +352,6 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
         createdAt: serverTimestamp(),
         suggestedBy: staffDisplayName || null,
         suggestedByUid: userUid,
-
-        // NEW: requirements schema saved with the program
         requirements: {
           textFields: [...PREDEFINED_REQ_TEXT, ...reqTextFields],
           fileFields: [...PREDEFINED_REQ_FILES, ...reqFileFields],
@@ -327,14 +360,22 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
 
       const programRef = await addDoc(collection(db, "Programs"), payload);
 
-      if (photoFile) {
-        const storageRef = ref(
-          storage,
-          `Programs/${programRef.id}/photo_${Date.now()}_${photoFile.name}`
-        );
-        await uploadBytes(storageRef, photoFile);
-        const photoURL = await getDownloadURL(storageRef);
-        await updateDoc(doc(db, "Programs", programRef.id), { photoURL });
+      // ⬇️ upload all selected images
+      if (photoFiles.length > 0) {
+        const uploadPromises = photoFiles.map(async (file, idx) => {
+          const storageRef = ref(
+            storage,
+            `Programs/${programRef.id}/photos/${Date.now()}_${idx}_${file.name}`
+          );
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
+        });
+
+        const urls = await Promise.all(uploadPromises);
+        await updateDoc(doc(db, "Programs", programRef.id), {
+          photoURL: urls[0] || null,     // main/cover image
+          photoURLs: urls,               // gallery
+        });
       }
 
       if (!autoApproved) {
@@ -356,7 +397,8 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Failed to save program. Please try again.");
+      // keep inline errors/UI instead of alert
+      setFileError("Failed to save program. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -364,7 +406,11 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
 
   if (!isOpen) return null;
 
-  const hasPhoto = !!previewURL;
+  const hasPreviews = previewURLs.length > 0;
+
+  const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
 
   return (
     <div className="add-programs-popup-overlay">
@@ -372,36 +418,74 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
         <h2>Add New Program</h2>
 
         <div className="add-programs-main-container">
-          {/* Left: Photo */}
+          {/* Left: Photo / Gallery */}
           <div className="add-programs-photo-section">
             <span className="add-programs-details-label">
-              Photo <span className="required">*</span>
+              Photos <span className="required">*</span>
             </span>
+
+            {/* Main preview (first image) */}
             <div className="add-programs-profile-container">
               <img
-                src={hasPhoto ? previewURL! : "/Images/thumbnail.png"}
+                src={hasPreviews ? previewURLs[0]! : "/Images/thumbnail.png"}
                 alt="Program"
                 className={[
                   "add-program-photo",
-                  !hasPhoto ? "placeholder" : "",
-                  errors.photoFile ? "input-error" : "",
-                  shake.photoFile ? "shake" : "",
+                  !hasPreviews ? "placeholder" : "",
+                  errors.photoFiles ? "input-error" : "",
+                  shake.photoFiles ? "shake" : "",
                 ].join(" ").trim()}
               />
             </div>
+
+            {/* Thumbnails for the rest */}
+            {previewURLs.length > 1 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 8,
+                  marginTop: 10,
+                }}
+              >
+                {previewURLs.slice(1).map((u, i) => (
+                  <img
+                    key={u}
+                    src={u}
+                    alt={`Preview ${i + 2}`}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      objectFit: "cover",
+                      borderRadius: 8,
+                      border: "1px solid #e5e7eb",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
             <input
               type="file"
               accept="image/*"
+              multiple
               style={{ display: "none" }}
               id="identification-file-upload"
-              onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
+              onChange={(e) => handleFilesChange(e.target.files)}
             />
-            <label
-              htmlFor="identification-file-upload"
-              className="add-programs-upload-link"
-            >
-              Click to Upload File
+            <label htmlFor="identification-file-upload" className="add-programs-upload-link">
+              Click to Upload File(s)
             </label>
+
+            {/* Inline file errors (kept subtle) */}
+            {(errors.photoFiles || fileError) && (
+              <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                {errors.photoFiles && "Please upload at least one image."}
+                {fileError && (
+                  <span style={{ display: "block", marginTop: 4 }}>{fileError}</span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right: Form */}
@@ -462,6 +546,24 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
 
                     <div className="fields-section-add-programs">
                       <p>
+                        Number of Volunteers<span className="required">*</span>
+                      </p>
+                      <input
+                        type="number"
+                        min={1}
+                        className={[
+                          "add-programs-input-field",
+                          errors.volunteers ? "input-error" : "",
+                          shake.volunteers ? "shake" : "",
+                        ].join(" ").trim()}
+                        placeholder="E.g. 50"
+                        value={volunteers}
+                        onChange={(e) => setVolunteers(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="fields-section-add-programs">
+                      <p>
                         Eligible Participants<span className="required">*</span>
                       </p>
                       <select
@@ -475,7 +577,7 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                       >
                         <option value="">Select requirement</option>
                         <option value="resident">Resident</option>
-                        <option value="non-resident">Non-Resident</option>
+                        {/* <option value="non-resident">Non-Resident</option> */}
                         <option value="both">Both</option>
                       </select>
                     </div>
@@ -558,11 +660,9 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                             onChange={(e) => {
                               const newStart = e.target.value;
                               setStartDate(newStart);
-                              // If endDate is set and is before newStart, bump it to newStart
                               if (endDate && new Date(endDate) < new Date(newStart)) {
                                 setEndDate(newStart);
                               }
-                              // If times are same-day and endTime < startTime, bump endTime
                               if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
                                 setTimeEnd(timeStart);
                               }
@@ -580,18 +680,15 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                               errors.endDate ? "input-error" : "",
                               shake.endDate ? "shake" : "",
                             ].join(" ").trim()}
-                            // Prevent picking an end date before the start date
                             min={startDate || minDate}
                             value={endDate}
                             onChange={(e) => {
                               const newEnd = e.target.value;
-                              // If user tries to pick before start, clamp to start
                               if (startDate && new Date(newEnd) < new Date(startDate)) {
                                 setEndDate(startDate);
                               } else {
                                 setEndDate(newEnd);
                               }
-                              // If same day after change, also ensure end time >= start time
                               if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
                                 setTimeEnd(timeStart);
                               }
@@ -648,12 +745,34 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                 </div>
 
                 <div className="add-programs-lower-section">
+
                   <div className="programs-description-container">
                     <div className="box-container-outer-description">
                       <div className="title-description-programs">
-                        Description of Program<span className="required">*</span>
+                        Summary of Program
+                      </div>
+                      <div className="box-container-summary">
+                        <span className="required-asterisk">*</span>
+                        <textarea
+                          className={[
+                            "summary-input-field",
+                            errors.summary ? "input-error" : "",
+                            shake.summary ? "shake" : "",
+                          ].join(" ").trim()}
+                          value={summary}
+                          onChange={(e) => setSummary(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="programs-description-container">
+                    <div className="box-container-outer-description">
+                      <div className="title-description-programs">
+                        Full Description of Program
                       </div>
                       <div className="box-container-description">
+                        <span className="required-asterisk">*</span>
                         <textarea
                           className={[
                             "description-input-field",
@@ -667,134 +786,209 @@ const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undef
                     </div>
                   </div>
 
-                  <div className="programs-description-container">
-                    <div className="box-container-outer-description">
-                      <div className="title-description-programs">
-                        Summary of Program<span className="required">*</span>
-                      </div>
-                      <div className="box-container-description">
-                        <textarea
-                          className={[
-                            "description-input-field",
-                            errors.summary ? "input-error" : "",
-                            shake.summary ? "shake" : "",
-                          ].join(" ").trim()}
-                          value={summary}
-                          onChange={(e) => setSummary(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  
                 </div>
               </>
             )}
 
             {activeSection === "reqs" && (
-              <div className="add-programs-upper-section">
-                {/* Predefined requirements toggle */}
-                <div className="fields-section-add-programs">
-                  <div className="predefined-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <p style={{ margin: 0 }}>Pre-defined Requirements</p>
-                    <button
-                      type="button"
-                      className="info-toggle-btn"
-                      onClick={() => setIsPredefinedOpen((s) => !s)}
-                      aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
-                    >
-                      {isPredefinedOpen ? "Hide" : "Show"}
-                    </button>
+              <div className="add-programs-requirements-container">
+
+                {/* PREDEFINED fields */}
+                <div className="predefined-fields-notes-container-programs">
+                  <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                    <div className="predefined-fields-title-programs">
+                        <h1>Pre-defined Fields</h1>
+                    </div>
+                    <div className="predefined-fields-button-section-programs">
+                      <button
+                        type="button"
+                        className="toggle-btn-predefined-fields-programs"
+                        aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                      >
+                        <img
+                          src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                          alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                          style={{ width: '16px', height: '16px' }}
+                        />
+                        </button>
+                    </div>
                   </div>
+
                   {isPredefinedOpen && (
-                    <div className="predefined-list" style={{ marginTop: 8 }}>
-                      <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 8 }}>
-                        (These will be auto-included when saving the program)
+                    <div className="predefined-list-programs">
+                      <div className="predefined-list-note-programs">
+                        * These will be auto-included when saving the program *
                       </div>
-                      <ul style={{ paddingLeft: 18, margin: 0 }}>
+                      <ul className="predefined-list-items-programs">
                         {PREDEFINED_REQ_TEXT.length === 0 && PREDEFINED_REQ_FILES.length === 0 && (
                           <li style={{ opacity: 0.7 }}>No predefined requirements yet.</li>
                         )}
+
                         {PREDEFINED_REQ_TEXT.map((f, i) => (
-                          <li key={`pretext-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(text)</span></li>
+                          <li key={`pretext-${i}`} className="predefined-text-programs">
+                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
                         ))}
+
                         {PREDEFINED_REQ_FILES.map((f, i) => (
-                          <li key={`prefile-${i}`}>{f.name} <span style={{ opacity: 0.6 }}>(file)</span></li>
+                          <li key={`prefile-${i}`} className="predefined-text-programs">
+                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                            <span className="predefined-type-programs">(file)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
                         ))}
                       </ul>
                     </div>
                   )}
+
                 </div>
 
+
                 {/* Custom TEXT requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement Text Fields</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., guardianName"
-                      value={reqTextNew}
-                      onChange={(e) => setReqTextNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqText}>+</button>
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
+                    Text Fields
                   </div>
 
-                  {reqTextFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqTextFields.map((f, i) => (
-                        <div key={`rt-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
+                      <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqTextFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
+                            className="add-program-field-input"
+                            placeholder="e.g., guardianName"
+                            value={reqTextNew}
+                            onChange={(e) => setReqTextNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
                           />
-                          <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>-</button>
                         </div>
-                      ))}
+                        <div className="row-button-section-programs">
+                          <button
+                            type="button"
+                            className="program-field-add-button"
+                            onClick={addReqText}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    
+                    <div className="added-program-field-container">
+                      {reqTextFields.length > 0 && (
+                        <>
+                          {reqTextFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqTextFields((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                    );
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section-programs">
+                                <button
+                                  type="button"
+                                  className="program-field-remove-button"
+                                  onClick={() => removeReqText(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Custom FILE requirements */}
-                <div className="fields-section-add-programs">
-                  <p>Requirement File Uploads</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input
-                      type="text"
-                      className="add-programs-input-field"
-                      placeholder="e.g., medicalCertificateJpg"
-                      value={reqFileNew}
-                      onChange={(e) => setReqFileNew(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
-                    />
-                    <button type="button" className="info-toggle-btn" onClick={addReqFile}>+</button>
+                <div className="box-container-outer-programs-fields">
+                  <div className="title-programs-fields">
+                    File Upload Fields
                   </div>
 
-                  {reqFileFields.length > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                      {reqFileFields.map((f, i) => (
-                        <div key={`rf-${i}`} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
+                  <div className="box-container-programs-fields">
+                    <div className="instructions-container-programs">
+                      <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                    </div>
+                    <span className="required-asterisk">*</span>
+                    <div className="add-programs-field-container">
+                      <div className="add-programs-field-row">
+                        <div className="row-title-section-programs">
+                          <h1>Add Field:</h1>
+                        </div>
+                        <div className="row-input-section-programs">
                           <input
                             type="text"
-                            className="add-programs-input-field"
-                            value={f.name}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
-                            }}
+                            className="add-program-field-input"
+                            placeholder="e.g., medicalCertificateJpg"
+                            value={reqFileNew}
+                            onChange={(e) => setReqFileNew(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
                           />
-                          <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>-</button>
                         </div>
-                      ))}
+                        <div className="row-button-section-programs">
+                          <button
+                            type="button"
+                            className="program-field-add-button"
+                            onClick={addReqFile}
+                            >
+                            +
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  )}
 
-                  <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-                    Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.)
+                    
+                    <div className="added-doc-field-container">
+                      {reqFileFields.length > 0 && (
+                        <>
+                         {reqFileFields.map((f, i) => (
+                            <div key={`rt-${i}`} className="added-program-field-row">
+                              <div className="row-input-section-added-program">
+                                <input
+                                  type="text"
+                                  className="add-program-field-input"
+                                  value={f.name}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                  }}
+                                />
+                              </div>
+                              <div className="row-button-section-programs">
+                                <button
+                                  type="button"
+                                  className="program-field-remove-button"
+                                  onClick={() => removeReqFile(i)}
+                                >
+                                  -
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

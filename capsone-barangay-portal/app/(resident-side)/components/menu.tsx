@@ -24,7 +24,7 @@ type Notification = {
   incidentID: string;
   requestID: string;
   isRead?: boolean;
-  type: string;
+  programId: string;
 };
 
 
@@ -287,8 +287,14 @@ const handleNotificationClick = async (notification: Notification) => {
   if(notification.requestID){
     router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
   }
-  else{
-    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.incidentID}&type=${notification.transactionType}`);
+  else if (type === "Verification") {
+    router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
+  }
+  else if (type === "Program Registration") {
+    router.push(`/Programs/${notification?.programId}`);
+  }  
+  else {
+    console.log("No navigation triggered for this notification type.");
   }
 
 };
@@ -335,7 +341,7 @@ const handleDeleteNotification = async (notificationId: string) => {
         <div className="dropdown-Container">
           <div className="menu-section-container">
             <p className="dropdown-item-resident">Services</p>
-            <img src="/images/down-arrow.png" className="dropdown-icon" />
+            <img src="/Images/down-arrow.png" className="dropdown-icon" />
           </div>
           <div className="Dropdown-services"> {/* CHANGE HERE */}
             <Link href="/services"><p>Request Documents</p></Link>
@@ -365,7 +371,7 @@ const handleDeleteNotification = async (notificationId: string) => {
           <div className="dropdown-Container">
             <div className="menu-section-container">
               <p className="dropdown-item-resident">Officials</p>
-              <img src="/images/down-arrow.png" className="dropdown-icon" />
+              <img src="/Images/down-arrow.png" className="dropdown-icon" />
             </div>
             <div className="Dropdown">
               <Link href="/OfficialsPage">

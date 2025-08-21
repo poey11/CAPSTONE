@@ -7,18 +7,19 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
-type SimpleField = { name: string };
+type SimpleField = { name: string, description?: string};
 
+// Requirements 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
-  { name: "firstName" },
-  { name: "lastName" },
-  { name: "contactNumber" },
-  { name: "emailAddress" },
-  { name: "location" },
+  { name: "firstName", description: "Used to save the first name of the participant" },
+  { name: "lastName", description: "Used to save the last name of the participant" },
+  { name: "contactNumber", description: "Used to save the contact number of the participant" },
+  { name: "emailAddress", description: "Used to save the email address of the participant" },
+  { name: "location", description: "Used to save the address of the participant" },
 ];
 
 const PREDEFINED_REQ_FILES: SimpleField[] = [
-  { name: "validIDjpg" }, // Valid ID upload
+  { name: "validIDjpg", description: "Used to save the uploaded valid ID of the participant" },
 ];
 
 const toSet = (arr: SimpleField[]) =>
@@ -49,13 +50,11 @@ export default function ProgramDetails() {
 
   const user = session?.user as any;
   const userPosition = user?.position || "";
-  const reviewerName = [userPosition, user?.fullName || user?.name || ""]
-    .filter(Boolean)
-    .join(" ");
+  const reviewerName = [userPosition, user?.fullName || user?.name || ""].filter(Boolean).join(" ");
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
 
-  // Popups
+  // Popups / toasts
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
   const [showRejectPopup, setShowRejectPopup] = useState(false);
   const [showSubmitRejectPopup, setShowSubmitRejectPopup] = useState(false);
@@ -63,9 +62,10 @@ export default function ProgramDetails() {
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Form state (aligned with AddNewProgramModal)
+  // Form state
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
@@ -81,18 +81,23 @@ export default function ProgramDetails() {
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
-  // Photo upload
-  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
-  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
-  const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null);
+  //  Photos (multiple)
+  // Existing photos from DB
+  const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null); // cover
+  const [existingPhotoURLs, setExistingPhotoURLs] = useState<string[]>([]); // gallery
+
+  // Newly selected (not yet uploaded)
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [previewURLs, setPreviewURLs] = useState<string[]>([]);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   // Statuses
   const [approvalStatus, setApprovalStatus] = useState<string>("Pending");
-  const [progressStatus, setProgressStatus] = useState<string>("Upcoming"); // NEW
-  const [activeStatus, setActiveStatus] = useState<"Active" | "Inactive">("Inactive"); // NEW
+  const [progressStatus, setProgressStatus] = useState<string>("Upcoming");
+  const [activeStatus, setActiveStatus] = useState<"Active" | "Inactive">("Inactive");
   const [rejectionReason, setRejectionReason] = useState("");
 
-  // Who suggested (for notifications)
+  // Who suggested
   const [suggestedBy, setSuggestedBy] = useState<string>("");
   const [suggestedByUid, setSuggestedByUid] = useState<string | null>(null);
 
@@ -104,6 +109,7 @@ export default function ProgramDetails() {
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
 
+  // Requirements
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
   const [reqTextNew, setReqTextNew] = useState("");
@@ -162,10 +168,10 @@ export default function ProgramDetails() {
     return h * 60 + m;
   };
 
-  // Read-only when Completed
-  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected"; // NEW
+  // Read-only lock
+  const isReadOnly = progressStatus === "Completed" || approvalStatus === "Rejected";
 
-  // Load the program by id
+  //  Load program 
   useEffect(() => {
     const load = async () => {
       if (!programId) return;
@@ -180,15 +186,14 @@ export default function ProgramDetails() {
         const data: any = snap.data() || {};
 
         setProgramName(data.programName ?? "");
-        setParticipants(
-          typeof data.participants === "number" ? String(data.participants) : data.participants ?? ""
-        );
+        setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
+        setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
 
         setApprovalStatus(data.approvalStatus ?? "Pending");
-        setProgressStatus(data.progressStatus ?? "Upcoming"); // NEW
-        setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive"); // NEW
+        setProgressStatus(data.progressStatus ?? "Upcoming");
+        setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
 
         setSuggestedBy(data.suggestedBy ?? "");
         setSuggestedByUid(data.suggestedByUid ?? null);
@@ -220,14 +225,16 @@ export default function ProgramDetails() {
 
         setTimeStart(data.timeStart ?? "");
         setTimeEnd(data.timeEnd ?? "");
-
         setDescription(data.description ?? "");
         setSummary(data.summary ?? "");
 
-        setExistingPhotoURL(data.photoURL ?? null);
-        setIdentificationPreview(data.photoURL ?? null);
+        // Photos (existing)
+        const cover = data.photoURL ?? null;
+        const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : (cover ? [cover] : []);
+        setExistingPhotoURL(cover);
+        setExistingPhotoURLs(gallery);
 
-        // ----- Load Requirements (split into predefined vs custom) -----
+        // Requirements (split into predefined vs custom)
         const preTextSet = toSet(PREDEFINED_REQ_TEXT);
         const preFileSet = toSet(PREDEFINED_REQ_FILES);
 
@@ -252,18 +259,61 @@ export default function ProgramDetails() {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
   };
 
-  const handleDiscardClick = () => setShowDiscardPopup(true);
-  const handleRejectClick = () => setShowRejectPopup(true);
+  //  Multi file select 
+  const handleFilesChange = (files: FileList | null) => {
+    if (isReadOnly) return;
+    setFileError(null);
 
-  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setIdentificationFile(file);
-    if (file) setIdentificationPreview(URL.createObjectURL(file));
+    // Clear previous previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
+
+    if (!files || files.length === 0) {
+      setPhotoFiles([]);
+      return;
+    }
+
+    const MAX_MB = 5;
+    const MAX_BYTES = MAX_MB * 1024 * 1024;
+    const MAX_FILES = 12;
+
+    const picked = Array.from(files);
+    const filtered: File[] = [];
+    const errs: string[] = [];
+
+    for (const f of picked.slice(0, MAX_FILES)) {
+      if (!f.type.startsWith("image/")) {
+        errs.push(`${f.name} is not an image.`);
+        continue;
+      }
+      if (f.size > MAX_BYTES) {
+        errs.push(`${f.name} exceeds ${MAX_MB}MB.`);
+        continue;
+      }
+      filtered.push(f);
+    }
+    if (picked.length > MAX_FILES) errs.push(`Only the first ${MAX_FILES} images were accepted.`);
+
+    const previews = filtered.map((f) => URL.createObjectURL(f));
+    setPhotoFiles(filtered);
+    setPreviewURLs(previews);
+    if (errs.length) setFileError(errs.join(" "));
   };
 
-  // Active/Inactive toggle (instant write)
+  useEffect(() => {
+    return () => {
+      // cleanup previews
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+    };
+  }, []);
+
   const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     const next = (e.target.value as "Active" | "Inactive") || "Inactive";
     const prev = activeStatus;
     setActiveStatus(next);
@@ -274,7 +324,7 @@ export default function ProgramDetails() {
       setShowPopup(true);
     } catch (err) {
       console.error(err);
-      setActiveStatus(prev); // rollback
+      setActiveStatus(prev);
       setPopupMessage("Failed to update status.");
       setShowPopup(true);
     } finally {
@@ -330,7 +380,7 @@ export default function ProgramDetails() {
   };
 
   const validate = () => {
-    if (isReadOnly) return false; // guard; shouldn't save anyway
+    if (isReadOnly) return false;
     const e: { [k: string]: boolean } = {};
     const need = (k: string, ok: boolean) => {
       if (!ok) {
@@ -341,6 +391,7 @@ export default function ProgramDetails() {
 
     need("programName", !!programName.trim());
     need("participants", !!participants);
+    need("volunteers", !!volunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
     need("description", !!description.trim());
@@ -378,7 +429,7 @@ export default function ProgramDetails() {
   };
 
   const handleSave = async () => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     if (!validate()) {
       setPopupMessage("Please correct the highlighted fields.");
       setShowPopup(true);
@@ -390,13 +441,14 @@ export default function ProgramDetails() {
       const normalizedStart = eventType === "single" ? singleDate : startDate;
       const normalizedEnd = eventType === "single" ? singleDate : endDate;
 
-      // merge requirements (predefined + custom) and dedupe
       const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
       const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
 
+      // start preparing updates
       const updates: any = {
         programName: programName.trim(),
         participants: Number(participants),
+        volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
@@ -406,28 +458,48 @@ export default function ProgramDetails() {
         timeEnd,
         description: description.trim(),
         summary: summary.trim(),
-        activeStatus, // persist current toggle
+        activeStatus,
         requirements: {
           textFields: mergedText,
           fileFields: mergedFiles,
         },
       };
 
-      if (identificationFile) {
-        const storageRef = ref(
-          storage,
-          `Programs/${programId}/photo_${Date.now()}_${identificationFile.name}`
-        );
-        await uploadBytes(storageRef, identificationFile);
-        const url = await getDownloadURL(storageRef);
-        updates.photoURL = url;
-        setExistingPhotoURL(url);
+      // Upload newly added images
+      let newUrls: string[] = [];
+      if (photoFiles.length > 0) {
+        const uploadPromises = photoFiles.map(async (file, idx) => {
+          const storageRef = ref(storage, `Programs/${programId}/photos/${Date.now()}_${idx}_${file.name}`);
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
+        });
+        newUrls = await Promise.all(uploadPromises);
       }
 
+      // ✅ Combine with currently kept existing photos
+      const combined = [...existingPhotoURLs, ...newUrls];
+      updates.photoURLs = combined;
+
+      // ✅ If cover is gone, reset cover
+      if (!combined.includes(existingPhotoURL || "")) {
+        updates.photoURL = combined.length > 0 ? combined[0] : null;
+        setExistingPhotoURL(updates.photoURL);
+      }
+
+      setExistingPhotoURLs(combined);
+
+      // Save to Firestore
       await updateDoc(doc(db, "Programs", programId), updates);
 
       setPopupMessage("Program saved successfully!");
       setShowPopup(true);
+
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+      setPhotoFiles([]);
+      setFileError(null);
     } catch (e) {
       console.error(e);
       setPopupMessage("Failed to save program.");
@@ -440,8 +512,9 @@ export default function ProgramDetails() {
     }
   };
 
+
   const handleApprove = async () => {
-    if (!programId || isReadOnly) return; // locked if completed
+    if (!programId || isReadOnly) return;
     try {
       setLoading(true);
 
@@ -479,6 +552,18 @@ export default function ProgramDetails() {
     }
   };
 
+  const handleDeleteNew = (index: number) => {
+  setPreviewURLs(prev => prev.filter((_, i) => i !== index));
+};
+
+const handleDeleteExisting = (index: number) => {
+  setExistingPhotoURLs(prev => prev.filter((_, i) => i !== index));
+};
+
+const togglePredefinedOpen = () => {
+        setIsPredefinedOpen(prev => !prev);
+    };
+
   return (
     <main className="edit-program-main-container">
       {showRejectPopup && (
@@ -501,11 +586,7 @@ export default function ProgramDetails() {
                 </div>
               </div>
               <div className="reject-reason-yesno-container">
-                <button
-                  type="button"
-                  onClick={() => setShowRejectPopup(false)}
-                  className="reject-reason-no-button"
-                >
+                <button type="button" onClick={() => setShowRejectPopup(false)} className="reject-reason-no-button">
                   Cancel
                 </button>
                 <button
@@ -528,8 +609,12 @@ export default function ProgramDetails() {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to Submit? </p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">No</button>
-              <button onClick={confirmSubmitReject} className="yes-button-add">Yes</button>
+              <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
+                No
+              </button>
+              <button onClick={confirmSubmitReject} className="yes-button-add">
+                Yes
+              </button>
             </div>
           </div>
         </div>
@@ -547,14 +632,16 @@ export default function ProgramDetails() {
       <div className="program-redirectionpage-section">
         <button className="program-redirection-buttons-selected">
           <div className="program-redirection-icons-section">
-            <img src="/images/profile-user.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
 
         <button
           className="program-redirection-buttons"
-          onClick={() => router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)} 
+          onClick={() =>
+            router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)
+          }
         >
           <div className="program-redirection-icons-section">
             <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
@@ -571,7 +658,7 @@ export default function ProgramDetails() {
               <h1>Approve Requested Program</h1>
             </button>
 
-            <button className="program-redirection-buttons" onClick={handleRejectClick}>
+            <button className="program-redirection-buttons" onClick={() => setShowRejectPopup(true)}>
               <div className="program-redirection-icons-section">
                 <img src="/images/rejected.png" alt="reject" className="program-redirection-icons-info" />
               </div>
@@ -590,9 +677,8 @@ export default function ProgramDetails() {
             <h1> Program Details </h1>
           </div>
 
-          {/* Header actions: Active/Inactive + Save/Discard */}
           <div className="action-btn-section-program">
-            {/* Active/Inactive toggle */}
+            {/*
             <select
               className="action-select-status"
               value={activeStatus}
@@ -603,11 +689,30 @@ export default function ProgramDetails() {
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
-            </select>
+            </select>*/}
+
+            <label className="switch-toggle" title={isReadOnly ? "Completed programs are locked." : "Toggle visibility on resident side"} style={{ marginRight: 12 }}>
+              <input
+                type="checkbox"
+                checked={activeStatus === "Active"}
+                onChange={(e) =>
+                  handleStatusChange(
+                    e.target.checked
+                      ? { target: { value: "Active" } } as any
+                      : { target: { value: "Inactive" } } as any
+                  )
+                }
+                disabled={isReadOnly}
+              />
+              <span className="slider"></span>
+              <span className="toggle-label">{activeStatus}</span>
+            </label>
+
+           
 
             {!isReadOnly && (
               <>
-                <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
+                <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>Discard</button>
                 <button className="action-save" onClick={handleSave}>
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -628,21 +733,19 @@ export default function ProgramDetails() {
               fontSize: 14,
             }}
           >
-              {approvalStatus === "Rejected" ? (
-                <>
-                  This program has been <strong>Rejected</strong>
-                  {rejectionReason ? (
-                    <> — <em>{rejectionReason}</em></>
-                  ) : null}
-                  . Editing is disabled (view-only).
-                </>
-              ) : (
-                <>
-                  This program is <strong>Completed</strong>. Editing is disabled (view-only).
-                </>
-              )}
-            </div>
-          )}
+            {approvalStatus === "Rejected" ? (
+              <>
+                This program has been <strong>Rejected</strong>
+                {rejectionReason ? (
+                  <> — <em>{rejectionReason}</em></>
+                ) : null}
+                . Editing is disabled (view-only).
+              </>
+            ) : (
+              <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
+            )}
+          </div>
+        )}
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
@@ -695,6 +798,23 @@ export default function ProgramDetails() {
                           placeholder="E.g. 50"
                           value={participants}
                           onChange={(e) => setParticipants(e.target.value)}
+                          disabled={isReadOnly}
+                        />
+                      </div>
+
+                      <div className="fields-section-edit-programs">
+                        <p>Number of Volunteers<span className="required">*</span></p>
+                        <input
+                          type="number"
+                          min="1"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.volunteers ? "input-error" : "",
+                            shake.volunteers ? "shake" : "",
+                          ].join(" ").trim()}
+                          placeholder="E.g. 50"
+                          value={volunteers}
+                          onChange={(e) => setVolunteers(e.target.value)}
                           disabled={isReadOnly}
                         />
                       </div>
@@ -836,151 +956,306 @@ export default function ProgramDetails() {
               )}
 
               {activeSection === "reqs" && (
-                <div className="edit-programs-upper-section">
-                  {/* Pre-defined Requirements */}
-                  <div className="fields-section-edit-programs">
-                    <div
-                      className="predefined-header"
-                      style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                    >
-                      <p style={{ margin: 0, fontWeight: 600 }}>Pre-defined Requirements</p>
-                      <button
-                        type="button"
-                        className="info-toggle-btn"
-                        onClick={() => setIsPredefinedOpen((s) => !s)}
-                        aria-label={isPredefinedOpen ? "Hide pre-defined" : "Show pre-defined"}
-                      >
-                        {isPredefinedOpen ? "Hide" : "Show"}
-                      </button>
+
+                
+                <div className="add-programs-requirements-container">
+                  <div className="predefined-fields-notes-container-programs">
+                    <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                      <div className="predefined-fields-title-programs">
+                        <h1>Pre-defined Fields</h1>
+                      </div>
+                      <div className="predefined-fields-button-section-programs">
+                        <button
+                          type="button"
+                          className="toggle-btn-predefined-fields-programs"
+                          aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                        >
+                          <img
+                            src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
+                            alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                            style={{ width: '16px', height: '16px' }}
+                          />
+                        </button>
+                      </div>
                     </div>
+
                     {isPredefinedOpen && (
-                      <div style={{ marginTop: 8 }}>
-                        <ul style={{ paddingLeft: 18, margin: 0 }}>
-                          {PREDEFINED_REQ_TEXT.map((f, i) => (
-                            <li key={`pretext-${i}`}>
-                              {f.name} <span style={{ opacity: 0.6 }}>(text)</span>
-                            </li>
-                          ))}
-                          {PREDEFINED_REQ_FILES.map((f, i) => (
-                            <li key={`prefile-${i}`}>
-                              {f.name} <span style={{ opacity: 0.6 }}>(file)</span>
-                            </li>
-                          ))}
+                      <div className="predefined-list-programs">
+                        <ul className="predefined-list-items-programs">
+                         {PREDEFINED_REQ_TEXT.map((f, i) => (
+                          <li key={`pretext-${i}`} className="predefined-text-programs">
+                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
+                        ))}
+
+                        {PREDEFINED_REQ_FILES.map((f, i) => (
+                          <li key={`prefile-${i}`} className="predefined-text-programs">
+                            {PREDEFINED_REQ_TEXT.length + i + 1}. {f.name}{" "}
+                            <span className="predefined-type-programs">(file)</span>
+                            <span className="predefined-desc-programs"> — {f.description}</span>
+                          </li>
+                        ))}
                         </ul>
                       </div>
                     )}
                   </div>
 
-                  {/* Custom Text Requirements */}
-                  <div className="fields-section-edit-programs">
-                    <p style={{ fontWeight: 600 }}>Custom Text Requirements</p>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <input
-                        type="text"
-                        className="edit-programs-input-field"
-                        placeholder="e.g., guardianName"
-                        value={reqTextNew}
-                        onChange={(e) => setReqTextNew(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addReqText();
-                          }
-                        }}
-                        disabled={isReadOnly}
-                      />
-                      <button type="button" className="info-toggle-btn" onClick={addReqText} disabled={isReadOnly}>
-                        +
-                      </button>
+                  <div className="predefined-fields-bottom-container-programs">
+                    {/* Custom TEXT requirements */}
+                    <div className="box-container-outer-programs-fields">
+                      <div className="title-programs-fields">
+                        Text Fields
+                      </div>
+                      <div className="box-container-programs-fields">
+                        <div className="instructions-container-programs">
+                          <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                        </div>
+                        <span className="required-asterisk">*</span>
+                        <div className="add-programs-field-container">
+                          <div className="add-programs-field-row">
+                            <div className="row-title-section-programs">
+                              <h1>Add Field:</h1>
+                            </div>
+                            <div className="row-input-section-programs">
+                              <input
+                                type="text"
+                                className="add-program-field-input"
+                                placeholder="e.g., guardianName"
+                                value={reqTextNew}
+                                onChange={(e) => setReqTextNew(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addReqText();
+                                  }
+                                }}
+                                disabled={isReadOnly}
+                              />
+                            </div>
+                            <div className="row-button-section-programs">
+                              <button
+                                type="button"
+                                className="program-field-add-button"
+                                onClick={addReqText}
+                                >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="added-program-field-container">
+                          {reqTextFields.length > 0 && (
+                            <>
+                              {reqTextFields.map((f, i) => (
+                                <div key={`rt-${i}`} className="added-program-field-row">
+                                  <div className="row-input-section-added-program">
+                                    <input
+                                      type="text"
+                                      className="add-program-field-input"
+                                      value={f.name}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                      }}
+                                      disabled={isReadOnly}
+                                    />
+                                  </div>
+                                  <div className="row-button-section-programs">
+                                    {!isReadOnly && (
+                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqText(i)}>-</button>
+                                    )}
+                                  </div>
+                                  
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {reqTextFields.length > 0 && (
-                      <div style={{ marginTop: 10 }}>
-                        {reqTextFields.map((f, i) => (
-                          <div
-                            key={`rt-${i}`}
-                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
-                          >
-                            <input
-                              type="text"
-                              className="edit-programs-input-field"
-                              value={f.name}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setReqTextFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
-                              }}
-                              disabled={isReadOnly}
-                            />
-                            {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqText(i)}>
-                                -
-                              </button>
-                            )}
-                          </div>
-                        ))}
+                    {/* Custom FIELD requirements */}
+                    <div className="box-container-outer-programs-fields">
+                      <div className="title-programs-fields">
+                        File Upload Fields
                       </div>
-                    )}
+                      <div className="box-container-programs-fields">
+                        <div className="instructions-container-programs">
+                          <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                        </div>
+                        <span className="required-asterisk">*</span>
+                        <div className="add-programs-field-container">
+                          <div className="add-programs-field-row">
+                            <div className="row-title-section-programs">
+                              <h1>Add Field:</h1>
+                            </div>
+                            <div className="row-input-section-programs">
+                              <input
+                                type="text"
+                                className="add-program-field-input"
+                                placeholder="e.g., medicalCertificateJpg"
+                                value={reqFileNew}
+                                onChange={(e) => setReqFileNew(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addReqFile();
+                                  }
+                                }}
+                                disabled={isReadOnly}
+                              />
+                            </div>
+                            <div className="row-button-section-programs">
+                              <button
+                                type="button"
+                                className="program-field-add-button"
+                                onClick={addReqFile}
+                                >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="added-program-field-container">
+                          {reqFileFields.length > 0 && (
+                            <>
+                              {reqFileFields.map((f, i) => (
+                                <div key={`rt-${i}`} className="added-program-field-row">
+                                  <div className="row-input-section-added-program">
+                                    <input
+                                      type="text"
+                                      className="add-program-field-input"
+                                      value={f.name}
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
+                                      }}
+                                      disabled={isReadOnly}
+                                    />
+                                  </div>
+                                  <div className="row-button-section-programs">
+                                    {!isReadOnly && (
+                                      <button type="button" className="program-field-remove-button" onClick={() => removeReqFile(i)}>-</button>
+                                    )}
+                                  </div>
+                                  
+                                </div>
+                              ))}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Custom File Requirements */}
-                  <div className="fields-section-edit-programs">
-                    <p style={{ fontWeight: 600 }}>Custom File Requirements</p>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <input
-                        type="text"
-                        className="edit-programs-input-field"
-                        placeholder="e.g., medicalCertificateJpg"
-                        value={reqFileNew}
-                        onChange={(e) => setReqFileNew(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            addReqFile();
-                          }
-                        }}
-                        disabled={isReadOnly}
-                      />
-                      <button type="button" className="info-toggle-btn" onClick={addReqFile} disabled={isReadOnly}>
-                        +
-                      </button>
-                    </div>
-
-                    {reqFileFields.length > 0 && (
-                      <div style={{ marginTop: 10 }}>
-                        {reqFileFields.map((f, i) => (
-                          <div
-                            key={`rf-${i}`}
-                            style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}
-                          >
-                            <input
-                              type="text"
-                              className="edit-programs-input-field"
-                              value={f.name}
-                              onChange={(e) => {
-                                const v = e.target.value;
-                                setReqFileFields((prev) => prev.map((x, idx) => (idx === i ? { name: v } : x)));
-                              }}
-                              disabled={isReadOnly}
-                            />
-                            {!isReadOnly && (
-                              <button type="button" className="program-no-button" onClick={() => removeReqFile(i)}>
-                                -
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-                      Tip: keep names consistent (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>)
-                    </div>
-                  </div>
                 </div>
               )}
 
               {activeSection === "others" && (
                 <>
                   <div className="edit-programs-upper-section">
+                    <div className="edit-official-others-mainsection">
+
+                      {/* ===== Photos UI (cover + gallery) ===== */}
+                      <div className="box-container-outer-resindentificationpic">
+                        <div className="title-resindentificationpic">Photos</div>
+                        <div className="box-container-resindentificationpic">
+                          
+                          <div className="identificationpic-container">
+                            <label
+                              htmlFor="identification-file-upload"
+                              className="upload-link"
+                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
+                            >
+                              Click to Upload File(s)
+                            </label>
+                            <input
+                              id="identification-file-upload"
+                              type="file"
+                              className="file-upload-input"
+                              accept="image/*"
+                              multiple
+                              onChange={(e) => handleFilesChange(e.target.files)}
+                              disabled={isReadOnly}
+                            />
+
+                            {/* Flex container */}
+                            <div className="identificationpic-content">
+                              {/* Cover preview */}
+                              <div className="identificationpic-display">
+                                <div className="cover-photo">
+                                  <img
+                                    src={previewURLs[0] || existingPhotoURL || "/Images/thumbnail.png"}
+                                    alt="Program Cover"
+                                    className="program-cover"
+                                  />
+                                  {!isReadOnly && previewURLs[0] && (
+                                    <button
+                                      className="delete-btn"
+                                      onClick={() => handleDeleteNew(0)}
+                                    >
+                                      ✕
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                              
+
+                              {/* Thumbnails (new + existing) */}
+                              <div className="identification-thumbnails">
+                                {previewURLs.length > 1 && (
+                                  <div className="thumbs-grid">
+                                    {previewURLs.slice(1).map((u, i) => (
+                                      <div key={`new-${i}`} className="thumb-wrapper">
+                                        <img src={u} alt={`New ${i + 2}`} className="thumb-img" />
+                                        {!isReadOnly && (
+                                          <button
+                                            className="delete-btn"
+                                            onClick={() => handleDeleteNew(i + 1)}
+                                          >
+                                            ✕
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {existingPhotoURLs.length > 0 && (
+                                  <div className="thumbs-section">
+                                    <div className="thumbs-label">* Existing Photos *</div>
+                                    <div className="thumbs-grid">
+                                      {existingPhotoURLs.map((u, i) => (
+                                        <div key={`old-${i}-${u}`} className="thumb-wrapper">
+                                          <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
+                                          {!isReadOnly && (
+                                            <button
+                                              className="delete-btn"
+                                              onClick={() => handleDeleteExisting(i)}
+                                            >
+                                              ✕
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+
+                        </div>
+                      </div>
+                      {/* ===== /Photos UI ===== */}
+                    </div>
+                  </div>
+
+                  <div className="edit-programs-bottom-section">
                     <div className="edit-official-others-mainsection">
                       <div className="edit-box-container-outer-programdesc">
                         <div className="title-remarks">Description of Program</div>
@@ -990,9 +1265,7 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.description ? "input-error" : "",
                               shake.description ? "shake" : "",
-                            ]
-                              .join(" ")
-                              .trim()}
+                            ].join(" ").trim()}
                             placeholder="Enter Remarks"
                             name="programDescription"
                             value={description}
@@ -1010,65 +1283,13 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.summary ? "input-error" : "",
                               shake.summary ? "shake" : "",
-                            ]
-                              .join(" ")
-                              .trim()}
+                            ].join(" ").trim()}
                             placeholder="Enter Summary"
                             name="programSummary"
                             value={summary}
                             onChange={(e) => setSummary(e.target.value)}
                             disabled={isReadOnly}
                           />
-                        </div>
-                      </div>
-
-                      <div className="box-container-outer-resindentificationpic">
-                        <div className="title-resindentificationpic">Photo</div>
-                        <div className="box-container-resindentificationpic">
-                          <div className="identificationpic-container">
-                            <label
-                              htmlFor="identification-file-upload"
-                              className="upload-link"
-                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
-                            >
-                              Click to Upload File
-                            </label>
-                            <input
-                              id="identification-file-upload"
-                              type="file"
-                              className="file-upload-input"
-                              accept=".jpg,.jpeg,.png"
-                              onChange={handleIdentificationFileChange}
-                              disabled={isReadOnly}
-                            />
-
-                            {(identificationFile || identificationPreview || existingPhotoURL) && (
-                              <div className="identificationpic-display">
-                                <div className="identification-picture">
-                                  {identificationPreview ? (
-                                    <img src={identificationPreview} alt="Preview" style={{ height: "200px" }} />
-                                  ) : existingPhotoURL ? (
-                                    <img src={existingPhotoURL} alt="Program" style={{ height: "200px" }} />
-                                  ) : null}
-                                </div>
-                              </div>
-                            )}
-
-                            {(identificationFile || identificationPreview) && !isReadOnly && (
-                              <div className="delete-container">
-                                <button
-                                  type="button"
-                                  className="delete-button"
-                                  onClick={() => {
-                                    setIdentificationFile(null);
-                                    setIdentificationPreview(null);
-                                  }}
-                                >
-                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
                         </div>
                       </div>
                     </div>
@@ -1086,9 +1307,7 @@ export default function ProgramDetails() {
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
             <p>Are you sure you want to discard the changes?</p>
             <div className="yesno-container-add">
-              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">
-                No
-              </button>
+              <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
               <button
                 className="yes-button-add"
                 onClick={() => {
