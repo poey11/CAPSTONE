@@ -568,6 +568,13 @@ export default function ParticipantsList() {
       {showResidentsPopup && (
         <div className="program-popup-overlay">
           <div className="program-popup" ref={residentPopUpRef}>
+
+            <div className="view-participant-backbutton-container">
+                <button onClick={handleBack}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+                </button>
+              </div>    
+
             <h2>Residents List</h2>
             <h1>* Please select Resident's Name *</h1>
 
