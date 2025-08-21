@@ -712,6 +712,9 @@ export default function SpecificProgram() {
                           })}
 
                           {fileFields.map((f, i) => {
+                            const nmLower = f.name.toLowerCase();
+                            const isValidIdField = nmLower === "valididjpg";
+                            const usePrefill = isVerifiedResident && !!preVerifiedIdUrl && isValidIdField;
                             const label = f.name
                             // 1. Remove "jpg" or other extensions at the end
                             .replace(/jpg$/i, "")
@@ -752,7 +755,7 @@ export default function SpecificProgram() {
                                     accept="image/*,application/pdf,.pdf"
                                     className="form-input-specific"
                                     required 
-                                    onChange={(e) => onFileChange(nm, e.currentTarget)}
+                                    onChange={(e) => onFileChange(f.name, e.currentTarget)}
                                   />
                                 )}
                               </div>
