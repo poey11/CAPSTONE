@@ -65,6 +65,7 @@ export default function ProgramDetails() {
   // Form state
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
 
@@ -186,6 +187,7 @@ export default function ProgramDetails() {
 
         setProgramName(data.programName ?? "");
         setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
+        setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
 
@@ -389,6 +391,7 @@ export default function ProgramDetails() {
 
     need("programName", !!programName.trim());
     need("participants", !!participants);
+    need("volunteers", !!volunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
     need("description", !!description.trim());
@@ -445,6 +448,7 @@ export default function ProgramDetails() {
       const updates: any = {
         programName: programName.trim(),
         participants: Number(participants),
+        volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
@@ -805,12 +809,12 @@ const togglePredefinedOpen = () => {
                           min="1"
                           className={[
                             "edit-programs-input-field",
-                            errors.participants ? "input-error" : "",
-                            shake.participants ? "shake" : "",
+                            errors.volunteers ? "input-error" : "",
+                            shake.volunteers ? "shake" : "",
                           ].join(" ").trim()}
                           placeholder="E.g. 50"
-                          value={participants}
-                          onChange={(e) => setParticipants(e.target.value)}
+                          value={volunteers}
+                          onChange={(e) => setVolunteers(e.target.value)}
                           disabled={isReadOnly}
                         />
                       </div>

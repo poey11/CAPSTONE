@@ -1,0 +1,479 @@
+"use client";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { db, storage } from "@/app/db/firebase";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  serverTimestamp,
+  getCountFromServer,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
+type SimpleField = { name: string };
+
+type Resident = {
+  id: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  address?: string;
+  location?: string;
+  contactNumber?: string;
+  mobile?: string;
+  emailAddress?: string;              // ✅ only source for email
+  verificationFilesURLs?: string[];   // ✅ first URL used as Valid ID
+};
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+
+  programId: string;
+  programName?: string;
+
+  textFields: SimpleField[];
+  fileFields: SimpleField[];
+
+  resident: Resident | null; // null for manual entry
+
+  onSaved: (msg?: string) => void;
+  onError?: (msg: string) => void;
+
+  prettyLabels?: Record<string, string>;
+};
+
+const DEFAULT_LABELS: Record<string, string> = {
+  firstName: "First Name",
+  lastName: "Last Name",
+  contactNumber: "Contact Number",
+  emailAddress: "Email Address",
+  location: "Location",
+  validIDjpg: "Valid ID",
+};
+
+type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
+
+export default function AddWalkInParticipantModal({
+  isOpen,
+  onClose,
+  programId,
+  programName = "",
+  textFields,
+  fileFields,
+  resident,
+  onSaved,
+  onError,
+  prettyLabels,
+}: Props) {
+  const LABELS = prettyLabels || DEFAULT_LABELS;
+
+  // Prefill from resident (if any)
+  const [formData, setFormData] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const f of textFields || []) init[f.name] = "";
+
+    if (resident) {
+      const fullName = `${resident.firstName || ""} ${resident.middleName ? resident.middleName + " " : ""}${resident.lastName || ""}`
+        .replace(/\s+/g, " ")
+        .trim();
+      for (const f of textFields || []) {
+        if (f.name === "firstName") init[f.name] = resident.firstName || "";
+        else if (f.name === "lastName") init[f.name] = resident.lastName || "";
+        else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || resident.mobile || "";
+        else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || ""; // ✅ emailAddress only
+        else if (f.name === "location") init[f.name] = resident.address || resident.location || "";
+        else if (f.name === "fullName") init[f.name] = fullName;
+      }
+    }
+    return init;
+  });
+
+  const [formFiles, setFormFiles] = useState<Record<string, File | null>>({});
+  const [saving, setSaving] = useState(false);
+
+  // --- Previews for ALL file fields ---
+  const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
+  const [filePreviews, setFilePreviews] = useState<Record<string, Preview>>({});
+  const previewsRef = useRef<Record<string, Preview>>({});
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({}); // custom trigger targets
+
+  useEffect(() => {
+    setFilePreviews((old) => {
+      const next: Record<string, Preview> = {};
+      const fields = (fileFields || []).map((f) => f.name);
+
+      for (const field of fields) {
+        const file = formFiles[field];
+        if (file) {
+          const objURL = URL.createObjectURL(file);
+          const isPdf =
+            (file.type || "").toLowerCase().includes("pdf") ||
+            (file.name || "").toLowerCase().endsWith(".pdf");
+          next[field] = { url: objURL, isPdf, isObjectUrl: true };
+        } else if (field === "validIDjpg" && residentValidIdUrl) {
+          next[field] = {
+            url: residentValidIdUrl,
+            isPdf: residentValidIdUrl.toLowerCase().includes(".pdf"),
+            isObjectUrl: false,
+          };
+        }
+      }
+
+      for (const [k, pv] of Object.entries(old)) {
+        const nxt = next[k];
+        if (pv.isObjectUrl && (!nxt || nxt.url !== pv.url)) {
+          URL.revokeObjectURL(pv.url);
+        }
+      }
+
+      previewsRef.current = next;
+      return next;
+    });
+
+    return () => {
+      for (const pv of Object.values(previewsRef.current)) {
+        if (pv.isObjectUrl) URL.revokeObjectURL(pv.url);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formFiles, residentValidIdUrl, fileFields]);
+
+  const textFieldsToRender = useMemo<SimpleField[]>(
+    () => (textFields?.length ? textFields : []),
+    [textFields]
+  );
+  const fileFieldsToRender = useMemo<SimpleField[]>(
+    () => (fileFields?.length ? fileFields : []),
+    [fileFields]
+  );
+
+  const needsValidId = fileFieldsToRender.some((f) => f.name === "validIDjpg");
+
+  const labelFor = (name: string) => LABELS[name] || name;
+
+  const handleFormTextChange = (field: string, value: string) =>
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+  const handleFormFileChange = (field: string, inputEl: HTMLInputElement) => {
+    const file = inputEl.files?.[0] || null;
+    setFormFiles((prev) => ({ ...prev, [field]: file }));
+  };
+
+  const validateReqForm = () => {
+    for (const f of textFieldsToRender) {
+      const val = (formData[f.name] ?? "").toString().trim();
+      if (!val) throw new Error(`Please fill out: ${labelFor(f.name)}`);
+    }
+    for (const f of fileFieldsToRender) {
+      const hasManual = !!formFiles[f.name];
+      if (!hasManual) {
+        if (f.name === "validIDjpg" && residentValidIdUrl) continue; // allow auto-attach
+        throw new Error(`Please upload: ${labelFor(f.name)}`);
+      }
+    }
+  };
+
+  // Capacity check (Approved + role: 'Participant')
+  const recheckCapacityServer = async () => {
+    const partQ = query(
+      collection(db, "ProgramsParticipants"),
+      where("programId", "==", programId),
+      where("approvalStatus", "==", "Approved"),
+      where("role", "==", "Participant")
+    );
+    const countSnap = await getCountFromServer(partQ);
+    const currentCount = countSnap.data().count || 0;
+
+    const progSnap = await getDoc(doc(db, "Programs", programId));
+    const capacity = Number((progSnap.data() as any)?.participants);
+    if (Number.isFinite(capacity) && currentCount >= capacity) {
+      throw new Error("Program capacity reached. Cannot add more participants.");
+    }
+    return progSnap.data() as any;
+  };
+
+  const uploadAllFiles = async (uidTag: string) => {
+    const urls: Record<string, string> = {};
+    const entries = Object.entries(formFiles).filter(([, f]) => !!f) as [string, File][];
+    for (const [field, file] of entries) {
+      const sref = ref(storage, `Programs/${programId}/walkinUploads/${uidTag}/${Date.now()}-${field}-${file.name}`);
+      await uploadBytes(sref, file);
+      urls[field] = await getDownloadURL(sref);
+    }
+    return urls;
+  };
+
+  const maybeUploadResidentValidID = async (uidTag: string) => {
+    const url = residentValidIdUrl;
+    if (!url) return {};
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch resident's Valid ID file.");
+    const blob = await res.blob();
+
+    const mime = (blob.type || "").toLowerCase();
+    let ext = "jpg";
+    if (mime.includes("pdf")) ext = "pdf";
+    else if (mime.includes("png")) ext = "png";
+    else if (mime.includes("jpeg")) ext = "jpg";
+    else if (mime.includes("webp")) ext = "webp";
+
+    const sref = ref(
+      storage,
+      `Programs/${programId}/walkinUploads/${uidTag}/${Date.now()}-validIDjpg-resident.${ext}`
+    );
+    await uploadBytes(sref, blob);
+    const uploadedUrl = await getDownloadURL(sref);
+    return { validIDjpg: uploadedUrl } as Record<string, string>;
+  };
+
+  const submit = async () => {
+    if (!programId) return;
+    setSaving(true);
+    try {
+      validateReqForm();
+
+      const progRef = doc(db, "Programs", programId);
+      const progSnap = await getDoc(progRef);
+      if (!progSnap.exists()) throw new Error("Program not found.");
+      const statusNow = (progSnap.data()?.progressStatus || "").toString().toLowerCase();
+      if (["rejected", "completed"].includes(statusNow)) {
+        throw new Error(`This program is ${progSnap.data()?.progressStatus}. You can’t add participants.`);
+      }
+
+      if (resident?.id) {
+        const dupQ = query(
+          collection(db, "ProgramsParticipants"),
+          where("programId", "==", programId),
+          where("residentId", "==", resident.id)
+        );
+        const dupSnap = await getDocs(dupQ);
+        if (!dupSnap.empty) throw new Error("This resident is already enlisted in this program.");
+      }
+
+      await recheckCapacityServer();
+
+      const firstName = formData.firstName ?? (resident ? resident.firstName || "" : "");
+      const lastName = formData.lastName ?? (resident ? resident.lastName || "" : "");
+      const contactNumber = formData.contactNumber ?? (resident ? resident.contactNumber || resident.mobile || "" : "");
+      const emailAddress = formData.emailAddress ?? (resident ? resident.emailAddress || "" : ""); // ✅ only emailAddress
+      const location = formData.location ?? (resident ? resident.address || resident.location || "" : "");
+      const fullName =
+        (formData.fullName ||
+          `${firstName || ""} ${lastName || ""}`.trim()) || "";
+
+      const uidTag = resident?.id ? `resident-${resident.id}` : "manual";
+      let uploadedFiles = await uploadAllFiles(uidTag);
+
+      if (needsValidId && !uploadedFiles.validIDjpg && residentValidIdUrl) {
+        const autoFiles = await maybeUploadResidentValidID(uidTag);
+        uploadedFiles = { ...uploadedFiles, ...autoFiles };
+      }
+
+      await addDoc(collection(db, "ProgramsParticipants"), {
+        programId,
+        programName: progSnap.data()?.programName || programName || "",
+        residentId: resident?.id || null,
+        role: "Participant",
+        approvalStatus: "Approved",
+        addedVia: resident?.id ? "walk-in-resident" : "walk-in-manual",
+        createdAt: serverTimestamp(),
+
+        fullName,
+        firstName: firstName || "",
+        lastName: lastName || "",
+        contactNumber: contactNumber || "",
+        emailAddress: emailAddress || "",
+        location: location || "",
+
+        fields: formData,
+        files: uploadedFiles,
+      });
+
+      onSaved?.("Participant added successfully!");
+      onClose();
+    } catch (e: any) {
+      onError?.(e?.message || "Failed to add participant. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <div className="participants-view-popup-overlay add-incident-animated">
+        <div className="view-barangayuser-popup" style={{ maxWidth: 760 }}>
+          <div className="view-user-main-section1">
+            <div className="view-user-header-first-section">
+              <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+            </div>
+            <div className="view-user-header-second-section">
+              <h2 className="gov-info">Republic of the Philippines</h2>
+              <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+              <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+              <h2 className="contact">930-0040 / 428-9030</h2>
+            </div>
+            <div className="view-user-header-third-section">
+              <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+            </div>
+          </div>
+
+          <div className="view-participant-header-body">
+            <div className="view-participant-header-body-top-section">
+              <div className="view-participant-backbutton-container">
+                <button onClick={onClose}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+                </button>
+              </div>
+
+              <div className="view-participant-info-toggle-wrapper">
+                <span className="participant-info-toggle-btn active">
+                  {resident ? "Complete Requirements" : "Manual Entry — Walk-in"}
+                </span>
+              </div>
+
+              <div className="action-btn-section-verify-section-participant">
+                <div className="action-btn-section-verify">
+                  <button className="participant-action-reject" onClick={onClose} disabled={saving}>
+                    Cancel
+                  </button>
+                  <button className="participant-action-accept" onClick={submit} disabled={saving}>
+                    {saving ? "Saving..." : "Save"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="view-participant-header-body-bottom-section" style={{ paddingTop: 12 }}>
+              <div className="view-participant-user-info-main-container" style={{ width: "100%" }}>
+                <div className="view-participant-info-main-content" style={{ width: "100%" }}>
+                  <div className="program-list" style={{ maxHeight: 420, overflow: "auto", width: "100%" }}>
+                    {textFieldsToRender.map((f) => {
+                      const name = f.name;
+                      const lower = name.toLowerCase();
+                      const type =
+                        lower.includes("email") ? "email" :
+                        lower.includes("contact") || lower.includes("phone") ? "tel" :
+                        "text";
+                      const label = labelFor(name);
+                      return (
+                        <div className="form-group-specific" key={`tf-${name}`} style={{ marginBottom: 12, position: "relative" }}>
+                          <label className="form-label-specific">
+                            {label} <span className="required-asterisk">*</span>
+                          </label>
+                          <input
+                            type={type}
+                            className="form-input-specific"
+                            required
+                            value={formData[name] || ""}
+                            onChange={(e) => handleFormTextChange(name, e.target.value)}
+                            placeholder={`Enter ${label}`}
+                          />
+                        </div>
+                      );
+                    })}
+
+                    {fileFieldsToRender.map((f) => {
+                      const name = f.name;
+                      const isValidId = name === "validIDjpg";
+                      const label = labelFor(name);
+                      const preview = filePreviews[name];
+
+                      const hasManual = !!formFiles[name];
+                      const statusText = hasManual
+                        ? formFiles[name]?.name || "File selected"
+                        : isValidId && !!residentValidIdUrl
+                        ? "Auto-attached from resident"
+                        : "No file chosen";
+
+                      return (
+                        <div className="form-group-specific" key={`ff-${name}`} style={{ marginBottom: 12 }}>
+                          <label className="form-label-specific">
+                            {label} <span className="required-asterisk">*</span>
+                          </label>
+
+                          <input
+                            ref={(el) => { fileInputRefs.current[name] = el; }}
+                            id={`file-${name}`}
+                            type="file"
+                            accept="image/*,application/pdf,.pdf"
+                            style={{
+                              position: "absolute",
+                              opacity: 0,
+                              width: 0,
+                              height: 0,
+                              pointerEvents: "none",
+                            }}
+                            onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                          />
+
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <button
+                              type="button"
+                              onClick={() => fileInputRefs.current[name]?.click()}
+                              className="participant-action-accept"
+                              style={{ padding: "6px 10px" }}
+                            >
+                              {hasManual ? "Replace file" : "Choose file"}
+                            </button>
+                            <span style={{ fontSize: 13, opacity: 0.85 }}>{statusText}</span>
+                          </div>
+
+                          {isValidId && !!residentValidIdUrl && !hasManual && (
+                            <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                              A resident Valid ID will be auto-attached.
+                            </small>
+                          )}
+
+                          {preview?.url && (
+                            <div className="box-container-outer-participant" style={{ width: "100%", marginTop: 10 }}>
+                              <div className="title-remarks-participant">{label} Preview</div>
+                              <div className="box-container-participant-2">
+                                {preview.isPdf ? (
+                                  <>
+                                    <a
+                                      href={preview.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ display: "inline-block", marginBottom: 8 }}
+                                    >
+                                      Open {label} (PDF)
+                                    </a>
+                                    <embed
+                                      src={preview.url}
+                                      type="application/pdf"
+                                      className="uploaded-pic-participant"
+                                    />
+                                  </>
+                                ) : (
+                                  <a href={preview.url} target="_blank" rel="noopener noreferrer">
+                                    <img
+                                      src={preview.url}
+                                      alt={`${label} preview`}
+                                      className="participant-img-view uploaded-pic-participant"
+                                      style={{ cursor: "pointer" }}
+                                    />
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>      
+    </>
+  );
+}
