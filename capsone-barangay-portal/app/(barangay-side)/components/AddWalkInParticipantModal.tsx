@@ -447,7 +447,7 @@ export default function AddWalkInParticipantModal({
                             className="box-container-outer-resindentificationpic"
                             style={{ flex: "0 0 calc(50% - 20px)" }} // 2 per row
                           >
-                            <div className="title-resindentificationpic">
+                            <div className="title-walkin-requirements">
                               {formattedLabel}
                             </div>
 
