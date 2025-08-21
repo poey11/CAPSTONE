@@ -32,6 +32,7 @@ type Resident = {
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  onBack: () => void;
 
   programId: string;
   programName?: string;
@@ -61,6 +62,7 @@ type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 export default function AddWalkInParticipantModal({
   isOpen,
   onClose,
+  onBack,
   programId,
   programName = "",
   textFields,
@@ -95,6 +97,8 @@ export default function AddWalkInParticipantModal({
 
   const [formFiles, setFormFiles] = useState<Record<string, File | null>>({});
   const [saving, setSaving] = useState(false);
+
+  const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
   // --- Previews for ALL file fields ---
   const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
@@ -305,40 +309,215 @@ export default function AddWalkInParticipantModal({
 
   if (!isOpen) return null;
 
+
+
+
   return (
     <>
-      <div className="participants-view-popup-overlay add-incident-animated">
-        <div className="view-barangayuser-popup" style={{ maxWidth: 760 }}>
-          <div className="view-user-main-section1">
-            <div className="view-user-header-first-section">
-              <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
-            </div>
-            <div className="view-user-header-second-section">
-              <h2 className="gov-info">Republic of the Philippines</h2>
-              <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
-              <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
-              <h2 className="contact">930-0040 / 428-9030</h2>
-            </div>
-            <div className="view-user-header-third-section">
-              <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
-            </div>
-          </div>
-
-          <div className="view-participant-header-body">
-            <div className="view-participant-header-body-top-section">
-              <div className="view-participant-backbutton-container">
-                <button onClick={onClose}>
+      <div className="program-popup-overlay">
+        <div className="program-popup">
+          <div className="walkin-participant-backbutton-container">
+                <button onClick={onBack}>
                   <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
                 </button>
-              </div>
+              </div>    
 
-              <div className="view-participant-info-toggle-wrapper">
-                <span className="participant-info-toggle-btn active">
-                  {resident ? "Complete Requirements" : "Manual Entry — Walk-in"}
-                </span>
-              </div>
+            <h2> {resident ? "Complete Requirements" : "Manual Entry"} </h2>
+            <h1>* Walk-in Participant Application *</h1>
 
-              <div className="action-btn-section-verify-section-participant">
+
+        <div className="walkin-participant-header-body-bottom-section">
+              <div className="walkin-participant-user-info-main-container">
+                <div className="walkin-participant-info-main-content">
+                  <nav className="walkin-info-toggle-wrapper">
+                    {["details", "reqs"].map((section) => (
+                      <button
+                        key={section}
+                        type="button"
+                        className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                        onClick={() => setActiveSection(section as "details" | "reqs")}
+                      >
+                        {section === "details" && "Details"}
+                        {section === "reqs" && "Requirements"}
+                      </button>
+                    ))}
+                  </nav>
+
+                  {activeSection === "details" && (
+                    <>
+                      
+                      <div className="walkin-details-section">
+                        {/* Left column */}
+                        <div className="walkin-content-left-side">
+                          {textFieldsToRender
+                            .filter((_, idx) => idx % 2 === 0) // even indexes go left
+                            .map((f) => {
+                              const name = f.name;
+                              const lower = name.toLowerCase();
+                              const type =
+                                lower.includes("email") ? "email" :
+                                lower.includes("contact") || lower.includes("phone") ? "tel" :
+                                "text";
+                              
+                               // Format: capitalize first + add space before uppercase letters
+                                const formattedLabel = name
+                                  .replace(/([A-Z])/g, " $1")   // add space before capital letters
+                                  .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {formattedLabel} <span className="required">*</span>
+                                  </p>
+                                  <input
+                                    type={type}
+                                    className="walkin-input-field"
+                                    required
+                                    value={formData[name] || ""}
+                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                    placeholder={`Enter ${formattedLabel}`}
+                                  />
+                                </div>
+                              );
+                            })}
+                        </div>
+
+                        {/* Right column */}
+                        <div className="walkin-content-right-side">
+                          {textFieldsToRender
+                            .filter((_, idx) => idx % 2 !== 0) // odd indexes go right
+                            .map((f) => {
+                              const name = f.name;
+                              const lower = name.toLowerCase();
+                              const type =
+                                lower.includes("email") ? "email" :
+                                lower.includes("contact") || lower.includes("phone") ? "tel" :
+                                "text";
+                               // Format: capitalize first + add space before uppercase letters
+                                const formattedLabel = name
+                                  .replace(/([A-Z])/g, " $1")   // add space before capital letters
+                                  .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {formattedLabel} <span className="required">*</span>
+                                  </p>
+                                  <input
+                                    type={type}
+                                    className="walkin-input-field"
+                                    required
+                                    value={formData[name] || ""}
+                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                    placeholder={`Enter ${formattedLabel}`}
+                                  />
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                    </>
+                  )}
+
+                  {activeSection === "reqs" && (
+                    <>
+                    <div className="walkin-requirements-section">
+                      {fileFieldsToRender.map((f, idx) => {
+                        const name = f.name;
+                        const isValidId = name === "validIDjpg";
+                        // Format: capitalize first + add space before uppercase letters
+                        const formattedLabel = name
+                          .replace(/([A-Z])/g, " $1")   // add space before capital letters
+                          .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+
+                        const preview = filePreviews[name];
+
+                        const hasManual = !!formFiles[name];
+                        const statusText = hasManual
+                          ? formFiles[name]?.name || "File selected"
+                          : isValidId && !!residentValidIdUrl
+                          ? "Auto-attached from resident"
+                          : "No file chosen";
+
+                        return (
+                          <div
+                            key={`ff-${name}`}
+                            className="box-container-outer-resindentificationpic"
+                            style={{ flex: "0 0 calc(50% - 20px)" }} // 2 per row
+                          >
+                            <div className="title-resindentificationpic">
+                              {formattedLabel}
+                            </div>
+
+                            <div className="box-container-resindentificationpic">
+                              {/* File Upload Section */}
+                              <div className="file-upload-container">
+                                <label
+                                  htmlFor={`file-${name}`}
+                                  className="upload-link"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {hasManual ? "Replace File" : "Click to Upload File"}
+                                </label>
+
+                                <input
+                                  ref={(el) => { fileInputRefs.current[name] = el; }}
+                                  id={`file-${name}`}
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept="image/*,application/pdf,.pdf"
+                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                                  style={{ display: "none" }}
+                                />
+
+                                {/* File Selected */}
+                                {hasManual && formFiles[name] && (
+                                  <div className="file-name-image-display">
+                                    <div className="file-name-image-display-indiv">
+                                      {preview?.url && !preview.isPdf && (
+                                        <img
+                                          src={preview.url}
+                                          alt="Preview"
+                                          style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                        />
+                                      )}
+                                      <span>{formFiles[name]?.name}</span>
+                                      
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Auto-attach notice */}
+                                {isValidId && !!residentValidIdUrl && !hasManual && (
+                                  <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                                    A resident Valid ID will be auto-attached.
+                                  </small>
+                                )}
+
+
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+
+                    </>
+                  )}
+
+                    
+              
+                </div>
+              </div>
+    
+    
+        </div>
+
+
+        <div className="action-btn-section-verify-section-participant">
                 <div className="action-btn-section-verify">
                   <button className="participant-action-reject" onClick={onClose} disabled={saving}>
                     Cancel
@@ -348,131 +527,12 @@ export default function AddWalkInParticipantModal({
                   </button>
                 </div>
               </div>
+
+
+
             </div>
 
-            <div className="view-participant-header-body-bottom-section" style={{ paddingTop: 12 }}>
-              <div className="view-participant-user-info-main-container" style={{ width: "100%" }}>
-                <div className="view-participant-info-main-content" style={{ width: "100%" }}>
-                  <div className="program-list" style={{ maxHeight: 420, overflow: "auto", width: "100%" }}>
-                    {textFieldsToRender.map((f) => {
-                      const name = f.name;
-                      const lower = name.toLowerCase();
-                      const type =
-                        lower.includes("email") ? "email" :
-                        lower.includes("contact") || lower.includes("phone") ? "tel" :
-                        "text";
-                      const label = labelFor(name);
-                      return (
-                        <div className="form-group-specific" key={`tf-${name}`} style={{ marginBottom: 12, position: "relative" }}>
-                          <label className="form-label-specific">
-                            {label} <span className="required-asterisk">*</span>
-                          </label>
-                          <input
-                            type={type}
-                            className="form-input-specific"
-                            required
-                            value={formData[name] || ""}
-                            onChange={(e) => handleFormTextChange(name, e.target.value)}
-                            placeholder={`Enter ${label}`}
-                          />
-                        </div>
-                      );
-                    })}
-
-                    {fileFieldsToRender.map((f) => {
-                      const name = f.name;
-                      const isValidId = name === "validIDjpg";
-                      const label = labelFor(name);
-                      const preview = filePreviews[name];
-
-                      const hasManual = !!formFiles[name];
-                      const statusText = hasManual
-                        ? formFiles[name]?.name || "File selected"
-                        : isValidId && !!residentValidIdUrl
-                        ? "Auto-attached from resident"
-                        : "No file chosen";
-
-                      return (
-                        <div className="form-group-specific" key={`ff-${name}`} style={{ marginBottom: 12 }}>
-                          <label className="form-label-specific">
-                            {label} <span className="required-asterisk">*</span>
-                          </label>
-
-                          <input
-                            ref={(el) => { fileInputRefs.current[name] = el; }}
-                            id={`file-${name}`}
-                            type="file"
-                            accept="image/*,application/pdf,.pdf"
-                            style={{
-                              position: "absolute",
-                              opacity: 0,
-                              width: 0,
-                              height: 0,
-                              pointerEvents: "none",
-                            }}
-                            onChange={(e) => handleFormFileChange(name, e.currentTarget)}
-                          />
-
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <button
-                              type="button"
-                              onClick={() => fileInputRefs.current[name]?.click()}
-                              className="participant-action-accept"
-                              style={{ padding: "6px 10px" }}
-                            >
-                              {hasManual ? "Replace file" : "Choose file"}
-                            </button>
-                            <span style={{ fontSize: 13, opacity: 0.85 }}>{statusText}</span>
-                          </div>
-
-                          {isValidId && !!residentValidIdUrl && !hasManual && (
-                            <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
-                              A resident Valid ID will be auto-attached.
-                            </small>
-                          )}
-
-                          {preview?.url && (
-                            <div className="box-container-outer-participant" style={{ width: "100%", marginTop: 10 }}>
-                              <div className="title-remarks-participant">{label} Preview</div>
-                              <div className="box-container-participant-2">
-                                {preview.isPdf ? (
-                                  <>
-                                    <a
-                                      href={preview.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      style={{ display: "inline-block", marginBottom: 8 }}
-                                    >
-                                      Open {label} (PDF)
-                                    </a>
-                                    <embed
-                                      src={preview.url}
-                                      type="application/pdf"
-                                      className="uploaded-pic-participant"
-                                    />
-                                  </>
-                                ) : (
-                                  <a href={preview.url} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                      src={preview.url}
-                                      alt={`${label} preview`}
-                                      className="participant-img-view uploaded-pic-participant"
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+            
       </div>      
     </>
   );

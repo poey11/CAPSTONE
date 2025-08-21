@@ -109,6 +109,10 @@ export default function ProgramDetails() {
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
 
+  // Agency
+    const [agency, setAgency] = useState("");
+    const [otherAgency, setOtherAgency] = useState("");
+
   // Requirements
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
@@ -855,6 +859,34 @@ const togglePredefinedOpen = () => {
                     </div>
 
                     <div className="edit-program-section-2-right-side">
+
+                      <div className="fields-section-edit-programs">
+                        <p>
+                          Partnered Agency<span className="required">*</span>
+                        </p>
+                        <select
+                          className="edit-programs-input-field"
+                          value={agency}
+                          onChange={(e) => setAgency(e.target.value)}
+                        >
+                          <option value="">Select agency</option>
+                          <option value="none">None</option>
+                          <option value="cityhall">City Hall</option>
+                          <option value="others">Others</option>
+                        </select>
+
+                        
+                        {agency === "others" && (
+                          <input
+                            type="text"
+                            placeholder="Enter agency"
+                            className="edit-programs-input-field"
+                            value={otherAgency}
+                            onChange={(e) => setOtherAgency(e.target.value)}
+                          />
+                        )}
+                      </div>
+
                       <div className="fields-section-edit-programs">
                         <p>Event Type<span className="required">*</span></p>
                         <select
@@ -1160,11 +1192,11 @@ const togglePredefinedOpen = () => {
                     <div className="edit-official-others-mainsection">
 
                       {/* ===== Photos UI (cover + gallery) ===== */}
-                      <div className="box-container-outer-resindentificationpic">
+                      <div className="box-container-outer-photosprogram">
                         <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-resindentificationpic">
+                        <div className="box-container-photosprogram">
                           
-                          <div className="identificationpic-container">
+                          <div className="photosprogram-container">
                             <label
                               htmlFor="identification-file-upload"
                               className="upload-link"
@@ -1205,7 +1237,7 @@ const togglePredefinedOpen = () => {
                               
 
                               {/* Thumbnails (new + existing) */}
-                              <div className="identification-thumbnails">
+                              <div className="photosprogram-thumbnails">
                                 {previewURLs.length > 1 && (
                                   <div className="thumbs-grid">
                                     {previewURLs.slice(1).map((u, i) => (

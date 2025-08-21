@@ -90,6 +90,9 @@ export default function ParticipantsList() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [searchName, setSearchName] = useState("");
 
+  // Role filter
+  const [roleFilter, setRoleFilter] = useState("");
+
   // Program meta + requirements
   const [programCapacity, setProgramCapacity] = useState<number | null>(null); // participants max
   const [programVolunteerCapacity, setProgramVolunteerCapacity] = useState<number | null>(null); // volunteers max
@@ -237,15 +240,22 @@ export default function ParticipantsList() {
     return () => unsub();
   }, [programId]);
 
-  // Search filter
+  // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
-    if (!q) return participants;
+
     return participants.filter((p) => {
+      // name check
       const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
-      return name.includes(q);
+      const matchesName = !q || name.includes(q);
+
+      // role check
+      const role = (p.role || "Participant").toLowerCase();
+      const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
+
+      return matchesName && matchesRole;
     });
-  }, [searchName, participants]);
+  }, [searchName, roleFilter, participants]);
 
   // Role-specific counts (from the already-filtered Approved list)
   const participantCount = useMemo(
@@ -258,11 +268,11 @@ export default function ParticipantsList() {
   );
 
   const badgeParticipantsText = useMemo(
-    () => `P ${participantCount} / ${programCapacity ?? "—"}`,
+    () => `Participants: ${participantCount} / ${programCapacity ?? "—"}`,
     [participantCount, programCapacity]
   );
   const badgeVolunteersText = useMemo(
-    () => `V ${volunteerCount} / ${programVolunteerCapacity ?? "—"}`,
+    () => `Volunteers: ${volunteerCount} / ${programVolunteerCapacity ?? "—"}`,
     [volunteerCount, programVolunteerCapacity]
   );
 
@@ -465,6 +475,16 @@ export default function ParticipantsList() {
         </div>
 
         <div className="filter-section">
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="programs-module-filter-role"
+          >
+            <option value="">All Roles</option>
+            <option value="participant">Participant</option>
+            <option value="volunteer">Volunteer</option>
+          </select>
+
           <input
             type="text"
             placeholder="Search by name..."
@@ -548,8 +568,26 @@ export default function ParticipantsList() {
       {showResidentsPopup && (
         <div className="program-popup-overlay">
           <div className="program-popup" ref={residentPopUpRef}>
+
+            <div className="view-participant-backbutton-container">
+                <button onClick={() => setShowResidentsPopup(false)}>
+                  <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+                </button>
+              </div>    
+
             <h2>Residents List</h2>
             <h1>* Please select Resident's Name *</h1>
+
+            <div className="manual-add-button-section">
+              <button
+                className="add-non-resident-button"
+                onClick={openManualEntry}
+                title="Add a non-resident walk-in"
+              >
+                Manual Entry <br/>
+                <p>(non-residents)</p>
+              </button>
+            </div>
 
             <input
               type="text"
@@ -593,15 +631,7 @@ export default function ParticipantsList() {
               )}
             </div>
 
-            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-              <button
-                className="program-yes-button"
-                onClick={openManualEntry}
-                title="Add a non-resident walk-in"
-              >
-                Add Manually (Non-resident)
-              </button>
-            </div>
+            
           </div>
         </div>
       )}
@@ -612,6 +642,11 @@ export default function ParticipantsList() {
           onClose={() => {
             setShowAddWalkInModal(false);
             setResidentForAdd(null);
+          }}
+
+          onBack={() => {
+            setShowAddWalkInModal(false);
+            setShowResidentsPopup(true);  //reopen residents popup
           }}
           programId={programId}
           programName={programTitle}
