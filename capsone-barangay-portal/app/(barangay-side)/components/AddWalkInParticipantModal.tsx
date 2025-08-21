@@ -423,86 +423,100 @@ export default function AddWalkInParticipantModal({
 
                   {activeSection === "reqs" && (
                     <>
-                    <div className="walkin-requirements-section">
-                      {fileFieldsToRender.map((f, idx) => {
-                        const name = f.name;
-                        const isValidId = name === "validIDjpg";
-                        // Format: capitalize first + add space before uppercase letters
-                        const formattedLabel = name
-                          .replace(/([A-Z])/g, " $1")   // add space before capital letters
-                          .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+                      <div className="walkin-requirements-section">
+                        {fileFieldsToRender.map((f, idx) => {
+                          const name = f.name;
+                          const isValidId = name === "validIDjpg";
+                          // Format: capitalize first + add space before uppercase letters
+                          const formattedLabel = name
+                            // 1. Remove "jpg" or other extensions at the end
+                            .replace(/jpg$/i, "")
+                            .replace(/jpeg$/i, "")
+                            .replace(/png$/i, "")
+                            .replace(/pdf$/i, "")
+                            // 2. Insert spaces correctly
+                            .replace(/([a-z])([A-Z])/g, "$1 $2")
+                            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+                            // 3. Capitalize first letter
+                            .replace(/^./, (s) => s.toUpperCase())
+                            // 4. Ensure "Id" → "ID"
+                            .replace(/\bId\b/g, "ID");
 
-                        const preview = filePreviews[name];
+                          const preview = filePreviews[name];
 
-                        const hasManual = !!formFiles[name];
-                        const statusText = hasManual
-                          ? formFiles[name]?.name || "File selected"
-                          : isValidId && !!residentValidIdUrl
-                          ? "Auto-attached from resident"
-                          : "No file chosen";
+                          const hasManual = !!formFiles[name];
+                          const statusText = hasManual
+                            ? formFiles[name]?.name || "File selected"
+                            : isValidId && !!residentValidIdUrl
+                            ? "Auto-attached from resident"
+                            : "No file chosen";
 
-                        return (
-                          <div
-                            key={`ff-${name}`}
-                            className="box-container-outer-resindentificationpic"
-                            style={{ flex: "0 0 calc(50% - 20px)" }} // 2 per row
-                          >
-                            <div className="title-resindentificationpic">
-                              {formattedLabel}
-                            </div>
+                          return (
+                            <div
+                              key={`ff-${name}`}
+                              className="box-container-outer-photosprogram"
+                              style={{
+                                flex: fileFieldsToRender.length === 1 ? "0 0 40%" : "0 0 calc(50% - 20px)",
+                                display: "flex",
+                                justifyContent: fileFieldsToRender.length === 1 ? "center" : "flex-start",
+                              }}
+                            >
+                              <div className="title-walkin-requirements">
+                                {formattedLabel}
+                              </div>
 
-                            <div className="box-container-resindentificationpic">
-                              {/* File Upload Section */}
-                              <div className="file-upload-container">
-                                <label
-                                  htmlFor={`file-${name}`}
-                                  className="upload-link"
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  {hasManual ? "Replace File" : "Click to Upload File"}
-                                </label>
+                              <div className="box-container-resindentificationpic">
+                                {/* File Upload Section */}
+                                <div className="file-upload-container">
+                                  <label
+                                    htmlFor={`file-${name}`}
+                                    className="upload-link"
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    {hasManual ? "Replace File" : "Click to Upload File"}
+                                  </label>
 
-                                <input
-                                  ref={(el) => { fileInputRefs.current[name] = el; }}
-                                  id={`file-${name}`}
-                                  type="file"
-                                  className="file-upload-input"
-                                  accept="image/*,application/pdf,.pdf"
-                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
-                                  style={{ display: "none" }}
-                                />
+                                  <input
+                                    ref={(el) => { fileInputRefs.current[name] = el; }}
+                                    id={`file-${name}`}
+                                    type="file"
+                                    className="file-upload-input"
+                                    accept="image/*,application/pdf,.pdf"
+                                    onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                                    style={{ display: "none" }}
+                                  />
 
-                                {/* File Selected */}
-                                {hasManual && formFiles[name] && (
-                                  <div className="file-name-image-display">
-                                    <div className="file-name-image-display-indiv">
-                                      {preview?.url && !preview.isPdf && (
-                                        <img
-                                          src={preview.url}
-                                          alt="Preview"
-                                          style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                                        />
-                                      )}
-                                      <span>{formFiles[name]?.name}</span>
-                                      
+                                  {/* File Selected */}
+                                  {hasManual && formFiles[name] && (
+                                    <div className="file-name-image-display">
+                                      <div className="file-name-image-display-indiv">
+                                        {preview?.url && !preview.isPdf && (
+                                          <img
+                                            src={preview.url}
+                                            alt="Preview"
+                                            style={{ width: "50px", height: "50px", marginRight: "5px" }}
+                                          />
+                                        )}
+                                        <span>{formFiles[name]?.name}</span>
+                                        
+                                      </div>
                                     </div>
-                                  </div>
-                                )}
+                                  )}
 
-                                {/* Auto-attach notice */}
-                                {isValidId && !!residentValidIdUrl && !hasManual && (
-                                  <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
-                                    A resident Valid ID will be auto-attached.
-                                  </small>
-                                )}
+                                  {/* Auto-attach notice */}
+                                  {isValidId && !!residentValidIdUrl && !hasManual && (
+                                    <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                                      A resident Valid ID will be auto-attached.
+                                    </small>
+                                  )}
 
 
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
 
 
                     </>
