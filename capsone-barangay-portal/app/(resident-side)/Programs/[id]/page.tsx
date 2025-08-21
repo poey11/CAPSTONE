@@ -1,7 +1,7 @@
 "use client";
 import "@/CSS/Programs/SpecificProgram.css";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Handshake } from "lucide-react";
@@ -140,6 +140,8 @@ type Program = {
 
 type Role = "Volunteer" | "Participant";
 
+type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
+
 export default function SpecificProgram() {
   const { id } = useParams();
   const searchParams = useSearchParams();
@@ -170,6 +172,10 @@ export default function SpecificProgram() {
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File>>({});
+
+  // 🔎 NEW: previews for chosen files (clickable to full view)
+  const [filePreviews, setFilePreviews] = useState<Record<string, Preview>>({});
+  const previewsRef = useRef<Record<string, Preview>>({});
 
   const [isVerifiedResident, setIsVerifiedResident] = useState(false);
   const [residentId, setResidentId] = useState<string | null>(null);
@@ -356,7 +362,29 @@ export default function SpecificProgram() {
       return;
     }
     setFiles((p) => ({ ...p, [field]: f }));
+
+    // 🔎 build preview + cleanup old one
+    setFilePreviews((prev) => {
+      const next = { ...prev };
+      const old = prev[field];
+      if (old?.isObjectUrl) URL.revokeObjectURL(old.url);
+
+      const url = URL.createObjectURL(f);
+      const isPdf = (f.type || "").toLowerCase().includes("pdf") || f.name.toLowerCase().endsWith(".pdf");
+      next[field] = { url, isPdf, isObjectUrl: true };
+      previewsRef.current = next;
+      return next;
+    });
   };
+
+  // revoke object URLs on unmount
+  useEffect(() => {
+    return () => {
+      for (const pv of Object.values(previewsRef.current)) {
+        if (pv.isObjectUrl) URL.revokeObjectURL(pv.url);
+      }
+    };
+  }, []);
 
   const maxParticipants = Number(program?.participants ?? 0);
   const volunteersCap   = Number(program?.volunteers ?? 0);
@@ -715,19 +743,19 @@ export default function SpecificProgram() {
                             const nmLower = f.name.toLowerCase();
                             const isValidIdField = nmLower === "valididjpg";
                             const usePrefill = isVerifiedResident && !!preVerifiedIdUrl && isValidIdField;
+
                             const label = f.name
-                            // 1. Remove "jpg" or other extensions at the end
-                            .replace(/jpg$/i, "")
-                            .replace(/jpeg$/i, "")
-                            .replace(/png$/i, "")
-                            .replace(/pdf$/i, "")
-                            // 2. Insert spaces correctly
-                            .replace(/([a-z])([A-Z])/g, "$1 $2")
-                            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-                            // 3. Capitalize first letter
-                            .replace(/^./, (s) => s.toUpperCase())
-                            // 4. Ensure "Id" → "ID"
-                            .replace(/\bId\b/g, "ID");
+                              .replace(/jpg$/i, "")
+                              .replace(/jpeg$/i, "")
+                              .replace(/png$/i, "")
+                              .replace(/pdf$/i, "")
+                              .replace(/([a-z])([A-Z])/g, "$1 $2")
+                              .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+                              .replace(/^./, (s) => s.toUpperCase())
+                              .replace(/\bId\b/g, "ID");
+
+                            const preview = filePreviews[f.name];
+                            const prefillIsPdf = (preVerifiedIdUrl || "").toLowerCase().endsWith(".pdf");
 
                             return (
                               <div className="form-group-specific" key={`ff-${i}`}>
@@ -737,26 +765,96 @@ export default function SpecificProgram() {
 
                                 {usePrefill ? (
                                   <div className="prefilled-file-notice">
-                                    <div style={{ fontSize: 14, opacity: 0.9 }}>
+                                    <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6 }}>
                                       Using your verified ID on file.
                                     </div>
-                                    <a
-                                      href={preVerifiedIdUrl as string}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="prefilled-file-link"
-                                    >
-                                      View file
-                                    </a>
+
+                                    {preVerifiedIdUrl && (
+                                      prefillIsPdf ? (
+                                        <a
+                                          href={preVerifiedIdUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="prefilled-file-link"
+                                        >
+                                          Open PDF in new tab
+                                        </a>
+                                      ) : (
+                                        <>
+                                          <a
+                                            href={preVerifiedIdUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            title={`Open ${label} in a new tab`}
+                                          >
+                                            <img
+                                              src={preVerifiedIdUrl}
+                                              alt={`${label} preview`}
+                                              style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
+                                            />
+                                          </a>
+                                          <a
+                                            href={preVerifiedIdUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="prefilled-file-link"
+                                            style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
+                                          >
+                                            Open full view
+                                          </a>
+                                        </>
+                                      )
+                                    )}
                                   </div>
                                 ) : (
-                                  <input
-                                    type="file"
-                                    accept="image/*,application/pdf,.pdf"
-                                    className="form-input-specific"
-                                    required 
-                                    onChange={(e) => onFileChange(f.name, e.currentTarget)}
-                                  />
+                                  <>
+                                    <input
+                                      type="file"
+                                      accept="image/*,application/pdf,.pdf"
+                                      className="form-input-specific"
+                                      required
+                                      onChange={(e) => onFileChange(f.name, e.currentTarget)}
+                                    />
+
+                                    {(preview?.url) && (
+                                      <div className="file-name-image-display" style={{ marginTop: 8 }}>
+                                        {preview.isPdf ? (
+                                          <a
+                                            href={preview.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="file-link"
+                                          >
+                                            Open PDF in new tab
+                                          </a>
+                                        ) : (
+                                          <>
+                                            <a
+                                              href={preview.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              title={`Open ${label} in a new tab`}
+                                            >
+                                              <img
+                                                src={preview.url}
+                                                alt={`${label} preview`}
+                                                style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
+                                              />
+                                            </a>
+                                            <a
+                                              href={preview.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="file-link"
+                                              style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
+                                            >
+                                              Open full view
+                                            </a>
+                                          </>
+                                        )}
+                                      </div>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             );
