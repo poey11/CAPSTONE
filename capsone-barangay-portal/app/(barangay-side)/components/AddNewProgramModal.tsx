@@ -66,6 +66,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
+  // Agency
+  const [agency, setAgency] = useState("");
+  const [otherAgency, setOtherAgency] = useState("");
+
 // Requirements 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "firstName", description: "Used to save the first name of the participant" },
@@ -412,6 +416,8 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
         setIsPredefinedOpen(prev => !prev);
     };
 
+  
+
   return (
     <div className="add-programs-popup-overlay">
       <div className="add-programs-confirmation-popup">
@@ -611,6 +617,35 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                   {/* Right column */}
                   <div className="add-programs-content-right-side">
+
+                    {/* pa gawa nalang ng backend */}
+                    <div className="fields-section-add-programs">
+                      <p>
+                        Partnered Agency<span className="required">*</span>
+                      </p>
+                      <select
+                        className="add-programs-input-field"
+                        value={agency}
+                        onChange={(e) => setAgency(e.target.value)}
+                      >
+                        <option value="">Select agency</option>
+                        <option value="none">None</option>
+                        <option value="cityhall">City Hall</option>
+                        <option value="others">Others</option>
+                      </select>
+
+                      
+                      {agency === "others" && (
+                        <input
+                          type="text"
+                          placeholder="Enter agency"
+                          className="add-programs-input-field"
+                          value={otherAgency}
+                          onChange={(e) => setOtherAgency(e.target.value)}
+                        />
+                      )}
+                    </div>
+
                     <div className="fields-section-add-programs">
                       <p>
                         Event Type<span className="required">*</span>
