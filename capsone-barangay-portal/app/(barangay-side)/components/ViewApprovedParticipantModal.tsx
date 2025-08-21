@@ -239,7 +239,7 @@ export default function ViewApprovedParticipantModal({
                     className={`participant-info-toggle-btn ${activeTab === tab ? "active" : ""}`}
                     onClick={() => setActiveTab(tab as "details" | "reqs")}
                   >
-                    {tab === "details" ? "Full Details" : "Requirements"}
+                    {tab === "details" ? "Details" : "Requirements"}
                   </button>
                 ))}
               </div>
@@ -276,11 +276,15 @@ export default function ViewApprovedParticipantModal({
                       ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                           {orderedTextNames.map((name) => {
-                            const label = labelFor(name);
+                            // Format: capitalize first + add space before uppercase letters
+                            const formattedLabel = name
+                              .replace(/([A-Z])/g, " $1")   // add space before capital letters
+                              .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+
                             const value = (fieldsMap[name] ?? "").toString();
                             return (
                               <div key={`tf-${name}`} className="view-participant-fields-section">
-                                <p>{label}</p>
+                                <p>{formattedLabel}</p>
                                 <input
                                   type={
                                     name.toLowerCase().includes("email")
