@@ -412,6 +412,9 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
         setIsPredefinedOpen(prev => !prev);
     };
 
+  const [agency, setAgency] = useState("");
+  const [otherAgency, setOtherAgency] = useState("");
+
   return (
     <div className="add-programs-popup-overlay">
       <div className="add-programs-confirmation-popup">
@@ -611,6 +614,31 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
 
                   {/* Right column */}
                   <div className="add-programs-content-right-side">
+                    <div className="fields-section-add-programs">
+                      <p>
+                        Partnered Agency<span className="required">*</span>
+                      </p>
+                      <select
+                        className="add-programs-input-field"
+                        value={agency}
+                        onChange={(e) => setAgency(e.target.value)}
+                      >
+                        <option value="cityhall">City Hall</option>
+                        <option value="others">Others</option>
+                      </select>
+
+                      
+                      {agency === "others" && (
+                        <input
+                          type="text"
+                          placeholder="Enter other agency"
+                          className="add-programs-input-field"
+                          value={otherAgency}
+                          onChange={(e) => setOtherAgency(e.target.value)}
+                        />
+                      )}
+                    </div>
+
                     <div className="fields-section-add-programs">
                       <p>
                         Event Type<span className="required">*</span>
