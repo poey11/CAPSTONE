@@ -230,12 +230,11 @@ const PREDEFINED_REQ_FILES: SimpleField[] = [
     return Object.keys(e).length === 0;
   };
 
+const normalize = (s: string) => s?.toString().trim().toLowerCase();
+
 const isAutoApprovedByPolicy = () => {
-  const roleOk = AUTO_POSITIONS.includes(userPosition);
-  const nameOk = PREAPPROVED_NAMES.some((needle) =>
-    programName.toLowerCase().includes(needle) // needles are already lowercase
-  );
-  return roleOk && nameOk;
+  const roleOk = AUTO_POSITIONS.map(normalize).includes(normalize(userPosition));
+  return roleOk;
 };
 
   
