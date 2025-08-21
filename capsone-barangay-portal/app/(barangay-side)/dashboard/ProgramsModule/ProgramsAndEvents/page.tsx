@@ -126,6 +126,15 @@ export default function ProgramsModule() {
   const canViewPendingParticipants =
     position === "Assistant Secretary" || position === "Secretary";
 
+  // NEW: who can see/use Delete
+  const canDelete = useMemo(
+    () =>
+      ["Punong Barangay", "Secretary", "Assistant Secretary"].includes(
+        position
+      ),
+    [position]
+  );
+
   const allowedSections = useMemo<
     Array<"main" | "programs" | "participants">
   >(() => {
@@ -176,6 +185,8 @@ export default function ProgramsModule() {
   const [confirmDel, setConfirmDel] = useState<ConfirmState>({ open: false });
 
   const askConfirmDeleteProgram = (p: Program) => {
+    if (!canDelete)
+      return showToast("error", "You don't have permission to delete.");
     setConfirmDel({
       open: true,
       kind: "program",
@@ -184,6 +195,8 @@ export default function ProgramsModule() {
     });
   };
   const askConfirmDeleteParticipant = (participant: Participant) => {
+    if (!canDelete)
+      return showToast("error", "You don't have permission to delete.");
     setConfirmDel({
       open: true,
       kind: "participant",
@@ -196,6 +209,8 @@ export default function ProgramsModule() {
 
   const handleConfirmYes = async () => {
     if (!confirmDel.open) return;
+    if (!canDelete)
+      return showToast("error", "You don't have permission to delete.");
     const { kind, id } = confirmDel;
 
     setConfirmDel({ open: false }); // close modal immediately
@@ -758,16 +773,18 @@ export default function ProgramsModule() {
                               className="action-programs-edit"
                             />
                           </button>
-                          <button
-                            className="action-programs-button"
-                            onClick={() => askConfirmDeleteProgram(program)}
-                          >
-                            <img
-                              src="/Images/delete.png"
-                              alt="Delete"
-                              className="action-programs-delete"
-                            />
-                          </button>
+                          {canDelete && (
+                            <button
+                              className="action-programs-button"
+                              onClick={() => askConfirmDeleteProgram(program)}
+                            >
+                              <img
+                                src="/Images/delete.png"
+                                alt="Delete"
+                                className="action-programs-delete"
+                              />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -874,18 +891,20 @@ export default function ProgramsModule() {
                                 className="action-programs-edit"
                               />
                             </button>
-                            <button
-                              className="action-programs-button"
-                              onClick={() =>
-                                askConfirmDeleteParticipant(participant)
-                              }
-                            >
-                              <img
-                                src="/Images/delete.png"
-                                alt="Delete"
-                                className="action-programs-delete"
-                              />
-                            </button>
+                            {canDelete && (
+                              <button
+                                className="action-programs-button"
+                                onClick={() =>
+                                  askConfirmDeleteParticipant(participant)
+                                }
+                              >
+                                <img
+                                  src="/Images/delete.png"
+                                  alt="Delete"
+                                  className="action-programs-delete"
+                                />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -1024,16 +1043,18 @@ export default function ProgramsModule() {
                               className="action-programs-edit"
                             />
                           </button>
-                          <button
-                            className="action-programs-button"
-                            onClick={() => askConfirmDeleteProgram(program)}
-                          >
-                            <img
-                              src="/Images/delete.png"
-                              alt="Delete"
-                              className="action-programs-delete"
-                            />
-                          </button>
+                          {canDelete && (
+                            <button
+                              className="action-programs-button"
+                              onClick={() => askConfirmDeleteProgram(program)}
+                            >
+                              <img
+                                src="/Images/delete.png"
+                                alt="Delete"
+                                className="action-programs-delete"
+                              />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
