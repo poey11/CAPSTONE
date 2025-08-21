@@ -445,7 +445,7 @@ animation: fadeSlideIn 0.5s ease-out;
   position: relative; 
   margin-top: 20px;
   margin-bottom: 20px;
-  width: 700px;
+  padding-left: 30px;
 }
 
 .title-resindentificationpic {
@@ -481,7 +481,7 @@ animation: fadeSlideIn 0.5s ease-out;
     align-items: center;
 }
 
-.box-container-resindentificationpic:hover {
+.box-container-photosprogramc:hover {
   background-color: rgba(245, 143, 88, 0.2);
 }
 
@@ -2054,9 +2054,11 @@ input:checked + .slider::before {
 .walkin-requirements-section {
   display: flex;
   flex-wrap: wrap;  /* allows wrapping */
-  margin-left: 45px;
+  /*margin-left: 45px;*/
   gap: 20px;
   width: 100%;
+  align-items: center;
+  justify-content: center;
 }
 
 .walkin-content-left-side {
@@ -2112,9 +2114,9 @@ input:checked + .slider::before {
 
 .title-walkin-requirements {
   position: absolute;
-  left: 30%; 
+  left: 5%; 
   top: 0; 
-  transform: translate(25%, 25%);
+  transform: translate(50%, 50%);
   background-color: #1f3b57;
   color: white;
   padding: 8px 16px;
