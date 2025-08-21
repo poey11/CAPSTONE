@@ -25,8 +25,8 @@ type Resident = {
   location?: string;
   contactNumber?: string;
   mobile?: string;
-  emailAddress?: string;              // ✅ only source for email
-  verificationFilesURLs?: string[];   // ✅ first URL used as Valid ID
+  emailAddress?: string;              
+  verificationFilesURLs?: string[];   
 };
 
 type Props = {
@@ -87,7 +87,7 @@ export default function AddWalkInParticipantModal({
         if (f.name === "firstName") init[f.name] = resident.firstName || "";
         else if (f.name === "lastName") init[f.name] = resident.lastName || "";
         else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || resident.mobile || "";
-        else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || ""; // ✅ emailAddress only
+        else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || "";
         else if (f.name === "location") init[f.name] = resident.address || resident.location || "";
         else if (f.name === "fullName") init[f.name] = fullName;
       }
@@ -128,6 +128,7 @@ export default function AddWalkInParticipantModal({
         }
       }
 
+      // cleanup stale object URLs
       for (const [k, pv] of Object.entries(old)) {
         const nxt = next[k];
         if (pv.isObjectUrl && (!nxt || nxt.url !== pv.url)) {
@@ -309,245 +310,248 @@ export default function AddWalkInParticipantModal({
 
   if (!isOpen) return null;
 
-
-
-
   return (
     <>
       <div className="program-popup-overlay">
         <div className="program-popup">
           <div className="walkin-participant-backbutton-container">
-                <button onClick={onBack}>
-                  <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
-                </button>
-              </div>    
+            <button onClick={onBack}>
+              <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+            </button>
+          </div>
 
-            <h2> {resident ? "Complete Requirements" : "Manual Entry"} </h2>
-            <h1>* Walk-in Participant Application *</h1>
+          <h2> {resident ? "Complete Requirements" : "Manual Entry"} </h2>
+          <h1>* Walk-in Participant Application *</h1>
 
+          <div className="walkin-participant-header-body-bottom-section">
+            <div className="walkin-participant-user-info-main-container">
+              <div className="walkin-participant-info-main-content">
+                <nav className="walkin-info-toggle-wrapper">
+                  {["details", "reqs"].map((section) => (
+                    <button
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      onClick={() => setActiveSection(section as "details" | "reqs")}
+                    >
+                      {section === "details" && "Details"}
+                      {section === "reqs" && "Requirements"}
+                    </button>
+                  ))}
+                </nav>
 
-        <div className="walkin-participant-header-body-bottom-section">
-              <div className="walkin-participant-user-info-main-container">
-                <div className="walkin-participant-info-main-content">
-                  <nav className="walkin-info-toggle-wrapper">
-                    {["details", "reqs"].map((section) => (
-                      <button
-                        key={section}
-                        type="button"
-                        className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                        onClick={() => setActiveSection(section as "details" | "reqs")}
-                      >
-                        {section === "details" && "Details"}
-                        {section === "reqs" && "Requirements"}
-                      </button>
-                    ))}
-                  </nav>
+                {activeSection === "details" && (
+                  <>
+                    <div className="walkin-details-section">
+                      {/* Left column */}
+                      <div className="walkin-content-left-side">
+                        {textFieldsToRender
+                          .filter((_, idx) => idx % 2 === 0) // even indexes go left
+                          .map((f) => {
+                            const name = f.name;
+                            const lower = name.toLowerCase();
+                            const type =
+                              lower.includes("email") ? "email" :
+                              lower.includes("contact") || lower.includes("phone") ? "tel" :
+                              "text";
 
-                  {activeSection === "details" && (
-                    <>
-                      
-                      <div className="walkin-details-section">
-                        {/* Left column */}
-                        <div className="walkin-content-left-side">
-                          {textFieldsToRender
-                            .filter((_, idx) => idx % 2 === 0) // even indexes go left
-                            .map((f) => {
-                              const name = f.name;
-                              const lower = name.toLowerCase();
-                              const type =
-                                lower.includes("email") ? "email" :
-                                lower.includes("contact") || lower.includes("phone") ? "tel" :
-                                "text";
-                              
-                               // Format: capitalize first + add space before uppercase letters
-                                const formattedLabel = name
-                                  .replace(/([A-Z])/g, " $1")   // add space before capital letters
-                                  .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+                            // Format: capitalize first + add space before uppercase letters
+                            const formattedLabel = name
+                              .replace(/([A-Z])/g, " $1")
+                              .replace(/^./, (s) => s.toUpperCase());
 
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {formattedLabel} <span className="required">*</span>
-                                  </p>
-                                  <input
-                                    type={type}
-                                    className="walkin-input-field"
-                                    required
-                                    value={formData[name] || ""}
-                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
-                                    placeholder={`Enter ${formattedLabel}`}
-                                  />
-                                </div>
-                              );
-                            })}
-                        </div>
-
-                        {/* Right column */}
-                        <div className="walkin-content-right-side">
-                          {textFieldsToRender
-                            .filter((_, idx) => idx % 2 !== 0) // odd indexes go right
-                            .map((f) => {
-                              const name = f.name;
-                              const lower = name.toLowerCase();
-                              const type =
-                                lower.includes("email") ? "email" :
-                                lower.includes("contact") || lower.includes("phone") ? "tel" :
-                                "text";
-                               // Format: capitalize first + add space before uppercase letters
-                                const formattedLabel = name
-                                  .replace(/([A-Z])/g, " $1")   // add space before capital letters
-                                  .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
-
-
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {formattedLabel} <span className="required">*</span>
-                                  </p>
-                                  <input
-                                    type={type}
-                                    className="walkin-input-field"
-                                    required
-                                    value={formData[name] || ""}
-                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
-                                    placeholder={`Enter ${formattedLabel}`}
-                                  />
-                                </div>
-                              );
-                            })}
-                        </div>
+                            return (
+                              <div className="fields-section-walkin" key={`tf-${name}`}>
+                                <p>
+                                  {formattedLabel} <span className="required">*</span>
+                                </p>
+                                <input
+                                  type={type}
+                                  className="walkin-input-field"
+                                  required
+                                  value={formData[name] || ""}
+                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                  placeholder={`Enter ${formattedLabel}`}
+                                />
+                              </div>
+                            );
+                          })}
                       </div>
 
-                    </>
-                  )}
+                      {/* Right column */}
+                      <div className="walkin-content-right-side">
+                        {textFieldsToRender
+                          .filter((_, idx) => idx % 2 !== 0) // odd indexes go right
+                          .map((f) => {
+                            const name = f.name;
+                            const lower = name.toLowerCase();
+                            const type =
+                              lower.includes("email") ? "email" :
+                              lower.includes("contact") || lower.includes("phone") ? "tel" :
+                              "text";
+                            // Format: capitalize first + add space before uppercase letters
+                            const formattedLabel = name
+                              .replace(/([A-Z])/g, " $1")
+                              .replace(/^./, (s) => s.toUpperCase());
 
-                  {activeSection === "reqs" && (
-                    <>
-                      <div className="walkin-requirements-section">
-                        {fileFieldsToRender.map((f, idx) => {
-                          const name = f.name;
-                          const isValidId = name === "validIDjpg";
-                          // Format: capitalize first + add space before uppercase letters
-                          const formattedLabel = name
-                            // 1. Remove "jpg" or other extensions at the end
-                            .replace(/jpg$/i, "")
-                            .replace(/jpeg$/i, "")
-                            .replace(/png$/i, "")
-                            .replace(/pdf$/i, "")
-                            // 2. Insert spaces correctly
-                            .replace(/([a-z])([A-Z])/g, "$1 $2")
-                            .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-                            // 3. Capitalize first letter
-                            .replace(/^./, (s) => s.toUpperCase())
-                            // 4. Ensure "Id" → "ID"
-                            .replace(/\bId\b/g, "ID");
-
-                          const preview = filePreviews[name];
-
-                          const hasManual = !!formFiles[name];
-                          const statusText = hasManual
-                            ? formFiles[name]?.name || "File selected"
-                            : isValidId && !!residentValidIdUrl
-                            ? "Auto-attached from resident"
-                            : "No file chosen";
-
-                          return (
-                            <div
-                              key={`ff-${name}`}
-                              className="box-container-outer-photosprogram"
-                              style={{
-                                flex: fileFieldsToRender.length === 1 ? "0 0 40%" : "0 0 calc(50% - 20px)",
-                                display: "flex",
-                                justifyContent: fileFieldsToRender.length === 1 ? "center" : "flex-start",
-                              }}
-                            >
-                              <div className="title-walkin-requirements">
-                                {formattedLabel}
+                            return (
+                              <div className="fields-section-walkin" key={`tf-${name}`}>
+                                <p>
+                                  {formattedLabel} <span className="required">*</span>
+                                </p>
+                                <input
+                                  type={type}
+                                  className="walkin-input-field"
+                                  required
+                                  value={formData[name] || ""}
+                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                  placeholder={`Enter ${formattedLabel}`}
+                                />
                               </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </>
+                )}
 
-                              <div className="box-container-resindentificationpic">
-                                {/* File Upload Section */}
-                                <div className="file-upload-container">
-                                  <label
-                                    htmlFor={`file-${name}`}
-                                    className="upload-link"
-                                    style={{ cursor: "pointer" }}
-                                  >
-                                    {hasManual ? "Replace File" : "Click to Upload File"}
-                                  </label>
+                {activeSection === "reqs" && (
+                  <>
+                    <div className="walkin-requirements-section">
+                      {fileFieldsToRender.map((f) => {
+                        const name = f.name;
+                        const isValidId = name === "validIDjpg";
+                        // Format: readable label
+                        const formattedLabel = name
+                          .replace(/jpg$/i, "")
+                          .replace(/jpeg$/i, "")
+                          .replace(/png$/i, "")
+                          .replace(/pdf$/i, "")
+                          .replace(/([a-z])([A-Z])/g, "$1 $2")
+                          .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+                          .replace(/^./, (s) => s.toUpperCase())
+                          .replace(/\bId\b/g, "ID");
 
-                                  <input
-                                    ref={(el) => { fileInputRefs.current[name] = el; }}
-                                    id={`file-${name}`}
-                                    type="file"
-                                    className="file-upload-input"
-                                    accept="image/*,application/pdf,.pdf"
-                                    onChange={(e) => handleFormFileChange(name, e.currentTarget)}
-                                    style={{ display: "none" }}
-                                  />
+                        const preview = filePreviews[name];
 
-                                  {/* File Selected */}
-                                  {hasManual && formFiles[name] && (
-                                    <div className="file-name-image-display">
-                                      <div className="file-name-image-display-indiv">
-                                        {preview?.url && !preview.isPdf && (
-                                          <img
-                                            src={preview.url}
-                                            alt="Preview"
-                                            style={{ width: "50px", height: "50px", marginRight: "5px" }}
-                                          />
-                                        )}
-                                        <span>{formFiles[name]?.name}</span>
-                                        
-                                      </div>
+                        const hasManual = !!formFiles[name];
+
+                        return (
+                          <div
+                            key={`ff-${name}`}
+                            className="box-container-outer-photosprogram"
+                            style={{
+                              flex: fileFieldsToRender.length === 1 ? "0 0 40%" : "0 0 calc(50% - 20px)",
+                              display: "flex",
+                              justifyContent: fileFieldsToRender.length === 1 ? "center" : "flex-start",
+                            }}
+                          >
+                            <div className="title-walkin-requirements">{formattedLabel}</div>
+
+                            <div className="box-container-resindentificationpic">
+                              {/* File Upload Section */}
+                              <div className="file-upload-container">
+                                <label
+                                  htmlFor={`file-${name}`}
+                                  className="upload-link"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  {hasManual ? "Replace File" : "Click to Upload File"}
+                                </label>
+
+                                <input
+                                  ref={(el) => { fileInputRefs.current[name] = el; }}
+                                  id={`file-${name}`}
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept="image/*,application/pdf,.pdf"
+                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                                  style={{ display: "none" }}
+                                />
+
+                                {/* PREVIEW (manual selection OR auto-attached resident file) */}
+                                {(hasManual || preview?.url) && (
+                                  <div className="file-name-image-display">
+                                    <div className="file-name-image-display-indiv">
+                                      {preview?.url ? (
+                                        preview.isPdf ? (
+                                          <>
+                                            <a
+                                              href={preview.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="file-link"
+                                              style={{ marginRight: 8 }}
+                                            >
+                                              Open PDF in new tab
+                                            </a>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <a
+                                              href={preview.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              title={`Open ${formattedLabel} in a new tab`}
+                                            >
+                                              <img
+                                                src={preview.url}
+                                                alt={`${formattedLabel} preview`}
+                                                style={{ width: 50, height: 50, marginRight: 8, objectFit: "cover", borderRadius: 4 }}
+                                              />
+                                            </a>
+                                            <a
+                                              href={preview.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="file-link"
+                                              style={{ fontSize: 12 }}
+                                            >
+                                              Open full view
+                                            </a>
+                                          </>
+                                        )
+                                      ) : null}
+
+                                      <span style={{ marginLeft: 8 }}>
+                                        {hasManual
+                                          ? (formFiles[name]?.name || "File selected")
+                                          : (isValidId ? "Auto-attached from resident" : "Preview")}
+                                      </span>
                                     </div>
-                                  )}
+                                  </div>
+                                )}
 
-                                  {/* Auto-attach notice */}
-                                  {isValidId && !!residentValidIdUrl && !hasManual && (
-                                    <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
-                                      A resident Valid ID will be auto-attached.
-                                    </small>
-                                  )}
-
-
-                                </div>
+                                {/* Only show “No file chosen” when nothing at all is available */}
+                                {!hasManual && !preview?.url && (
+                                  <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                                    No file chosen
+                                  </small>
+                                )}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-
-
-                    </>
-                  )}
-
-                    
-              
-                </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </div>
-    
-    
-        </div>
-
-
-        <div className="action-btn-section-verify-section-participant">
-                <div className="action-btn-section-verify">
-                  <button className="participant-action-reject" onClick={onClose} disabled={saving}>
-                    Cancel
-                  </button>
-                  <button className="participant-action-accept" onClick={submit} disabled={saving}>
-                    {saving ? "Saving..." : "Save"}
-                  </button>
-                </div>
-              </div>
-
-
-
             </div>
+          </div>
 
-            
-      </div>      
+          <div className="action-btn-section-verify-section-participant">
+            <div className="action-btn-section-verify">
+              <button className="participant-action-reject" onClick={onClose} disabled={saving}>
+                Cancel
+              </button>
+              <button className="participant-action-accept" onClick={submit} disabled={saving}>
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
