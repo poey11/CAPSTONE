@@ -461,8 +461,7 @@ export default function ParticipantsList() {
               <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
             <h1>
-              Participants Lists
-              {programTitle ? ` — ${programTitle}` : ""}
+              {programTitle }
             </h1>
           </div>
 

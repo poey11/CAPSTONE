@@ -58,7 +58,9 @@ export default function ProgramDetails() {
     userPosition === "Assistant Secretary" ||
     userPosition === "Secretary";
 
-  const [activeSection, setActiveSection] = useState<"details" | "reqs" | "others">("details");
+  type Section = "details" | "reqs" | "others" | "reject";
+
+const [activeSection, setActiveSection] = useState<Section>("details");
 
   // Popups / toasts
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
@@ -198,6 +200,8 @@ export default function ProgramDetails() {
         setApprovalStatus(data.approvalStatus ?? "Pending");
         setProgressStatus(data.progressStatus ?? "Upcoming");
         setActiveStatus((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
+
+        setRejectionReason(data.rejectionReason ?? "");
 
         setSuggestedBy(data.suggestedBy ?? "");
         setSuggestedByUid(data.suggestedByUid ?? null);
@@ -735,7 +739,7 @@ export default function ProgramDetails() {
             <button onClick={handleBack}>
               <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-            <h1> Program Details </h1>
+            <h1> {programName} </h1>
           </div>
 
           <div className="action-btn-section-program">
@@ -807,16 +811,17 @@ export default function ProgramDetails() {
 
         <div className="edit-program-bottom-section">
           <nav className="edit-program-info-toggle-wrapper">
-            {["details", "reqs", "others"].map((section) => (
+            {["details", "reqs", "others", ...(approvalStatus === "Rejected" ? ["reject"] : [])].map((section) => (
               <button
                 key={section}
                 type="button"
                 className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                onClick={() => setActiveSection(section as "details" | "reqs" | "others")}
+                onClick={() => setActiveSection(section as "details" | "reqs" | "others" | "reject")}
               >
                 {section === "details" && "Details"}
                 {section === "reqs" && "Requirements"}
                 {section === "others" && "Others"}
+                {section === "reject" && "Rejected"}
               </button>
             ))}
           </nav>
@@ -1274,9 +1279,12 @@ export default function ProgramDetails() {
                 <>
                   <div className="edit-programs-upper-section">
                     <div className="edit-official-others-mainsection">
-                      <div className="box-container-outer-photosprogram">
-                        <div className="title-resindentificationpic">Photos</div>
-                        <div className="box-container-photosprogram">
+
+                      {/* ===== Photos UI (cover + gallery) ===== */}
+                      <div className="box-container-outer-others-photosprogram">
+                        <div className="title-others-photos">Photos</div>
+                        <div className="box-container-photosprogram-others">
+                          
                           <div className="photosprogram-container">
                             <label
                               htmlFor="identification-file-upload"
@@ -1386,6 +1394,26 @@ export default function ProgramDetails() {
                             name="programSummary"
                             value={summary}
                             onChange={(e) => setSummary(e.target.value)}
+                            disabled={isReadOnly}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeSection === "reject" && (
+                <>
+                  <div className="edit-programs-upper-section">
+                    <div className="edit-official-others-mainsection">
+                      <div className="edit-box-container-outer-programdesc">
+                        <div className="title-remarks">Reason for Reject</div>
+                        <div className="box-container-programdesc">
+                          <textarea
+                            className="programdesc-input-field"
+                            name="reasonForReject"
+                            value={rejectionReason}                  
                             disabled={isReadOnly}
                           />
                         </div>
