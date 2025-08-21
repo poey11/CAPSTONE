@@ -1,17 +1,17 @@
 // app/dashboard/accountSetup/page.tsx
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/app/api/lib/auth";
 import { doc, collection, getDoc } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import Form from "@/app/(barangay-side)/components/accSetupForm";
 
-interface AccountSetupPageProps {
-  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
-}
+// interface AccountSetupPageProps {
+//   searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
+// }
 
 
-export default async function AccountSetupPage({searchParams}: AccountSetupPageProps) {
+export default async function AccountSetupPage({searchParams}: any) {
   const params = await searchParams;
   const returnUrl = (params.returnUrl as string) || "/dashboard";
   const session = await getServerSession(authOptions);

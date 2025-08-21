@@ -2,7 +2,7 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
-import {useSearchParams } from "next/navigation";
+// import {useSearchParams } from "next/navigation";
 import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, query, where} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes } from "firebase/storage";
@@ -12,6 +12,7 @@ import {customAlphabet} from "nanoid";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import React from "react";
 ;
 
 interface EmergencyDetails {
@@ -109,14 +110,16 @@ interface ClearanceInput {
 
 
 
-export default function Action() {
+export default function Action({ searchParams }: any) {
+  const params = React.use(searchParams);
+  const { docB, purpose }:any = params;
   const user = useAuth().user;
   const isGuest = !user;
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const searchParam = useSearchParams();
-  const docType = searchParam.get("doc") || "";
-  const docPurpose = searchParam.get("purpose") || "";
+  // const searchParam = useSearchParams();
+  // const docB = searchParam.get("docB") || "";
+  // const purpose = searchParam.get("purpose") || "";
   const router = useRouter();
   const [nos, setNos] = useState(0);
 
@@ -134,10 +137,10 @@ export default function Action() {
   const [clearanceInput, setClearanceInput] =  useState<ClearanceInput>({
     accountId: user?.uid || "Guest",
     residentId: userData?.residentId || "Guest",
-    docType: docType || "" ,
+    docType: docB || "" ,
     isViewed: false,
     requestId: "",
-    purpose: docPurpose || "",
+    purpose: purpose || "",
     dateRequested: new Date().toLocaleString(),
     fullName: "",
     appointmentDate: "",
@@ -221,17 +224,17 @@ export default function Action() {
 
   useEffect(() => {
     if (userData === null) return; // still loading Firestore
-    if (!docType) return; // no docType provided yet
+    if (!docB) return; // no docB provided yet
   
     const restrictedDocs = ["Barangay Certificate", "Barangay Indigency", "Barangay Clearance"];
-    const tryingToAccessRestrictedDoc = restrictedDocs.includes(docType);
+    const tryingToAccessRestrictedDoc = restrictedDocs.includes(docB);
     const isUnverifiedOrGuest = !user || userData?.status !== "Verified";
   
     if (tryingToAccessRestrictedDoc && isUnverifiedOrGuest) {
       alert("You must be a verified resident to request this document.");
       router.push("/services");
     }
-  }, [user, userData, docType]);
+  }, [user, userData, docB]);
   
 
 
@@ -363,7 +366,7 @@ export default function Action() {
       const userDocSnap = await getDoc(userDocRef);
       if (!userDocSnap.exists()) return;
   
-      const userData = userDocSnap.data();
+      const userData:any = userDocSnap.data();
       setUserData(userData);
   
       const residentId = userData.residentId;
@@ -377,7 +380,7 @@ export default function Action() {
         const residentDocSnap = await getDoc(residentDocRef);
         if (!residentDocSnap.exists()) return;
   
-        const residentData = residentDocSnap.data();
+        const residentData:any = residentDocSnap.data();
         const gender = residentData.sex;
         const mrms = gender === "Male" ? "Mr." : "Ms.";
         const fullName = `${residentData.firstName||""}${` ${residentData.middleName} `||" "}${residentData.lastName||""}`;
@@ -455,8 +458,8 @@ export default function Action() {
         const imageFieldMap: { [key: string]: string[] } = {};
         const residentOnlyMap: { [key: string]: boolean } = {};
   
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
+        snapshot.docs.forEach((docB) => {
+          const data = docB.data();
           const { type, title, fields, imageFields, forResidentOnly } = data;
   
           if (type && title) {
@@ -491,7 +494,7 @@ export default function Action() {
   useEffect(() => {
     const fetchOtherDocuments = async () => {
       const snapshot = await getDocs(collection(db, "OtherDocuments"));
-      const docs = snapshot.docs.map((doc) => doc.data());
+      const docs = snapshot.docs.map((docB) => docB.data());
       setOtherDocuments(docs);
     };
   
@@ -567,8 +570,8 @@ useEffect(() => {
   const unsubscribe = onSnapshot(collectionRef, (snapshot) => {
     const map: Record<string, number> = {};
 
-    snapshot.forEach((doc) => {
-      const data = doc.data();
+    snapshot.forEach((docB) => {
+      const data = docB.data();
       const time = toPHISOString(new Date(data.appointmentDate));
         map[time] = (map[time] || 0) + 1;
     });
@@ -577,7 +580,7 @@ useEffect(() => {
   });
 
   return () => unsubscribe();
-}, [clearanceInput.docType, clearanceInput.purpose]);
+}, [clearanceInput.docB, clearanceInput.purpose]);
 
 
 function toPHISOString(date: Date): string {
@@ -700,12 +703,12 @@ useEffect(() => {
 
   const unsubscribe = onSnapshot(q, (snapshot) => {
     const map: any = {};
-    snapshot.forEach((doc) => {
-      const data = doc.data();
+    snapshot.forEach((docB) => {
+      const data = docB.data();
       if (data.appointmentDate) {
-        if (!map[data.docType]) map[data.docType] = [];
-        map[data.docType].push({
-          docId: doc.id,
+        if (!map[data.docB]) map[data.docB] = [];
+        map[data.docB].push({
+          docId: docB.id,
           purpose: data.purpose,
           appointmentDate: data.appointmentDate,
         });
@@ -796,15 +799,15 @@ const handleFileChange = (
 
     // Upload the report to Firestore
     let sendTo ="";
-      if(clearanceInput.docType === "Barangay Certificate" || clearanceInput.docType === "Barangay Clearance" 
-        || clearanceInput.docType === "Barangay Indigency" || clearanceInput.docType === "Temporary Business Permit"
-        || clearanceInput.docType === "Construction" || (docType === "Barangay Permit" && docPurpose)||
-        (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+      if(clearanceInput.docB === "Barangay Certificate" || clearanceInput.docB === "Barangay Clearance" 
+        || clearanceInput.docB === "Barangay Indigency" || clearanceInput.docB === "Temporary Business Permit"
+        || clearanceInput.docB === "Construction" || (docB === "Barangay Permit" && purpose)||
+        (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
 
       ) {
         sendTo = "SAS";
       } 
-      else if(clearanceInput.docType === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
+      else if(clearanceInput.docB === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
         sendTo = "Admin Staff";
       }
       let documentTypeIs = "";
@@ -831,9 +834,9 @@ const handleFileChange = (
     // Only go to notification if addDoc is 
     let newDoc = "";
     try {
-      const doc = await addDoc(docRef, updates);
-      console.log("Request uploaded with ID:", doc.id);
-      newDoc = doc.id;
+      const docB = await addDoc(docRef, updates);
+      console.log("Request uploaded with ID:", docB.id);
+      newDoc = docB.id;
       router.push("/services/notification");
     } catch (error) {
       console.error("Failed to upload request:", error);
@@ -846,8 +849,8 @@ const handleFileChange = (
     const notificationRef = collection(db, "BarangayNotifications");
     
     const useDocTypeAsMessage = 
-      clearanceInput.docType === "Business Permit" || 
-      clearanceInput.docType === "Temporary Business Permit";
+      clearanceInput.docB === "Business Permit" || 
+      clearanceInput.docB === "Temporary Business Permit";
 
       const rawDate = new Date(clearanceInput.appointmentDate);
       const formattedAppointmentDate = rawDate.toLocaleString("en-US", {
@@ -864,27 +867,30 @@ const handleFileChange = (
     message: 
       clearanceInput.purpose === "First Time Jobseeker"
         ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
-        : clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+        : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
           ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-          : clearanceInput.docType === "Barangay Indigency"
+          : clearanceInput.docB === "Barangay Indigency"
             ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-            : clearanceInput.docType === "Construction"
+            : clearanceInput.docB === "Construction"
               ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
-              : `New ${useDocTypeAsMessage ? clearanceInput.docType : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
+              : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
 
       timestamp: new Date(),
       requestorId: userData?.residentId,
       isRead: false,
-      transactionType: "Online Service Request",
-      recipientRole: (
+      ...(documentTypeIs !== "" ? {
+        transactionType: documentTypeIs,}:
+      {
+        transactionType: "ServiceRequest",
+      }),      recipientRole: (
         clearanceInput.purpose === "First Time Jobseeker" ||
-        clearanceInput.docType === "Barangay Certificate" ||
-        clearanceInput.docType === "Barangay Clearance" ||
-        clearanceInput.docType === "Barangay Indigency" ||
-        clearanceInput.docType === "Temporary Business Permit" ||
-        clearanceInput.docType === "Construction" ||
-        clearanceInput.docType === "Barangay Permit" ||        
-        (clearanceInput.docType === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+        clearanceInput.docB === "Barangay Certificate" ||
+        clearanceInput.docB === "Barangay Clearance" ||
+        clearanceInput.docB === "Barangay Indigency" ||
+        clearanceInput.docB === "Temporary Business Permit" ||
+        clearanceInput.docB === "Construction" ||
+        clearanceInput.docB === "Barangay Permit" ||        
+        (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
       )
         ? "Assistant Secretary"
         : "Admin Staff",
@@ -897,7 +903,11 @@ const handleFileChange = (
     requestID: newDoc,
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
-    transactionType: "Online Service Request",
+    ...(documentTypeIs !== "" ? {
+        transactionType: documentTypeIs,}:
+      {
+        transactionType: "ServiceRequest",
+      }),
     isRead: false,
   });
 
@@ -966,7 +976,7 @@ const handleFileChange = (
           "citizenship"
         );
 
-      if(clearanceInput.docType === "Barangay Certificate" ){
+      if(clearanceInput.docB === "Barangay Certificate" ){
         requiredFields.push("purpose")
         if(clearanceInput.purpose === "Residency"){
           requiredFields.push("CYFrom", "CYTo");
@@ -1013,7 +1023,7 @@ const handleFileChange = (
         }
       }
       
-      if (clearanceInput.docType === "Barangay Indigency") {
+      if (clearanceInput.docB === "Barangay Indigency") {
         requiredFields.push("purpose");
         if(clearanceInput.purpose === "No Income") {
           requiredFields.push("noIncomePurpose","noIncomeChildFName");
@@ -1030,13 +1040,13 @@ const handleFileChange = (
         }
       }
 
-      if(clearanceInput.docType === "Barangay Clearance") {
+      if(clearanceInput.docB === "Barangay Clearance") {
         if(clearanceInput.purpose === "Residency"){
           requiredFields.push("CYFrom", "CYTo");
         }
       }
 
-      if(clearanceInput.docType === "Other Documents") {
+      if(clearanceInput.docB === "Other Documents") {
         requiredFields.push("purpose");
         if(clearanceInput.purpose === "Barangay ID") {
           requiredFields.push("birthplace","religion","nationality"
@@ -1049,11 +1059,11 @@ const handleFileChange = (
         }
       }
       // Barangay Permits
-      if(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") {
+      if(clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit") {
         requiredFields.push("purpose", "businessName", 
           "businessNature", "businessLocation","estimatedCapital")
       }
-      if(clearanceInput.docType === "Construction") {
+      if(clearanceInput.docB === "Construction") {
         requiredFields.push("typeofconstruction", "typeofbldg",
           "homeOrOfficeAddress", "projectName", "projectLocation"
         );
@@ -1066,14 +1076,14 @@ const handleFileChange = (
 
     const handleSubmit = async (event: React.FormEvent) => {
       event.preventDefault(); // Prevent default form submission
-      if((clearanceInput.docType === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docType === "Barangay Indigency") {
+      if((clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docB === "Barangay Indigency") {
         
         const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
 
       
-        // check if the user has an existing appointment for this docType and purpose on the selected date
+        // check if the user has an existing appointment for this docB and purpose on the selected date
         const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
-        const userAppointment = userAppointmentsMap[clearanceInput.docType]?.find((app: any) => {
+        const userAppointment = userAppointmentsMap[clearanceInput.docB]?.find((app: any) => {
           const appDateOnly = new Date(app.appointmentDate).toDateString();
           console.log("appDateOnly:", appDateOnly, "selectedDateOnly:", selectedDateOnly);
           return appDateOnly === selectedDateOnly && app.purpose === clearanceInput.purpose;
@@ -1085,7 +1095,7 @@ const handleFileChange = (
           return;
         }
 
-        // Check if the selected date is already booked for this user in any doctype and purpose
+        // Check if the selected date is already booked for this user in any docB and purpose
         const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
         const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
 
@@ -1111,7 +1121,7 @@ const handleFileChange = (
       return;
       }
 
-      // Gather required fields for this docType/purpose
+      // Gather required fields for this docB/purpose
       const requiredFields = getRequiredFields();
 
       requiredFields.push(...filteredDynamicFields);
@@ -1125,11 +1135,11 @@ const handleFileChange = (
       ...Object.keys(dynamicFileStates),
       "signaturejpg"
       ];
-      // Add static image fields if they are visible in the UI for this docType/purpose
+      // Add static image fields if they are visible in the UI for this docB/purpose
       if (
-      docType === "Barangay Certificate" ||
-      docType === "Barangay Clearance" ||
-      docType === "Barangay Indigency" ||
+      docB === "Barangay Certificate" ||
+      docB === "Barangay Clearance" ||
+      docB === "Barangay Indigency" ||
       clearanceInput.purpose === "First Time Jobseeker"
       ) {
         requiredImageFields.push("barangayIDjpg", "validIDjpg", "letterjpg");
@@ -1137,10 +1147,10 @@ const handleFileChange = (
       if(clearanceInput.purpose === "Barangay ID"){
         requiredImageFields.push("signaturejpg", "validIDjpg");
       }
-      if (docType === "Temporary Business Permit" || docType === "Business Permit") {
+      if (docB === "Temporary Business Permit" || docB === "Business Permit") {
         requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "validIDjpg");
       }
-      if (docType === "Construction") {
+      if (docB === "Construction") {
         requiredImageFields.push("copyOfPropertyTitle", "taxDeclaration", "approvedBldgPlan", "validIDjpg");
       }
       if (clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax") {
@@ -1151,9 +1161,9 @@ const handleFileChange = (
       
 
       const atLeastOneIDRequired =
-        (docType === "Barangay Certificate" ||
-          docType === "Barangay Clearance" ||
-          docType === "Barangay Indigency" ||
+        (docB === "Barangay Certificate" ||
+          docB === "Barangay Clearance" ||
+          docB === "Barangay Indigency" ||
           clearanceInput.purpose === "Barangay ID" ||
           clearanceInput.purpose === "First Time Jobseeker"
         );
@@ -1244,9 +1254,9 @@ const handleFileChange = (
 
       // 📌 Handling for Barangay Certificate, Clearance, Indigency, Business ID, First Time Jobseeker
       if (
-      docType === "Barangay Certificate" ||
-      docType === "Barangay Clearance" ||
-      docType === "Barangay Indigency" ||
+      docB === "Barangay Certificate" ||
+      docB === "Barangay Clearance" ||
+      docB === "Barangay Indigency" ||
       clearanceInput.purpose === "Barangay ID" ||
       clearanceInput.purpose === "First Time Jobseeker"
       ) {
@@ -1258,7 +1268,7 @@ const handleFileChange = (
         statusPriority: 1,
         requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
         accID: clearanceInput.accountId,
-        docType: docType,
+        docType: docB,
         purpose: clearanceInput.purpose,
         dateOfResidency: clearanceInput.dateOfResidency,
         address: clearanceInput.address,
@@ -1333,7 +1343,7 @@ const handleFileChange = (
         ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
         ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
         ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
-        ...(((clearanceInput.purpose === "Residency" && docType === "Barangay Certificate") || docType === "Barangay Indigency") && {
+        ...(((clearanceInput.purpose === "Residency" && docB === "Barangay Certificate") || docB === "Barangay Indigency") && {
           appointmentDate: clearanceInput.appointmentDate,
           purpose: clearanceInput.purpose,
         }),
@@ -1389,7 +1399,7 @@ const handleFileChange = (
       }
 
       // 📌 Handling for Temporary Business Permit & Business Permit
-      if (docType === "Temporary Business Permit" || docType === "Business Permit") {
+      if (docB === "Temporary Business Permit" || docB === "Business Permit") {
       const clearanceVars = {
         createdAt: clearanceInput.dateRequested,
         requestId: clearanceInput.requestId,
@@ -1406,7 +1416,7 @@ const handleFileChange = (
         civilStatus: clearanceInput.civilStatus,
         contact: clearanceInput.contact,
         citizenship: clearanceInput.citizenship,
-        docType: docType,
+        docType: docB,
         purpose: clearanceInput.purpose,
         businessName: clearanceInput.businessName,
         businessLocation: clearanceInput.businessLocation,
@@ -1422,7 +1432,7 @@ const handleFileChange = (
       }
 
       // 📌 Handling for Construction Permit
-      if (docType === "Construction") {
+      if (docB === "Construction") {
       const clearanceVars = {
         createdAt: clearanceInput.dateRequested,
         requestId: clearanceInput.requestId,
@@ -1431,7 +1441,7 @@ const handleFileChange = (
         reqType: "Online",
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
-        docType: docType,
+        docType: docB,
         typeofconstruction: clearanceInput.typeofconstruction,
         homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
         dateOfResidency: clearanceInput.dateOfResidency,
@@ -1455,7 +1465,7 @@ const handleFileChange = (
       }
 
       if (
-      docType &&
+      docB &&
         ![
         "Barangay Certificate",
         "Barangay Clearance",
@@ -1463,7 +1473,7 @@ const handleFileChange = (
         "Temporary Business Permit",
         "Business Permit",
         "Construction"
-        ].includes(docType) &&
+        ].includes(docB) &&
         !["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose)
       ) {
       const clearanceVars: Record<string, any> = {
@@ -1474,7 +1484,7 @@ const handleFileChange = (
         statusPriority: 1,
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
-        docType: docType,
+        docType: docB,
         purpose: clearanceInput.purpose,
         dateOfResidency: clearanceInput.dateOfResidency,
         address: clearanceInput.address,
@@ -1606,12 +1616,12 @@ const handleFileChange = (
     
     
     useEffect(() => {
-      if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docType === "Barangay Certificate") setAddOn("Deceased ");
-      else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docType === "Barangay Certificate")setAddOn("From ");
-      else if(clearanceInput.purpose === "Guardianship" && docType === "Barangay Certificate") setAddOn("Guardian's ");
+      if ((clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax" ) && docB === "Barangay Certificate") setAddOn("Deceased ");
+      else if(clearanceInput.purpose === "Occupancy /  Moving Out" && docB === "Barangay Certificate")setAddOn("From ");
+      else if(clearanceInput.purpose === "Guardianship" && docB === "Barangay Certificate") setAddOn("Guardian's ");
       else setAddOn("");
       
-    }, [clearanceInput.purpose, docType]);
+    }, [clearanceInput.purpose, docB]);
 
 
     
@@ -1666,8 +1676,8 @@ const handleFileChange = (
     console.log("Filtered Dynamic Fields:", filteredDynamicFields);
     const matchedImageFieldsRaw = [
       ...(otherDocImageFields[clearanceInput.purpose] || []),
-      ...(otherDocPurposes["Barangay Permit"]?.includes(docType || "")
-        ? otherDocImageFields[docType || ""] || []
+      ...(otherDocPurposes["Barangay Permit"]?.includes(docB || "")
+        ? otherDocImageFields[docB || ""] || []
         : []),
     ];
     
@@ -1703,7 +1713,7 @@ const handleFileChange = (
 
 
       <div className="document-req-section">
-        <h1>{docType} Request Form</h1>
+        <h1>{docB} Request Form</h1>
       
 
         <div className="document-req-section-upper">
@@ -1728,14 +1738,14 @@ const handleFileChange = (
             <>
               <div className="document-req-form-container">
                 <div className="document-req-form-container-left-side">
-                  {(docType === "Barangay Certificate" || docType === "Barangay Clearance" 
-                  ||  docType === "Barangay Indigency" || docType === "Business Permit" || docType === "Temporary Business Permit" ||
-                    docType === "Other Documents") 
+                  {(docB === "Barangay Certificate" || docB === "Barangay Clearance" 
+                  ||  docB === "Barangay Indigency" || docB === "Business Permit" || docB === "Temporary Business Permit" ||
+                    docB === "Other Documents") 
                   && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="purpose" className="form-label-document-req">
-                          {docType} Purpose<span className="required">*</span>
+                          {docB} Purpose<span className="required">*</span>
                         </label>
                         <select
                           id="purpose"
@@ -1747,7 +1757,7 @@ const handleFileChange = (
                         >
                           <option value="" disabled>Select purpose</option>
 
-                          {docType === "Barangay Certificate" ? (
+                          {docB === "Barangay Certificate" ? (
                             <>
                               <option value="Residency">Residency</option>
                               <option value="Occupancy /  Moving Out">Occupancy /  Moving Out</option>
@@ -1765,7 +1775,7 @@ const handleFileChange = (
                                 <option key={index} value={title}>{title}</option>
                               ))}
                             </>
-                          ) : docType === "Barangay Clearance" ? (
+                          ) : docB === "Barangay Clearance" ? (
                             <>
                               <option value="Loan">Loan</option>
                               <option value="Bank Transaction">Bank Transaction</option>
@@ -1780,7 +1790,7 @@ const handleFileChange = (
                                 <option key={index} value={title}>{title}</option>
                               ))}
                             </>
-                          ) : docType === "Barangay Indigency" ? (
+                          ) : docB === "Barangay Indigency" ? (
                             <>
                               <option value="No Income">No Income</option>
                               <option value="Public Attorneys Office">Public Attorneys Office</option>
@@ -1795,12 +1805,12 @@ const handleFileChange = (
                                 <option key={index} value={title}>{title}</option>
                               ))}
                             </>
-                          ) : docType === "Business Permit" || docType === "Temporary Business Permit" ? (
+                          ) : docB === "Business Permit" || docB === "Temporary Business Permit" ? (
                             <>
                               <option value="New">New</option>
                               <option value="Renewal">Renewal</option>
                             </>
-                          ) : docType === "Other Documents" ? (
+                          ) : docB === "Other Documents" ? (
                             <>
                               {!isGuest && (
                                 <>
@@ -1822,7 +1832,7 @@ const handleFileChange = (
                   </>
                   )}
 
-                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency")&& (
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docB === "Barangay Indigency")&& (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomePurpose" className="form-label-document-req">Purpose Of No Income:<span className="required">*</span></label>
@@ -1926,7 +1936,7 @@ const handleFileChange = (
                     />
                   </div>
 
-                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docB === "Barangay Certificate") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="CYFrom" className="form-label-document-req">Cohabitation Year From:<span className="required">*</span></label>
@@ -1955,7 +1965,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Clearance") && (
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docB === "Barangay Clearance") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="CYFrom" className="form-label-document-req">Cohabitation Year From:<span className="required">*</span></label>
@@ -2005,7 +2015,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {((clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate") || (clearanceInput.purpose === "Financial Subsidy of Solo Parent" && clearanceInput.docType === "Barangay Indigency")) && (
+                  {((clearanceInput.purpose === "No Income" && clearanceInput.docB === "Barangay Certificate") || (clearanceInput.purpose === "Financial Subsidy of Solo Parent" && clearanceInput.docB === "Barangay Indigency")) && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
@@ -2023,7 +2033,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
+                  {(docB === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="partnerWifeHusbandFullName" className="form-label-document-req">Partner's/Wife's/Husband's Full Name<span className="required">*</span></label>
@@ -2237,7 +2247,7 @@ const handleFileChange = (
                     </div>
                   ))}
 
-                  { (clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") && (
+                  { (clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit") && (
                     <>  
                       <div className="form-group-document-req">
                         <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
@@ -2268,7 +2278,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {docType === "Construction" && (
+                  {docB === "Construction" && (
                     <>
                       <div className="form-group-document-req">
                         <label className="form-label-document-req">Type of Construction Activity<span className="required">*</span></label>
@@ -2478,7 +2488,7 @@ const handleFileChange = (
 
                 
                 <div className="document-req-form-container-right-side">
-                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Certificate")&& (
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docB === "Barangay Certificate")&& (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomePurpose" className="form-label-document-req">Purpose Of No Income:<span className="required">*</span></label>
@@ -2572,7 +2582,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {(docType === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docType === "Barangay Certificate")) && (
+                  {(docB === "Barangay Indigency" || (clearanceInput.purpose === "Residency" && docB === "Barangay Certificate")) && (
                     <>
                       <div className="form-group-document-req">
                         
@@ -2829,7 +2839,7 @@ const handleFileChange = (
                     </>
                   )} */}
 
-                  {(clearanceInput.purpose === "No Income" && clearanceInput.docType === "Barangay Indigency") && (
+                  {(clearanceInput.purpose === "No Income" && clearanceInput.docB === "Barangay Indigency") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="noIncomeChildFName" className="form-label-document-req">Son/Daughter's Name<span className="required">*</span></label>
@@ -2924,7 +2934,7 @@ const handleFileChange = (
                     </div>
                   )}
 
-                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Certificate") && (
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docB === "Barangay Certificate") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
@@ -2967,7 +2977,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {(clearanceInput.purpose === "Residency" && clearanceInput.docType === "Barangay Clearance") && (
+                  {(clearanceInput.purpose === "Residency" && clearanceInput.docB === "Barangay Clearance") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="CYTo" className="form-label-document-req">Cohabitation Year To:<span className="required">*</span></label>
@@ -3010,7 +3020,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {(docType === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
+                  {(docB === "Barangay Certificate" && clearanceInput.purpose === "Cohabitation") && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="cohabitationStartDate" className="form-label-document-req">
@@ -3230,7 +3240,7 @@ const handleFileChange = (
                     </div>
                   ))}
 
-                  {(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit") && (
+                  {(clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit") && (
                     <>  
                       <div className="form-group-document-req">
                         <label htmlFor="businessNature" className="form-label-document-req">Business Nature<span className="required">*</span></label>
@@ -3261,7 +3271,7 @@ const handleFileChange = (
                     </>
                   )}
 
-                  {docType === "Construction"  && (
+                  {docB === "Construction"  && (
                     <>
                       <div className="form-group-document-req">
                         <label htmlFor="projectName" className="form-label-document-req">Project Name<span className="required">*</span></label>
@@ -3538,7 +3548,7 @@ const handleFileChange = (
                         type="file"
                         accept=".jpg,.jpeg,.png"
                         name="signaturejpg"
-                        //required = {docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction"}
+                        //required = {docB === "Temporary Business Permit" || docB === "Business Permit" || docB === "Construction"}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           handleFileChange(e, setFiles, 'signaturejpg');
                         }} 
@@ -3723,16 +3733,16 @@ const handleFileChange = (
 
 
 
-                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !=="Construction" && clearanceInput.purpose !=="Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                {(//docB !=="Temporary Business Permit" && docB !=="Business Permit" && docB !=="Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docB ==="Barangay Certificate" || docB ==="Barangay Indigency" || docB ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) && (
                   <>
                     <label className="form-label-required-documents-uploadany"> Upload any of the following requirements<span className="required">*</span></label>
                   </>
                 )}
 
-                {(//docType !=="Temporary Business Permit" && docType !=="Business Permit" && docType !== "Construction" && clearanceInput.purpose !=="Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                {(//docB !=="Temporary Business Permit" && docB !=="Business Permit" && docB !== "Construction" && clearanceInput.purpose !=="Barangay ID"
+                  docB ==="Barangay Certificate" || docB ==="Barangay Indigency" || docB ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) &&(
                   <>
                     <div className="required-documents-container">
@@ -3745,7 +3755,7 @@ const handleFileChange = (
                             name="barangayIDjpg"
                             type="file"
                             accept=".jpg,.jpeg,.png"
-                            //required={docType === "Temporary Business Permit" || docType === "Business Permit"}
+                            //required={docB === "Temporary Business Permit" || docB === "Business Permit"}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               handleFileChange(e, setFiles2, 'barangayIDjpg');
                             }}
@@ -3802,8 +3812,8 @@ const handleFileChange = (
 
                 
                     <div className="required-documents-container">
-                      {(//docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction"
-                        docType !=="Barangay Certificate" && docType !=="Barangay Clearance" && docType !== "Barangay Indigency" && clearanceInput.purpose !=="Barangay ID" && clearanceInput.purpose !=="First Time Jobseeker"
+                      {(//docB ==="Temporary Business Permit" || docB ==="Business Permit" || docB === "Construction"
+                        docB !=="Barangay Certificate" && docB !=="Barangay Clearance" && docB !== "Barangay Indigency" && clearanceInput.purpose !=="Barangay ID" && clearanceInput.purpose !=="First Time Jobseeker"
                       ) &&(
                         <>
                           <label className="form-label-required-documents"> Valid ID<span className="required">*</span></label>
@@ -3817,7 +3827,7 @@ const handleFileChange = (
                           <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
                         </>
                       )}
-                      {(docType ==="Barangay Certificate" || docType ==="Barangay Clearance" || docType === "Barangay Indigency" || clearanceInput.purpose ==="First Time Jobseeker"
+                      {(docB ==="Barangay Certificate" || docB ==="Barangay Clearance" || docB === "Barangay Indigency" || clearanceInput.purpose ==="First Time Jobseeker"
                         
                       )
                       
@@ -3838,7 +3848,7 @@ const handleFileChange = (
                               name="validIDjpg"
                               type="file"
                               accept=".jpg,.jpeg,.png"
-                              //required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                              //required={(docB === "Temporary Business Permit" || docB === "Business Permit")}
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 handleFileChange(e, setFiles3, 'validIDjpg');
                               }}
@@ -3887,8 +3897,8 @@ const handleFileChange = (
                     </div>
                    
 
-                {(//docType !== "Construction" && docType !== "Temporary Business Permit" && docType !== "Business Permit" && clearanceInput.purpose !== "Barangay ID"
-                  docType ==="Barangay Certificate" || docType ==="Barangay Indigency" || docType ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
+                {(//docB !== "Construction" && docB !== "Temporary Business Permit" && docB !== "Business Permit" && clearanceInput.purpose !== "Barangay ID"
+                  docB ==="Barangay Certificate" || docB ==="Barangay Indigency" || docB ==="Barangay Clearance" || clearanceInput.purpose ==="First Time Jobseeker"
                 ) && (
                   <>
                     <div className="required-documents-container">
@@ -3902,7 +3912,7 @@ const handleFileChange = (
                           type="file"
                           accept=".jpg,.jpeg,.png"
                           name="letterjpg"
-                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
+                          //required={(docB === "Temporary Business Permit" || docB === "Business Permit"|| docB === "Construction")}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             handleFileChange(e,setFiles4, 'letterjpg');
                           
@@ -3959,7 +3969,7 @@ const handleFileChange = (
                   </>
                   )}
                 
-                {(docType ==="Temporary Business Permit" || docType ==="Business Permit" || docType === "Construction") &&(
+                {(docB ==="Temporary Business Permit" || docB ==="Business Permit" || docB === "Construction") &&(
                   <>
                     <div className="required-documents-container">
                         <label className="form-label-required-documents">Certified True Copy of Title of the Property/Contract of Lease<span className="required">*</span></label>
@@ -4023,7 +4033,7 @@ const handleFileChange = (
                   </>
                 )}
 
-                {(docType ==="Temporary Business Permit"||docType ==="Business Permit") &&(
+                {(docB ==="Temporary Business Permit"||docB ==="Business Permit") &&(
                   <>
                     <div className="required-documents-container">
                       <label className="form-label-required-documents">Certified True Copy of DTI Registration<span className="required">*</span></label>
@@ -4033,7 +4043,7 @@ const handleFileChange = (
                           <input
                             id="file-upload6"
                             type="file"
-                            //required={(docType === "Temporary Business Permit" || docType === "Business Permit")}
+                            //required={(docB === "Temporary Business Permit" || docB === "Business Permit")}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               handleFileChange(e, setFiles6, 'dtiRegistration');
                             }} 
@@ -4093,7 +4103,7 @@ const handleFileChange = (
                           <input
                             id="file-upload7"
                             type="file"
-                            //required={(docType === "Temporary Business Permit" || docType === "Business Permit" || docType === "Construction")}
+                            //required={(docB === "Temporary Business Permit" || docB === "Business Permit" || docB === "Construction")}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                               handleFileChange(e, setFiles7, 'isCCTV');
                             }} 
@@ -4146,7 +4156,7 @@ const handleFileChange = (
                   </>
                 )}
 
-                {docType === "Construction" && (
+                {docB === "Construction" && (
                   <>
                     <div className="required-documents-container">
                       <label className="form-label-required-documents"> Certified True Copy of Tax Declaration<span className="required">*</span></label>
@@ -4270,7 +4280,7 @@ const handleFileChange = (
 
                 
 
-                {(docType === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
+                {(docB === "Other Documents" && clearanceInput.purpose === "Barangay ID") && (
                   <div className="required-documents-container">
                     <label className="form-label-required-documents"> 2x2 ID picture</label>
 
@@ -4281,7 +4291,7 @@ const handleFileChange = (
                           type="file"
                           accept=".jpg,.jpeg,.png"
                           name="twoByTwoPicture"
-                          //required={(docType === "Temporary Business Permit" || docType === "Business Permit"|| docType === "Construction")}
+                          //required={(docB === "Temporary Business Permit" || docB === "Business Permit"|| docB === "Construction")}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             handleFileChange(e,setFiles11, 'twoByTwoPicture');
                           

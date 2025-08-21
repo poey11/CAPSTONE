@@ -523,7 +523,7 @@ const confirmAccept = async () => {
             <div className="residentusers-page-main-section">
               {currentPendingUsers.length === 0 ? (
                 <div className="no-result-card">
-                  <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+                  <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
                   <p className="no-results-department">No Results Found</p>
                 </div>
               ) : (
@@ -587,7 +587,7 @@ const confirmAccept = async () => {
             <div className="view-barangayuser-popup" ref={popupRef}>
               <div className="view-user-main-section1">
                 <div className="view-user-header-first-section">
-                  <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                  <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
                 </div>
                 <div className="view-user-header-second-section">
                   <h2 className="gov-info">Republic of the Philippines</h2>
@@ -604,7 +604,7 @@ const confirmAccept = async () => {
                 <div className="view-user-header-body-top-section">
                   <div className="view-user-backbutton-container">
                     <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">

@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { usePathname, useSearchParams} from "next/navigation";
+import { usePathname} from "next/navigation";
 import { auth, db } from "../../db/firebase";
 import {useAuth} from "../../context/authContext";
 import { signOut } from "firebase/auth";
@@ -40,8 +40,6 @@ interface Resident {
 }
 
 const Menu = () => {
-  const searchParams = useSearchParams();
-  const residentId = searchParams.get("id");
   const {user, loading} = useAuth();
   const router = useRouter();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
@@ -252,7 +250,6 @@ case "document":
     );
   }
 
-
 const handleNotificationClick = async (notification: Notification) => {
   console.log("Notification clicked:", notification);
 
@@ -272,15 +269,23 @@ const handleNotificationClick = async (notification: Notification) => {
       console.error("Error marking notification as read:", error);
     }
   }
-
   // Navigation logic
   const type = notification.transactionType;
 
-  if (type === "Online Incident") {
-    router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`);
-  } 
-  else if (type === "Online Request" || type === "Online Service Request") {
-    router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
+  // if (type === "Online Incident") {
+  //   router.push(`/ResidentAccount/Transactions/IncidentTransactions?id=${notification.incidentID}`);
+  // } 
+  // else if (type === "Online Request" || type === "Online Service Request") {
+  //   router.push(`/ResidentAccount/Transactions/DocumentTransactions?id=${notification.requestID}`);
+  // }
+  // else if (type === "Verification") {
+  //   router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
+  // }
+  // else {
+  //   console.log("No navigation triggered for this notification type.");
+  // }
+  if(notification.requestID){
+    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
   }
   else if (type === "Verification") {
     router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
@@ -291,6 +296,7 @@ const handleNotificationClick = async (notification: Notification) => {
   else {
     console.log("No navigation triggered for this notification type.");
   }
+
 };
 
 
@@ -313,7 +319,7 @@ const handleDeleteNotification = async (notificationId: string) => {
   {/* Add new links as we go */}
   <div className="navbar-container">
     <div className="navbar-card">
-      <img src="/images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
+      <img src="/Images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
 
       <div className="navbar-links">
         <div className="navbar-indiv-container">
@@ -335,7 +341,7 @@ const handleDeleteNotification = async (notificationId: string) => {
         <div className="dropdown-Container">
           <div className="menu-section-container">
             <p className="dropdown-item-resident">Services</p>
-            <img src="/images/down-arrow.png" className="dropdown-icon" />
+            <img src="/Images/down-arrow.png" className="dropdown-icon" />
           </div>
           <div className="Dropdown-services"> {/* CHANGE HERE */}
             <Link href="/services"><p>Request Documents</p></Link>
@@ -365,7 +371,7 @@ const handleDeleteNotification = async (notificationId: string) => {
           <div className="dropdown-Container">
             <div className="menu-section-container">
               <p className="dropdown-item-resident">Officials</p>
-              <img src="/images/down-arrow.png" className="dropdown-icon" />
+              <img src="/Images/down-arrow.png" className="dropdown-icon" />
             </div>
             <div className="Dropdown">
               <Link href="/OfficialsPage">
@@ -391,7 +397,7 @@ const handleDeleteNotification = async (notificationId: string) => {
             <div className="dropdown-Container-notifications">
               <div className="dropdown-item-no-hover-notifications">
                 <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
-                  <img src="/images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
+                  <img src="/Images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                   {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                 </p>
               </div>
@@ -417,12 +423,12 @@ const handleDeleteNotification = async (notificationId: string) => {
                             </div>
                             <div className="unread-icon-section">
                               {message.isRead === false && (
-                                <img src="/images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
+                                <img src="/Images/unread-icon.png" alt="Unread Icon" className="unread-icon" />
                               )}
                             </div>
                             <div className="delete-icon-section">
                               <button className="delete-btn" onClick={(e) => { e.stopPropagation(); handleDeleteNotification(message.id); }}>
-                                <img src="/images/Delete.png" alt="Delete" className="delete-icon-image" />
+                                <img src="/Images/delete.png" alt="Delete" className="delete-icon-image" />
                               </button>
                             </div>
                           </div>

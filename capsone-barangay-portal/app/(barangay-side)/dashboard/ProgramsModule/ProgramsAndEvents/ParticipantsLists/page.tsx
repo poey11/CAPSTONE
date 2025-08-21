@@ -441,14 +441,14 @@ export default function ParticipantsList() {
       <div className="program-redirectionpage-section">
         <button className="program-redirection-buttons" onClick={handleEditClick}>
           <div className="program-redirection-icons-section">
-            <img src="/images/audience.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/Images/audience.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Program Details</h1>
         </button>
 
         <button className="program-redirection-buttons-selected" onClick={handleParticipantsClick}>
           <div className="program-redirection-icons-section">
-            <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
+            <img src="/Images/team.png" alt="user info" className="program-redirection-icons-info" />
           </div>
           <h1>Participants</h1>
         </button>
@@ -458,7 +458,7 @@ export default function ParticipantsList() {
         <div className="edit-program-main-section1">
           <div className="edit-program-main-section1-left">
             <button onClick={handleBack}>
-              <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+              <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
             <h1>
               Participants Lists

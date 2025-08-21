@@ -278,7 +278,7 @@ export default function EditBarangayAccount() {
                 <div className="editbrgyuser-main-section1">
                     <div className="editbrgyuser-main-section1-left">
                         <button onClick={handleBack}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> Edit Barangay User </h1>

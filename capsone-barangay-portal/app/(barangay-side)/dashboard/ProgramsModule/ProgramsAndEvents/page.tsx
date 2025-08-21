@@ -25,7 +25,7 @@ type Program = {
   programName: string;
   approvalStatus: "Approved" | "Pending" | "Rejected";
   progressStatus: "Ongoing" | "Upcoming" | "Completed" | "Rejected"; // includes Rejected
-  activeStatus: "Active" | "Inactive";
+  activeStatus: "Active" | "Inactive" | "Rejected"; // includes Rejected
   createdAt?: Timestamp | null;
   dateCreated: string;
 };
@@ -66,9 +66,9 @@ const decideStatuses = (p: any): {
 } => {
   const approval: Program["approvalStatus"] = p?.approvalStatus ?? "Pending";
 
-  // 🔴 If rejected, stop here.
+  // If rejected, stop here.
   if (approval === "Rejected") {
-    return { progress: "Rejected", active: "Inactive" };
+    return { progress: "Rejected", active: "Rejected" };
   }
 
   // Otherwise compute date-based progress

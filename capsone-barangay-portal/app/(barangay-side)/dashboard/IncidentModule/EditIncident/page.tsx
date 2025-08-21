@@ -592,7 +592,7 @@ const handleHearingSection = () => {
           <div className="edit-incident-redirectionpage-section">
             <button className="edit-incident-redirection-buttons-selected">
               <div className="edit-incident-redirection-icons-section">
-                <img src="/images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
+                <img src="/Images/profile-user.png" alt="user info" className="redirection-icons-info"/> 
               </div>
               <h1>Incident Information</h1>
             </button>
@@ -602,7 +602,7 @@ const handleHearingSection = () => {
                 <div className="dialogue-dropdown">
                   <button className="edit-incident-redirection-buttons">
                     <div className="edit-incident-redirection-icons-section">
-                      <img src="/images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                      <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
                     </div>
                     <h1>Dialogue Meeting</h1>
                   </button>
@@ -638,7 +638,7 @@ const handleHearingSection = () => {
                 <div className="hearing-dropdown">
                   <button className="edit-incident-redirection-buttons">
                     <div className="edit-incident-redirection-icons-section">
-                      <img src="/images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
+                      <img src="/Images/group-discussion.png" alt="user info" className="redirection-icons-hearing"/> 
                     </div>
                     <h1>Hearing Section</h1>
                   </button>
@@ -722,7 +722,7 @@ const handleHearingSection = () => {
             <div className="edit-incident-main-section1">
               <div className="edit-incident-main-section1-left">
                 <button onClick={handleBack}>
-                  <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                  <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                 </button>
 
                 <h1> Incident Details </h1>

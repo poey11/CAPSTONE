@@ -156,7 +156,7 @@ export default function view() {
                     onClick={handdlePrintDocument}
                     >
                  <div className="newdoc-redirection-icons">
-                     <img src="/images/generatedoc.png" alt="user info" className="newdoc-redirection-icons-info" />
+                     <img src="/Images/generatedoc.png" alt="user info" className="newdoc-redirection-icons-info" />
                  </div>
                   <h1> Generate Document</h1>
                 </button>
@@ -169,7 +169,7 @@ export default function view() {
 
                   <div className="newdoc-main-section1-left">
                      <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                       </button>
 
                       <h1> {data.purpose} Request Details   </h1>

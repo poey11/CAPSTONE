@@ -542,7 +542,7 @@ useEffect(() => {
                   <p className="error">{error}</p>
                     ) : filteredMainRequests.length === 0 ? (
                   <div className="no-result-card-inbarangay" /* edited this class */>
-                    <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
+                    <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-inbarangay" />
                     <p className="no-results-inbarangay">No Results Found</p>
                   </div>
                 ) : (
