@@ -1384,7 +1384,6 @@ animation: fadeSlideIn 0.5s ease-out;
 }
 
 .program-popup h1 {
-  margin-bottom: 30px;
   font-size: 1.1rem;
   text-align: center;
   color: #dd3327;
@@ -1845,4 +1844,34 @@ input:checked + .slider::before {
     font-size: 15px;
     color: #2C3E50;
     font-weight: bold;
+}
+
+.add-non-resident-button{
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 140px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+  background-color: #4caf50; 
+}
+
+.add-non-resident-button p{
+  font-size: 14px;
+  color: white;
+}
+
+
+.add-non-resident-button:hover {
+  background-color: #3d8c40; 
+} 
+
+.manual-add-button-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
 }

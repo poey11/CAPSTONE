@@ -551,6 +551,17 @@ export default function ParticipantsList() {
             <h2>Residents List</h2>
             <h1>* Please select Resident's Name *</h1>
 
+            <div className="manual-add-button-section">
+              <button
+                className="add-non-resident-button"
+                onClick={openManualEntry}
+                title="Add a non-resident walk-in"
+              >
+                Manual Entry <br/>
+                <p>(non-residents)</p>
+              </button>
+            </div>
+
             <input
               type="text"
               placeholder="Search Resident's Name"
@@ -593,15 +604,7 @@ export default function ParticipantsList() {
               )}
             </div>
 
-            <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-              <button
-                className="program-yes-button"
-                onClick={openManualEntry}
-                title="Add a non-resident walk-in"
-              >
-                Add Manually (Non-resident)
-              </button>
-            </div>
+            
           </div>
         </div>
       )}
