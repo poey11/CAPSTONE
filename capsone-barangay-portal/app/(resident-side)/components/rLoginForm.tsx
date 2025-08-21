@@ -261,7 +261,7 @@ const rLoginForm:React.FC = () => {
                 </div>
 
                 <div className="login-right-panel">
-                     <img src="/Images/QClogo.png" alt="Quezon City Logo" className="qc-logo" />
+                     <img src="/Images/QCLogo.png" alt="Quezon City Logo" className="qc-logo" />
                          <h2>WELCOME TO <br />BARANGAY FAIRVIEW</h2>
                          <p className={`fade-text ${fadeState}`}>
                             {messages[index]}

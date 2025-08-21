@@ -432,7 +432,7 @@ TRY NEW
   width: 100%;
   scroll-snap-align: start;
   background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+              url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
   display: flex;
   justify-content: center;
   align-items: center;

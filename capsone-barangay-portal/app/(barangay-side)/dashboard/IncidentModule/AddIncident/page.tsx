@@ -758,7 +758,7 @@ const handleSubmit = async (event: React.FormEvent) => {
               <div className="section-1-left-side-add">
 
                 <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-add"/> 
+                <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-add"/> 
                 </button>
 
                 <h1> Add New Incident </h1>

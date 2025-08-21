@@ -769,7 +769,7 @@ if (!mounted) return null;
             {index === 0 && (
               <>
                 <div className="counts-card-left-side">
-                  <img src="/images/register.png" alt="Visible Icon" className="counts-icon-register" />
+                  <img src="/Images/register.png" alt="Visible Icon" className="counts-icon-register" />
                 </div>
                 <div className="counts-card-right-side">
                   <Link href="/dashboard/admin/ResidentUsers">
@@ -785,7 +785,7 @@ if (!mounted) return null;
             {index === 1 && (
               <>
                 <div className="counts-card-left-side">
-                  <img src="/images/visible.png" alt="Visible Icon" className="counts-icon-view" />
+                  <img src="/Images/visible.png" alt="Visible Icon" className="counts-icon-view" />
                 </div>
                 <div className="counts-card-right-side">
                   <p className="title">Total Homepage Visits</p>
@@ -797,7 +797,7 @@ if (!mounted) return null;
             {index === 2 && (
               <>
                 <div className="counts-card-left-side">
-                  <img src="/images/avatar.png" alt="Visible Icon" className="counts-icon-officer" />
+                  <img src="/Images/avatar.png" alt="Visible Icon" className="counts-icon-officer" />
                 </div>
                 <div className="counts-card-right-side">
                   <p className="title">Total Barangay Officials</p>

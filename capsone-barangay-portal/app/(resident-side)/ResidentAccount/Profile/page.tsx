@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Eye, EyeOff } from "lucide-react";
@@ -8,15 +8,18 @@ import "@/CSS/ResidentAccount/profile.css";
 
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { auth, db, storage } from "@/app/db/firebase"; // Ensure 'auth' is imported
+import React from "react";
 
 
 
 
 
-export default function SettingsPageResident() {
+export default function SettingsPageResident({searchParams}: any) {
+    const params = React.use(searchParams);
+    const { id: residentId }:any = params;
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const residentId = searchParams.get("id");
+    // const searchParams = useSearchParams();
+    // const residentId = searchParams.get("id");
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

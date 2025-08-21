@@ -319,7 +319,7 @@ const handleSubmitClick = async () => {
 
       setPopupMessage("Online Report Submitted Succesfuly!!");
       setShowPopup(true);
-      await handleSMSToAssignedOfficer(); // Send SMS to assigned officer
+      //await handleSMSToAssignedOfficer(); // Send SMS to assigned officer
       
       const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
@@ -379,7 +379,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
       incidentID: formData.id,
       message: `Your incident report (${formData.caseNumber}) has been updated to "${formData.status}".`,
       timestamp: new Date(),
-      transactionType: "Online Incident",
+      transactionType: "IncidentReport",
       isRead: false,
     });
 
@@ -390,7 +390,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
         incidentID: formData.id,
         message: `Respondent information for your incident report (${formData.caseNumber}) has been updated.`,
         timestamp: new Date(),
-        transactionType: "Online Incident",
+        transactionType: "IncidentReport",
         isRead: false,
       });
     }
@@ -404,7 +404,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
         timestamp: new Date(),
         isRead: false,
         incidentID: formData.id,
-        transactionType: "Online Assigned Incident"
+        transactionType: "IncidentReport"
       });
     }
 

@@ -3,7 +3,7 @@ import { PDFDocument, PDFTextField, TextAlignment } from "pdf-lib";
 import { storage } from '@/app/db/firebase';
 import { ref, getDownloadURL } from 'firebase/storage';
 
-export async function POST(req: NextRequest, res: NextResponse) {
+export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { location, pdfTemplate, data,centerField = []} = body;

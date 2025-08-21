@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="footer-top">
           <div className="footer-section1">
             <img
-              src="/images/brgylogo.png"
+              src="/Images/brgylogo.png"
               alt="Barangay Logo"
               className="footer-logo"
             />
