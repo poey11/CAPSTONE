@@ -678,7 +678,7 @@ const togglePredefinedOpen = () => {
             <button onClick={handleBack}>
               <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-            <h1> Program Details </h1>
+            <h1> {programName} </h1>
           </div>
 
           <div className="action-btn-section-program">
