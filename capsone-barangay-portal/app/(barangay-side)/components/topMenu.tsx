@@ -37,6 +37,7 @@ type BarangayNotification = {
   accID?: string;
   respondentID?: string;
   programID?: string;
+  participantID?: string;
 };
 
 export default function TopMenu() {
@@ -275,11 +276,14 @@ export default function TopMenu() {
     } else if (
       transactionType === "Program Suggestion" ||
       transactionType === "Program Decision" ||
-      transactionType === "Program Enrollment" ||
       transactionType === "Program Added" || 
       transactionType === "Program Submission"
     ) {
       router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programID}`);
+    } else if (
+      transactionType === "Program Registration" 
+    ) {
+      router.push(`/dashboard/ProgramsModule/ProgramsAndEvents?section=participants`);
     } else if (
       ["Online Service Request", "Online Assigned Service Request", "Service Request", "Assigned Service Request"].includes(
         transactionType
