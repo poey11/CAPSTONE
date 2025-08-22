@@ -214,6 +214,11 @@ const router = useRouter();
   // prefilled ID for verified users
   const [preVerifiedIdUrl, setPreVerifiedIdUrl] = useState<string | null>(null);
 
+  //Popups
+    const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+    const [pendingRole, setPendingRole] = useState<Role | null>(null);
+
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastError, setToastError] = useState(false);
@@ -609,6 +614,28 @@ const router = useRouter();
     }
   };
 
+
+
+
+// open popup
+const handleSubmitClick = (role: Role) => {
+  setPendingRole(role);
+  setShowSubmitPopup(true);
+};
+
+// confirm from popup
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+  if (pendingRole) {
+    await handleSubmit(pendingRole);
+    setPendingRole(null);
+  }
+};
+
+
+
+
+  
   if (!program) {
     return (
       <main className="main-container-specific">
@@ -792,11 +819,12 @@ const router = useRouter();
 
                     {!reached && selectedAction === action.key && (
                       <AnimatePresence>
-                        <motion.form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handleSubmit(action.key);
-                          }}
+                      <motion.form
+                        ref={formRef}
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleSubmitClick(action.key); // show popup first
+                        }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 20 }}
@@ -999,6 +1027,7 @@ const router = useRouter();
           </div>
         )}
       </section>
+      
 
       {toastVisible && (
         <div
@@ -1018,6 +1047,22 @@ const router = useRouter();
           </div>
         </div>
       )}
+
+
+
+         {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-online">
+                <div className="confirmation-popup-online">
+                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                <p>Are you sure you want to submit?</p>
+                <div className="yesno-container-add">
+                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                </div>
+                </div>
+            </div>
+            )}
+
     </main>
   );
 }
