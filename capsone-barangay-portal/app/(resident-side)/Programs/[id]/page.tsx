@@ -554,25 +554,29 @@ export default function SpecificProgram() {
     return urls;
   };
 
-  const handleSubmit = async (role: Role) => {
-    if (!program) return;
-    const gate = checkEligibilityForRole(role);
-    if (!gate.ok) return showToast(gate.msg || "Not eligible.", true);
+const handleSubmit = async (role: Role) => {
+  if (!program) return;
+  const gate = checkEligibilityForRole(role);
+  if (!gate.ok) return showToast(gate.msg || "Not eligible.", true);
 
-    if (residentId && alreadyRegistered) {
-      return showToast("You are already enlisted in this program.", true);
-    }
+  if (residentId && alreadyRegistered) {
+    return showToast("You are already enlisted in this program.", true);
+  }
 
-    const prefilled: Record<string, string> = {};
-    if (isVerifiedResident && preVerifiedIdUrl) {
-      prefilled["validIDjpg"] = preVerifiedIdUrl;
-    }
+  const prefilled: Record<string, string> = {};
+  if (isVerifiedResident && preVerifiedIdUrl) {
+    prefilled["validIDjpg"] = preVerifiedIdUrl;
+  }
 
-    const uidOrGuest = user?.uid || "guest";
-    const uploadedFiles = await uploadAllFiles(program.id, uidOrGuest, prefilled);
+  const uidOrGuest = user?.uid || "guest";
+  const uploadedFiles = await uploadAllFiles(program.id, uidOrGuest, prefilled);
 
-    try {
-      await addDoc(collection(db, "ProgramsParticipants"), {
+  try {
+    const registrantName =
+      (formData.fullName ||
+        `${formData.firstName || ""} ${formData.lastName || ""}`.trim()) || "Unknown";
+
+      const newRegRef = await addDoc(collection(db, "ProgramsParticipants"), {
         programId: program.id,
         programName: program.programName,
         residentId: residentId || null,
@@ -589,18 +593,45 @@ export default function SpecificProgram() {
         emailAddress: formData.emailAddress || "",
         location: formData.location || "",
         dateOfBirth: formData.dateOfBirth || "",
-        age: userAge ?? null, // stored for convenience
+        age: userAge ?? null,
         fields: formData,
         files: uploadedFiles,
       });
 
-      if (typeof window !== "undefined") {
-        window.location.reload();
+      const roleLabel = role === "Volunteer" ? "volunteer" : "participant";
+      await addDoc(collection(db, "BarangayNotifications"), {
+        message: `A new ${roleLabel} has registered for ${program.programName}. Name: ${registrantName}. Registration ID: ${newRegRef.id}`,
+        timestamp: new Date(),
+        isRead: false,
+        transactionType: "Program Registration",
+        recipientRole: "Assistant Secretary",
+        participantID: newRegRef.id,
+        programID: program.id,
+        accID: user?.uid || "",
+      });
+
+      if (user?.uid) {
+        await addDoc(collection(db, "Notifications"), {
+          message: `You have successfully registered as a ${roleLabel} for ${program.programName}. Please wait to be contacted regarding your registration status. Registration ID: ${newRegRef.id}`,
+          timestamp: new Date(),
+          isRead: false,
+          transactionType: "Program Registration",
+          participantID: newRegRef.id,
+          recipientUid: user.uid,
+          residentID: residentId || user.uid,
+          programId: program.id,             
+        });
       }
-    } catch {
-      showToast("Something went wrong. Please try again.", true);
+
+    if (typeof window !== "undefined") {
+      window.location.reload();
     }
-  };
+  } catch (err) {
+    console.error(err);
+    showToast("Something went wrong. Please try again.", true);
+  }
+};
+
 
   if (!program) {
     return (
