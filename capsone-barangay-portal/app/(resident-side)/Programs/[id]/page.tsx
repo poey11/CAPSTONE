@@ -913,105 +913,89 @@ const confirmSubmit = async () => {
                             const prefillIsPdf = (preVerifiedIdUrl || "").toLowerCase().endsWith(".pdf");
 
                             return (
-                              <div className="form-group-specific" key={`ff-${i}`}>
-                                <label className="form-label-specific">
-                                  {label} <span className="required">*</span>
-                                </label>
+                
+                        <div className="form-group-specific" key={`ff-${i}`}>
+                          <label className="form-label-specific">
+                            {label} <span className="required">*</span>
+                          </label>
 
-                                {usePrefill ? (
-                                  <div className="prefilled-file-notice">
-                                    <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6 }}>
+                          {usePrefill || preview?.url ? (
+                            <div className="prefilled-file-notice">
+                              {usePrefill ? (
+                                <>
+                                  {!prefillIsPdf && preVerifiedIdUrl && (
+                                    <a
+                                      href={preVerifiedIdUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title={`Open ${label} in a new tab`}
+                                    >
+                                      <img
+                                        src={preVerifiedIdUrl}
+                                        alt={`${label} preview`}
+                                        className="prefilled-file-thumbnail"
+                                      />
+                                    </a>
+                                  )}
+                                  <div className="prefilled-file-details">
+                                    <div className="prefilled-file-text">
                                       Using your verified ID on file.
                                     </div>
-
                                     {preVerifiedIdUrl && (
-                                      prefillIsPdf ? (
-                                        <a
-                                          href={preVerifiedIdUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="prefilled-file-link"
-                                        >
-                                          Open PDF in new tab
-                                        </a>
-                                      ) : (
-                                        <>
-                                          <a
-                                            href={preVerifiedIdUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            title={`Open ${label} in a new tab`}
-                                          >
-                                            <img
-                                              src={preVerifiedIdUrl}
-                                              alt={`${label} preview`}
-                                              style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
-                                            />
-                                          </a>
-                                          <a
-                                            href={preVerifiedIdUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="prefilled-file-link"
-                                            style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
-                                          >
-                                            Open full view
-                                          </a>
-                                        </>
-                                      )
+                                      <a
+                                        href={preVerifiedIdUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="prefilled-file-link"
+                                      >
+                                        {prefillIsPdf ? "Open PDF in new tab" : "Open full view"}
+                                      </a>
                                     )}
                                   </div>
-                                ) : (
-                                  <>
-                                    <input
-                                      type="file"
-                                      accept="image/*,application/pdf,.pdf"
-                                      className="form-input-specific"
-                                      required
-                                      onChange={(e) => onFileChange(f.name, e.currentTarget)}
-                                    />
+                                </>
+                              ) : (
+                                <>
+                                  {!preview.isPdf ? (
+                                    <a
+                                      href={preview.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title={`Open ${label} in a new tab`}
+                                    >
+                                      <img
+                                        src={preview.url}
+                                        alt={`${label} preview`}
+                                        className="prefilled-file-thumbnail"
+                                      />
+                                    </a>
+                                  ) : null}
 
-                                    {(preview?.url) && (
-                                      <div className="file-name-image-display" style={{ marginTop: 8 }}>
-                                        {preview.isPdf ? (
-                                          <a
-                                            href={preview.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="file-link"
-                                          >
-                                            Open PDF in new tab
-                                          </a>
-                                        ) : (
-                                          <>
-                                            <a
-                                              href={preview.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              title={`Open ${label} in a new tab`}
-                                            >
-                                              <img
-                                                src={preview.url}
-                                                alt={`${label} preview`}
-                                                style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
-                                              />
-                                            </a>
-                                            <a
-                                              href={preview.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="file-link"
-                                              style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
-                                            >
-                                              Open full view
-                                            </a>
-                                          </>
-                                        )}
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                              </div>
+                                  <div className="prefilled-file-details">
+                                    <div className="prefilled-file-text">
+                                      {preview.isPdf ? "Uploaded PDF" : "Uploaded Image"}
+                                    </div>
+                                    <a
+                                      href={preview.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="prefilled-file-link"
+                                    >
+                                      {preview.isPdf ? "Open PDF in new tab" : "Open full view"}
+                                    </a>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <input
+                              type="file"
+                              accept="image/*,application/pdf,.pdf"
+                              className="form-input-specific"
+                              required
+                              onChange={(e) => onFileChange(f.name, e.currentTarget)}
+                            />
+                          )}
+                        </div>        
                             );
                           })}
 

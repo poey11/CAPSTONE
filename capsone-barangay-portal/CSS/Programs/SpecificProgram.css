@@ -588,3 +588,66 @@ For confirmation
 }
 
 
+
+
+
+
+
+/*
+Valid id section
+*/
+
+.prefilled-file-notice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f9fafb;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+
+.prefilled-file-thumbnail {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: transform 0.2s ease;
+}
+
+.prefilled-file-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.prefilled-file-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.prefilled-file-text {
+  font-size: 14px;
+  color: #214666;
+  font-weight: 500;
+}
+
+.prefilled-file-link {
+  font-size: 13px;
+  color: #DF7426;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.prefilled-file-link:hover {
+  text-decoration: underline;
+}
+
+
+
+/*
+For not prefilled case
+*/
+
