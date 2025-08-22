@@ -426,14 +426,7 @@ export default function EditResident() {
         }
                 
 
-        /*
-      const docRef = doc(db, "Residents", residentId!);
-      await updateDoc(docRef, {
-        ...formData,
-        verificationFilesURLs,
-        identificationFileURL,
-        updatedBy: session?.user?.position,
-      });*/
+
       const docRef = doc(db, "Residents", residentId!);
       await updateDoc(doc(db, "Residents", residentId as string), {
         ...formData,
@@ -488,6 +481,59 @@ export default function EditResident() {
             await updateDoc(doc(db, "KasambahayList", docSnap.id), updates);
           }
         }
+
+        // --- Update ServiceRequests ---
+        {
+          const fullName = `${formData.firstName} ${formData.middleName ? formData.middleName + " " : ""}${formData.lastName}`.trim();
+
+          const honorific = (() => {
+            if (formData.sex === "Male") return "Mr.";
+            if (formData.sex === "Female") return "Ms.";
+            return ""; // fallback if sex not provided
+          })();
+
+          const calcAge = (dobStr?: string) => {
+            if (!dobStr) return formData.age || 0;
+            const dob = new Date(dobStr);
+            if (Number.isNaN(dob.getTime())) return formData.age || 0;
+            const today = new Date();
+            let a = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+            return a;
+          };
+
+          const normalizedDOB = formData.dateOfBirth || "";
+          const computedAge = calcAge(normalizedDOB);
+
+          const srQuery = query(
+            collection(db, "ServiceRequests"),
+            where("residentId", "==", residentId)
+          );
+
+          const srSnap = await getDocs(srQuery);
+
+          const srUpdates = {
+            requestorFname: fullName,
+            requestor: `${honorific ? honorific + " " : ""}${fullName}`.trim(),
+            requestorMrMs: honorific,
+            gender: formData.sex || "",
+            receivalName: fullName,
+            dateOfResidency: formData.dateOfResidency || "",
+            contact: formData.contactNumber || "",
+            birthday: normalizedDOB,            // aka dateOfBirth
+            citizenship: formData.citizenship || "",
+            civilStatus: formData.civilStatus || "",
+            age: computedAge,
+          };
+
+          // Update each matching service request
+          for (const d of srSnap.docs) {
+            const srRef = doc(db, "ServiceRequests", d.id);
+            await updateDoc(srRef, srUpdates);
+          }
+        }
+
     
 
         // Update in VotersList
