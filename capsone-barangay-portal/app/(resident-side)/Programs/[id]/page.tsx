@@ -477,6 +477,7 @@ const router = useRouter();
   }, [program?.ageRestriction]);
 
   // final Age Limit line in the UI
+  //di ko na ginamit
   const ageLimitText = `Volunteers: 17+ • Participants: ${participantAgeLimitText}`;
 
   // age eligibility check (role-aware)
@@ -725,34 +726,48 @@ const confirmSubmit = async () => {
         <div className="programs-details-specific">
           <div className="program-detail-card-specific">
             <h3>Schedule</h3>
-            <p>
-              {datePart}
-              {timePart && (<><br />{timePart}</>)}
-            </p>
+
+              <div className="values">
+                <p> {datePart} </p>
+                <p> {timePart} </p>
+              </div>
           </div>
 
           <div className="program-detail-card-specific">
             <h3>Location</h3>
-            <p>{program.location || ""}</p>
+              <div className="values">
+                 <p>{program.location || ""}</p>
+              </div>
+           
           </div>
 
           <div className="program-detail-card-specific">
             <h3>Participants</h3>
-            <p>{participantsLabel}</p>
+              <div className="values">
+                  <p>{participantsLabel}</p>
+              </div>
+           
           </div>
 
           {hasVolunteerCap && (
             <div className="program-detail-card-specific">
               <h3>Volunteers</h3>
-              <p>{volunteersLabel}</p>
+              <div className="values">
+                 <p>{volunteersLabel}</p>
+              </div>
+             
             </div>
           )}
 
           {/* Age Limit box */}
-          <div className="program-detail-card-specific">
-            <h3>Age Limit</h3>
-            <p>{ageLimitText}</p>
+        <div className="program-detail-card-specific">
+          <h3>Age Limit</h3>
+          <div className="values">
+            <span>Volunteers: 17+ years old</span>
+            <span >Participants: {participantAgeLimitText} years old</span>
           </div>
+        </div>
+
         </div>
       </section>
 

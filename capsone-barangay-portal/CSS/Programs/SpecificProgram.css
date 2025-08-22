@@ -364,6 +364,7 @@ border-radius: 15px;
   text-align: center;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+  
 }
 
 .program-detail-card-specific:hover {
@@ -664,6 +665,13 @@ Valid id section
 
 
 /*
-For not prefilled case
+For age 
 */
 
+.values{
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
