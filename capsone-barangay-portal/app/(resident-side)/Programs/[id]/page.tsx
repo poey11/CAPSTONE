@@ -465,20 +465,22 @@ const router = useRouter();
   const userAge = useMemo(() => computeAgeFromDOB(userDOB), [userDOB]);
 
   // helper: build participant age limit text from program.ageRestriction
-  const participantAgeLimitText = useMemo(() => {
-    const ar = program?.ageRestriction;
-    if (!ar || ar.noAgeLimit) return "none";
-    const min = ar.minAge ?? null;
-    const max = ar.maxAge ?? null;
-    if (min != null && max != null) return `${min} - ${max}`;
-    if (min != null) return `≥ ${min}`;
-    if (max != null) return `≤ ${max}`;
-    return "none";
-  }, [program?.ageRestriction]);
+const participantAgeLimitText = useMemo(() => {
+  const ar = program?.ageRestriction;
+  if (!ar || ar.noAgeLimit) return null;
 
-  // final Age Limit line in the UI
-  //di ko na ginamit
-  const ageLimitText = `Volunteers: 17+ • Participants: ${participantAgeLimitText}`;
+  const min = ar.minAge ?? null;
+  const max = ar.maxAge ?? null;
+  const nilOrZero = (v: number | null | undefined) => v == null || v === 0;
+
+  // Treat null or 0 as "no limit"
+  if (nilOrZero(min) && nilOrZero(max)) return null;
+
+  if (!nilOrZero(min) && !nilOrZero(max)) return `${min}-${max}`;
+  if (!nilOrZero(min)) return `${min}+`;
+  if (!nilOrZero(max)) return `≤ ${max}`;
+  return null;
+}, [program?.ageRestriction]);
 
   // age eligibility check (role-aware)
   const checkAgeEligibility = (role: Role): { ok: boolean; msg?: string } => {
@@ -610,7 +612,7 @@ const handleSubmit = async (role: Role) => {
 
       const roleLabel = role === "Volunteer" ? "volunteer" : "participant";
       await addDoc(collection(db, "BarangayNotifications"), {
-        message: `A new ${roleLabel} has registered for ${program.programName}. Name: ${registrantName}. Registration ID: ${newRegRef.id}`,
+        message: `A new ${roleLabel} has registered for ${program.programName}. Name: ${registrantName}.`,
         timestamp: new Date(),
         isRead: false,
         transactionType: "Program Registration",
@@ -622,7 +624,7 @@ const handleSubmit = async (role: Role) => {
 
       if (user?.uid) {
         await addDoc(collection(db, "Notifications"), {
-          message: `You have successfully registered as a ${roleLabel} for ${program.programName}. Please wait to be contacted regarding your registration status. Registration ID: ${newRegRef.id}`,
+          message: `You have successfully registered as a ${roleLabel} for ${program.programName}. Please wait to be contacted regarding your registration status.`,
           timestamp: new Date(),
           isRead: false,
           transactionType: "Program Registration",
@@ -789,8 +791,7 @@ const confirmSubmit = async () => {
           <h3>Age Limit</h3>
           <div className="values">
             <span>Volunteers: 17+ years old</span>
-            <span >Participants: {participantAgeLimitText} years old</span>
-          </div>
+            <span>Participants: {participantAgeLimitText ? `${participantAgeLimitText} years old` : "None"}</span>          </div>
         </div>
 
         </div>
