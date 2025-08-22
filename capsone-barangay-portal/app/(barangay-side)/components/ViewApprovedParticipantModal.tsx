@@ -41,7 +41,22 @@ const PRETTY_LABELS: Record<string, string> = {
   emailAddress: "Email Address",
   location: "Location",
   validIDjpg: "Valid ID",
+  dateOfBirth: "Date of Birth",
+  age: "Age",
 };
+
+// helper: compute age from YYYY-MM-DD
+function computeAgeFromDOB(dobYMD?: string): number | null {
+  if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
+  const [y, m, d] = dobYMD.split("-").map(Number);
+  const dob = new Date(y, m - 1, d);
+  if (Number.isNaN(dob.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const mDiff = now.getMonth() - dob.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && now.getDate() < dob.getDate())) age--;
+  return age >= 0 && age <= 200 ? age : null;
+}
 
 export default function ViewApprovedParticipantModal({
   isOpen,
@@ -131,10 +146,9 @@ export default function ViewApprovedParticipantModal({
 
   const labelFor = (name: string) => PRETTY_LABELS[name] || name;
 
-  //  Derived display data (strict to emailAddress only)
-  const fieldsMap: Record<string, string> = useMemo(() => {
+  // Derived display data (emailAddress preferred, bring top-level + fields)
+  const fieldsMap: Record<string, any> = useMemo(() => {
     const base = (fullDoc?.fields || {}) as Record<string, any>;
-    // promote meaningful fields & enforce emailAddress only
     const top: Record<string, any> = {
       firstName: fullDoc?.firstName,
       lastName: fullDoc?.lastName,
@@ -144,9 +158,19 @@ export default function ViewApprovedParticipantModal({
       programName: fullDoc?.programName,
       role: fullDoc?.role ?? participant?.role ?? "",
       fullName: fullDoc?.fullName ?? participant?.fullName ?? "",
+      dateOfBirth: fullDoc?.dateOfBirth ?? base?.dateOfBirth ?? "",
+      computedAge: typeof fullDoc?.computedAge === "number" ? fullDoc.computedAge : undefined,
     };
     return { ...base, ...top };
   }, [fullDoc, participant?.emailAddress, participant?.role, participant?.fullName]);
+
+  // DOB + Age derived values
+  const dobValue: string = (fieldsMap.dateOfBirth || "").toString();
+  const ageFromDOB = computeAgeFromDOB(dobValue);
+  const ageValue: string =
+    typeof fieldsMap.computedAge === "number"
+      ? String(fieldsMap.computedAge)
+      : (ageFromDOB != null ? String(ageFromDOB) : "");
 
   // Files map with legacy support. We'll render by program order later.
   const filesMap: Record<string, string> = useMemo(() => {
@@ -161,9 +185,11 @@ export default function ViewApprovedParticipantModal({
   // Build ordered text fields to show: program-defined order; if none, fallback to common fields
   const orderedTextNames: string[] = useMemo(() => {
     if (reqTextFields.length > 0) return reqTextFields.map((f) => f.name);
-    // fallback order if program has no config
-    return ["firstName", "lastName", "contactNumber", "emailAddress", "location"];
-  }, [reqTextFields]);
+    // fallback order if program has no config (include DOB if present)
+    const base = ["firstName", "lastName", "contactNumber", "emailAddress", "location"];
+    if (dobValue) base.push("dateOfBirth");
+    return base;
+  }, [reqTextFields, dobValue]);
 
   // Build ordered file keys to show: program-defined first (keeping any present), then any extras (alpha)
   const orderedFileNames: string[] = useMemo(() => {
@@ -189,14 +215,8 @@ export default function ViewApprovedParticipantModal({
     return out;
   }, [reqFileFields, filesMap]);
 
-  const roleValue = fieldsMap.role || "";
+  const roleValue = (fieldsMap.role || "") as string;
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
-
-
-
-
-
-
 
   if (!isOpen || !participant) return null;
 
@@ -276,12 +296,38 @@ export default function ViewApprovedParticipantModal({
                       ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
                           {orderedTextNames.map((name) => {
-                            // Format: capitalize first + add space before uppercase letters
-                            const formattedLabel = name
-                              .replace(/([A-Z])/g, " $1")   // add space before capital letters
-                              .replace(/^./, (s) => s.toUpperCase()); // capitalize first letter
+                            // Special rendering for dateOfBirth: show DOB + Age
+                            if (name === "dateOfBirth") {
+                              return (
+                                <React.Fragment key="dob-special">
+                                  <div className="view-participant-fields-section">
+                                    <p>{labelFor("dateOfBirth")}</p>
+                                    <input
+                                      type="text"
+                                      className="view-participant-input-field"
+                                      value={dobValue || ""}
+                                      readOnly
+                                    />
+                                  </div>
+                                  <div className="view-participant-fields-section">
+                                    <p>{labelFor("age")}</p>
+                                    <input
+                                      type="text"
+                                      className="view-participant-input-field"
+                                      value={ageValue}
+                                      readOnly
+                                    />
+                                  </div>
+                                </React.Fragment>
+                              );
+                            }
 
-                            const value = (fieldsMap[name] ?? "").toString();
+                            // Generic field rendering
+                            const formattedLabel = name
+                              .replace(/([A-Z])/g, " $1")
+                              .replace(/^./, (s) => s.toUpperCase());
+                            const v = (fieldsMap[name] ?? "").toString();
+
                             return (
                               <div key={`tf-${name}`} className="view-participant-fields-section">
                                 <p>{formattedLabel}</p>
@@ -294,7 +340,7 @@ export default function ViewApprovedParticipantModal({
                                       : "text"
                                   }
                                   className="view-participant-input-field"
-                                  value={value}
+                                  value={v}
                                   readOnly
                                 />
                               </div>
@@ -325,7 +371,6 @@ export default function ViewApprovedParticipantModal({
                             const label = labelFor(key);
                             const isPdf = isPdfUrl(url);
 
-                            // Put Valid ID at the top visually if present (we already biased order)
                             return (
                               <div key={key} className="box-container-outer-participant" style={{ width: "100%" }}>
                                 <div className="title-remarks-participant">
@@ -358,11 +403,6 @@ export default function ViewApprovedParticipantModal({
           </div>
         </div>
       </div>
-
-
-
-
-
     </>
   );
 }

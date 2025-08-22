@@ -15,6 +15,7 @@ const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "contactNumber", description: "Used to save the contact number of the participant" },
   { name: "emailAddress", description: "Used to save the email address of the participant" },
   { name: "location", description: "Used to save the address of the participant" },
+  { name: "dateOfBirth", description: "Used to save the participant's date of birth (enables age checks)" },
 ];
 
 const PREDEFINED_REQ_FILES: SimpleField[] = [
@@ -59,8 +60,7 @@ export default function ProgramDetails() {
     userPosition === "Secretary";
 
   type Section = "details" | "reqs" | "others" | "reject";
-
-const [activeSection, setActiveSection] = useState<Section>("details");
+  const [activeSection, setActiveSection] = useState<Section>("details");
 
   // Popups / toasts
   const [showDiscardPopup, setShowDiscardPopup] = useState(false);
@@ -115,9 +115,14 @@ const [activeSection, setActiveSection] = useState<Section>("details");
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), ms);
   };
 
-  // Agency
+  //  Agency
   const [agency, setAgency] = useState("");
   const [otherAgency, setOtherAgency] = useState("");
+
+  // Age restriction
+  const [noAgeLimit, setNoAgeLimit] = useState(true);
+  const [ageMin, setAgeMin] = useState<string>("");
+  const [ageMax, setAgeMax] = useState<string>("");
 
   // Requirements
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
@@ -154,23 +159,11 @@ const [activeSection, setActiveSection] = useState<Section>("details");
   };
   const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
-  
 
-  // EDIT RULES:
-  // Only Punong Barangay can edit WHEN the program is PENDING.
-  // Once Approved/Rejected/Completed => read-only for everyone.
+  // EDIT RULES
   const canEdit =
     isPunongBarangay && approvalStatus === "Pending" && progressStatus !== "Completed";
   const isReadOnly = !canEdit;
-
-  // If later allowing PB/AS/Secretary to edit when progressStatus is Upcoming, use this instead:
-  // const canEdit =
-  //   (["Punong Barangay", "Assistant Secretary", "Secretary"].includes(userPosition) && progressStatus === "Upcoming")
-  //   || (isPunongBarangay && approvalStatus === "Pending");
-  // const isReadOnly = !canEdit;
-
-  // ACTIVE/INACTIVE TOGGLE:
-  // Stays editable for 'isHigherUp' regardless of other edit locks.
   const canToggleActive = isHigherUp;
 
   // Load program
@@ -188,14 +181,20 @@ const [activeSection, setActiveSection] = useState<Section>("details");
         const data: any = snap.data() || {};
 
         setProgramName(data.programName ?? "");
-        setParticipants(
-          typeof data.participants === "number" ? String(data.participants) : data.participants ?? ""
-        );
-        setVolunteers(
-          typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? ""
-        );
+        setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
+        setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
         setEligibleParticipants(data.eligibleParticipants ?? "");
         setLocation(data.location ?? "");
+
+        //  Load agency fields
+        setAgency(data.agencyRaw || data.agency || ""); // prefer raw if present
+        setOtherAgency(data.otherAgency || "");
+
+        //  Load age restriction
+        const ar = data.ageRestriction || {};
+        setNoAgeLimit(!!ar.noAgeLimit || (ar.minAge == null && ar.maxAge == null));
+        setAgeMin(ar.minAge != null ? String(ar.minAge) : "");
+        setAgeMax(ar.maxAge != null ? String(ar.maxAge) : "");
 
         setApprovalStatus(data.approvalStatus ?? "Pending");
         setProgressStatus(data.progressStatus ?? "Upcoming");
@@ -351,6 +350,9 @@ const [activeSection, setActiveSection] = useState<Section>("details");
     const mergedText = dedupeByName([...PREDEFINED_REQ_TEXT, ...reqTextFields]);
     const mergedFiles = dedupeByName([...PREDEFINED_REQ_FILES, ...reqFileFields]);
 
+    //  Resolve agency values consistently
+    const resolvedAgency = agency === "others" ? (otherAgency.trim() || "Others") : agency;
+
     const updates: any = {
       programName: programName.trim(),
       participants: Number(participants),
@@ -364,6 +366,19 @@ const [activeSection, setActiveSection] = useState<Section>("details");
       timeEnd,
       description: description.trim(),
       summary: summary.trim(),
+
+      //  Persist agency both normalized and raw
+      agency: resolvedAgency,     // display/normalized value ("City Hall" | "None" | custom text)
+      agencyRaw: agency,          // "none" | "cityhall" | "others" | "" (if not chosen)
+      otherAgency: otherAgency.trim() || null,
+
+      //  Persist age restriction
+      ageRestriction: {
+        noAgeLimit,
+        minAge: noAgeLimit || ageMin.trim() === "" ? null : Number(ageMin),
+        maxAge: noAgeLimit || ageMax.trim() === "" ? null : Number(ageMax),
+      },
+
       activeStatus,
       requirements: {
         textFields: mergedText,
@@ -481,6 +496,34 @@ const [activeSection, setActiveSection] = useState<Section>("details");
     need("location", !!location.trim());
     need("description", !!description.trim());
     need("summary", !!summary.trim());
+
+    // Agency validation
+    need("agency", !!agency);
+    if (agency === "others") {
+      need("otherAgency", !!otherAgency.trim());
+    }
+
+    // Age restriction validation (only when not "No age limit")
+    if (!noAgeLimit) {
+      const hasMin = ageMin.trim().length > 0;
+      const hasMax = ageMax.trim().length > 0;
+      if (!hasMin && !hasMax) {
+        e["ageMin"] = true;
+        e["ageMax"] = true;
+        triggerShake("ageMin");
+        triggerShake("ageMax");
+      } else {
+        const minNum = hasMin ? Number(ageMin) : null;
+        const maxNum = hasMax ? Number(ageMax) : null;
+        const validMin = minNum === null || (Number.isFinite(minNum) && minNum >= 0 && minNum <= 150);
+        const validMax = maxNum === null || (Number.isFinite(maxNum) && maxNum >= 0 && maxNum <= 150);
+        if (!validMin) { e["ageMin"] = true; triggerShake("ageMin"); }
+        if (!validMax) { e["ageMax"] = true; triggerShake("ageMax"); }
+        if (validMin && validMax && minNum !== null && maxNum !== null && minNum > maxNum) {
+          e["ageMin"] = true; e["ageMax"] = true; triggerShake("ageMin"); triggerShake("ageMax");
+        }
+      }
+    }
 
     if (eventType === "single") {
       need("singleDate", !!singleDate && isFutureDate(singleDate));
@@ -616,17 +659,14 @@ const [activeSection, setActiveSection] = useState<Section>("details");
   const handleDeleteNew = (index: number) => {
     setPreviewURLs((prev) => prev.filter((_, i) => i !== index));
   };
-
   const handleDeleteExisting = (index: number) => {
     setExistingPhotoURLs((prev) => prev.filter((_, i) => i !== index));
   };
-
-  const togglePredefinedOpen = () => {
-    setIsPredefinedOpen((prev) => !prev);
-  };
+  const togglePredefinedOpen = () => setIsPredefinedOpen((prev) => !prev);
 
   return (
     <main className="edit-program-main-container">
+      {/* Reject popups & generic popup (unchanged) */}
       {showRejectPopup && (
         <div className="reasonfor-recject-popup-overlay">
           <div className="reasonfor-reject-confirmation-popup">
@@ -673,7 +713,7 @@ const [activeSection, setActiveSection] = useState<Section>("details");
               <button onClick={() => setShowSubmitRejectPopup(false)} className="no-button-add">
                 No
               </button>
-                <button onClick={confirmSubmitReject} className="yes-button-add">
+              <button onClick={confirmSubmitReject} className="yes-button-add">
                 Yes
               </button>
             </div>
@@ -702,9 +742,7 @@ const [activeSection, setActiveSection] = useState<Section>("details");
           <button
             className="program-redirection-buttons"
             onClick={() =>
-              router.push(
-                `/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`
-              )
+              router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ParticipantsLists?programId=${programId}`)
             }
           >
             <div className="program-redirection-icons-section">
@@ -761,7 +799,6 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                         : ({ target: { value: "Inactive" } } as any)
                     )
                   }
-                  // IMPORTANT: toggle stays enabled for isHigherUp even if page is read-only
                   disabled={!canToggleActive}
                 />
                 <span className="slider"></span>
@@ -909,6 +946,68 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                         </select>
                       </div>
 
+                      {/* Age Restriction */}
+                      <div className="fields-section-edit-programs">
+                        <p>
+                          Age Restriction<span className="required">*</span>
+                        </p>
+                        <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <input
+                            type="checkbox"
+                            checked={noAgeLimit}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setNoAgeLimit(checked);
+                              if (checked) {
+                                setAgeMin("");
+                                setAgeMax("");
+                                setErrors((prev) => {
+                                  const { ageMin, ageMax, ...rest } = prev;
+                                  return rest;
+                                });
+                              }
+                            }}
+                            disabled={isReadOnly}
+                          />
+                          <span>No age limit</span>
+                        </label>
+
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="Min age"
+                            className={[
+                              "edit-programs-input-field",
+                              errors.ageMin ? "input-error" : "",
+                              shake.ageMin ? "shake" : "",
+                            ].join(" ").trim()}
+                            value={ageMin}
+                            onChange={(e) => setAgeMin(e.target.value)}
+                            disabled={isReadOnly || noAgeLimit}
+                          />
+                          <input
+                            type="number"
+                            min={0}
+                            placeholder="Max age"
+                            className={[
+                              "edit-programs-input-field",
+                              errors.ageMax ? "input-error" : "",
+                              shake.ageMax ? "shake" : "",
+                            ].join(" ").trim()}
+                            value={ageMax}
+                            onChange={(e) => setAgeMax(e.target.value)}
+                            disabled={isReadOnly || noAgeLimit}
+                          />
+                        </div>
+
+                        {!noAgeLimit && (errors.ageMin || errors.ageMax) && (
+                          <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                            Please set a valid age range. Use either min, max, or both. Min must be ≤ max.
+                          </div>
+                        )}
+                      </div>
+
                       <div className="fields-section-edit-programs">
                         <p>
                           Time Start<span className="required">*</span>
@@ -933,9 +1032,27 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                           Partnered Agency<span className="required">*</span>
                         </p>
                         <select
-                          className="edit-programs-input-field"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.agency ? "input-error" : "",
+                            shake.agency ? "shake" : "",
+                          ].join(" ").trim()}
                           value={agency}
-                          onChange={(e) => setAgency(e.target.value)}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setAgency(v);
+                            if (v !== "others") {
+                              setOtherAgency("");
+                              setErrors((prev) => {
+                                const { otherAgency, ...rest } = prev;
+                                return rest;
+                              });
+                            }
+                            setErrors((prev) => {
+                              const { agency, ...rest } = prev;
+                              return rest;
+                            });
+                          }}
                           disabled={isReadOnly}
                         >
                           <option value="">Select agency</option>
@@ -948,9 +1065,19 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                           <input
                             type="text"
                             placeholder="Enter agency"
-                            className="edit-programs-input-field"
+                            className={[
+                              "edit-programs-input-field",
+                              errors.otherAgency ? "input-error" : "",
+                              shake.otherAgency ? "shake" : "",
+                            ].join(" ").trim()}
                             value={otherAgency}
-                            onChange={(e) => setOtherAgency(e.target.value)}
+                            onChange={(e) => {
+                              setOtherAgency(e.target.value);
+                              setErrors((prev) => {
+                                const { otherAgency, ...rest } = prev;
+                                return rest;
+                              });
+                            }}
                             disabled={isReadOnly}
                           />
                         )}
@@ -1279,12 +1406,10 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                 <>
                   <div className="edit-programs-upper-section">
                     <div className="edit-official-others-mainsection">
-
-                      {/* ===== Photos UI (cover + gallery) ===== */}
+                      {/* Photos */}
                       <div className="box-container-outer-others-photosprogram">
                         <div className="title-others-photos">Photos</div>
                         <div className="box-container-photosprogram-others">
-                          
                           <div className="photosprogram-container">
                             <label
                               htmlFor="identification-file-upload"
@@ -1413,7 +1538,7 @@ const [activeSection, setActiveSection] = useState<Section>("details");
                           <textarea
                             className="programdesc-input-field"
                             name="reasonForReject"
-                            value={rejectionReason}                  
+                            value={rejectionReason}
                             disabled={isReadOnly}
                           />
                         </div>

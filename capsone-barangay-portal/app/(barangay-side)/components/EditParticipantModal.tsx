@@ -33,6 +33,19 @@ type Props = {
   onReject?: (participantId: string, reason: string) => void | Promise<void>;
 };
 
+// helper: compute age from YYYY-MM-DD
+function computeAgeFromDOB(dobYMD?: string): number | null {
+  if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
+  const [y, m, d] = dobYMD.split("-").map(Number);
+  const dob = new Date(y, m - 1, d);
+  if (Number.isNaN(dob.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const mDiff = now.getMonth() - dob.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && now.getDate() < dob.getDate())) age--;
+  return age >= 0 && age <= 200 ? age : null;
+}
+
 export default function EditParticipantModal({
   isOpen,
   onClose,
@@ -80,7 +93,7 @@ export default function EditParticipantModal({
     load();
   }, [isOpen, participant?.id]);
 
-  // Derived display data (no conditional hooks)
+  // Derived display data
   const fieldsMap: Record<string, string> = useMemo(() => {
     const base = (fullDoc?.fields || {}) as Record<string, any>;
     const top: Record<string, any> = {
@@ -91,6 +104,8 @@ export default function EditParticipantModal({
       location: fullDoc?.location ?? fullDoc?.address,
       programName: fullDoc?.programName,
       role: fullDoc?.role ?? participant?.role ?? "",
+      // explicitly surface predefined text fields if they were saved on top-level
+      dateOfBirth: fullDoc?.dateOfBirth ?? base?.dateOfBirth,
     };
     return { ...base, ...top };
   }, [fullDoc, participant?.role]);
@@ -98,24 +113,28 @@ export default function EditParticipantModal({
   // Requirements: file URLs. validIDjpg first, then others alpha.
   const filesMap: Record<string, string> = useMemo(() => {
     const map = { ...(fullDoc?.files || {}) } as Record<string, string>;
-
     // legacy support: top-level idImageUrl
     if (fullDoc?.idImageUrl && !map.validIDjpg) {
       map.validIDjpg = fullDoc.idImageUrl;
     }
-
     const ordered: Record<string, string> = {};
     if (map.validIDjpg) ordered.validIDjpg = map.validIDjpg;
-
     Object.keys(map)
       .filter((k) => k !== "validIDjpg")
       .sort((a, b) => a.localeCompare(b))
       .forEach((k) => (ordered[k] = map[k]));
-
     return ordered;
   }, [fullDoc]);
 
   const roleValue = fieldsMap.role || "";
+
+  // New: derive DOB and Age
+  const dobValue: string = fieldsMap.dateOfBirth || "";
+  const computedAgeFromDOB = computeAgeFromDOB(dobValue);
+  const ageValue =
+    typeof fullDoc?.computedAge === "number" && fullDoc.computedAge >= 0
+      ? String(fullDoc.computedAge)
+      : (computedAgeFromDOB != null ? String(computedAgeFromDOB) : "");
 
   // Helpers
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
@@ -124,7 +143,6 @@ export default function EditParticipantModal({
     if (!participant?.id || acting) return;
     setActing(true);
     try {
-      // Parent handles Firestore approve + parent toast
       await onApprove?.(participant.id);
 
       // Resident-facing notification
@@ -144,14 +162,11 @@ export default function EditParticipantModal({
           isRead: false,
         });
       } catch (e) {
-        // Non-blocking
         console.error("Failed to send approval notification:", e);
       }
 
-      // Close modal immediately after success
       onClose();
     } catch (e) {
-      // If parent throws, keep modal open so user can retry
       console.error("Approve failed:", e);
     } finally {
       setActing(false);
@@ -177,7 +192,6 @@ export default function EditParticipantModal({
     if (!participant?.id || acting) return;
     setActing(true);
     try {
-      // Parent handles Firestore reject + parent toast
       await onReject?.(participant.id, rejectReason.trim());
 
       // Resident-facing notification
@@ -197,16 +211,13 @@ export default function EditParticipantModal({
           isRead: false,
         });
       } catch (e) {
-        // Non-blocking
         console.error("Failed to send rejection notification:", e);
       }
 
-      // Close nested popups then main modal
       setShowSubmitRejectPopup(false);
       setShowRejectPopup(false);
       onClose();
     } catch (e) {
-      // If parent throws, keep modal open so user can retry
       console.error("Reject failed:", e);
     } finally {
       setActing(false);
@@ -371,6 +382,28 @@ export default function EditParticipantModal({
                             type="text"
                             className="view-participant-input-field"
                             value={roleValue}
+                            readOnly
+                          />
+                        </div>
+
+                        {/* NEW: Date of Birth */}
+                        <div className="view-participant-fields-section">
+                          <p>Date of Birth</p>
+                          <input
+                            type="text"
+                            className="view-participant-input-field"
+                            value={dobValue || ""}
+                            readOnly
+                          />
+                        </div>
+
+                        {/* NEW: Age (computed or stored) */}
+                        <div className="view-participant-fields-section">
+                          <p>Age</p>
+                          <input
+                            type="text"
+                            className="view-participant-input-field"
+                            value={ageValue}
                             readOnly
                           />
                         </div>

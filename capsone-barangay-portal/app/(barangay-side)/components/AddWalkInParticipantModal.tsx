@@ -24,9 +24,9 @@ type Resident = {
   address?: string;
   location?: string;
   contactNumber?: string;
-  mobile?: string;
-  emailAddress?: string;              
-  verificationFilesURLs?: string[];   
+  emailAddress?: string;
+  verificationFilesURLs?: string[];
+  dateOfBirth?: string; // YYYY-MM-DD
 };
 
 type Props = {
@@ -55,9 +55,24 @@ const DEFAULT_LABELS: Record<string, string> = {
   emailAddress: "Email Address",
   location: "Location",
   validIDjpg: "Valid ID",
+  dateOfBirth: "Date of Birth",
+  age: "Age",
 };
 
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
+
+// Compute age from YYYY-MM-DD
+function computeAgeFromDOB(dobYMD?: string): number | null {
+  if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
+  const [y, m, d] = dobYMD.split("-").map(Number);
+  const dob = new Date(y, m - 1, d);
+  if (Number.isNaN(dob.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const mDiff = now.getMonth() - dob.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && now.getDate() < dob.getDate())) age--;
+  return age >= 0 && age <= 200 ? age : null;
+}
 
 export default function AddWalkInParticipantModal({
   isOpen,
@@ -86,10 +101,11 @@ export default function AddWalkInParticipantModal({
       for (const f of textFields || []) {
         if (f.name === "firstName") init[f.name] = resident.firstName || "";
         else if (f.name === "lastName") init[f.name] = resident.lastName || "";
-        else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || resident.mobile || "";
+        else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || "";
         else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || "";
         else if (f.name === "location") init[f.name] = resident.address || resident.location || "";
         else if (f.name === "fullName") init[f.name] = fullName;
+        else if (f.name === "dateOfBirth") init[f.name] = resident.dateOfBirth || "";
       }
     }
     return init;
@@ -158,7 +174,6 @@ export default function AddWalkInParticipantModal({
   );
 
   const needsValidId = fileFieldsToRender.some((f) => f.name === "validIDjpg");
-
   const labelFor = (name: string) => LABELS[name] || name;
 
   const handleFormTextChange = (field: string, value: string) =>
@@ -168,6 +183,18 @@ export default function AddWalkInParticipantModal({
     const file = inputEl.files?.[0] || null;
     setFormFiles((prev) => ({ ...prev, [field]: file }));
   };
+
+  const todayStr = useMemo(() => {
+    const t = new Date();
+    const y = t.getFullYear();
+    const m = String(t.getMonth() + 1).padStart(2, "0");
+    const d = String(t.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }, []);
+
+  // Derived age from formData.dateOfBirth (if present)
+  const dobInForm = formData["dateOfBirth"] || "";
+  const derivedAge = useMemo(() => computeAgeFromDOB(dobInForm), [dobInForm]);
 
   const validateReqForm = () => {
     for (const f of textFieldsToRender) {
@@ -264,12 +291,16 @@ export default function AddWalkInParticipantModal({
 
       const firstName = formData.firstName ?? (resident ? resident.firstName || "" : "");
       const lastName = formData.lastName ?? (resident ? resident.lastName || "" : "");
-      const contactNumber = formData.contactNumber ?? (resident ? resident.contactNumber || resident.mobile || "" : "");
-      const emailAddress = formData.emailAddress ?? (resident ? resident.emailAddress || "" : ""); // ✅ only emailAddress
+      const contactNumber = formData.contactNumber ?? (resident ? resident.contactNumber || "" : "");
+      const emailAddress = formData.emailAddress ?? (resident ? resident.emailAddress || "" : "");
       const location = formData.location ?? (resident ? resident.address || resident.location || "" : "");
       const fullName =
         (formData.fullName ||
           `${firstName || ""} ${lastName || ""}`.trim()) || "";
+
+      // DOB + Age for saving
+      const dateOfBirth = formData.dateOfBirth || "";
+      const computedAge = computeAgeFromDOB(dateOfBirth);
 
       const uidTag = resident?.id ? `resident-${resident.id}` : "manual";
       let uploadedFiles = await uploadAllFiles(uidTag);
@@ -295,6 +326,11 @@ export default function AddWalkInParticipantModal({
         emailAddress: emailAddress || "",
         location: location || "",
 
+        // store DOB & derived age top-level for convenience in reviews
+        dateOfBirth: dateOfBirth || "",
+        age: computedAge ?? null,
+
+        // keep full map of submitted fields (including DOB)
         fields: formData,
         files: uploadedFiles,
       });
@@ -349,13 +385,42 @@ export default function AddWalkInParticipantModal({
                           .filter((_, idx) => idx % 2 === 0) // even indexes go left
                           .map((f) => {
                             const name = f.name;
+
+                            // Special handling for dateOfBirth → date input + Age field
+                            if (name === "dateOfBirth") {
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                  </p>
+                                  <input
+                                    type="date"
+                                    className="walkin-input-field"
+                                    required
+                                    max={todayStr}
+                                    value={formData.dateOfBirth || ""}
+                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <p>{labelFor("age")}</p>
+                                    <input
+                                      type="text"
+                                      className="walkin-input-field"
+                                      value={formData.dateOfBirth ? (derivedAge != null ? String(derivedAge) : "") : ""}
+                                      readOnly
+                                      placeholder="Will be computed"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
                               lower.includes("contact") || lower.includes("phone") ? "tel" :
                               "text";
 
-                            // Format: capitalize first + add space before uppercase letters
                             const formattedLabel = name
                               .replace(/([A-Z])/g, " $1")
                               .replace(/^./, (s) => s.toUpperCase());
@@ -384,12 +449,40 @@ export default function AddWalkInParticipantModal({
                           .filter((_, idx) => idx % 2 !== 0) // odd indexes go right
                           .map((f) => {
                             const name = f.name;
+
+                            if (name === "dateOfBirth") {
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                  </p>
+                                  <input
+                                    type="date"
+                                    className="walkin-input-field"
+                                    required
+                                    max={todayStr}
+                                    value={formData.dateOfBirth || ""}
+                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <p>{labelFor("age")}</p>
+                                    <input
+                                      type="text"
+                                      className="walkin-input-field"
+                                      value={formData.dateOfBirth ? (derivedAge != null ? String(derivedAge) : "") : ""}
+                                      readOnly
+                                      placeholder="Will be computed"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
                               lower.includes("contact") || lower.includes("phone") ? "tel" :
                               "text";
-                            // Format: capitalize first + add space before uppercase letters
                             const formattedLabel = name
                               .replace(/([A-Z])/g, " $1")
                               .replace(/^./, (s) => s.toUpperCase());
@@ -421,7 +514,6 @@ export default function AddWalkInParticipantModal({
                       {fileFieldsToRender.map((f) => {
                         const name = f.name;
                         const isValidId = name === "validIDjpg";
-                        // Format: readable label
                         const formattedLabel = name
                           .replace(/jpg$/i, "")
                           .replace(/jpeg$/i, "")
@@ -433,7 +525,6 @@ export default function AddWalkInParticipantModal({
                           .replace(/\bId\b/g, "ID");
 
                         const preview = filePreviews[name];
-
                         const hasManual = !!formFiles[name];
 
                         return (
@@ -449,7 +540,6 @@ export default function AddWalkInParticipantModal({
                             <div className="title-walkin-requirements">{formattedLabel}</div>
 
                             <div className="box-container-resindentificationpic">
-                              {/* File Upload Section */}
                               <div className="file-upload-container">
                                 <label
                                   htmlFor={`file-${name}`}
@@ -469,23 +559,20 @@ export default function AddWalkInParticipantModal({
                                   style={{ display: "none" }}
                                 />
 
-                                {/* PREVIEW (manual selection OR auto-attached resident file) */}
                                 {(hasManual || preview?.url) && (
                                   <div className="file-name-image-display">
                                     <div className="file-name-image-display-indiv">
                                       {preview?.url ? (
                                         preview.isPdf ? (
-                                          <>
-                                            <a
-                                              href={preview.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="file-link"
-                                              style={{ marginRight: 8 }}
-                                            >
-                                              Open PDF in new tab
-                                            </a>
-                                          </>
+                                          <a
+                                            href={preview.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="file-link"
+                                            style={{ marginRight: 8 }}
+                                          >
+                                            Open PDF in new tab
+                                          </a>
                                         ) : (
                                           <>
                                             <a
@@ -522,7 +609,6 @@ export default function AddWalkInParticipantModal({
                                   </div>
                                 )}
 
-                                {/* Only show “No file chosen” when nothing at all is available */}
                                 {!hasManual && !preview?.url && (
                                   <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
                                     No file chosen

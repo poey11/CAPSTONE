@@ -69,6 +69,21 @@ function buildScheduleParts(p: {
   return { datePart, timePart };
 }
 
+// Age helpers
+function computeAgeFromDOB(dobYMD: string): number | null {
+  if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
+  const [y, m, d] = dobYMD.split("-").map(Number);
+  const dob = new Date(y, m - 1, d);
+  if (Number.isNaN(dob.getTime())) return null;
+  const now = new Date();
+  let age = now.getFullYear() - dob.getFullYear();
+  const mDiff = now.getMonth() - dob.getMonth();
+  if (mDiff < 0 || (mDiff === 0 && now.getDate() < dob.getDate())) {
+    age--;
+  }
+  return age >= 0 && age <= 200 ? age : null;
+}
+
 const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".tiff", ".svg"];
 const isImageMime = (t: string) => t.startsWith("image/");
 const isPdfMime = (t: string) => t === "application/pdf";
@@ -96,19 +111,28 @@ const PRETTY_LABELS: Record<string, string> = {
   emailAddress: "Email Address",
   location: "Location",
   validIDjpg: "Valid ID",
+  dateOfBirth: "Date of Birth",
 };
 
+// Fields used for VOLUNTEER form (we need DOB here to enforce 17+)
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "firstName" },
   { name: "lastName" },
   { name: "contactNumber" },
   { name: "emailAddress" },
   { name: "location" },
+  { name: "dateOfBirth" }, // DOB required for volunteers
 ];
 
 const PREDEFINED_REQ_FILES: SimpleField[] = [
   { name: "validIDjpg" },
 ];
+
+type AgeRestriction = {
+  noAgeLimit?: boolean;
+  minAge?: number | null;
+  maxAge?: number | null;
+};
 
 type Program = {
   id: string;
@@ -121,14 +145,11 @@ type Program = {
   timeStart?: string;
   timeEnd?: string;
   location?: string;
-  /** Max participants (attendees). */
   participants?: number;
-  /** Separate max volunteers; if missing or 0, volunteer card should NOT show. */
   volunteers?: number;
   approvalStatus?: "Approved" | "Pending" | "Rejected";
   progressStatus?: "Ongoing" | "Upcoming" | "Completed" | "Rejected";
   activeStatus?: "Active" | "Inactive";
-  /** Who is allowed to join at all (for both roles). */
   eligibleParticipants?: "resident" | "non-resident" | "both";
   photoURL?: string | null;
   photoURLs?: string[];
@@ -136,6 +157,7 @@ type Program = {
     textFields?: { name: string }[];
     fileFields?: { name: string }[];
   };
+  ageRestriction?: AgeRestriction; // used for PARTICIPANTS only
 };
 
 type Role = "Volunteer" | "Participant";
@@ -145,7 +167,7 @@ type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 export default function SpecificProgram() {
   const { id } = useParams();
   const searchParams = useSearchParams();
-  const { user } = useAuth(); // user?.uid if logged in
+  const { user } = useAuth();
 
   const actions = useMemo(
     () => [
@@ -173,7 +195,7 @@ export default function SpecificProgram() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File>>({});
 
-  // 🔎 NEW: previews for chosen files (clickable to full view)
+  // previews for chosen files
   const [filePreviews, setFilePreviews] = useState<Record<string, Preview>>({});
   const previewsRef = useRef<Record<string, Preview>>({});
 
@@ -185,7 +207,7 @@ export default function SpecificProgram() {
   const [approvedParticipantCount, setApprovedParticipantCount] = useState<number>(0);
   const [approvedVolunteerCount, setApprovedVolunteerCount] = useState<number>(0);
 
-  // prefilled ID for verified users (first URL from verificationFilesURLs)
+  // prefilled ID for verified users
   const [preVerifiedIdUrl, setPreVerifiedIdUrl] = useState<string | null>(null);
 
   const [toastVisible, setToastVisible] = useState(false);
@@ -244,6 +266,7 @@ export default function SpecificProgram() {
     return () => clearInterval(t);
   }, [images]);
 
+  // try to prefill user info
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user?.uid) {
@@ -265,7 +288,6 @@ export default function SpecificProgram() {
       setIsVerifiedResident(Boolean(verified && rId));
       setResidentId(rId);
 
-      // Try to harvest a pre-verified ID URL from either doc
       let candidateUrl: string | null = null;
       const userUrls: unknown = u?.verificationFilesURLs;
       if (Array.isArray(userUrls) && userUrls.length > 0 && typeof userUrls[0] === "string") {
@@ -278,7 +300,6 @@ export default function SpecificProgram() {
         if (resSnap.exists()) {
           const rd: any = resSnap.data();
 
-          // Prefer resident doc if it has URLs, otherwise keep candidate from user doc
           const resUrls: unknown = rd?.verificationFilesURLs;
           if (Array.isArray(resUrls) && resUrls.length > 0 && typeof resUrls[0] === "string") {
             candidateUrl = (resUrls[0] as string) || candidateUrl;
@@ -296,6 +317,7 @@ export default function SpecificProgram() {
             emailAddress: u.email || prev.emailAddress || "",
             location: rd.address || prev.location || "",
             fullName: fullName || prev.fullName || "",
+            dateOfBirth: rd.dateOfBirth || prev.dateOfBirth || "",
           }));
         } else {
           const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
@@ -331,7 +353,7 @@ export default function SpecificProgram() {
     fetchUserData();
   }, [user]);
 
-  /* check duplicate for verified residents and this program */
+  // check duplicate
   useEffect(() => {
     const checkDup = async () => {
       if (!program?.id || !residentId) {
@@ -349,7 +371,7 @@ export default function SpecificProgram() {
     checkDup();
   }, [program?.id, residentId]);
 
-  /* form handlers */
+  // form handlers
   const onTextChange = (field: string, value: string) =>
     setFormData((p) => ({ ...p, [field]: value }));
 
@@ -363,7 +385,6 @@ export default function SpecificProgram() {
     }
     setFiles((p) => ({ ...p, [field]: f }));
 
-    // 🔎 build preview + cleanup old one
     setFilePreviews((prev) => {
       const next = { ...prev };
       const old = prev[field];
@@ -386,6 +407,7 @@ export default function SpecificProgram() {
     };
   }, []);
 
+  // capacity
   const maxParticipants = Number(program?.participants ?? 0);
   const volunteersCap   = Number(program?.volunteers ?? 0);
   const hasVolunteerCap = volunteersCap > 0;
@@ -393,10 +415,9 @@ export default function SpecificProgram() {
   const capacityReached = (role: Role) => {
     if (!program) return false;
     if (role === "Participant") {
-      if (maxParticipants <= 0) return true; // treat 0/undefined as closed
+      if (maxParticipants <= 0) return true;
       return approvedParticipantCount >= maxParticipants;
     }
-    // Volunteer
     if (volunteersCap <= 0) return true;
     return approvedVolunteerCount >= volunteersCap;
   };
@@ -406,11 +427,12 @@ export default function SpecificProgram() {
       ? "Max limit of participants has been reached!"
       : "Max limit of volunteers has been reached!";
 
-  /* audience gating */
+  // audience gating
   const ep = program?.eligibleParticipants || "both";
-  const isGuest = !user?.uid;
+  const { user: authUser } = useAuth();
+  const isGuest = !authUser?.uid;
   const isResident = isVerifiedResident;
-  const isNonResident = !isResident; 
+  const isNonResident = !isResident;
 
   const userAllowedAtAll =
     ep === "both" ||
@@ -425,11 +447,56 @@ export default function SpecificProgram() {
 
   const canShowVolunteerCard =
     userAllowedAtAll &&
-    isResident && // volunteers require verified resident
+    isResident &&
     (ep === "resident" || ep === "both") &&
-    hasVolunteerCap; // hide entirely if 0 or missing
+    hasVolunteerCap;
 
-  /* submit (role-aware) */
+  // derived age
+  const userDOB = formData.dateOfBirth || "";
+  const userAge = useMemo(() => computeAgeFromDOB(userDOB), [userDOB]);
+
+  // helper: build participant age limit text from program.ageRestriction
+  const participantAgeLimitText = useMemo(() => {
+    const ar = program?.ageRestriction;
+    if (!ar || ar.noAgeLimit) return "none";
+    const min = ar.minAge ?? null;
+    const max = ar.maxAge ?? null;
+    if (min != null && max != null) return `${min} - ${max}`;
+    if (min != null) return `≥ ${min}`;
+    if (max != null) return `≤ ${max}`;
+    return "none";
+  }, [program?.ageRestriction]);
+
+  // final Age Limit line in the UI
+  const ageLimitText = `Volunteers: 17+ • Participants: ${participantAgeLimitText}`;
+
+  // age eligibility check (role-aware)
+  const checkAgeEligibility = (role: Role): { ok: boolean; msg?: string } => {
+    if (role === "Volunteer") {
+      // volunteers: fixed 17+
+      if (!userDOB) return { ok: false, msg: "Please enter your Date of Birth." };
+      const age = userAge;
+      if (age == null) return { ok: false, msg: "Invalid Date of Birth." };
+      if (age < 17) return { ok: false, msg: "Volunteers must be at least 17 years old." };
+      return { ok: true };
+    }
+
+    // participants: follow program.ageRestriction (if any)
+    const ar = program?.ageRestriction;
+    if (!ar || ar.noAgeLimit) return { ok: true }; // no age restriction
+    if (!userDOB) return { ok: false, msg: "Please enter your Date of Birth." };
+    const age = userAge;
+    if (age == null) return { ok: false, msg: "Invalid Date of Birth." };
+    if (ar.minAge != null && age < ar.minAge) {
+      return { ok: false, msg: `Minimum age is ${ar.minAge}.` };
+    }
+    if (ar.maxAge != null && age > ar.maxAge) {
+      return { ok: false, msg: `Maximum age is ${ar.maxAge}.` };
+    }
+    return { ok: true };
+  };
+
+  // submit (role-aware)
   const checkEligibilityForRole = (role: Role): { ok: boolean; msg?: string } => {
     if (!program) return { ok: false, msg: "Program not found." };
 
@@ -460,6 +527,10 @@ export default function SpecificProgram() {
       return { ok: false, msg: capacityMessage(role) };
     }
 
+    // age rule
+    const ageGate = checkAgeEligibility(role);
+    if (!ageGate.ok) return ageGate;
+
     return { ok: true };
   };
 
@@ -471,7 +542,7 @@ export default function SpecificProgram() {
     const urls: Record<string, string> = { ...prefilled };
 
     for (const key of Object.keys(files)) {
-      if (urls[key]) continue; // skip if we already have a URL
+      if (urls[key]) continue;
       const f = files[key];
       const sref = ref(
         storage,
@@ -505,7 +576,7 @@ export default function SpecificProgram() {
         programId: program.id,
         programName: program.programName,
         residentId: residentId || null,
-        role, // Volunteer | Participant
+        role,
         approvalStatus: "Pending",
         addedVia: user?.uid ? "resident-form" : "guest-form",
         createdAt: serverTimestamp(),
@@ -517,6 +588,8 @@ export default function SpecificProgram() {
         contactNumber: formData.contactNumber || "",
         emailAddress: formData.emailAddress || "",
         location: formData.location || "",
+        dateOfBirth: formData.dateOfBirth || "",
+        age: userAge ?? null, // stored for convenience
         fields: formData,
         files: uploadedFiles,
       });
@@ -548,25 +621,43 @@ export default function SpecificProgram() {
     timeEnd: program.timeEnd,
   });
 
-  // Numeric, role-aware labels (always show numbers)
+  // Numeric, role-aware labels
   const participantsLabel = `${approvedParticipantCount}/${Math.max(0, maxParticipants)}`;
   const volunteersLabel   = hasVolunteerCap ? `${approvedVolunteerCount}/${volunteersCap}` : "";
 
-  // force toast to top-right
+  // toast position
   const toastPosStyle: React.CSSProperties = { top: "13%", right: 12, left: "auto", bottom: "auto" };
 
-  // derive which cards to show based on audience + verification + volunteer cap
+  // which action cards to show
   const visibleActions = actions.filter((a) =>
     a.key === "Participant" ? canShowParticipantCard : canShowVolunteerCard
   );
 
-  // If user can't join at all due to audience restrictions, show a single notice
+  // audience block message
   const audienceBlockedMsg =
     !userAllowedAtAll
       ? (ep === "resident"
           ? "Only Verified Resident Users can participate."
           : "This program is for non-residents only.")
       : "";
+
+  // helper to render label
+  const renderPrettyLabel = (name: string) => {
+    const fromDict = PRETTY_LABELS[name];
+    if (fromDict) return fromDict;
+    return name
+      .replace(/jpg$/i, "")
+      .replace(/jpeg$/i, "")
+      .replace(/png$/i, "")
+      .replace(/pdf$/i, "")
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
+      .replace(/^./, (s) => s.toUpperCase())
+      .replace(/\bId\b/g, "ID");
+  };
+
+  // whether participant DOB should be required (only when program sets an age restriction)
+  const participantDOBRequired = !!(program?.ageRestriction && !program.ageRestriction.noAgeLimit);
 
   return (
     <main className="main-container-specific">
@@ -622,6 +713,12 @@ export default function SpecificProgram() {
               <p>{volunteersLabel}</p>
             </div>
           )}
+
+          {/* Age Limit box */}
+          <div className="program-detail-card-specific">
+            <h3>Age Limit</h3>
+            <p>{ageLimitText}</p>
+          </div>
         </div>
       </section>
 
@@ -632,7 +729,7 @@ export default function SpecificProgram() {
         {isVerifiedResident && alreadyRegistered ? (
           <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
             <h3>Status</h3>
-            <p>You have already registered for this event! Please wait for further instructions.</p>
+            <p>You have already registered for this event. Please wait for further instructions.</p>
           </div>
         ) : audienceBlockedMsg ? (
           <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
@@ -647,17 +744,17 @@ export default function SpecificProgram() {
                 const reached = capacityReached(action.key);
                 const disabledReason = reached ? capacityMessage(action.key) : "";
 
+                // TEXT fields: volunteers use predefined (ensure DOB present); participants use program-defined
                 const textFields: SimpleField[] =
                   action.key === "Volunteer"
                     ? PREDEFINED_REQ_TEXT
                     : (program.requirements?.textFields || []);
 
+                // FILE fields: volunteers use predefined; participants use program-defined
                 const fileFields: SimpleField[] =
                   action.key === "Volunteer"
                     ? PREDEFINED_REQ_FILES
                     : (program.requirements?.fileFields || []);
-
-                const labelFor = (name: string) => PRETTY_LABELS[name] || name;
 
                 return (
                   <motion.div
@@ -701,26 +798,58 @@ export default function SpecificProgram() {
                         >
                           {textFields.map((f, i) => {
                             const name = f.name;
+
+                            // Special handling for dateOfBirth: show date input + read-only age.
+                            if (name === "dateOfBirth") {
+                              const today = new Date();
+                              const todayStr = [
+                                today.getFullYear(),
+                                String(today.getMonth() + 1).padStart(2, "0"),
+                                String(today.getDate()).padStart(2, "0"),
+                              ].join("-");
+
+                              const ageLabel = "Age";
+                              const requireDOB =
+                                action.key === "Volunteer" ? true : participantDOBRequired;
+
+                              return (
+                                <div className="form-group-specific" key={`tf-dob-${i}`}>
+                                  <label className="form-label-specific">
+                                    Date of Birth {requireDOB && <span className="required">*</span>}
+                                  </label>
+                                  <input
+                                    type="date"
+                                    className="form-input-specific"
+                                    required={requireDOB}
+                                    max={todayStr}
+                                    value={formData.dateOfBirth || ""}
+                                    onChange={(e) => onTextChange("dateOfBirth", e.target.value)}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <label className="form-label-specific">{ageLabel}</label>
+                                    <input
+                                      type="text"
+                                      className="form-input-specific"
+                                      value={
+                                        formData.dateOfBirth
+                                          ? (userAge != null ? `${userAge}` : "")
+                                          : ""
+                                      }
+                                      readOnly
+                                      placeholder="Will be computed"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
                               lower.includes("contact") || lower.includes("phone") ? "tel" :
                               "text";
-                            
-                              // Format: capitalize first + add space before uppercase letters
-                              const formattedLabel = name
-                                // 1. Remove "jpg" or other extensions at the end
-                                .replace(/jpg$/i, "")
-                                .replace(/jpeg$/i, "")
-                                .replace(/png$/i, "")
-                                .replace(/pdf$/i, "")
-                                // 2. Insert spaces correctly
-                                .replace(/([a-z])([A-Z])/g, "$1 $2")
-                                .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-                                // 3. Capitalize first letter
-                                .replace(/^./, (s) => s.toUpperCase())
-                                // 4. Ensure "Id" → "ID"
-                                .replace(/\bId\b/g, "ID");
+
+                            const formattedLabel = renderPrettyLabel(name);
 
                             return (
                               <div className="form-group-specific" key={`tf-${i}`}>
@@ -744,16 +873,7 @@ export default function SpecificProgram() {
                             const isValidIdField = nmLower === "valididjpg";
                             const usePrefill = isVerifiedResident && !!preVerifiedIdUrl && isValidIdField;
 
-                            const label = f.name
-                              .replace(/jpg$/i, "")
-                              .replace(/jpeg$/i, "")
-                              .replace(/png$/i, "")
-                              .replace(/pdf$/i, "")
-                              .replace(/([a-z])([A-Z])/g, "$1 $2")
-                              .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-                              .replace(/^./, (s) => s.toUpperCase())
-                              .replace(/\bId\b/g, "ID");
-
+                            const label = renderPrettyLabel(f.name);
                             const preview = filePreviews[f.name];
                             const prefillIsPdf = (preVerifiedIdUrl || "").toLowerCase().endsWith(".pdf");
 
@@ -887,7 +1007,7 @@ export default function SpecificProgram() {
               alt="icon alert"
               className="icon-alert"
             />
-          <p>{toastMsg}</p>
+            <p>{toastMsg}</p>
           </div>
         </div>
       )}
