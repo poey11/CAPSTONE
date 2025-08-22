@@ -2,7 +2,7 @@
 import "@/CSS/Programs/SpecificProgram.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter} from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Handshake } from "lucide-react";
 import { useAuth } from "@/app/context/authContext";
@@ -165,6 +165,10 @@ type Role = "Volunteer" | "Participant";
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 
 export default function SpecificProgram() {
+
+const router = useRouter();
+
+
   const { id } = useParams();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -209,6 +213,11 @@ export default function SpecificProgram() {
 
   // prefilled ID for verified users
   const [preVerifiedIdUrl, setPreVerifiedIdUrl] = useState<string | null>(null);
+
+  //Popups
+    const [showSubmitPopup, setShowSubmitPopup] = useState<boolean>(false);
+    const formRef = useRef<HTMLFormElement>(null);
+    const [pendingRole, setPendingRole] = useState<Role | null>(null);
 
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -468,6 +477,7 @@ export default function SpecificProgram() {
   }, [program?.ageRestriction]);
 
   // final Age Limit line in the UI
+  //di ko na ginamit
   const ageLimitText = `Volunteers: 17+ • Participants: ${participantAgeLimitText}`;
 
   // age eligibility check (role-aware)
@@ -622,17 +632,36 @@ const handleSubmit = async (role: Role) => {
           programId: program.id,             
         });
       }
-
-    if (typeof window !== "undefined") {
-      window.location.reload();
+         router.push("/Programs/Notification");
+    } catch {
+      showToast("Something went wrong. Please try again.", true);
     }
-  } catch (err) {
-    console.error(err);
-    showToast("Something went wrong. Please try again.", true);
+
+};
+
+
+
+
+
+// open popup
+const handleSubmitClick = (role: Role) => {
+  setPendingRole(role);
+  setShowSubmitPopup(true);
+};
+
+// confirm from popup
+const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+  if (pendingRole) {
+    await handleSubmit(pendingRole);
+    setPendingRole(null);
   }
 };
 
 
+
+
+  
   if (!program) {
     return (
       <main className="main-container-specific">
@@ -722,34 +751,48 @@ const handleSubmit = async (role: Role) => {
         <div className="programs-details-specific">
           <div className="program-detail-card-specific">
             <h3>Schedule</h3>
-            <p>
-              {datePart}
-              {timePart && (<><br />{timePart}</>)}
-            </p>
+
+              <div className="values">
+                <p> {datePart} </p>
+                <p> {timePart} </p>
+              </div>
           </div>
 
           <div className="program-detail-card-specific">
             <h3>Location</h3>
-            <p>{program.location || ""}</p>
+              <div className="values">
+                 <p>{program.location || ""}</p>
+              </div>
+           
           </div>
 
           <div className="program-detail-card-specific">
             <h3>Participants</h3>
-            <p>{participantsLabel}</p>
+              <div className="values">
+                  <p>{participantsLabel}</p>
+              </div>
+           
           </div>
 
           {hasVolunteerCap && (
             <div className="program-detail-card-specific">
               <h3>Volunteers</h3>
-              <p>{volunteersLabel}</p>
+              <div className="values">
+                 <p>{volunteersLabel}</p>
+              </div>
+             
             </div>
           )}
 
           {/* Age Limit box */}
-          <div className="program-detail-card-specific">
-            <h3>Age Limit</h3>
-            <p>{ageLimitText}</p>
+        <div className="program-detail-card-specific">
+          <h3>Age Limit</h3>
+          <div className="values">
+            <span>Volunteers: 17+ years old</span>
+            <span >Participants: {participantAgeLimitText} years old</span>
           </div>
+        </div>
+
         </div>
       </section>
 
@@ -758,15 +801,23 @@ const handleSubmit = async (role: Role) => {
         <div className="programs-underline-specific"></div>
 
         {isVerifiedResident && alreadyRegistered ? (
-          <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
-            <h3>Status</h3>
-            <p>You have already registered for this event. Please wait for further instructions.</p>
-          </div>
+  <div className="program-detail-card-specific">
+    <div className="status-header">
+      <img src="/Images/check.png" alt="Registered" className="status-icon" />
+      <h3>Status</h3>
+    </div>
+    <p className="status-message">
+      You have already registered for this event. Please wait for further instructions.
+    </p>
+  </div>
         ) : audienceBlockedMsg ? (
-          <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
-            <h3>Notice</h3>
-            <p>{audienceBlockedMsg}</p>
-          </div>
+  <div className="program-detail-card-specific">
+    <div className="status-header">
+      <img src="/Images/prohibition.png" alt="Blocked" className="status-icon" />
+      <h3>Notice</h3>
+    </div>
+    <p className="status-message">{audienceBlockedMsg}</p>
+  </div>
         ) : (
           <div className="actions-grid">
             {visibleActions
@@ -816,11 +867,12 @@ const handleSubmit = async (role: Role) => {
 
                     {!reached && selectedAction === action.key && (
                       <AnimatePresence>
-                        <motion.form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handleSubmit(action.key);
-                          }}
+                      <motion.form
+                        ref={formRef}
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          handleSubmitClick(action.key); // show popup first
+                        }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 20 }}
@@ -856,7 +908,7 @@ const handleSubmit = async (role: Role) => {
                                     value={formData.dateOfBirth || ""}
                                     onChange={(e) => onTextChange("dateOfBirth", e.target.value)}
                                   />
-                                  <div style={{ marginTop: 8 }}>
+                                  <div className="form-group-specific-age">
                                     <label className="form-label-specific">{ageLabel}</label>
                                     <input
                                       type="text"
@@ -909,105 +961,89 @@ const handleSubmit = async (role: Role) => {
                             const prefillIsPdf = (preVerifiedIdUrl || "").toLowerCase().endsWith(".pdf");
 
                             return (
-                              <div className="form-group-specific" key={`ff-${i}`}>
-                                <label className="form-label-specific">
-                                  {label} <span className="required">*</span>
-                                </label>
+                
+                        <div className="form-group-specific" key={`ff-${i}`}>
+                          <label className="form-label-specific">
+                            {label} <span className="required">*</span>
+                          </label>
 
-                                {usePrefill ? (
-                                  <div className="prefilled-file-notice">
-                                    <div style={{ fontSize: 14, opacity: 0.9, marginBottom: 6 }}>
+                          {usePrefill || preview?.url ? (
+                            <div className="prefilled-file-notice">
+                              {usePrefill ? (
+                                <>
+                                  {!prefillIsPdf && preVerifiedIdUrl && (
+                                    <a
+                                      href={preVerifiedIdUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title={`Open ${label} in a new tab`}
+                                    >
+                                      <img
+                                        src={preVerifiedIdUrl}
+                                        alt={`${label} preview`}
+                                        className="prefilled-file-thumbnail"
+                                      />
+                                    </a>
+                                  )}
+                                  <div className="prefilled-file-details">
+                                    <div className="prefilled-file-text">
                                       Using your verified ID on file.
                                     </div>
-
                                     {preVerifiedIdUrl && (
-                                      prefillIsPdf ? (
-                                        <a
-                                          href={preVerifiedIdUrl}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="prefilled-file-link"
-                                        >
-                                          Open PDF in new tab
-                                        </a>
-                                      ) : (
-                                        <>
-                                          <a
-                                            href={preVerifiedIdUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            title={`Open ${label} in a new tab`}
-                                          >
-                                            <img
-                                              src={preVerifiedIdUrl}
-                                              alt={`${label} preview`}
-                                              style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
-                                            />
-                                          </a>
-                                          <a
-                                            href={preVerifiedIdUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="prefilled-file-link"
-                                            style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
-                                          >
-                                            Open full view
-                                          </a>
-                                        </>
-                                      )
+                                      <a
+                                        href={preVerifiedIdUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="prefilled-file-link"
+                                      >
+                                        {prefillIsPdf ? "Open PDF in new tab" : "Open full view"}
+                                      </a>
                                     )}
                                   </div>
-                                ) : (
-                                  <>
-                                    <input
-                                      type="file"
-                                      accept="image/*,application/pdf,.pdf"
-                                      className="form-input-specific"
-                                      required
-                                      onChange={(e) => onFileChange(f.name, e.currentTarget)}
-                                    />
+                                </>
+                              ) : (
+                                <>
+                                  {!preview.isPdf ? (
+                                    <a
+                                      href={preview.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title={`Open ${label} in a new tab`}
+                                    >
+                                      <img
+                                        src={preview.url}
+                                        alt={`${label} preview`}
+                                        className="prefilled-file-thumbnail"
+                                      />
+                                    </a>
+                                  ) : null}
 
-                                    {(preview?.url) && (
-                                      <div className="file-name-image-display" style={{ marginTop: 8 }}>
-                                        {preview.isPdf ? (
-                                          <a
-                                            href={preview.url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="file-link"
-                                          >
-                                            Open PDF in new tab
-                                          </a>
-                                        ) : (
-                                          <>
-                                            <a
-                                              href={preview.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              title={`Open ${label} in a new tab`}
-                                            >
-                                              <img
-                                                src={preview.url}
-                                                alt={`${label} preview`}
-                                                style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 4, display: "block" }}
-                                              />
-                                            </a>
-                                            <a
-                                              href={preview.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="file-link"
-                                              style={{ fontSize: 12, marginTop: 4, display: "inline-block" }}
-                                            >
-                                              Open full view
-                                            </a>
-                                          </>
-                                        )}
-                                      </div>
-                                    )}
-                                  </>
-                                )}
-                              </div>
+                                  <div className="prefilled-file-details">
+                                    <div className="prefilled-file-text">
+                                      {preview.isPdf ? "Uploaded PDF" : "Uploaded Image"}
+                                    </div>
+                                    <a
+                                      href={preview.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="prefilled-file-link"
+                                    >
+                                      {preview.isPdf ? "Open PDF in new tab" : "Open full view"}
+                                    </a>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          ) : (
+                            <input
+                              type="file"
+                              accept="image/*,application/pdf,.pdf"
+                              className="form-input-specific"
+                              required
+                              onChange={(e) => onFileChange(f.name, e.currentTarget)}
+                            />
+                          )}
+                        </div>        
                             );
                           })}
 
@@ -1023,6 +1059,7 @@ const handleSubmit = async (role: Role) => {
           </div>
         )}
       </section>
+      
 
       {toastVisible && (
         <div
@@ -1042,6 +1079,22 @@ const handleSubmit = async (role: Role) => {
           </div>
         </div>
       )}
+
+
+
+         {showSubmitPopup && (
+            <div className="confirmation-popup-overlay-online">
+                <div className="confirmation-popup-online">
+                <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                <p>Are you sure you want to submit?</p>
+                <div className="yesno-container-add">
+                    <button onClick={() => setShowSubmitPopup(false)} className="no-button-add">No</button>
+                    <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                </div>
+                </div>
+            </div>
+            )}
+
     </main>
   );
 }
