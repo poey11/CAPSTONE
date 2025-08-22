@@ -600,7 +600,7 @@ const handleSubmit = async (role: Role) => {
 
       const roleLabel = role === "Volunteer" ? "volunteer" : "participant";
       await addDoc(collection(db, "BarangayNotifications"), {
-        message: `A new ${roleLabel} has registered for ${program.programName}. Name: ${registrantName}. Registration ID: ${newRegRef.id}`,
+        message: `A new ${roleLabel} has registered for ${program.programName}. Name: ${registrantName}.`,
         timestamp: new Date(),
         isRead: false,
         transactionType: "Program Registration",
@@ -612,7 +612,7 @@ const handleSubmit = async (role: Role) => {
 
       if (user?.uid) {
         await addDoc(collection(db, "Notifications"), {
-          message: `You have successfully registered as a ${roleLabel} for ${program.programName}. Please wait to be contacted regarding your registration status. Registration ID: ${newRegRef.id}`,
+          message: `You have successfully registered as a ${roleLabel} for ${program.programName}. Please wait to be contacted regarding your registration status.`,
           timestamp: new Date(),
           isRead: false,
           transactionType: "Program Registration",
