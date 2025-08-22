@@ -535,6 +535,56 @@ export default function EditResident() {
         }
 
     
+      // --- Update ProgramsParticipants ---
+      {
+        const fullNamePP = `${formData.firstName} ${formData.lastName}`.trim();
+        const normalizedDOB = formData.dateOfBirth || "";
+        const calcAge = (dobStr?: string) => {
+          if (!dobStr) return formData.age || 0;
+          const dob = new Date(dobStr);
+          if (Number.isNaN(dob.getTime())) return formData.age || 0;
+          const today = new Date();
+          let a = today.getFullYear() - dob.getFullYear();
+          const m = today.getMonth() - dob.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) a--;
+          return a;
+        };
+        const computedAge = calcAge(normalizedDOB);
+
+        const ppQuery = query(
+          collection(db, "ProgramsParticipants"),
+          where("residentId", "==", residentId)
+        );
+        const ppSnap = await getDocs(ppQuery);
+
+        for (const d of ppSnap.docs) {
+          const ppRef = doc(db, "ProgramsParticipants", d.id);
+
+          // Top-level fields + nested mirrors
+          await updateDoc(ppRef, {
+            // top-level
+            firstName: formData.firstName || "",
+            lastName: formData.lastName || "",
+            fullName: `${formData.firstName || ""} ${formData.lastName || ""}`.trim(),
+            age: computedAge,
+            dateOfBirth: normalizedDOB,
+            contactNumber: formData.contactNumber || "",
+            emailAddress: formData.emailAddress || "",
+            location: formData.address || "",
+
+            // nested mirrors (fields.*)
+            "fields.firstName": formData.firstName || "",
+            "fields.lastName": formData.lastName || "",
+            "fields.dateOfBirth": normalizedDOB,
+            "fields.contactNumber": formData.contactNumber || "",
+            "fields.emailAddress": formData.emailAddress || "",
+            "fields.location": formData.address || "",
+
+          });
+        }
+      }
+
+        
 
         // Update in VotersList
         const votersQuery = query(
