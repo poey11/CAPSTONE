@@ -761,15 +761,23 @@ const confirmSubmit = async () => {
         <div className="programs-underline-specific"></div>
 
         {isVerifiedResident && alreadyRegistered ? (
-          <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
-            <h3>Status</h3>
-            <p>You have already registered for this event. Please wait for further instructions.</p>
-          </div>
+  <div className="program-detail-card-specific">
+    <div className="status-header">
+      <img src="/Images/check.png" alt="Registered" className="status-icon" />
+      <h3>Status</h3>
+    </div>
+    <p className="status-message">
+      You have already registered for this event. Please wait for further instructions.
+    </p>
+  </div>
         ) : audienceBlockedMsg ? (
-          <div className="program-detail-card-specific" style={{ margin: "0 auto" }}>
-            <h3>Notice</h3>
-            <p>{audienceBlockedMsg}</p>
-          </div>
+  <div className="program-detail-card-specific">
+    <div className="status-header">
+      <img src="/Images/prohibition.png" alt="Blocked" className="status-icon" />
+      <h3>Notice</h3>
+    </div>
+    <p className="status-message">{audienceBlockedMsg}</p>
+  </div>
         ) : (
           <div className="actions-grid">
             {visibleActions
