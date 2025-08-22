@@ -142,6 +142,12 @@ display: flex;
 flex-direction: column;
 }
 
+.form-group-specific-age {
+  display: flex;
+flex-direction: column;
+margin-top: 12px;
+}
+
 .form-label-specific {
 font-size: 16px;
 font-weight: bold;

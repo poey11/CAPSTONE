@@ -883,7 +883,7 @@ const confirmSubmit = async () => {
                                     value={formData.dateOfBirth || ""}
                                     onChange={(e) => onTextChange("dateOfBirth", e.target.value)}
                                   />
-                                  <div style={{ marginTop: 8 }}>
+                                  <div className="form-group-specific-age">
                                     <label className="form-label-specific">{ageLabel}</label>
                                     <input
                                       type="text"
