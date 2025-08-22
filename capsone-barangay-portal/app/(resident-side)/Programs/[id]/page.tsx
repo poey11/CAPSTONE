@@ -2,7 +2,7 @@
 import "@/CSS/Programs/SpecificProgram.css";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter} from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Handshake } from "lucide-react";
 import { useAuth } from "@/app/context/authContext";
@@ -165,6 +165,10 @@ type Role = "Volunteer" | "Participant";
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 
 export default function SpecificProgram() {
+
+const router = useRouter();
+
+
   const { id } = useParams();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -594,9 +598,12 @@ export default function SpecificProgram() {
         files: uploadedFiles,
       });
 
+        {/*}
       if (typeof window !== "undefined") {
         window.location.reload();
       }
+        */}
+         router.push("/Programs/Notification");
     } catch {
       showToast("Something went wrong. Please try again.", true);
     }
