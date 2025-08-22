@@ -17,21 +17,15 @@ type Props = {
   onProgramSaved?: (msg: string) => void;
 };
 
-const PREAPPROVED_NAMES = [
-  "medical mission",
-  "caravan",
-  "social services program caravan",
-  "aksyon medikal",
-  "job fair local employment",
-  "feeding program",
-  "scholarship program",
-];
-
 const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
 
-type SimpleField = { name: string, description?: string };
+type SimpleField = { name: string; description?: string };
 
-export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: Props) {
+export default function AddNewProgramModal({
+  isOpen,
+  onClose,
+  onProgramSaved,
+}: Props) {
   const { data: session } = useSession();
   const userPosition = (session?.user as any)?.position ?? "";
   const userFullName = (session?.user as any)?.fullName ?? "";
@@ -40,7 +34,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // Details form state
+  // Details
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
   const [volunteers, setVolunteers] = useState<string>("");
@@ -54,6 +48,11 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
 
+  // Age restriction
+  const [noAgeLimit, setNoAgeLimit] = useState(true);
+  const [ageMin, setAgeMin] = useState<string>("");
+  const [ageMax, setAgeMax] = useState<string>("");
+
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
 
@@ -65,7 +64,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
-  // Agency
+  // Agency (fixed to be functional)
   const [agency, setAgency] = useState("");
   const [otherAgency, setOtherAgency] = useState("");
 
@@ -76,6 +75,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     { name: "contactNumber", description: "Used to save the contact number of the participant" },
     { name: "emailAddress", description: "Used to save the email address of the participant" },
     { name: "location", description: "Used to save the address of the participant" },
+    { name: "dateOfBirth", description: "Used to save the participant's date of birth (enables age checks)" },
   ];
 
   const PREDEFINED_REQ_FILES: SimpleField[] = [
@@ -112,7 +112,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     window.setTimeout(() => setShake((prev) => ({ ...prev, [field]: false })), durationMs);
   };
 
-  // Minimum start date is 3 days from today
+  // Minimum start date is 3 days from today (UI shows +4 to be safe)
   const minStartDate = useMemo(() => {
     const t = new Date();
     t.setDate(t.getDate() + 4);
@@ -127,7 +127,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     const min = new Date(today);
     min.setDate(min.getDate() + days);
     const d = new Date(dateStr);
-    return d >= min; // allow same-day as min threshold
+    return d >= min;
   };
 
   const toMinutes = (hhmm: string) => {
@@ -152,7 +152,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setDescription("");
     setSummary("");
 
-    // revoke and clear previews
+    setNoAgeLimit(true);
+    setAgeMin("");
+    setAgeMax("");
+
     setPreviewURLs((old) => {
       old.forEach((u) => URL.revokeObjectURL(u));
       return [];
@@ -163,12 +166,14 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     setErrors({});
     setShake({});
 
-    // requirements
     setReqTextNew("");
     setReqFileNew("");
     setReqTextFields([]);
     setReqFileFields([]);
     setIsPredefinedOpen(false);
+
+    setAgency("");
+    setOtherAgency("");
   };
 
   const validate = () => {
@@ -203,6 +208,12 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     need("timeStart", !!timeStart);
     need("timeEnd", !!timeEnd);
 
+    // Agency validation (fixed)
+    need("agency", !!agency);
+    if (agency === "others") {
+      need("otherAgency", !!otherAgency.trim());
+    }
+
     if (eventType === "single") {
       need("singleDate", !!singleDate && isAtLeastDaysFromToday(singleDate, 3));
     } else {
@@ -229,6 +240,48 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       }
     }
 
+    if (!noAgeLimit) {
+      const hasMin = ageMin.trim().length > 0;
+      const hasMax = ageMax.trim().length > 0;
+
+      if (!hasMin && !hasMax) {
+        e["ageMin"] = true;
+        e["ageMax"] = true;
+        triggerShake("ageMin");
+        triggerShake("ageMax");
+      } else {
+        const minNum = hasMin ? Number(ageMin) : null;
+        const maxNum = hasMax ? Number(ageMax) : null;
+
+        const validMin =
+          minNum === null || (Number.isFinite(minNum) && minNum >= 0 && minNum <= 150);
+        const validMax =
+          maxNum === null || (Number.isFinite(maxNum) && maxNum >= 0 && maxNum <= 150);
+
+        if (!validMin) {
+          e["ageMin"] = true;
+          triggerShake("ageMin");
+        }
+        if (!validMax) {
+          e["ageMax"] = true;
+          triggerShake("ageMax");
+        }
+
+        if (
+          validMin &&
+          validMax &&
+          minNum !== null &&
+          maxNum !== null &&
+          minNum > maxNum
+        ) {
+          e["ageMin"] = true;
+          e["ageMax"] = true;
+          triggerShake("ageMin");
+          triggerShake("ageMax");
+        }
+      }
+    }
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -240,11 +293,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
     return roleOk;
   };
 
-  // handle multi-file selection (images only)
+  // Files (images only)
   const handleFilesChange = (files: FileList | null) => {
     setFileError(null);
     if (!files || files.length === 0) {
-      // clear
       setPhotoFiles([]);
       setPreviewURLs((old) => {
         old.forEach((u) => URL.revokeObjectURL(u));
@@ -253,46 +305,42 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       return;
     }
 
-    // Constraints
     const MAX_MB = 5;
     const MAX_BYTES = MAX_MB * 1024 * 1024;
     const MAX_FILES = 4;
 
     const picked = Array.from(files);
     const filtered: File[] = [];
-    const errors: string[] = [];
+    const errs: string[] = [];
 
     for (const f of picked.slice(0, MAX_FILES)) {
       if (!f.type.startsWith("image/")) {
-        errors.push(`${f.name} is not an image.`);
+        errs.push(`${f.name} is not an image.`);
         continue;
       }
       if (f.size > MAX_BYTES) {
-        errors.push(`${f.name} exceeds ${MAX_MB}MB.`);
+        errs.push(`${f.name} exceeds ${MAX_MB}MB.`);
         continue;
       }
       filtered.push(f);
     }
 
     if (picked.length > MAX_FILES) {
-      errors.push(`Only the first ${MAX_FILES} images were accepted.`);
+      errs.push(`Only the first ${MAX_FILES} images were accepted.`);
     }
 
-    // Build previews
     const newPreviews = filtered.map((f) => URL.createObjectURL(f));
 
-    // Revoke old previews
     setPreviewURLs((old) => {
       old.forEach((u) => URL.revokeObjectURL(u));
       return newPreviews;
     });
     setPhotoFiles(filtered);
 
-    if (errors.length) {
-      setFileError(errors.join(" "));
+    if (errs.length) {
+      setFileError(errs.join(" "));
     }
 
-    // clear any old photo error flag
     setErrors((prev) => {
       const { photoFiles, ...rest } = prev;
       return rest;
@@ -301,7 +349,6 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
   useEffect(() => {
     return () => {
-      // cleanup on unmount
       setPreviewURLs((old) => {
         old.forEach((u) => URL.revokeObjectURL(u));
         return [];
@@ -340,6 +387,10 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       const normalizedStart = eventType === "single" ? singleDate : startDate;
       const normalizedEnd = eventType === "single" ? singleDate : endDate;
 
+      // Resolve agency to store
+      const resolvedAgency =
+        agency === "others" ? (otherAgency.trim() || "Others") : agency;
+
       const payload: any = {
         programName: programName.trim(),
         participants: Number(participants),
@@ -353,6 +404,15 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
         timeEnd,
         description: description.trim(),
         summary: summary.trim(),
+        // store both the selected value and the resolved label
+        agency: resolvedAgency,
+        agencyRaw: agency,          // "none" | "cityhall" | "others"
+        otherAgency: otherAgency.trim() || null,
+        ageRestriction: {
+          noAgeLimit,
+          minAge: noAgeLimit || ageMin.trim() === "" ? null : Number(ageMin),
+          maxAge: noAgeLimit || ageMax.trim() === "" ? null : Number(ageMax),
+        },
         approvalStatus: autoApproved ? "Approved" : "Pending",
         progressStatus: "Upcoming",
         activeStatus: autoApproved ? "Active" : "Inactive",
@@ -373,14 +433,14 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
             storage,
             `Programs/${programRef.id}/photos/${Date.now()}_${idx}_${file.name}`
           );
-          await uploadBytes(storageRef, file);
-          return getDownloadURL(storageRef);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
         });
 
         const urls = await Promise.all(uploadPromises);
         await updateDoc(doc(db, "Programs", programRef.id), {
-          photoURL: urls[0] || null,     
-          photoURLs: urls,               
+          photoURL: urls[0] || null,
+          photoURLs: urls,
         });
       }
 
@@ -397,8 +457,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
       });
 
       const pos = normalize(userPosition);
-      const isSecOrAsst =
-        pos === "secretary" || pos === "assistant secretary";
+      const isSecOrAsst = pos === "secretary" || pos === "assistant secretary";
       const isPB = pos === "punong barangay";
 
       if (isSecOrAsst) {
@@ -458,7 +517,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
               Photos <span className="required">*</span>
             </span>
 
-            {/* Main preview (first image) */}
+            {/* Main preview */}
             <div className="add-programs-profile-container">
               <img
                 src={hasPreviews ? previewURLs[0]! : "/Images/thumbnail.png"}
@@ -468,11 +527,13 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                   !hasPreviews ? "placeholder" : "",
                   errors.photoFiles ? "input-error" : "",
                   shake.photoFiles ? "shake" : "",
-                ].join(" ").trim()}
+                ]
+                  .join(" ")
+                  .trim()}
               />
             </div>
 
-            {/* Thumbnails for the rest */}
+            {/* Thumbnails */}
             {previewURLs.length > 1 && (
               <div
                 style={{
@@ -511,7 +572,6 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
               Click to Upload File(s)
             </label>
 
-            {/* Inline file errors (kept subtle) */}
             {(errors.photoFiles || fileError) && (
               <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
                 {errors.photoFiles && "Please upload at least one image."}
@@ -553,7 +613,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.programName ? "input-error" : "",
                           shake.programName ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         placeholder="Program Name (E.g. Feeding Program)"
                         value={programName}
                         onChange={(e) => setProgramName(e.target.value)}
@@ -571,7 +633,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.participants ? "input-error" : "",
                           shake.participants ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         placeholder="E.g. 50"
                         value={participants}
                         onChange={(e) => setParticipants(e.target.value)}
@@ -589,7 +653,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.volunteers ? "input-error" : "",
                           shake.volunteers ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         placeholder="E.g. 50"
                         value={volunteers}
                         onChange={(e) => setVolunteers(e.target.value)}
@@ -605,15 +671,81 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.eligibleParticipants ? "input-error" : "",
                           shake.eligibleParticipants ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         value={eligibleParticipants}
                         onChange={(e) => setEligibleParticipants(e.target.value)}
                       >
                         <option value="">Select requirement</option>
                         <option value="resident">Resident</option>
-                        {/* <option value="non-resident">Non-Resident</option> */}
                         <option value="both">Both</option>
                       </select>
+                    </div>
+
+                    {/* Age Restriction */}
+                    <div className="fields-section-add-programs">
+                      <p>
+                        Age Restriction<span className="required">*</span>
+                      </p>
+
+                      <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <input
+                          type="checkbox"
+                          checked={noAgeLimit}
+                          onChange={(e) => {
+                            setNoAgeLimit(e.target.checked);
+                            if (e.target.checked) {
+                              setAgeMin("");
+                              setAgeMax("");
+                              setErrors((prev) => {
+                                const { ageMin, ageMax, ...rest } = prev;
+                                return rest;
+                              });
+                            }
+                          }}
+                        />
+                        <span>No age limit</span>
+                      </label>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        <input
+                          type="number"
+                          min={0}
+                          placeholder="Min age"
+                          className={[
+                            "add-programs-input-field",
+                            errors.ageMin ? "input-error" : "",
+                            shake.ageMin ? "shake" : "",
+                          ]
+                            .join(" ")
+                            .trim()}
+                          value={ageMin}
+                          onChange={(e) => setAgeMin(e.target.value)}
+                          disabled={noAgeLimit}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          placeholder="Max age"
+                          className={[
+                            "add-programs-input-field",
+                            errors.ageMax ? "input-error" : "",
+                            shake.ageMax ? "shake" : "",
+                          ]
+                            .join(" ")
+                            .trim()}
+                          value={ageMax}
+                          onChange={(e) => setAgeMax(e.target.value)}
+                          disabled={noAgeLimit}
+                        />
+                      </div>
+
+                      {!noAgeLimit && (errors.ageMin || errors.ageMax) && (
+                        <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                          Please set a valid age range. Use either min, max, or both. Min must be ≤ max.
+                        </div>
+                      )}
                     </div>
 
                     <div className="fields-section-add-programs">
@@ -626,7 +758,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.timeStart ? "input-error" : "",
                           shake.timeStart ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         value={timeStart}
                         onChange={(e) => {
                           const newStart = e.target.value;
@@ -645,16 +779,32 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
 
                   {/* Right column */}
                   <div className="add-programs-content-right-side">
-
-                    {/* pa gawa nalang ng backend */}
                     <div className="fields-section-add-programs">
                       <p>
                         Partnered Agency<span className="required">*</span>
                       </p>
                       <select
-                        className="add-programs-input-field"
+                        className={[
+                          "add-programs-input-field",
+                          errors.agency ? "input-error" : "",
+                          shake.agency ? "shake" : "",
+                        ].join(" ").trim()}
                         value={agency}
-                        onChange={(e) => setAgency(e.target.value)}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setAgency(v);
+                          if (v !== "others") {
+                            setOtherAgency("");
+                            setErrors((prev) => {
+                              const { otherAgency, ...rest } = prev;
+                              return rest;
+                            });
+                          }
+                          setErrors((prev) => {
+                            const { agency, ...rest } = prev;
+                            return rest;
+                          });
+                        }}
                       >
                         <option value="">Select agency</option>
                         <option value="none">None</option>
@@ -666,9 +816,19 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                         <input
                           type="text"
                           placeholder="Enter agency"
-                          className="add-programs-input-field"
+                          className={[
+                            "add-programs-input-field",
+                            errors.otherAgency ? "input-error" : "",
+                            shake.otherAgency ? "shake" : "",
+                          ].join(" ").trim()}
                           value={otherAgency}
-                          onChange={(e) => setOtherAgency(e.target.value)}
+                          onChange={(e) => {
+                            setOtherAgency(e.target.value);
+                            setErrors((prev) => {
+                              const { otherAgency, ...rest } = prev;
+                              return rest;
+                            });
+                          }}
                         />
                       )}
                     </div>
@@ -680,7 +840,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                       <select
                         className="add-programs-input-field"
                         value={eventType}
-                        onChange={(e) => setEventType(e.target.value as "single" | "multiple")}
+                        onChange={(e) =>
+                          setEventType(e.target.value as "single" | "multiple")
+                        }
                       >
                         <option value="single">Single Day</option>
                         <option value="multiple">Multiple Days</option>
@@ -698,7 +860,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             "add-programs-input-field",
                             errors.singleDate ? "input-error" : "",
                             shake.singleDate ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           min={minStartDate}
                           value={singleDate}
                           onChange={(e) => setSingleDate(e.target.value)}
@@ -716,7 +880,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                               "add-programs-input-field",
                               errors.startDate ? "input-error" : "",
                               shake.startDate ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             min={minStartDate}
                             value={startDate}
                             onChange={(e) => {
@@ -725,7 +891,12 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                               if (endDate && new Date(endDate) < new Date(newStart)) {
                                 setEndDate(newStart);
                               }
-                              if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
+                              if (
+                                isSameDay() &&
+                                timeStart &&
+                                timeEnd &&
+                                toMinutes(timeEnd) < toMinutes(timeStart)
+                              ) {
                                 setTimeEnd(timeStart);
                               }
                             }}
@@ -741,7 +912,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                               "add-programs-input-field",
                               errors.endDate ? "input-error" : "",
                               shake.endDate ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             min={startDate || minStartDate}
                             value={endDate}
                             onChange={(e) => {
@@ -751,7 +924,12 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                               } else {
                                 setEndDate(newEnd);
                               }
-                              if (isSameDay() && timeStart && timeEnd && toMinutes(timeEnd) < toMinutes(timeStart)) {
+                              if (
+                                isSameDay() &&
+                                timeStart &&
+                                timeEnd &&
+                                toMinutes(timeEnd) < toMinutes(timeStart)
+                              ) {
                                 setTimeEnd(timeStart);
                               }
                             }}
@@ -770,7 +948,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.location ? "input-error" : "",
                           shake.location ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         placeholder="Location (E.g. Barangay Hall)"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
@@ -787,7 +967,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                           "add-programs-input-field",
                           errors.timeEnd ? "input-error" : "",
                           shake.timeEnd ? "shake" : "",
-                        ].join(" ").trim()}
+                        ]
+                          .join(" ")
+                          .trim()}
                         min={endTimeMin}
                         value={timeEnd}
                         onChange={(e) => {
@@ -807,12 +989,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                 </div>
 
                 <div className="add-programs-lower-section">
-
                   <div className="programs-description-container">
                     <div className="box-container-outer-description">
-                      <div className="title-description-programs">
-                        Summary of Program
-                      </div>
+                      <div className="title-description-programs">Summary of Program</div>
                       <div className="box-container-summary">
                         <span className="required-asterisk">*</span>
                         <textarea
@@ -820,7 +999,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             "summary-input-field",
                             errors.summary ? "input-error" : "",
                             shake.summary ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={summary}
                           onChange={(e) => setSummary(e.target.value)}
                         />
@@ -840,39 +1021,43 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             "description-input-field",
                             errors.description ? "input-error" : "",
                             shake.description ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                         />
                       </div>
                     </div>
                   </div>
-
                 </div>
               </>
             )}
 
             {activeSection === "reqs" && (
               <div className="add-programs-requirements-container">
-
-                {/* PREDEFINED fields */}
+                {/* Predefined fields */}
                 <div className="predefined-fields-notes-container-programs">
-                  <div className="predefined-fields-notes-container-tile-programs" style={{cursor: 'pointer'}} onClick={togglePredefinedOpen}>
+                  <div
+                    className="predefined-fields-notes-container-tile-programs"
+                    style={{ cursor: "pointer" }}
+                    onClick={togglePredefinedOpen}
+                  >
                     <div className="predefined-fields-title-programs">
-                        <h1>Pre-defined Fields</h1>
+                      <h1>Pre-defined Fields</h1>
                     </div>
                     <div className="predefined-fields-button-section-programs">
                       <button
                         type="button"
                         className="toggle-btn-predefined-fields-programs"
-                        aria-label={isPredefinedOpen ? 'Hide details' : 'Show details'}
+                        aria-label={isPredefinedOpen ? "Hide details" : "Show details"}
                       >
                         <img
-                          src={isPredefinedOpen ? '/Images/up.png' : '/Images/down.png'}
-                          alt={isPredefinedOpen ? 'Hide details' : 'Show details'}
-                          style={{ width: '16px', height: '16px' }}
+                          src={isPredefinedOpen ? "/Images/up.png" : "/Images/down.png"}
+                          alt={isPredefinedOpen ? "Hide details" : "Show details"}
+                          style={{ width: "16px", height: "16px" }}
                         />
-                        </button>
+                      </button>
                     </div>
                   </div>
 
@@ -882,13 +1067,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                         * These will be auto-included when saving the program *
                       </div>
                       <ul className="predefined-list-items-programs">
-                        {PREDEFINED_REQ_TEXT.length === 0 && PREDEFINED_REQ_FILES.length === 0 && (
-                          <li style={{ opacity: 0.7 }}>No predefined requirements yet.</li>
-                        )}
+                        {PREDEFINED_REQ_TEXT.length === 0 &&
+                          PREDEFINED_REQ_FILES.length === 0 && (
+                            <li style={{ opacity: 0.7 }}>
+                              No predefined requirements yet.
+                            </li>
+                          )}
 
                         {PREDEFINED_REQ_TEXT.map((f, i) => (
                           <li key={`pretext-${i}`} className="predefined-text-programs">
-                            {i + 1}. {f.name} <span className="predefined-type-programs">(text)</span>
+                            {i + 1}. {f.name}{" "}
+                            <span className="predefined-type-programs">(text)</span>
                             <span className="predefined-desc-programs"> — {f.description}</span>
                           </li>
                         ))}
@@ -903,18 +1092,18 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                       </ul>
                     </div>
                   )}
-
                 </div>
 
-                {/* Custom TEXT requirements */}
+                {/* Custom text requirements */}
                 <div className="box-container-outer-programs-fields">
-                  <div className="title-programs-fields">
-                    Text Fields
-                  </div>
+                  <div className="title-programs-fields">Text Fields</div>
 
                   <div className="box-container-programs-fields">
                     <div className="instructions-container-programs">
-                      <h1>* Enter the text fields needed for the program. No need to input pre-defined fields. FORMAT: sampleField *</h1>
+                      <h1>
+                        * Enter the text fields needed for the program. No need to input pre-defined
+                        fields. FORMAT: sampleField *
+                      </h1>
                     </div>
                     <span className="required-asterisk">*</span>
                     <div className="add-programs-field-container">
@@ -929,7 +1118,12 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             placeholder="e.g., guardianName"
                             value={reqTextNew}
                             onChange={(e) => setReqTextNew(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqText(); } }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addReqText();
+                              }
+                            }}
                           />
                         </div>
                         <div className="row-button-section-programs">
@@ -937,7 +1131,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             type="button"
                             className="program-field-add-button"
                             onClick={addReqText}
-                            >
+                          >
                             +
                           </button>
                         </div>
@@ -979,15 +1173,17 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                   </div>
                 </div>
 
-                {/* Custom FILE requirements */}
+                {/* Custom file requirements */}
                 <div className="box-container-outer-programs-fields">
-                  <div className="title-programs-fields">
-                    File Upload Fields
-                  </div>
+                  <div className="title-programs-fields">File Upload Fields</div>
 
                   <div className="box-container-programs-fields">
                     <div className="instructions-container-programs">
-                      <h1>* Enter the file upload fields needed for the program. No need to input pre-defined fields. Tip: use a clear naming convention (e.g., <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *</h1>
+                      <h1>
+                        * Enter the file upload fields needed for the program. No need to input
+                        pre-defined fields. Tip: use a clear naming convention (e.g.,{" "}
+                        <code>validIDjpg</code>, <code>barangayIDjpg</code>, etc.) *
+                      </h1>
                     </div>
                     <span className="required-asterisk">*</span>
                     <div className="add-programs-field-container">
@@ -1002,7 +1198,12 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             placeholder="e.g., medicalCertificateJpg"
                             value={reqFileNew}
                             onChange={(e) => setReqFileNew(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addReqFile(); } }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addReqFile();
+                              }
+                            }}
                           />
                         </div>
                         <div className="row-button-section-programs">
@@ -1010,7 +1211,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                             type="button"
                             className="program-field-add-button"
                             onClick={addReqFile}
-                            >
+                          >
                             +
                           </button>
                         </div>
@@ -1020,7 +1221,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                     <div className="added-doc-field-container">
                       {reqFileFields.length > 0 && (
                         <>
-                         {reqFileFields.map((f, i) => (
+                          {reqFileFields.map((f, i) => (
                             <div key={`rt-${i}`} className="added-program-field-row">
                               <div className="row-input-section-added-program">
                                 <input
@@ -1029,7 +1230,9 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
                                   value={f.name}
                                   onChange={(e) => {
                                     const v = e.target.value;
-                                    setReqFileFields((prev) => prev.map((x, idx) => idx === i ? { name: v } : x));
+                                    setReqFileFields((prev) =>
+                                      prev.map((x, idx) => (idx === i ? { name: v } : x))
+                                    );
                                   }}
                                 />
                               </div>
@@ -1067,11 +1270,7 @@ export default function AddNewProgramModal({ isOpen, onClose, onProgramSaved }: 
           >
             Cancel
           </button>
-          <button
-            className="program-yes-button"
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <button className="program-yes-button" onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save"}
           </button>
         </div>
