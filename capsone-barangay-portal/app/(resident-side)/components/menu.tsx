@@ -25,6 +25,7 @@ type Notification = {
   requestID: string;
   isRead?: boolean;
   programId: string;
+  participantID: string;
 };
 
 
