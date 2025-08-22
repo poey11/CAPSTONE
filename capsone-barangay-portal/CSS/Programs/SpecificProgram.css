@@ -142,6 +142,12 @@ display: flex;
 flex-direction: column;
 }
 
+.form-group-specific-age {
+  display: flex;
+flex-direction: column;
+margin-top: 12px;
+}
+
 .form-label-specific {
 font-size: 16px;
 font-weight: bold;
@@ -358,33 +364,50 @@ border-radius: 15px;
 
 /* Each block */
 .program-detail-card-specific {
-  background: white;
-  border-radius: 15px;
-  padding: 1.5rem;
+  background: #fff;
+  border-radius: 18px;
+  padding: 2rem 1.5rem;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  
 }
 
 .program-detail-card-specific:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* Titles (Schedule, Location, etc.) */
+/* Header section (icon + title inline) */
+.status-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 0.5rem;
+}
+
 .program-detail-card-specific h3 {
   color: #DF7426;
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
-/* Text inside (date, place, etc.) */
-.program-detail-card-specific p {
+/* Message text */
+.status-message {
   color: #444;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-top: 0.5rem;
 }
+
 
 /* Get Involved Section */
 .get-involved {
@@ -499,4 +522,162 @@ border-radius: 15px;
 
 .back-btn:hover {
   transform: scale(1.2);
+}
+
+
+/*
+For confirmation
+*/
+
+.confirmation-popup-overlay-online {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-online {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.confirmation-popup-online p{
+  color: rgb(97, 97, 97);
+}
+
+.yesno-container-add{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add,
+.no-button-add{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-add {
+  background-color: #4caf50; 
+}
+
+.yes-button-add:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-add {
+  background-color: #f44336;
+}
+
+.no-button-add:hover {
+  background-color:  #c2352b; 
+} 
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+
+
+
+
+
+
+/*
+Valid id section
+*/
+
+.prefilled-file-notice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #f9fafb;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 8px;
+}
+
+.prefilled-file-thumbnail {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  transition: transform 0.2s ease;
+}
+
+.prefilled-file-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.prefilled-file-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.prefilled-file-text {
+  font-size: 14px;
+  color: #214666;
+  font-weight: 500;
+}
+
+.prefilled-file-link {
+  font-size: 13px;
+  color: #DF7426;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.prefilled-file-link:hover {
+  text-decoration: underline;
+}
+
+
+
+/*
+For age 
+*/
+
+.values{
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
