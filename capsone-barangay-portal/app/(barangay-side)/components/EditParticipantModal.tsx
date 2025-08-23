@@ -110,6 +110,9 @@ export default function EditParticipantModal({
     return { ...base, ...top };
   }, [fullDoc, participant?.role]);
 
+  const roleValue = fieldsMap.role || "";
+  const isVolunteer = roleValue.trim().toLowerCase() === "volunteer";
+
   // Requirements: file URLs. validIDjpg first, then others alpha.
   const filesMap: Record<string, string> = useMemo(() => {
     const map = { ...(fullDoc?.files || {}) } as Record<string, string>;
@@ -126,8 +129,6 @@ export default function EditParticipantModal({
     return ordered;
   }, [fullDoc]);
 
-  const roleValue = fieldsMap.role || "";
-
   // New: derive DOB and Age
   const dobValue: string = fieldsMap.dateOfBirth || "";
   const computedAgeFromDOB = computeAgeFromDOB(dobValue);
@@ -138,6 +139,12 @@ export default function EditParticipantModal({
 
   // Helpers
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
+
+  // Volunteer-only: filter to just validIDjpg; otherwise include all files
+  const fileEntries = useMemo(() => {
+    const entries = Object.entries(filesMap);
+    return isVolunteer ? entries.filter(([k]) => k === "validIDjpg") : entries;
+  }, [filesMap, isVolunteer]);
 
   const handleApprove = async () => {
     if (!participant?.id || acting) return;
@@ -423,7 +430,7 @@ export default function EditParticipantModal({
                           />
                           <p className="no-results-programs">Loading uploads…</p>
                         </div>
-                      ) : Object.keys(filesMap).length === 0 ? (
+                      ) : fileEntries.length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
                             src="/images/no-results.png"
@@ -434,47 +441,18 @@ export default function EditParticipantModal({
                         </div>
                       ) : (
                         <>
-                          {filesMap.validIDjpg && (
-                            <div className="box-container-outer-participant" style={{ width: "100%" }}>
-                              <div className="title-remarks-participant">Uploaded Valid ID</div>
-                              <div className="box-container-participant-2">
-                                {isPdfUrl(filesMap.validIDjpg) ? (
-                                  <embed
-                                    src={filesMap.validIDjpg}
-                                    type="application/pdf"
-                                    className="uploaded-pic-participant"
-                                  />
-                                ) : (
-                                  <a
-                                    href={filesMap.validIDjpg}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <img
-                                      src={filesMap.validIDjpg}
-                                      alt="Valid ID"
-                                      className="participant-img-view uploaded-pic-participant"
-                                      style={{ cursor: "pointer" }}
-                                    />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {Object.entries(filesMap)
-                            .filter(([k]) => k !== "validIDjpg")
-                            .map(([key, url]) => (
+                          {fileEntries.map(([key, url]) => {
+                            const label = key === "validIDjpg" ? "Uploaded Valid ID" : key;
+                            const isPdf = isPdfUrl(url);
+                            return (
                               <div
                                 key={key}
                                 className="box-container-outer-participant"
                                 style={{ width: "100%" }}
                               >
-                                <div className="title-remarks-participant">
-                                  {key}
-                                </div>
+                                <div className="title-remarks-participant">{label}</div>
                                 <div className="box-container-participant-2">
-                                  {isPdfUrl(url) ? (
+                                  {isPdf ? (
                                     <embed
                                       src={url}
                                       type="application/pdf"
@@ -484,7 +462,7 @@ export default function EditParticipantModal({
                                     <a href={url} target="_blank" rel="noopener noreferrer">
                                       <img
                                         src={url}
-                                        alt={key}
+                                        alt={label}
                                         className="participant-img-view uploaded-pic-participant"
                                         style={{ cursor: "pointer" }}
                                       />
@@ -492,7 +470,8 @@ export default function EditParticipantModal({
                                   )}
                                 </div>
                               </div>
-                            ))}
+                            );
+                          })}
                         </>
                       )}
                     </div>

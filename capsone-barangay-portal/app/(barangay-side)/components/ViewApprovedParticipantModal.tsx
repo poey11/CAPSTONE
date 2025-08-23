@@ -164,6 +164,17 @@ export default function ViewApprovedParticipantModal({
     return { ...base, ...top };
   }, [fullDoc, participant?.emailAddress, participant?.role, participant?.fullName]);
 
+  const roleValue = (fieldsMap.role || "") as string;
+  const isVolunteer = roleValue?.trim().toLowerCase() === "volunteer";
+
+  // For Volunteers, allow only PRETTY text fields (excluding file keys and derived "age")
+  const PRETTY_TEXT_KEYS_SET = useMemo(() => {
+    const keys = Object.keys(PRETTY_LABELS).filter(
+      (k) => k !== "validIDjpg" && k !== "age"
+    );
+    return new Set(keys);
+  }, []);
+
   // DOB + Age derived values
   const dobValue: string = (fieldsMap.dateOfBirth || "").toString();
   const ageFromDOB = computeAgeFromDOB(dobValue);
@@ -191,6 +202,15 @@ export default function ViewApprovedParticipantModal({
     return base;
   }, [reqTextFields, dobValue]);
 
+  // Filter text fields if Volunteer (only PRETTY labels)
+  const filteredTextNames: string[] = useMemo(() => {
+    if (!isVolunteer) return orderedTextNames;
+    // Keep only those that exist in PRETTY labels (text) or the special dateOfBirth
+    return orderedTextNames.filter(
+      (name) => PRETTY_TEXT_KEYS_SET.has(name) || name === "dateOfBirth"
+    );
+  }, [orderedTextNames, PRETTY_TEXT_KEYS_SET, isVolunteer]);
+
   // Build ordered file keys to show: program-defined first (keeping any present), then any extras (alpha)
   const orderedFileNames: string[] = useMemo(() => {
     const seen = new Set<string>();
@@ -215,7 +235,12 @@ export default function ViewApprovedParticipantModal({
     return out;
   }, [reqFileFields, filesMap]);
 
-  const roleValue = (fieldsMap.role || "") as string;
+  // Filter files if Volunteer (only Valid ID)
+  const filteredFileNames: string[] = useMemo(() => {
+    if (!isVolunteer) return orderedFileNames;
+    return orderedFileNames.filter((k) => k === "validIDjpg");
+  }, [orderedFileNames, isVolunteer]);
+
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
   if (!isOpen || !participant) return null;
@@ -295,7 +320,7 @@ export default function ViewApprovedParticipantModal({
                         <div style={{ padding: 16, opacity: 0.8 }}>Loading fields…</div>
                       ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                          {orderedTextNames.map((name) => {
+                          {filteredTextNames.map((name) => {
                             // Special rendering for dateOfBirth: show DOB + Age
                             if (name === "dateOfBirth") {
                               return (
@@ -323,9 +348,11 @@ export default function ViewApprovedParticipantModal({
                             }
 
                             // Generic field rendering
-                            const formattedLabel = name
-                              .replace(/([A-Z])/g, " $1")
-                              .replace(/^./, (s) => s.toUpperCase());
+                            const formattedLabel = PRETTY_LABELS[name]
+                              ? PRETTY_LABELS[name]
+                              : name
+                                  .replace(/([A-Z])/g, " $1")
+                                  .replace(/^./, (s) => s.toUpperCase());
                             const v = (fieldsMap[name] ?? "").toString();
 
                             return (
@@ -358,14 +385,14 @@ export default function ViewApprovedParticipantModal({
                           <img src="/images/no-results.png" alt="Loading" className="no-result-icon-programs" />
                           <p className="no-results-programs">Loading uploads…</p>
                         </div>
-                      ) : Object.keys(filesMap).length === 0 ? (
+                      ) : (isVolunteer ? filteredFileNames : Object.keys(filesMap)).length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
                           <p className="no-results-programs">No files uploaded</p>
                         </div>
                       ) : (
                         <>
-                          {orderedFileNames.map((key) => {
+                          {(isVolunteer ? filteredFileNames : orderedFileNames).map((key) => {
                             const url = filesMap[key];
                             if (!url) return null;
                             const label = labelFor(key);
