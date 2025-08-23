@@ -1544,11 +1544,6 @@ export default function ProgramDetails() {
                               {descriptionLen}/{MIN_DESC_CHARS}
                             </span>
                           </div>
-                          {descriptionLen < MIN_DESC_CHARS && (
-                            <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                              Description must be at least {MIN_DESC_CHARS} characters.
-                            </div>
-                          )}
                         </div>
                       </div>
 
@@ -1589,11 +1584,6 @@ export default function ProgramDetails() {
                               {summaryLen}/{MIN_SUMMARY_CHARS}
                             </span>
                           </div>
-                          {summaryLen < MIN_SUMMARY_CHARS && (
-                            <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
-                              Summary must be at least {MIN_SUMMARY_CHARS} characters.
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
