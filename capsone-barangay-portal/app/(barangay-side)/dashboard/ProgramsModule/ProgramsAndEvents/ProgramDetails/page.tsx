@@ -54,10 +54,9 @@ export default function ProgramDetails() {
 
   // Roles
   const isPunongBarangay = userPosition === "Punong Barangay";
-  const isHigherUp =
-    userPosition === "Punong Barangay" ||
-    userPosition === "Assistant Secretary" ||
-    userPosition === "Secretary";
+  const isSecretary = userPosition === "Secretary";
+  const isAssistantSecretary = userPosition === "Assistant Secretary";
+  const isHigherUp = isPunongBarangay || isSecretary || isAssistantSecretary;
 
   type Section = "details" | "reqs" | "others" | "reject";
   const [activeSection, setActiveSection] = useState<Section>("details");
@@ -88,6 +87,12 @@ export default function ProgramDetails() {
   // Text areas
   const [description, setDescription] = useState("");
   const [summary, setSummary] = useState("");
+
+  // --- Minimum character requirements (same as create modal) ---
+  const MIN_SUMMARY_CHARS = 200;
+  const MIN_DESC_CHARS = 300;
+  const summaryLen = summary.trim().length;
+  const descriptionLen = description.trim().length;
 
   const [existingPhotoURL, setExistingPhotoURL] = useState<string | null>(null); // cover
   const [existingPhotoURLs, setExistingPhotoURLs] = useState<string[]>([]); // gallery
@@ -160,11 +165,17 @@ export default function ProgramDetails() {
   const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
 
-  // EDIT RULES
-  const canEdit =
-    isPunongBarangay && approvalStatus === "Pending" && progressStatus !== "Completed";
+  // --- EDIT & VISIBILITY RULES (updated per your requirements) ---
+  // Pending: only PB can edit/approve; hide Active/Inactive toggle
+  // Approved + Upcoming: PB, Secretary, Assistant Secretary can edit
+  // Ongoing or later (or Rejected): fully locked
+  const canEdit = (() => {
+    if (approvalStatus === "Pending") return isPunongBarangay;
+    if (approvalStatus === "Approved" && progressStatus === "Upcoming") return isHigherUp;
+    return false;
+  })();
   const isReadOnly = !canEdit;
-  const canToggleActive = isHigherUp;
+  const showActiveToggle = isHigherUp && approvalStatus !== "Pending"; // hide toggle when Pending
 
   // Load program
   useEffect(() => {
@@ -368,8 +379,9 @@ export default function ProgramDetails() {
       summary: summary.trim(),
 
       //  Persist agency both normalized and raw
-      agency: resolvedAgency,     // display/normalized value ("City Hall" | "None" | custom text)
-      agencyRaw: agency,          // "none" | "cityhall" | "others" | "" (if not chosen)
+      agency: resolvedAgency,     // display/normalized value
+      agencyRaw: agency,          // "none" | "cityhall" | "others" | ""
+
       otherAgency: otherAgency.trim() || null,
 
       //  Persist age restriction
@@ -413,7 +425,7 @@ export default function ProgramDetails() {
   const handleStatusChange = async (
     e: React.ChangeEvent<HTMLSelectElement> | { target: { value: "Active" | "Inactive" } }
   ) => {
-    if (!programId || !canToggleActive) return;
+    if (!programId || !showActiveToggle) return;
     const next = (e.target.value as "Active" | "Inactive") || "Inactive";
     const prev = activeStatus;
     setActiveStatus(next);
@@ -494,8 +506,13 @@ export default function ProgramDetails() {
     need("volunteers", !!volunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
-    need("description", !!description.trim());
-    need("summary", !!summary.trim());
+
+    // --- Enforce minimum lengths ---
+    const summaryOk = summary.trim().length >= MIN_SUMMARY_CHARS;
+    need("summary", summaryOk);
+
+    const descriptionOk = description.trim().length >= MIN_DESC_CHARS;
+    need("description", descriptionOk);
 
     // Agency validation
     need("agency", !!agency);
@@ -781,11 +798,11 @@ export default function ProgramDetails() {
           </div>
 
           <div className="action-btn-section-program">
-            {canToggleActive && (
+            {showActiveToggle && (
               <label
                 className="switch-toggle"
                 title={
-                  !canToggleActive ? "You don't have permission to toggle visibility" : "Toggle visibility on resident side"
+                  !showActiveToggle ? "You don't have permission to toggle visibility" : "Toggle visibility on resident side"
                 }
                 style={{ marginRight: 12 }}
               >
@@ -799,7 +816,7 @@ export default function ProgramDetails() {
                         : ({ target: { value: "Inactive" } } as any)
                     )
                   }
-                  disabled={!canToggleActive}
+                  disabled={!showActiveToggle}
                 />
                 <span className="slider"></span>
                 <span className="toggle-label">{activeStatus}</span>
@@ -831,17 +848,19 @@ export default function ProgramDetails() {
               fontSize: 14,
             }}
           >
-            {approvalStatus === "Approved" ? (
-              <>This program has been <strong>Approved</strong>. Editing is disabled for everyone.</>
+            {approvalStatus === "Approved" && progressStatus === "Ongoing" ? (
+              <>This program is <strong>Approved</strong> and currently <strong>Ongoing</strong>. Editing is disabled for everyone.</>
+            ) : approvalStatus === "Approved" && progressStatus === "Completed" ? (
+              <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
+            ) : approvalStatus === "Approved" && progressStatus === "Upcoming" && !isHigherUp ? (
+              <>This program is <strong>Approved (Upcoming)</strong>. Only the <strong>Punong Barangay</strong>, <strong>Secretary</strong>, and <strong>Assistant Secretary</strong> may edit until it becomes <strong>Ongoing</strong>.</>
             ) : approvalStatus === "Rejected" ? (
               <>
                 This program has been <strong>Rejected</strong>
                 {rejectionReason ? <> — <em>{rejectionReason}</em></> : null}. Editing is disabled (view-only).
               </>
-            ) : progressStatus === "Completed" ? (
-              <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
-            ) : !isPunongBarangay ? (
-              <>Only the <strong>Punong Barangay</strong> can edit Pending programs. You have view-only access.</>
+            ) : approvalStatus === "Pending" && !isPunongBarangay ? (
+              <>This program is <strong>Pending</strong>. Only the <strong>Punong Barangay</strong> can edit and make a decision.</>
             ) : null}
           </div>
         )}
@@ -1497,12 +1516,39 @@ export default function ProgramDetails() {
                               errors.description ? "input-error" : "",
                               shake.description ? "shake" : "",
                             ].join(" ").trim()}
-                            placeholder="Enter Remarks"
+                            placeholder={`Write at least ${MIN_DESC_CHARS} characters...`}
                             name="programDescription"
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => {
+                              setDescription(e.target.value);
+                              if (e.target.value.trim().length >= MIN_DESC_CHARS) {
+                                setErrors((prev) => {
+                                  const { description, ...rest } = prev;
+                                  return rest;
+                                });
+                              }
+                            }}
                             disabled={isReadOnly}
                           />
+                          {/* Counter + validation hint */}
+                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
+                            <span style={{ opacity: 0.7 }}>
+                              Minimum {MIN_DESC_CHARS} characters
+                            </span>
+                            <span
+                              style={{
+                                opacity: descriptionLen < MIN_DESC_CHARS ? 1 : 0.7,
+                                color: descriptionLen < MIN_DESC_CHARS ? "#b91c1c" : "inherit",
+                              }}
+                            >
+                              {descriptionLen}/{MIN_DESC_CHARS}
+                            </span>
+                          </div>
+                          {descriptionLen < MIN_DESC_CHARS && (
+                            <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                              Description must be at least {MIN_DESC_CHARS} characters.
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1515,12 +1561,39 @@ export default function ProgramDetails() {
                               errors.summary ? "input-error" : "",
                               shake.summary ? "shake" : "",
                             ].join(" ").trim()}
-                            placeholder="Enter Summary"
+                            placeholder={`Write at least ${MIN_SUMMARY_CHARS} characters...`}
                             name="programSummary"
                             value={summary}
-                            onChange={(e) => setSummary(e.target.value)}
+                            onChange={(e) => {
+                              setSummary(e.target.value);
+                              if (e.target.value.trim().length >= MIN_SUMMARY_CHARS) {
+                                setErrors((prev) => {
+                                  const { summary, ...rest } = prev;
+                                  return rest;
+                                });
+                              }
+                            }}
                             disabled={isReadOnly}
                           />
+                          {/* Counter + validation hint */}
+                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
+                            <span style={{ opacity: 0.7 }}>
+                              Minimum {MIN_SUMMARY_CHARS} characters
+                            </span>
+                            <span
+                              style={{
+                                opacity: summaryLen < MIN_SUMMARY_CHARS ? 1 : 0.7,
+                                color: summaryLen < MIN_SUMMARY_CHARS ? "#b91c1c" : "inherit",
+                              }}
+                            >
+                              {summaryLen}/{MIN_SUMMARY_CHARS}
+                            </span>
+                          </div>
+                          {summaryLen < MIN_SUMMARY_CHARS && (
+                            <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
+                              Summary must be at least {MIN_SUMMARY_CHARS} characters.
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
