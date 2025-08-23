@@ -23,6 +23,7 @@
     "firebase": "^11.1.0",
     "firebase-admin": "^13.0.2",
     "framer-motion": "^12.4.10",
+    "google-auth-library": "^10.2.1",
     "install": "^0.13.0",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.475.0",
