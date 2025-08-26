@@ -64,6 +64,12 @@ export default function AddNewProgramModal({
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
   const [shake, setShake] = useState<{ [key: string]: boolean }>({});
 
+  // --- Added: minimum character requirements for Summary/Description ---
+  const MIN_SUMMARY_CHARS = 200;
+  const MIN_DESC_CHARS = 300;
+  const summaryLen = summary.trim().length;
+  const descriptionLen = description.trim().length;
+
   // Agency (fixed to be functional)
   const [agency, setAgency] = useState("");
   const [otherAgency, setOtherAgency] = useState("");
@@ -202,8 +208,14 @@ export default function AddNewProgramModal({
     need("volunteers", validVolunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
-    need("description", !!description.trim());
-    need("summary", !!summary.trim());
+
+    // --- Updated: enforce min lengths ---
+    const summaryOk = summary.trim().length >= MIN_SUMMARY_CHARS;
+    need("summary", summaryOk);
+
+    const descriptionOk = description.trim().length >= MIN_DESC_CHARS;
+    need("description", descriptionOk);
+
     need("photoFiles", photoFiles.length > 0);
     need("timeStart", !!timeStart);
     need("timeEnd", !!timeEnd);
@@ -433,8 +445,8 @@ export default function AddNewProgramModal({
             storage,
             `Programs/${programRef.id}/photos/${Date.now()}_${idx}_${file.name}`
           );
-        await uploadBytes(storageRef, file);
-        return getDownloadURL(storageRef);
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
         });
 
         const urls = await Promise.all(uploadPromises);
@@ -1003,8 +1015,31 @@ export default function AddNewProgramModal({
                             .join(" ")
                             .trim()}
                           value={summary}
-                          onChange={(e) => setSummary(e.target.value)}
+                          onChange={(e) => {
+                            setSummary(e.target.value);
+                            if (e.target.value.trim().length >= MIN_SUMMARY_CHARS) {
+                              setErrors((prev) => {
+                                const { summary, ...rest } = prev;
+                                return rest;
+                              });
+                            }
+                          }}
+                          placeholder={`Write at least ${MIN_SUMMARY_CHARS} characters...`}
                         />
+                        {/* Counter + validation hint */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
+                          <span style={{ opacity: 0.7 }}>
+                            Minimum {MIN_SUMMARY_CHARS} characters
+                          </span>
+                          <span
+                            style={{
+                              opacity: summaryLen < MIN_SUMMARY_CHARS ? 1 : 0.7,
+                              color: summaryLen < MIN_SUMMARY_CHARS ? "#b91c1c" : "inherit",
+                            }}
+                          >
+                            {summaryLen}/{MIN_SUMMARY_CHARS}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1025,8 +1060,31 @@ export default function AddNewProgramModal({
                             .join(" ")
                             .trim()}
                           value={description}
-                          onChange={(e) => setDescription(e.target.value)}
+                          onChange={(e) => {
+                            setDescription(e.target.value);
+                            if (e.target.value.trim().length >= MIN_DESC_CHARS) {
+                              setErrors((prev) => {
+                                const { description, ...rest } = prev;
+                                return rest;
+                              });
+                            }
+                          }}
+                          placeholder={`Write at least ${MIN_DESC_CHARS} characters...`}
                         />
+                        {/* Counter + validation hint */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
+                          <span style={{ opacity: 0.7 }}>
+                            Minimum {MIN_DESC_CHARS} characters
+                          </span>
+                          <span
+                            style={{
+                              opacity: descriptionLen < MIN_DESC_CHARS ? 1 : 0.7,
+                              color: descriptionLen < MIN_DESC_CHARS ? "#b91c1c" : "inherit",
+                            }}
+                          >
+                            {descriptionLen}/{MIN_DESC_CHARS}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
