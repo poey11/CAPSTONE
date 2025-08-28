@@ -350,6 +350,12 @@ border-radius: 15px;
   line-height: 2.0;
   text-align: justify;
   margin-top: 70px;
+
+  /* Wrapping & cutting long words properly */
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;     
+  word-break: break-word;   
 }
 
 /* Container to hold all four info blocks */
