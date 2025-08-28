@@ -588,7 +588,7 @@ Add Programs
 
 
 
-      .add-programs-input-field {
+    .add-programs-input-field {
     padding: 8px;
     width: 90%;
     height: 35px;
@@ -598,6 +598,7 @@ Add Programs
     color: #000000;
     text-align: left; 
     font-size: 16px;
+
   }
 
   .add-programs-input-field:focus {
@@ -648,8 +649,7 @@ Add Programs
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-right: 10px;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 
@@ -657,7 +657,6 @@ Add Programs
 
  .programs-description-container {
     width: 100%;
-    padding-right: 20px;
   }
 
 
@@ -692,7 +691,7 @@ Add Programs
     background-color: #ffffff;
     margin-top: 30px;
     height: 250px;
-
+    
   }
 
   .box-container-summary {
@@ -715,9 +714,10 @@ Add Programs
     height: 135px;
     margin-top: 25px;
     resize: none;
+    font-size: 16px;
   }
 
-  .description-input-field {
+  .description-input-field-addprogram {
     padding: 8px;
     width: 100%;
     border-radius: 5px;
@@ -726,9 +726,10 @@ Add Programs
     height: 210px;
     margin-top: 25px;
     resize: none;
+    font-size: 16px;
   }
 
-  .description-input-field:focus,
+  .description-input-field-addprogram:focus,
   .summary-input-field:focus {
     outline: none;
     border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
@@ -1279,6 +1280,13 @@ gap: 20px;
   border: 1px solid #eaecf2;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
   overflow-y: auto;
+}
+
+.view-participant-content{
+  display: flex;
+  width: 100%;
+  padding: 20px;
+  padding-bottom: 430px;
 }
 
 .view-participant-user-content-left-side{
@@ -2111,3 +2119,102 @@ Popup in reject
     color: #000000;
     text-align: left; 
 }
+
+input[type="checkbox"] {
+  accent-color: #ED7014;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+
+.flex-center-gap-addprogram {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #000000;
+  padding-top: 10px;
+  font-size: 16px;
+}
+
+.grid-2col-gap-addprogram {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 95%;
+}
+
+.confirmation-popup-overlay-online-reports {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+}
+
+.confirmation-popup-online-reports {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.confirmation-popup-online-reports p{
+  color: rgb(97, 97, 97);
+}
+
+.successful-icon-popup-online-reports {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.yesno-container-add{
+  display: flex;
+  gap: 20px;
+}
+
+.yes-button-add,
+.no-button-add{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.yes-button-add {
+  background-color: #4caf50; 
+}
+
+.yes-button-add:hover {
+  background-color: #3d8c40; 
+} 
+
+.no-button-add {
+  background-color: #f44336;
+}
+
+.no-button-add:hover {
+  background-color:  #c2352b; 
+} 

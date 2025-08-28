@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 import TopNav from './(resident-side)/components/menu';
 import { AuthProvider } from './context/authContext';
 import RoleChecker from './(resident-side)/components/roleCheckers';
+import Chatbot from './(resident-side)/components/chatbot';
 import "./globals.css";
 
 export default function RootLayout({
@@ -21,6 +22,10 @@ export default function RootLayout({
             <SessionProvider>
               <TopNav />
               <RoleChecker children={children}/>
+
+              {/* Floating chatbot */}
+              <Chatbot />
+
               {/* Conditionally render Footer */}
               {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
             </SessionProvider>

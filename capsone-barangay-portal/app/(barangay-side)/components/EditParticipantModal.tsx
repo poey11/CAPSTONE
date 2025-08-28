@@ -306,7 +306,7 @@ export default function EditParticipantModal({
                 <div className="view-participant-info-main-content">
                   {/* ===== Full Details ===== */}
                   {activeTab === "details" && (
-                    <div style={{ display: "flex", width: "100%", padding: "20px 0" }}>
+                    <div className="view-participant-content">
                       <div className="view-participant-user-content-left-side">
                         <div className="view-participant-fields-section">
                           <p>Last Name</p>
@@ -323,43 +323,6 @@ export default function EditParticipantModal({
                         </div>
 
                         <div className="view-participant-fields-section">
-                          <p>Contact Number</p>
-                          <input
-                            type="tel"
-                            className="view-participant-input-field"
-                            value={fieldsMap.contactNumber ?? fullDoc?.contactNumber ?? ""}
-                            readOnly
-                          />
-                        </div>
-
-                        <div className="view-participant-fields-section">
-                          <p>Home Address</p>
-                          <input
-                            type="text"
-                            className="view-participant-input-field"
-                            value={
-                              fieldsMap.location ??
-                              fullDoc?.location ??
-                              fullDoc?.address ??
-                              ""
-                            }
-                            readOnly
-                          />
-                        </div>
-
-                        <div className="view-participant-fields-section">
-                          <p>Program Name</p>
-                          <input
-                            type="text"
-                            className="view-participant-input-field"
-                            value={fieldsMap.programName ?? fullDoc?.programName ?? ""}
-                            readOnly
-                          />
-                        </div>
-                      </div>
-
-                      <div className="view-participant-user-content-right-side">
-                        <div className="view-participant-fields-section">
                           <p>First Name</p>
                           <input
                             type="text"
@@ -373,22 +336,19 @@ export default function EditParticipantModal({
                           />
                         </div>
 
-                        <div className="view-participant-fields-section">
-                          <p>Email</p>
-                          <input
-                            type="email"
-                            className="view-participant-input-field"
-                            value={fieldsMap.emailAddress ?? fullDoc?.emailAddress ?? fullDoc?.email ?? ""}
-                            readOnly
-                          />
-                        </div>
+                        
 
                         <div className="view-participant-fields-section">
-                          <p>Role</p>
+                          <p>Home Address</p>
                           <input
                             type="text"
                             className="view-participant-input-field"
-                            value={roleValue}
+                            value={
+                              fieldsMap.location ??
+                              fullDoc?.location ??
+                              fullDoc?.address ??
+                              ""
+                            }
                             readOnly
                           />
                         </div>
@@ -414,6 +374,55 @@ export default function EditParticipantModal({
                             readOnly
                           />
                         </div>
+
+                        
+                      </div>
+
+                      <div className="view-participant-user-content-right-side">
+                        
+                        <div className="view-participant-fields-section">
+                          <p>Program Name</p>
+                          <input
+                            type="text"
+                            className="view-participant-input-field"
+                            value={fieldsMap.programName ?? fullDoc?.programName ?? ""}
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="view-participant-fields-section">
+                          <p>Role</p>
+                          <input
+                            type="text"
+                            className="view-participant-input-field"
+                            value={roleValue}
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="view-participant-fields-section">
+                          <p>Contact Number</p>
+                          <input
+                            type="tel"
+                            className="view-participant-input-field"
+                            value={fieldsMap.contactNumber ?? fullDoc?.contactNumber ?? ""}
+                            readOnly
+                          />
+                        </div>
+
+                        <div className="view-participant-fields-section">
+                          <p>Email</p>
+                          <input
+                            type="email"
+                            className="view-participant-input-field"
+                            value={fieldsMap.emailAddress ?? fullDoc?.emailAddress ?? fullDoc?.email ?? ""}
+                            readOnly
+                          />
+                        </div>
+
+                        
+
+                        
                       </div>
                     </div>
                   )}
