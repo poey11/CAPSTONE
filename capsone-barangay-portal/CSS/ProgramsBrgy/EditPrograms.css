@@ -1602,13 +1602,20 @@ input:checked + .slider::before {
   gap: 8px;
 }
 
-.thumb-img {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+.thumbs-grid.center-grid {
+  justify-content: center;   /* centers grid content */
+  grid-template-columns: repeat(auto-fit, minmax(80px, max-content));
 }
+
+
+.thumbs-grid img {
+  width: 100px;   /* fixed size */
+  height: 90px;  /* fixed size */
+  object-fit: cover; /* keeps aspect ratio but crops if needed */
+  border-radius: 6px; /* optional styling */
+}
+
+
 
 .thumbs-label {
   font-size: 15px;
@@ -1642,10 +1649,9 @@ input:checked + .slider::before {
 }
 
 .cover-photo {
-  padding-right: 30px;        
+  position: relative;      
   margin-right: 15px;         
-  border-right: 2px solid #dcdcdc;
-  width: 230px;          
+  width: 230px;       
 }
 
 .add-programs-requirements-container{
