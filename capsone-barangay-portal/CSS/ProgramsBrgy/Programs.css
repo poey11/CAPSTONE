@@ -1281,6 +1281,13 @@ gap: 20px;
   overflow-y: auto;
 }
 
+.view-participant-content{
+  display: flex;
+  width: 100%;
+  padding: 20px;
+  padding-bottom: 430px;
+}
+
 .view-participant-user-content-left-side{
   display: flex;
   flex-direction: column;

@@ -38,6 +38,7 @@ type Participant = {
   contactNumber?: string;
   emailAddress?: string;
   email?: string;
+  role?: string;
   location?: string;
   address?: string;
   programName?: string;
@@ -311,6 +312,7 @@ export default function ProgramsModule() {
             programName: d.programName ?? "",
             idImageUrl: d.idImageUrl ?? "",
             approvalStatus: d.approvalStatus ?? "Pending",
+            role: d.role ?? "",
           });
         });
         setParticipantsListsData(list);
@@ -417,6 +419,7 @@ export default function ProgramsModule() {
   // Participants filtering
   const [participantNameSearch, setParticipantNameSearch] = useState("");
   const [participantProgramSearch, setParticipantProgramSearch] = useState("");
+  const [participantRoleFilter, setParticipantRoleFilter] = useState("");
   const [filteredParticipants, setFilteredParticipants] = useState<
     Participant[]
   >([]);
@@ -437,11 +440,17 @@ export default function ProgramsModule() {
           .includes(participantProgramSearch.toLowerCase())
       );
     }
+
+     if (participantRoleFilter) {
+      filtered = filtered.filter((p) => p.role === participantRoleFilter);
+    }
+
     setFilteredParticipants(filtered);
     setParticipantsPage(1);
   }, [
     participantNameSearch,
     participantProgramSearch,
+    participantRoleFilter,
     participantsListsData,
   ]);
 
@@ -826,6 +835,7 @@ export default function ProgramsModule() {
                 value={participantNameSearch}
                 onChange={(e) => setParticipantNameSearch(e.target.value)}
               />
+              
               <input
                 type="text"
                 className="programs-module-filter"
@@ -833,6 +843,16 @@ export default function ProgramsModule() {
                 value={participantProgramSearch}
                 onChange={(e) => setParticipantProgramSearch(e.target.value)}
               />
+
+              <select
+                className="programs-module-filter"
+                value={participantRoleFilter}
+                onChange={(e) => setParticipantRoleFilter(e.target.value)}
+              >
+                <option value="">All Roles</option>
+                <option value="Participant">Participant</option>
+                <option value="Volunteer">Volunteer</option>
+              </select>
             </div>
 
             <div className="programs-module-main-section">
@@ -854,8 +874,8 @@ export default function ProgramsModule() {
                       <th>Full Name</th>
                       <th>Program Name</th>
                       <th>Contact Number</th>
-                      <th>Email Address</th>
                       <th>Location</th>
+                      <th>Role</th>
                       <th>Approval</th>
                       <th>Actions</th>
                     </tr>
@@ -866,8 +886,9 @@ export default function ProgramsModule() {
                         <td>{participant.fullName}</td>
                         <td>{participant.programName}</td>
                         <td>{participant.contactNumber}</td>
-                        <td>{participant.emailAddress}</td>
                         <td>{participant.location}</td>
+                        <td>{participant.role}</td>
+                        
                         <td>
                           <span
                             className={`status-badge-programs ${String(
