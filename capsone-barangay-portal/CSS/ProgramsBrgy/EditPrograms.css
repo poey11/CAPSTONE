@@ -171,7 +171,7 @@ animation: fadeSlideIn 0.5s ease-out;
 .edit-program-bottom-section-scroll{
   overflow-y: auto;
   height: 400px;
-  padding-bottom: 70px;
+  padding-bottom: 130px;
 }
 
   p .required {
@@ -221,6 +221,7 @@ animation: fadeSlideIn 0.5s ease-out;
 .edit-programs-upper-section {
   display: flex;
   width: 100%;
+
 }
 .edit-programs-bottom-section {
   display: flex;
@@ -542,13 +543,12 @@ animation: fadeSlideIn 0.5s ease-out;
 }
 
 
-      .identification-picture{
+  .identification-picture{
     width: 200px;
     margin-top: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: green;
   }
 
     .delete-container {
