@@ -1487,24 +1487,24 @@ export default function ProgramDetails() {
                                   <div className="thumbs-section">
                                     <div className="thumbs-label">* Existing Photos *</div>
                                     <div
-  className={`thumbs-grid ${
-    existingPhotoURLs.length <= 2 ? "center-grid" : ""
-  }`}
->
-  {existingPhotoURLs.map((u, i) => (
-    <div key={`old-${i}-${u}`} className="thumb-wrapper">
-      <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
-      {!isReadOnly && (
-        <button
-          className="delete-btn"
-          onClick={() => handleDeleteExisting(i)}
-        >
-          ✕
-        </button>
-      )}
-    </div>
-  ))}
-</div>
+                                      className={`thumbs-grid ${
+                                        existingPhotoURLs.length <= 2 ? "center-grid" : ""
+                                      }`}
+                                    >
+                                      {existingPhotoURLs.map((u, i) => (
+                                        <div key={`old-${i}-${u}`} className="thumb-wrapper">
+                                          <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
+                                          {!isReadOnly && (
+                                            <button
+                                              className="delete-btn"
+                                              onClick={() => handleDeleteExisting(i)}
+                                            >
+                                              ✕
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
                                   </div>
                                 )}
                               </div>

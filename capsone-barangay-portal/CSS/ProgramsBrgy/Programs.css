@@ -588,7 +588,7 @@ Add Programs
 
 
 
-      .add-programs-input-field {
+    .add-programs-input-field {
     padding: 8px;
     width: 90%;
     height: 35px;
@@ -598,6 +598,7 @@ Add Programs
     color: #000000;
     text-align: left; 
     font-size: 16px;
+
   }
 
   .add-programs-input-field:focus {
@@ -2117,4 +2118,28 @@ Popup in reject
     border-radius: 5px;
     color: #000000;
     text-align: left; 
+}
+
+input[type="checkbox"] {
+  accent-color: #ED7014;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+
+.flex-center-gap-addprogram {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #000000;
+  padding-top: 10px;
+  font-size: 16px;
+}
+
+.grid-2col-gap-addprogram {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 95%;
 }

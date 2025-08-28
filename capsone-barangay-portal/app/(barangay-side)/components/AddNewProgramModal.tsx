@@ -636,6 +636,25 @@ export default function AddNewProgramModal({
 
                     <div className="fields-section-add-programs">
                       <p>
+                        Location<span className="required">*</span>
+                      </p>
+                      <input
+                        type="text"
+                        className={[
+                          "add-programs-input-field",
+                          errors.location ? "input-error" : "",
+                          shake.location ? "shake" : "",
+                        ]
+                          .join(" ")
+                          .trim()}
+                        placeholder="Location (E.g. Barangay Hall)"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="fields-section-add-programs">
+                      <p>
                         Number of Participants<span className="required">*</span>
                       </p>
                       <input
@@ -701,7 +720,7 @@ export default function AddNewProgramModal({
                         Age Restriction<span className="required">*</span>
                       </p>
 
-                      <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                      <label className="flex-center-gap-addprogram">
                         <input
                           type="checkbox"
                           checked={noAgeLimit}
@@ -720,7 +739,7 @@ export default function AddNewProgramModal({
                         <span>No age limit</span>
                       </label>
 
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      <div className="grid-2col-gap-addprogram">
                         <input
                           type="number"
                           min={0}
@@ -760,33 +779,7 @@ export default function AddNewProgramModal({
                       )}
                     </div>
 
-                    <div className="fields-section-add-programs">
-                      <p>
-                        Time Start<span className="required">*</span>
-                      </p>
-                      <input
-                        type="time"
-                        className={[
-                          "add-programs-input-field",
-                          errors.timeStart ? "input-error" : "",
-                          shake.timeStart ? "shake" : "",
-                        ]
-                          .join(" ")
-                          .trim()}
-                        value={timeStart}
-                        onChange={(e) => {
-                          const newStart = e.target.value;
-                          setTimeStart(newStart);
-
-                          if (isSameDay() && newStart && timeEnd) {
-                            const minAllowed = addMinutes(newStart, 180);
-                            if (toMinutes(timeEnd) < toMinutes(minAllowed)) {
-                              setTimeEnd(minAllowed);
-                            }
-                          }
-                        }}
-                      />
-                    </div>
+                    
                   </div>
 
                   {/* Right column */}
@@ -952,23 +945,33 @@ export default function AddNewProgramModal({
 
                     <div className="fields-section-add-programs">
                       <p>
-                        Location<span className="required">*</span>
+                        Time Start<span className="required">*</span>
                       </p>
                       <input
-                        type="text"
+                        type="time"
                         className={[
                           "add-programs-input-field",
-                          errors.location ? "input-error" : "",
-                          shake.location ? "shake" : "",
+                          errors.timeStart ? "input-error" : "",
+                          shake.timeStart ? "shake" : "",
                         ]
                           .join(" ")
                           .trim()}
-                        placeholder="Location (E.g. Barangay Hall)"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                        value={timeStart}
+                        onChange={(e) => {
+                          const newStart = e.target.value;
+                          setTimeStart(newStart);
+
+                          if (isSameDay() && newStart && timeEnd) {
+                            const minAllowed = addMinutes(newStart, 180);
+                            if (toMinutes(timeEnd) < toMinutes(minAllowed)) {
+                              setTimeEnd(minAllowed);
+                            }
+                          }
+                        }}
                       />
                     </div>
 
+                    
                     <div className="fields-section-add-programs">
                       <p>
                         Time End<span className="required">*</span>

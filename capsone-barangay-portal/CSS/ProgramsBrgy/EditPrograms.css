@@ -2590,6 +2590,7 @@ input[type="checkbox"] {
   margin-bottom: 8px;
   color: #000000;
   padding-top: 10px;
+  font-size: 16px;
 }
 
 .grid-2col-gap {
