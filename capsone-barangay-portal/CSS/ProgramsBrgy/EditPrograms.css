@@ -2561,3 +2561,33 @@ height: 300px;
   object-fit: contain;
   display: block; /* remove extra spacing from inline behavior */
 }
+
+.checkbox-label-programs {
+  font-size: 1rem; 
+  color: #2C3E50;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+input[type="checkbox"] {
+  accent-color: #ED7014;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.flex-center-gap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #000000;
+  padding-top: 10px;
+}
+
+.grid-2col-gap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
