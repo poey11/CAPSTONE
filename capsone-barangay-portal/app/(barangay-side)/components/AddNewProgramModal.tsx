@@ -48,6 +48,9 @@ export default function AddNewProgramModal({
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
 
+  // Submit Confirmation
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
   // Age restriction
   const [noAgeLimit, setNoAgeLimit] = useState(true);
   const [ageMin, setAgeMin] = useState<string>("");
@@ -385,6 +388,142 @@ export default function AddNewProgramModal({
 
   const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
 
+
+  const handleSave = () => {
+    if (!validate()) {
+      setActiveSection("details");
+      return;
+    }
+    setShowConfirmation(true); // show confirmation popup if no errors
+  };
+
+  const confirmSubmit= async () => {
+    if (saving) return;
+    if (!validate()) {
+      setActiveSection("details");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const autoApproved = isAutoApprovedByPolicy();
+
+      const normalizedStart = eventType === "single" ? singleDate : startDate;
+      const normalizedEnd = eventType === "single" ? singleDate : endDate;
+
+      // Resolve agency to store
+      const resolvedAgency =
+        agency === "others" ? (otherAgency.trim() || "Others") : agency;
+
+      const payload: any = {
+        programName: programName.trim(),
+        participants: Number(participants),
+        volunteers: Number(volunteers),
+        eligibleParticipants,
+        location: location.trim(),
+        eventType,
+        startDate: normalizedStart,
+        endDate: normalizedEnd,
+        timeStart,
+        timeEnd,
+        description: description.trim(),
+        summary: summary.trim(),
+        // store both the selected value and the resolved label
+        agency: resolvedAgency,
+        agencyRaw: agency,          // "none" | "cityhall" | "others"
+        otherAgency: otherAgency.trim() || null,
+        ageRestriction: {
+          noAgeLimit,
+          minAge: noAgeLimit || ageMin.trim() === "" ? null : Number(ageMin),
+          maxAge: noAgeLimit || ageMax.trim() === "" ? null : Number(ageMax),
+        },
+        approvalStatus: autoApproved ? "Approved" : "Pending",
+        progressStatus: "Upcoming",
+        activeStatus: autoApproved ? "Active" : "Inactive",
+        createdAt: serverTimestamp(),
+        suggestedBy: staffDisplayName || null,
+        suggestedByUid: userUid,
+        requirements: {
+          textFields: [...PREDEFINED_REQ_TEXT, ...reqTextFields],
+          fileFields: [...PREDEFINED_REQ_FILES, ...reqFileFields],
+        },
+      };
+
+      const programRef = await addDoc(collection(db, "Programs"), payload);
+
+      if (photoFiles.length > 0) {
+        const uploadPromises = photoFiles.map(async (file, idx) => {
+          const storageRef = ref(
+            storage,
+            `Programs/${programRef.id}/photos/${Date.now()}_${idx}_${file.name}`
+          );
+          await uploadBytes(storageRef, file);
+          return getDownloadURL(storageRef);
+        });
+
+        const urls = await Promise.all(uploadPromises);
+        await updateDoc(doc(db, "Programs", programRef.id), {
+          photoURL: urls[0] || null,
+          photoURLs: urls,
+        });
+      }
+
+      await addDoc(collection(db, "BarangayNotifications"), {
+        message: `Your program (${programName}) was submitted successfully.`,
+        timestamp: new Date(),
+        isRead: false,
+        recipientUid: userUid,
+        transactionType: "Program Submission",
+        programID: programRef.id,
+        programName: programName.trim(),
+        suggestedBy: staffDisplayName || null,
+        suggestedByUid: userUid,
+      });
+
+      const pos = normalize(userPosition);
+      const isSecOrAsst = pos === "secretary" || pos === "assistant secretary";
+      const isPB = pos === "punong barangay";
+
+      if (isSecOrAsst) {
+        await addDoc(collection(db, "BarangayNotifications"), {
+          message: `A new program (${programName}) was added by ${staffDisplayName}.`,
+          timestamp: new Date(),
+          isRead: false,
+          recipientRole: "Punong Barangay",
+          transactionType: "Program Added",
+          programID: programRef.id,
+          programName: programName.trim(),
+          suggestedBy: staffDisplayName || null,
+          suggestedByUid: userUid,
+        });
+      } else if (!autoApproved && !isPB) {
+        await addDoc(collection(db, "BarangayNotifications"), {
+          message: `A new program (${programName}) has been suggested by ${staffDisplayName}.`,
+          timestamp: new Date(),
+          isRead: false,
+          recipientRole: "Punong Barangay",
+          transactionType: "Program Suggestion",
+          programID: programRef.id,
+          programName: programName.trim(),
+          suggestedBy: staffDisplayName || null,
+          suggestedByUid: userUid,
+        });
+      }
+
+      onProgramSaved?.("Program saved successfully.");
+      resetForm();
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setFileError("Failed to save program. Please try again.");
+    } finally {
+      setSaving(false);
+      setShowConfirmation(false);
+    }
+  };
+
+
+  {/*
   const handleSave = async () => {
     if (saving) return;
     if (!validate()) {
@@ -508,6 +647,8 @@ export default function AddNewProgramModal({
       setSaving(false);
     }
   };
+
+  */}
 
   if (!isOpen) return null;
 
@@ -1336,6 +1477,20 @@ export default function AddNewProgramModal({
           </button>
         </div>
       </div>
+
+
+        {showConfirmation && (
+            <div className="confirmation-popup-overlay-online-reports">
+                             <div className="confirmation-popup-online-reports">
+                                 <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup-online-reports" />          
+                            <p>Are you sure you want to submit?</p>
+                                   <div className="yesno-container-add">
+                                 <button onClick={() => setShowConfirmation(false)} className="no-button-add">No</button>
+                                     <button onClick={confirmSubmit} className="yes-button-add">Yes</button> 
+                               </div> 
+                            </div>
+                  </div>
+          )}
     </div>
   );
 }
