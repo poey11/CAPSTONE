@@ -214,6 +214,7 @@ border-radius: 15px;
 .slideshow-container-specific {
   position: relative;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   margin-bottom: 2rem;
@@ -686,4 +687,25 @@ For age
   gap: 12px;
   margin-top: 8px;
   flex-wrap: wrap;
+}
+
+.slideshow-dots-specific {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dot-specific {
+  height: 10px;
+  width: 10px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot-specific.active {
+  background-color: #DF7426;
 }
