@@ -1056,7 +1056,7 @@ export default function AddNewProgramModal({
                         <span className="required-asterisk">*</span>
                         <textarea
                           className={[
-                            "description-input-field",
+                            "description-input-field-addprogram",
                             errors.description ? "input-error" : "",
                             shake.description ? "shake" : "",
                           ]
