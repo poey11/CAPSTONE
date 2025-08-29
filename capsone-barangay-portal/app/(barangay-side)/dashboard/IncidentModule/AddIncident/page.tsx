@@ -81,7 +81,6 @@ export default function AddIncident() {
     nosofFemaleChildren: "",
     file: null,
     typeOfIncident: "",
-    recommendedEvent: "",
     reasonForLateFiling: "",
   });
   const [deskStaff, setdeskStaff] = useState<any>({
@@ -359,10 +358,8 @@ export default function AddIncident() {
               isReportLate: reportInfo.isReportLate,
               reasonForLateFiling: reportInfo.reasonForLateFiling,
             }),
-            ...(reportInfo.typeOfIncident === "Minor" && {
-              recommendedEvent: reportInfo.recommendedEvent,
-            }),
-            ...(departmentId === "GAD" && { 
+            
+            ...((departmentId === "VAWC" || departmentId === "BCPC" ) && { 
               nosofMaleChildren: reportInfo.nosofMaleChildren,
               nosofFemaleChildren: reportInfo.nosofFemaleChildren,
             }),
@@ -492,7 +489,6 @@ const handleSubmit = async (event: React.FormEvent) => {
       isEmpty(reportInfo.dateReceived) ||
       isEmpty(reportInfo.timeReceived)||
       isEmpty(reportInfo.typeOfIncident) ||
-      (reportInfo.typeOfIncident === "Minor" && isEmpty(reportInfo.recommendedEvent)) ||
       isEmpty(reportInfo.areaOfIncident)
     ) {
       // Find the first empty field in reportInfo
@@ -507,7 +503,6 @@ const handleSubmit = async (event: React.FormEvent) => {
         dateReceived: reportInfo.dateReceived,
         timeReceived: reportInfo.timeReceived,
         typeOfIncident: reportInfo.typeOfIncident,
-        recommendedEvent: reportInfo.typeOfIncident === "Minor" ? reportInfo.recommendedEvent : undefined,
         areaOfIncident: reportInfo.areaOfIncident,
       }).find(([_, value]) => isEmpty(value));
 
@@ -530,7 +525,7 @@ const handleSubmit = async (event: React.FormEvent) => {
     }
   
     // Validate GAD-specific child counts
-    if (reportInfo.departmentId === "GAD") {
+    if ((departmentId === "VAWC" || departmentId === "BCPC" )) {
       if (isEmpty(reportInfo.nosofMaleChildren) || isEmpty(reportInfo.nosofFemaleChildren)) {
         setPopupErrorMessage("Please provide the number of children for GAD reports.");
         setShowErrorPopup(true);
@@ -1348,36 +1343,6 @@ const handleSubmit = async (event: React.FormEvent) => {
                 </select>
               </div>
 
-                                {reportInfo.typeOfIncident === "Minor" && (
-                    <>
-                      <div className="fields-section-add">
-                        <p>Recommended To Join:<span className="required">*</span></p>
-                        <select 
-                          className="add-incident-input-field" 
-                          required
-                          id="recommendedEvent" name="recommendedEvent" 
-                          value={reportInfo.recommendedEvent}
-                          onChange={handleFormChange}
-                          >
-                            {/* the options are hard coded for now but will be revised when the program.s and event are implemented.
-                            Will be replaced with a dynamic list of events/programs from the database Not sure if the list will be based on the
-                            area of incident. or all events will be available to all areas.
-                            */}
-                            <option value="" disabled>Choose an Event/Program To Recommend</option>
-                            <option value="Livelihood Training Program">Livelihood Training Program</option>
-                            <option value="Parenting Seminar">Parenting Seminar</option>
-                            <option value="Community Clean-Up Drive">Community Clean-Up Drive</option>
-                            <option value="Drug Awareness Seminar">Drug Awareness Seminar</option>
-                            <option value="Youth Leadership Workshop">Youth Leadership Workshop</option>
-                            <option value="Barangay Sports Program">Barangay Sports Program</option>
-                            <option value="Health and Wellness Camp">Health and Wellness Camp</option>
-                            <option value="Solo Parent Support Group">Solo Parent Support Group</option>
-                            <option value="GAD (Gender and Development) Seminar">GAD (Gender and Development) Seminar</option>
-                            <option value="Barangay Livelihood Assistance Orientation">Barangay Livelihood Assistance Orientation</option>
-                          </select>
-                      </div>
-                    </>
-                  )}
 
 
           <div className="box-container-outer-proof">
@@ -1454,7 +1419,7 @@ const handleSubmit = async (event: React.FormEvent) => {
           </div>
 
 
-        {departmentId === "GAD" && (
+        {(departmentId === "VAWC" || departmentId === "BCPC" ) && (
           <div className="add-incident-GAD-section">
             <div className="fields-section-add">
               <p>Nos of Male Children Victim/s<span className="required">*</span></p>

@@ -40,7 +40,7 @@ export default function DialogueSection() {
     router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
     };
 
-    const handleHearingSection = () => {
+    const handleHearingSection = (e:any) => {
     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
     }
     
@@ -211,6 +211,16 @@ export default function DialogueSection() {
                             return;
                           }
                         }
+                        if(!reportData?.reasonForFailureToAppearDialogue){
+                            setErrorPopup({ show: true, message: `Fill out Refailure Meeting (Dialogue) first.` });
+                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                          return;
+                        }
+                        if(reportData?. refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                          setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                          return;
+                        }
                         // ✅ All good
                         handleGenerateLetterAndInvitation(e);
                       }}
@@ -219,16 +229,30 @@ export default function DialogueSection() {
                     </button>
 
                     {hasSummonLetter ? (
-                        <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                        <button className="submenu-button" name="section" onClick={(e)=>{
+                          if(!reportData?.reasonForFailureToAppearDialogue){
+                          setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Dialogue) first." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
+                          
+                          return
+                        }
+                         if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                          setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
+                          return;
+                        }
+                          handleHearingSection(e);
+                          }
+                        }>
                         <h1>Hearing Section</h1>
                         </button>
                     ) : (
                         <button
                         className="submenu-button"
                         name="section"
-                        onClick={() => {
-                            setErrorPopup({ show: true, message: "Generate a Summon Letter First." });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                       onClick={() => {
+                          setErrorPopup({ show: true, message: "Generate a Summon Letter First." });
+                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                         }}
                         >
                         <h1>Hearing Section</h1>

@@ -7,6 +7,7 @@ import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDo
 import { db } from "../../../../db/firebase";
 import React from "react";
 import { report } from "process";
+import { set } from "date-fns";
 
 
 export default function EditLuponIncident() {
@@ -30,34 +31,7 @@ export default function EditLuponIncident() {
     const [reportData, setReportData] = useState<any>();
     const departmentId = reportData?.department;
     const [concernImageUrl, setconcernImageUrl] = useState<string | null>(null);
-    const [toUpdate, setToUpdate] = useState<any|null>({
-      complainant: {
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        civilStatus: "",
-        address: "",
-        contact: "",
-      },
-      respondent: {
-        fname: "",
-        lname: "",
-        sex: "",
-        age: "",
-        civilStatus: "",
-        address: "",
-        contact: "",
-      },
-      fname: "",
-      lname: "",
-      nature: "",
-      location: "",
-      status: reportData?.status,
-      nosofMaleChildren: "",
-      nosofFemaleChildren: "",
-      reopenRequester: "",
-    });
+    
 
     const [summonLetterData, setSummonLetterData] = useState<any[]>([]);
     useEffect(()=>{
@@ -101,7 +75,52 @@ export default function EditLuponIncident() {
       
     }, [docId]);
 
+
     console.log("Report Data:", reportData);
+
+    const [toUpdate, setToUpdate] = useState<any|null>({
+      complainant: {
+        fname: "",
+        lname: "",
+        sex: "",
+        age: "",
+        civilStatus: "",
+        address: "",
+        contact: "",
+      },
+      respondent: {
+        fname: "",
+        lname: "",
+        sex: "",
+        age: "",
+        civilStatus: "",
+        address: "",
+        contact: "",
+      },
+      fname: "",
+      lname: "",
+      nature: "",
+      location: "",
+      status: reportData?.status,
+      nosofMaleChildren: "",
+      nosofFemaleChildren: "",
+      
+      
+      refailureDialogueStatus:"Present",
+      reasonForFailureToAppearDialogue: reportData?.reasonForFailureToAppearDialogue || "",
+    });
+    
+    useEffect(() => {
+      if(!docId) return;
+      if((reportData?.complainantAbsents === 2) || (reportData?.respondentAbsents=== 2 && reportData?.complainantAbsent===2) ){
+        const mainDocRef = doc(db, "IncidentReports", docId); 
+        updateDoc(mainDocRef, {
+          status: "dismissed",
+          statusPriority: 5,
+        })
+        router.push(`/dashboard/IncidentModule/Department?id=${reportData?.department}`);
+      }
+    }, [reportData,docId]);
 
     useEffect(() => {
       if(reportData?.file){
@@ -111,8 +130,8 @@ export default function EditLuponIncident() {
       }
     },[reportData]);
 
-
-    useEffect(() => {
+    
+  useEffect(() => {
   const id = searchParam.get("id");
   const department = reportData?.department;
 
@@ -330,7 +349,7 @@ const handleDialogueSection = () => {
   router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${departmentId}`);
 };
 
-const handleHearingSection = () => {
+const handleHearingSection = (e:any) => {
   router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${departmentId}`);
 };
       
@@ -367,12 +386,50 @@ const handleHearingSection = () => {
           isConciliation: reportData.isConciliation || false,
           isArbitration: reportData.isArbitration || false,
           timeReceived: reportData.timeReceived || "",
-          dateReceived: reportData.dateReceived || ""
+          dateReceived: reportData.dateReceived || "",
+          refailureDialogueStatus: reportData.refailureDialogueStatus||"Present",
+          // refailureHearingStatus0: "Present",
+          // refailureHearingStatus1: "Present",
+          // refailureHearingStatus2: "Present",
+
+          reasonForFailureToAppearDialogue: reportData.reasonForFailureToAppearDialogue || "",
+        
         });
       }
     }, [reportData]);
 
+useEffect(() => {
+      if (!reportData?.refailureHearingDetails) {
+        if (reportData?.sentLetterOfFailureToAppearHearing &&
+            Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0) {
+            
+          Object.entries(reportData.sentLetterOfFailureToAppearHearing).forEach(
+            ([key, _value]) => {
+              setToUpdate((prevState: any) => ({
+                ...prevState,
+                [`refailureHearingStatus${key}`]: "Present",
+                [`reasonForFailureToAppearHearing${key}`]: "",
+              }));
+            }
+          );
+        }
+      }
+    
+      else{
+        Object.entries(reportData.refailureHearingDetails).forEach(
+          ([key, detail]: [string, any]) => {
+            setToUpdate((prevState: any) => ({
+              ...prevState,
+              [`refailureHearingStatus${key}`]: detail.resStatus || "Present",
+              [`reasonForFailureToAppearHearing${key}`]: detail.reason || "",
+            }));
+          }
+        );
+      }
+    }, [reportData]);
 
+
+    console.log("To Update State:", toUpdate);
   const [activeSection, setActiveSection] = useState("complainant");
 
 
@@ -419,26 +476,7 @@ const handleHearingSection = () => {
 
 
 
-  
-    const [dialogueReset, setDialogueReset] = useState(false);
-    const [hearingReset, setHearingReset] = useState(false);
-    useEffect(() => {
-      if(reportData?.status !== "archived") return;
-      if(reportData.isDialogue && reportData.hearing === 0){
-        /*WHen in the dialogue section, has a absent it will ask which one requested to reopen the incident case */
-        console.log("Dialogue Section is respondent/compainant absent. one of them requested to reopen the incident case");
-        setShowContinuePopup(true);
-        setDialogueReset(true);
-      }
-      else if(reportData.hearingId){
-        /* When in the hearing section, has a absent it will ask which one requested to reopen the incident case */
-        console.log("Hearing Section is respondent/compainant absent. one of them requested to reopen the incident case");
-        setShowContinuePopup(true);
-        setHearingReset(true);
-      }
-
-
-    },[reportData])
+ 
   const [generatedLetters, setGeneratedLetters] = useState<any[]>([]);
   useEffect(() => {
     if (!docId) return;
@@ -486,67 +524,6 @@ const handleHearingSection = () => {
 
   console.log("Generated Letter:", generatedLetters);
 
-  const handleReopen = async(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-    if (!docId) return;
-
-    try {
-      const docRef = doc(db, "IncidentReports", docId);
-      // Only update the reopenRequester field and set status to "pending"
-      await updateDoc(docRef, {
-        reopenRequester: toUpdate.reopenRequester,
-        status: "pending",
-        statusPriority: 1,
-      });
-
-      if(dialogueReset) {
-        await updateDoc(docRef, {
-          isDialogue: false, 
-        })
-        const dialogueLetter = generatedLetters.find(
-          (letter) => letter.letterType === "dialogue"
-        );
-        const generatedLetterId = dialogueLetter?.id;
-        if (generatedLetterId) {
-          await deleteDoc(doc(db, "IncidentReports", docId, "GeneratedLetters", generatedLetterId));
-        }
-        await deleteDoc(doc(db, "IncidentReports", docId, "DialogueMeeting", docId));
-
-      }
-      if(hearingReset){
-        await updateDoc(docRef, {
-          generatedHearingSummons: reportData?.generatedHearingSummons - 1, // Increment the hearing summons count
-          hearing: reportData?.hearing - 1, // Decrement the hearing count
-        })
-        const assortedLetter = generatedLetters
-          .filter(letter => letter.letterType === "summon")
-          .sort((a, b) => a.hearingNumber - b.hearingNumber);
-
-        
-
-        await deleteDoc(doc(db, "IncidentReports", docId, "GeneratedLetters", assortedLetter[assortedLetter.length-1]?.id)); // Delete the lastest summon letter
-
-
-        await deleteDoc(doc(db, "IncidentReports", docId, "SummonsMeeting", reportData.hearingId)); // Delete the hearing section if it exists\
-      } 
-
-      setShowContinuePopup(false);
-      setPopupMessage("Incident case has been reopened.");
-      setShowPopup(true);
-
-      setTimeout(() => {
-        setShowPopup(false);
-        // router.refresh(); // Refresh the page to reflect changes
-        // if (docId && departmentId) {
-        //   window.location.reload(); // Reload the page to ensure all data is fresh
-        // }
-      }, 3000);
-    } catch (error) {
-      setPopupErrorMessage("Failed to reopen the case. Please try again.");
-      setShowErrorPopup(true);
-      setTimeout(() => setShowErrorPopup(false), 3000);
-    }
-  }
 
   const handleClosingCase = async(status:boolean) => {
     if (!docId) return;
@@ -597,7 +574,7 @@ const handleHearingSection = () => {
               <h1>Incident Information</h1>
             </button>
           
-            {reportData?.typeOfIncident === "Major" && (
+            {(reportData?.typeOfIncident === "Major" || reportData?.typeOfIncident === "Minor")  && (
               <>
                 <div className="dialogue-dropdown">
                   <button className="edit-incident-redirection-buttons">
@@ -612,7 +589,7 @@ const handleHearingSection = () => {
                       <h1>Generate Dialogue Letters</h1>
                     </button>
 
-                    {reportData.isDialogue ? (
+                    {reportData?.isDialogue ? (
                       <button className="submenu-button" name="section" onClick={handleDialogueSection}>
                         <h1>Dialogue Section</h1>
                       </button>
@@ -683,6 +660,19 @@ const handleHearingSection = () => {
                           }
                         }
                       
+                        if(!reportData?.reasonForFailureToAppearDialogue){
+                          setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return;
+                        }
+
+                        if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                          setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return;
+                        }
                         // ✅ All good
                         handleGenerateLetterAndInvitation(e);
                       }}
@@ -694,7 +684,23 @@ const handleHearingSection = () => {
 
 
                     {hasSummonLetter ? (
-                      <button className="submenu-button" name="section" onClick={handleHearingSection}>
+                      <button className="submenu-button" name="section" onClick={(e)=>{
+                        if(!reportData?.reasonForFailureToAppearDialogue){
+                          setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return
+                        }
+                        if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                          setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return;
+                        }
+                          handleHearingSection(e);
+                
+                        }
+                      }>
                         <h1>Hearing Section</h1>
                       </button>
                     ) : (
@@ -702,6 +708,7 @@ const handleHearingSection = () => {
                         className="submenu-button"
                         name="section"
                         onClick={() => {
+                          
                           setPopupErrorMessage("Generate a Summon Letter First");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
@@ -716,6 +723,8 @@ const handleHearingSection = () => {
               
               </>
             )}
+
+                       
           </div>
           
           <div className="edit-incident-main-content">
@@ -740,7 +749,14 @@ const handleHearingSection = () => {
             <div className="edit-incident-header-body">
              <div className="edit-incident-header-body-top-section">
                 <div className="edit-incident-info-toggle-wrapper">
-                  {["complainant", "respondent", "incident" , "barangay desk" ].map((section) => (
+                    {["complainant", "respondent", "incident",
+                    ...(reportData?.sentLetterOfFailureToAppearDialogue ? ["refailure dialgoue"] : []),
+                    ...(reportData?.sentLetterOfFailureToAppearHearing &&
+                     Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0
+                       ? ["refailure hearing"]
+                       : []),
+                    "barangay desk"
+                    ].map((section) => (
                     <button
                       key={section}
                       type="button"
@@ -750,6 +766,8 @@ const handleHearingSection = () => {
                       {section === "complainant" && "Complainant"}
                       {section === "respondent" && "Respondent"}
                       {section === "incident" && "Incident"}
+                      {section === "refailure dialgoue" && "Refailure Meeting (Dialogue)"}
+                      {section === "refailure hearing" && "Refailure Meeting (Hearing)"}
                       {section === "barangay desk" && "Desk Officer"}
                     </button>
                   ))}
@@ -776,8 +794,9 @@ const handleHearingSection = () => {
                           disabled
                         >
                           <option value="pending">Pending</option>
-                          <option value="archived">Archived</option>
+                          <option value="dismissed">Dismissed</option>
                           <option value="settled">Settled</option>
+                          <option value="Refer to Government Agency">Refer to Government Agency</option>
                           <option value="CFA">CFA</option>
                         </select>
                       </div> 
@@ -1132,6 +1151,250 @@ const handleHearingSection = () => {
                           </div>
                         </>
                       )}
+                      {activeSection === "refailure dialgoue" && (
+                       <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-md mx-auto">
+                        <div className="flex items-center space-x-2 mb-4">
+                         <input
+                            type="checkbox"
+                            id="refailuredialoguepresent"
+                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            checked={toUpdate.refailureDialogueStatus !== "Absent"} // default checked
+                            onChange={(e) =>
+                              setToUpdate((prev: any) => ({
+                                ...prev,
+                                refailureDialogueStatus: e.target.checked ? "Present" : "Absent",
+                                reasonForFailureToAppearDialogue: e.target.checked
+                                  ? "" // 🔹 clear when switching back to Present
+                                  : "Respondent Absent", // auto-set when Absent
+                              }))
+                            }
+                            disabled={!!reportData?.reasonForFailureToAppearDialogue?.trim()}
+                          />
+                          <label
+                            htmlFor="refailuredialoguepresent"
+                            className="text-gray-700 font-medium"
+                          >
+                            Respondent Present
+                          </label>
+
+
+                        </div>
+                          
+                        {/* Textarea */}
+                        <div className="mb-4">
+                          <label
+                            htmlFor="reasonForFailureToAppearDialogue"
+                            className="block text-gray-600 font-medium mb-2"
+                          >
+                            Reason for Failure to Appear During Dialogue Meeting
+                          </label>
+                          <textarea
+                            placeholder="Enter reason here..."
+                            name="reasonForFailureToAppearDialogue"
+                            id="reasonForFailureToAppearDialogue"
+                            value={
+                              toUpdate.reasonForFailureToAppearDialogue ||
+                              reportData?.reasonForFailureToAppearDialogue ||
+                              ""
+                            }
+                            disabled={
+                              toUpdate.refailureDialogueStatus === "Absent" ||
+                              !!reportData?.reasonForFailureToAppearDialogue?.trim()
+                            }
+                            onChange={(e) => {
+                              if (toUpdate.refailureDialogueStatus === "Present") {
+                                handleFormChange(e); // only allow typing if Present
+                              }
+                            }}
+                            className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
+                              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700
+                              ${toUpdate.refailureDialogueStatus === "Absent" ? "bg-gray-100 cursor-not-allowed" : ""}
+                              disabled:cursor-not-allowed disabled:bg-gray-100`}
+                          />
+
+
+                        </div>
+                          
+                        {/* Submit button */}
+                        <button
+                          type="button"
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 
+                                     rounded-lg shadow-md transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          // onClick={handleSubmitRefailureDialogue}
+                          disabled={
+                            !!(
+                                reportData?.reasonForFailureToAppearDialogue?.trim()
+                              )
+                          }
+
+                          onClick={() => {
+                            if (
+                              toUpdate.refailureDialogueStatus === "Present" &&
+                              toUpdate.reasonForFailureToAppearDialogue === "" ||
+                              !toUpdate.reasonForFailureToAppearDialogue
+                            ) {
+                              setPopupErrorMessage(
+                                "Please fill out the reason for failure to appear."
+                              );
+                              setShowErrorPopup(true);
+                              setTimeout(() => setShowErrorPopup(false), 3000);
+                              return;
+                            }
+                            if(!docId) return;
+                            const docRef = doc(db, "IncidentReports", docId );
+                             updateDoc(docRef, {
+                              refailureDialogueStatus: toUpdate.refailureDialogueStatus || "Absent",
+                              reasonForFailureToAppearDialogue: toUpdate.reasonForFailureToAppearDialogue || reportData?.reasonForFailureToAppearDialogue || "",
+                            })
+
+                            setPopupMessage("Refailure Dialogue Updated Successfully");
+                            setShowPopup(true);
+                            setTimeout(() => setShowPopup(false), 3000);
+
+                          }}
+                        >
+                          Submit
+                        </button>
+                      </div>
+
+
+                      )}
+
+                      {activeSection === "refailure hearing" && (
+                        <>
+                          {reportData?.sentLetterOfFailureToAppearHearing &&
+                            Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0 && (
+                              <>
+                                {Object.entries(reportData.sentLetterOfFailureToAppearHearing).map(
+                                  ([key, value]) => (
+                                    <div key={key} className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-md mx-auto">
+                                      <div className="text-lg font-semibold text-gray-800 mb-4 flex justify-center">
+                                        {Number(key) === 0 ? (<>First</>) : Number(key) === 1 ? (<>Second</>) : Number(key) === 2 && (<>Third</>)} Hearing
+                                      </div>
+                                      <div className="flex items-center space-x-2 mb-4">
+                                       <input
+                                          type="checkbox"
+                                          id={`refailureHearingStatus${key}`}
+                                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                          checked={
+                                            (toUpdate[`refailureHearingStatus${key}`] ?? reportData?.refailureHearingDetails?.[key]?.status) !== "Absent"
+                                          }                                          
+                                          onChange={(e) =>
+                                            setToUpdate((prev: any) => ({
+                                              ...prev,
+                                              [`refailureHearingStatus${key}`]: e.target.checked ? "Present" : "Absent",
+                                              [`reasonForFailureToAppearHearing${key}`]: e.target.checked
+                                                ? "" // 🔹 clear when switching back to Present
+                                                : "Respondent Absent", // auto-set when Absent
+                                            }))
+                                          }
+                                          disabled={
+                                              !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                          }
+                                        />
+                                        <label
+                                          htmlFor={`refailureHearingStatus${key}`}
+                                          className="text-gray-700 font-medium"
+                                        >
+                                          Respondent Present
+                                        </label>
+                                        
+                                        
+                                      </div>
+                                        
+                                      {/* Textarea */}
+                                      <div className="mb-4">
+                                        <label
+                                          htmlFor={`reasonForFailureToAppearHearing${key}`}
+                                          className="block text-gray-600 font-medium mb-2"
+                                        >
+                                          Reason for Failure to Appear During Hearing Meeting
+                                        </label>
+                                        <textarea
+                                          placeholder="Enter reason here..."
+                                          name={`reasonForFailureToAppearHearing${key}`}
+                                          id={`reasonForFailureToAppearHearing${key}`}
+                                          value={
+                                            toUpdate[`reasonForFailureToAppearHearing${key}`] ||
+                                            reportData[`reasonForFailureToAppearHearing${key}`] ||""
+                                          }
+                                          disabled={
+                                            toUpdate[`refailureHearingStatus${key}`] === "Absent" ||
+                                              !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                          
+                                          }
+                                          onChange={(e) => {
+                                            if (toUpdate[`refailureHearingStatus${key}`] === "Present") {
+                                              handleFormChange(e); // only allow typing if Present
+                                            }
+                                          }}
+                                          className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
+                                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700
+                                            ${toUpdate[`refailureHearingStatus${key}`] === "Absent" ? "bg-gray-100 cursor-not-allowed" : ""}
+                                            disabled:cursor-not-allowed disabled:bg-gray-100`}
+                                        />
+              
+                                          
+                                      </div>
+                                          
+                                      {/* Submit button */}
+                                      <button
+                                        type="button"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 
+                                                   rounded-lg shadow-md transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                        // onClick={handleSubmitRefailureDialogue}
+                                        disabled={
+                                          
+                                          !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                          
+                                        }
+                                      
+                                        onClick={() => {
+                                          if (
+                                             toUpdate[`refailureHearingStatus${key}`] === "Present" &&
+                                            toUpdate[`reasonForFailureToAppearHearing${key}`] === "" ||
+                                            !toUpdate[`reasonForFailureToAppearHearing${key}`]
+                                          ) {
+                                            setPopupErrorMessage(
+                                              "Please fill out the reason for failure to appear."
+                                            );
+                                            setShowErrorPopup(true);
+                                            setTimeout(() => setShowErrorPopup(false), 3000);
+                                            return;
+                                          }
+                                          if(!docId) return;
+                                          const docRef = doc(db, "IncidentReports", docId );
+                                          updateDoc(docRef, {
+                                            [`refailureHearingDetails.${key}`]: {
+                                              resStatus: toUpdate[`refailureHearingStatus${key}`] || "Absent",
+                                              reason: toUpdate[`reasonForFailureToAppearHearing${key}`] 
+                                                    || reportData?.[`reasonForFailureToAppearHearing${key}`] 
+                                            }
+                                          });
+                                          const hearingLabel =
+                                          Number(key) === 0
+                                            ? "First"
+                                            : Number(key) === 1
+                                            ? "Second"
+                                            : Number(key) === 2
+                                            ? "Third"
+                                            : "";
+                                          setPopupMessage(`${hearingLabel} Hearing Refailure Updated Successfully`);
+                                          setShowPopup(true);
+                                          setTimeout(() => setShowPopup(false), 3000);
+                                          
+                                        }}
+                                        
+                                      >
+                                        Submit
+                                      </button>
+                                    </div>
+                                  )
+                                )}
+                              </>
+                            )}
+                        </>
+                      )}
 
                       {activeSection === "barangay desk" && (
                         <>
@@ -1297,83 +1560,7 @@ const handleHearingSection = () => {
                 )}
 
 
-        {showContinuePopup && (
-          <div className="confirmation-popup-overlay-continue">
-            <div className="confirmation-popup-continue">
-               <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-                    <p className="popup-title">Who requested to reopen the incident case?</p>
-
-                          <div className="settlement-options">
-                            <label className="settlement-option">
-                              <input
-                                type="radio"
-                                name="reopenRequester"
-                                checked={toUpdate.reopenRequester === "complainant"}
-                                onChange={() =>
-                                  setToUpdate((prev: any) => ({
-                                    ...prev,
-                                    reopenRequester: "complainant",
-                                  }))
-                                }
-                              />
-                              Complainant
-                            </label>
-                            <label className="settlement-option">
-                              <input
-                                type="radio"
-                                name="reopenRequester"
-                                checked={toUpdate.reopenRequester === "respondent"}
-                                onChange={() =>
-                                  setToUpdate((prev: any) => ({
-                                    ...prev,
-                                    reopenRequester: "respondent",
-                                  }))
-                                }
-                              />
-                              Respondent
-                            </label>
-                          </div>
-
-              <div className="yesno-container-continue">
-                <button
-                  onClick={() => {
-                    setShowContinuePopup(false);
-                    router.push(`/dashboard/IncidentModule/Department?id=${departmentId}`);
-                  }}
-                  className="no-button-continue"
-                >
-                  Cancel
-                </button>
-                <button onClick={handleReopen} className="yes-button-continue">
-                  Reopen
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* {showDoneIncidentPopup && (
-          <div className="confirmation-popup-overlay-add">
-            <div className="confirmation-popup-add">
-              <img src="/Images/check.png" alt="icon alert" className="successful-icon-popup" />
-              <p>Has the incident case been settled?</p>
-              <div className="yesno-container-add">
-                <button
-                  onClick={() => handleClosingCase(false)}
-                  className="no-button-add"
-                >
-                  No
-                </button>
-                <button  
-                  onClick={() => handleClosingCase(true)}
-                  className="yes-button-add"
-                >
-                  Yes
-                </button>
-              </div>
-            </div>
-          </div>    
-        )} */}
+        
 
      </main>
       )}
