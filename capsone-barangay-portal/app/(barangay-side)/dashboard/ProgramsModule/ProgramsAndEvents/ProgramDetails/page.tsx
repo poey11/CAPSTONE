@@ -175,7 +175,10 @@ export default function ProgramDetails() {
     return false;
   })();
   const isReadOnly = !canEdit;
-  const showActiveToggle = isHigherUp && approvalStatus !== "Pending"; // hide toggle when Pending
+  
+  const showActiveToggle =
+  isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" &&progressStatus !== "Completed";
+
 
   // Load program
   useEffect(() => {
@@ -877,7 +880,7 @@ export default function ProgramDetails() {
                 {section === "details" && "Details"}
                 {section === "reqs" && "Requirements"}
                 {section === "others" && "Others"}
-                {section === "reject" && "Rejected"}
+                {section === "reject" && "Reason for Reject"}
               </button>
             ))}
           </nav>
