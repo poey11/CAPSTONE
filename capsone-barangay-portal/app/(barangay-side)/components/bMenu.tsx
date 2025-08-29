@@ -209,7 +209,7 @@ const BMenu: React.FC = () => {
         >
 
             <div className="dropdown-button-brgyside">
-              <Link href="/dashboard">Programs Management</Link>
+              <Link href="/dashboard/ProgramsModule/ProgramsAndEvents">Programs Management</Link>
               <img 
                   src={hoveredDropdown === "programs" ? "/Images/left-arrow.png" : "/Images/down-arrow.png"} 
                   alt="Menu Icon" 

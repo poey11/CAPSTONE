@@ -684,6 +684,17 @@ export default function ProgramDetails() {
   };
   const togglePredefinedOpen = () => setIsPredefinedOpen((prev) => !prev);
 
+
+  useEffect(() => {
+  if (showPopup) {
+    const timer = setTimeout(() => {
+      setShowPopup(false);
+    }, 3000); // hides after 2 seconds
+    return () => clearTimeout(timer);
+  }
+}, [showPopup]);
+
+
   return (
     <main className="edit-program-main-container">
       {/* Reject popups & generic popup (unchanged) */}
