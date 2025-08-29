@@ -1,10 +1,11 @@
-import {  useEffect, useState } from "react";
+import {  use, useEffect, useState } from "react";
 import { collection, addDoc, doc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { fill } from "pdf-lib";
+import {handleLetterOfFailure} from "@/app/helpers/pdfhelper";
 
 interface HearingFormProps {
     index: number;
@@ -62,8 +63,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         thirdHearingOfficer: "",
         filled:false,
         hearingMeetingDateTime: "",
-        Cstatus: "",
-        Rstatus: "",
+        Cstatus: "Present",
+        Rstatus: "Present",
         createdAt: new Date()
     }); 
     
@@ -90,16 +91,18 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             firstHearingOfficer: (fetchedDetails[0]?.firstHearingOfficer) || user?.fullName || "",
             secondHearingOfficer: (fetchedDetails[1]?.secondHearingOfficer) || user?.fullName || "",
             thirdHearingOfficer: (fetchedDetails[2]?.thirdHearingOfficer) || user?.fullName || "",
+            Cstatus: fetchedDetails[index]?.Cstatus || "Present",
+            Rstatus: fetchedDetails[index]?.Rstatus || "Present",
           }));
         });
       
         return () => unsubscribe();
       }, [id, user]);
       
+    
 
 
-
-      
+      console.log("Hearing Details:", hearingDetails);
 
       useEffect(() => { 
         const docRef = doc(db, "IncidentReports", id, "DialogueMeeting", id);
@@ -128,6 +131,17 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         return () => unsubscribe();
 
     },[])
+
+    useEffect(() => {
+      if((data?.complainantAbsents === 2) || (data?.respondentAbsents === 2 && data?.complainantAbsent===2) ){
+        const mainDocRef = doc(db, "IncidentReports", id); 
+        updateDoc(mainDocRef, {
+          status: "dismissed",
+          statusPriority: 5,
+        })
+        router.push(`/dashboard/IncidentModule/Department?id=${data?.department}`);
+      }
+    }, [data]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement| HTMLSelectElement> ) => {
         const { name, value } = e.target;
@@ -234,6 +248,15 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         setShowSubmitPopup(true);
     };
     
+    const [showSetRefailureMeetingPopup, setShowSetRefailureMeetingPopup] = useState(false);
+    const [resheduleDateTime, setResheduleDateTime] = useState("");
+    const handleRescheduleMeeting = async (date: string) => {
+          const mainDocRef = doc(db, "IncidentReports", id);
+          await updateDoc(mainDocRef, {
+            [`refailureExplainationMeetingHearing${index}`]: date
+          })
+      }
+
     const saveSummon = async () => {
         try {
             const docRef = collection(db, "IncidentReports", id, "SummonsMeeting");
@@ -247,22 +270,60 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         
 
             const mainDocRef = doc(db, "IncidentReports", id); 
-            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+            
+            if(details.Rstatus === "Absent" && details.Cstatus !== "Absent"){
+              //Send letter of refailure to appear to respondent
+              // A small window or popup to set the date and time of explaination of the failure to appear
+              setShowSetRefailureMeetingPopup(true);
               await updateDoc(mainDocRef, {
-                status: "archived",
-                statusPriority: 2,
-                hearingId: success.id,
-              });
+              //[`sentLetterOfFailureToAppearHearing${index}`]: true,
+              sentLetterOfFailureToAppearHearing: {
+                ...(data?.sentLetterOfFailureToAppearHearing || {}),
+                [index]: true
+              },
 
-             
-           setTimeout(() => {
-              setShowPopup(false);
-              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-            }, 3000);
+              respondentAbsents: (data?.respondentAbsents || 0) + 1,
+              })
 
-            } else {
-              setShowDoneIncidentPopup(true);
+              if(index === 2){
+                await updateDoc(mainDocRef, {
+                  status: "CFA",
+                  statusPriority: 4,
+                })
+              }
+
+              setTimeout(() => {
+                setShowPopup(false);
+              }, 3000);
+              
             }
+            else if(details.Cstatus === "Absent" && details.Rstatus !== "Absent"){
+              await updateDoc(mainDocRef, {
+                  complainantAbsents: (data?.complainantAbsents || 0) + 1,                
+                })
+              if(index === 2){
+                await updateDoc(mainDocRef, {
+                  status: "dismissed",
+                  statusPriority: 5,
+                })
+              }  
+            } 
+            else if(details.Rstatus === "Absent" && details.Cstatus === "Absent"){
+              await updateDoc(mainDocRef, {
+                  respondentAbsents: (data?.respondentAbsents || 0) + 1,
+                  complainantAbsents: (data?.complainantAbsents || 0) + 1,
+                })
+                if(index === 2){
+                await updateDoc(mainDocRef, {
+                    status: "dismissed",
+                    statusPriority: 5,
+                  })
+                }  
+            }
+            else if (details.Cstatus !== "Absent" && details.Rstatus !== "Absent") {
+              setShowDoneIncidentPopup(true);
+            }    
+
         } catch (error:any) {
             console.error("Error saving data:", error.message);
         }
@@ -386,6 +447,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     const router = useRouter();
     const [showSubmitPopupB, setShowSubmitPopupB] = useState(false);
     const [showDoneIncidentPopup, setShowDoneIncidentPopup] = useState(false);
+    
     const handleClosingCase = async(status:boolean) => {
         if (!docId) return;
         setShowDoneIncidentPopup(false);
@@ -402,15 +464,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
     setTimeout(() => {
       setShowPopup(false);
-
-      // ✅ Only redirect if not "Lupon"
-      if (department !== "Lupon") {
-        router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-      } else {
-        setShowSubmitPopupB(true);
-      }
-    }, 3000); // Wait 3 seconds before redirecting or showing next popup
-
+      }, 3000); // Wait 3 seconds before redirecting or showing next popup
         }
         else{
           // If the case is not closed, update the status to "cfa"
@@ -428,6 +482,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
         }
       }
+
+    const [showGovAgencyPopup, setShowGovAgencyPopup] = useState(false);
 
       const [activeSection, setActiveSection] = useState("meeting");
 
@@ -457,7 +513,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
 
                   <div className="hearing-edit-section-2">
-                        {!hearingDetails[index]?.filled && (<button type="submit" className="action-save-edit-hearing">Save</button>)}
+                        {(!hearingDetails[index]?.filled && data?.status === "pending" ) && (<button type="submit" className="action-save-edit-hearing">Save</button>)}
                   </div>
         </div>
 
@@ -483,20 +539,20 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                         <div className="checkbox-container-dialogue">
                           <label className="custom-checkbox-label">
                             <input
-                                type="checkbox"
-                                name="Cstatus"
-                                disabled={hearingDetails[index]?.filled}
-                                checked={details.Cstatus === "" || details.Cstatus === "Present"}
-                                onChange={(e) =>
+                              type="checkbox"
+                              name="Cstatus"
+                              disabled={hearingDetails[index]?.filled}
+                              checked={details.Cstatus === "Present" || hearingDetails[index]?.Cstatus === "Present"}
+                              onChange={(e) =>
                                 setDetails((prev: any) => ({
-                                    ...prev,
-                                    Cstatus: e.target.checked ? "" : "Absent"
+                                  ...prev,
+                                  Cstatus: e.target.checked ?  "Present" : "Absent"
                                 }))
-                                }
+                              }
                             />
                             <span className="checkmark"></span>
                             Present
-                            </label>
+                          </label>
 
                         </div>
 
@@ -533,11 +589,11 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                                     type="checkbox"
                                     name="Rstatus"
                                     disabled={hearingDetails[index]?.filled}
-                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                    checked={details.Rstatus === "Present" || hearingDetails[index]?.Rstatus === "Present"}
                                     onChange={(e) =>
                                     setDetails((prev: any) => ({
                                         ...prev,
-                                        Rstatus: e.target.checked ? "" : "Absent"
+                                        Rstatus: e.target.checked ? "Present" : "Absent"
                                     }))
                                     }
                                 />
@@ -763,23 +819,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       <p>Has the incident case been settled?</p>
       <div className="yesno-container-add">
 
-        {/* Case 1: hearing !== 3 && archived */}
-        {hearing !== 3 && data?.status === "archived" && (
-          <button
-            onClick={() => {
-              setShowDoneIncidentPopup(false);
-              setPopupMessage("If case is reopened, generate a letter again.");
-              setShowPopup(true);
-              setTimeout(() => setShowPopup(false), 3000);
-            }}
-            className="no-button-add"
-          >
-            No
-          </button>
-        )}
+       
 
-        {/* Case 2: hearing !== 3 && NOT archived */}
-        {hearing !== 3 && data?.status !== "archived" && (
+        {/* Case 2: hearing !== 3 && NOT dismissed */}
+        {hearing !== 3 && data?.status !== "dismissed" && (
           <button
             onClick={() => {
               setShowDoneIncidentPopup(false);
@@ -793,14 +836,22 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         )}
 
         {/* Case 3: hearing === 3 */}
-        {hearing === 3 && (
+        {(hearing === 3 && department === "Lupon") ? (
           <button
             onClick={() => handleClosingCase(false)}
             className="no-button-add bg-gray-600"
           >
             CFA
           </button>
+        ):(hearing === 3 && department !== "Lupon") && (
+          <button
+            onClick={() => setShowGovAgencyPopup(true)}
+            className="no-button-add bg-gray-600"
+          >
+            Refer to Government Agency
+          </button>
         )}
+      
 
         {/* YES button (shared by all) */}
         <button
@@ -817,6 +868,92 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 )}
 
 
+{showGovAgencyPopup && (
+  <div className="confirmation-popup-overlay-add">
+    <div className="confirmation-popup-add">
+      <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
+      <p>Which Government Agency to Refer this to?</p>
+      <div className="settlement-options-modern-section">
+        {[
+          { label: "Social Services Development Department (SSDD)", key: "SSDD" },
+          { label: "Department of Social Welfare and Development (DSWD)", key: "DSWD" },
+          { label: "Police Station", key: "PS" },
+          { label: "Others", key: "Others" },
+        ].map(({ label, key }) => {
+          const isSelected = toUpdate?.[key] === true;
+          return (
+            
+            <label
+              className={`settlement-card-section ${isSelected ? "selected-section" : ""}`}
+              key={key}
+            >
+              <input
+                type="radio"
+                name="settlementMethod"
+                checked={isSelected}
+                onChange={() =>
+                  setToUpdate((prev: any) => ({
+                    ...prev,
+                    SSDD: key === "SSDD",
+                    DSWD: key === "DSWD",
+                    PS: key === "PS",
+                    Others: key === "Others",
+                  }))
+                }
+              />
+              <span>{label}</span>
+              {toUpdate?.Others && key === "Others" && (
+                <input
+                  type="text"
+                  className="edit-incident-input-field mt-2"
+                  placeholder="Please specify"
+                  value={toUpdate?.OtherAgencyName || ""}
+                  onChange={(e) =>
+                    setToUpdate((prev: any) => ({
+                      ...prev,
+                      OtherAgencyName: e.target.value,
+                    }))
+                  }
+                />
+              )}
+            </label>
+
+          );
+        })}
+      </div>
+
+      <div className="yesno-container-add-section">
+        <button
+          className="yes-button-add-section"
+          onClick={() => {
+            const isAnySelected =
+              toUpdate?.SSDD || toUpdate?.DSWD || toUpdate?.PS || toUpdate?.Others;
+            const isOthersValid = toUpdate?.Others ? !!toUpdate?.OtherAgencyName?.trim() : true;
+            if (!isAnySelected || !isOthersValid) {
+              setPopupErrorMessage("Please select a government agency before submitting.");
+              setShowErrorPopup(true);
+              // Auto-hide after 3 seconds
+              setTimeout(() => {
+                setShowErrorPopup(false);
+              }, 3000);
+            } else {
+              const mainDocRef = doc(db, "IncidentReports", id);
+              updateDoc(mainDocRef, {
+                status: "Refer to Government Agency",
+                statusPriority: 6,
+              });
+              confirmSubmitB();
+            }
+          }}
+        >
+          Submit
+        </button>
+
+      </div>
+    </div>
+  </div>  
+
+)}
 
 
 {showSubmitPopupB && (
@@ -903,6 +1040,56 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 </div>
             )}
 
+        {showSetRefailureMeetingPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
+              <p>Set meeting to explain failure to appear</p>
+              <div className="yesno-container-add">
+                <input
+                  className=""
+                  name="resheduleDateTime"
+                  id="resheduleDateTime"
+                  value={resheduleDateTime}
+                  onChange={(e) => setResheduleDateTime(e.target.value)}
+                  type="date"
+                  min={(() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    // Format as yyyy-MM-dd for date input
+                    const pad = (n: number) => n.toString().padStart(2, "0");
+                    const yyyy = tomorrow.getFullYear();
+                    const mm = pad(tomorrow.getMonth() + 1);
+                    const dd = pad(tomorrow.getDate());
+                    return `${yyyy}-${mm}-${dd}`;
+                  })()}
+                  required
+                />
+                <button
+                  onClick={() => {
+                    if (!resheduleDateTime) {
+                      alert("Please select a date before submitting.");
+                      return;
+                    }
+                    handleRescheduleMeeting(resheduleDateTime);
+                    setShowSetRefailureMeetingPopup(false);
+                    setPopupMessage("Successfully Set Meeting to Explain Failure to Appear");
+                    setShowPopup(true);
+                    setTimeout(() => {
+                      setShowPopup(false);
+                      //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                    }, 3000);
+                    handleLetterOfFailure(id, resheduleDateTime, `${data?.complainant?.fname} ${data?.complainant?.lname}`, `${data?.respondent?.fname} ${data?.respondent?.lname}`, "summon", index);
+                  }}
+                  className="yes-button-add"
+                  disabled={!resheduleDateTime}
+                >
+                  Submit
+                </button>
+              </div>
+            </div>  
+          </div>
+        )}
         </>
     )
 }

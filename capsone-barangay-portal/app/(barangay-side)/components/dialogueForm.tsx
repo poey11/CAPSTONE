@@ -5,7 +5,7 @@ import { doc, onSnapshot,collection, setDoc, query, where, updateDoc } from "fir
 import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import {handleLetterOfFailure} from "@/app/helpers/pdfhelper";
 
 
 interface DialogueFormProps {
@@ -50,8 +50,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         remarks: "",
         partyA: "",
         partyB: "",
-        Cstatus: "",
-        Rstatus: "",
+        Cstatus: "Present",
+        Rstatus: "Present",
     });
 
     useEffect(() => {
@@ -61,12 +61,14 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         }));
             
     },[user])
+    const [data, setData] = useState<any>(null);
     useEffect(() => {
         if(!id) return;
         const docRef = doc(db, "IncidentReports", id);
         const unsubscribe = onSnapshot(docRef, (doc) => {
             if (doc.exists()) {
                 const data = doc.data();
+                setData(data);
                 setIsDialogue(data.isDialogue); 
             } else {
                 console.log("No such document!");
@@ -221,8 +223,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 };
 
 
-
-
+    const [showSetRefailureMeetingPopup, setShowSetRefailureMeetingPopup] = useState(false);
+    const [resheduleDateTime, setResheduleDateTime] = useState("");
 
     const saveDialogue = async () => {
         try {
@@ -234,36 +236,48 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             });
 
             const mainDocRef = doc(db, "IncidentReports", id);
-
-            if (details.Cstatus === "Absent" || details.Rstatus === "Absent") {
+            
+            if(details.Rstatus === "Absent" && details.Cstatus !== "Absent"){
+              setShowSetRefailureMeetingPopup(true);
               await updateDoc(mainDocRef, {
-                status: "archived",
-                statusPriority: 2,
-              });
+                sentLetterOfFailureToAppearDialogue: true,
+                respondentAbsents: (data?.respondentAbsents || 0) + 1,
+              })
 
-              // try added for redirection to main page archive in dialogue
               setTimeout(() => {
                 setShowPopup(false);
-                router.push(`/dashboard/IncidentModule/Department?id=${department}`);
               }, 3000);
 
-            } else {
-              setShowDoneIncidentPopup(true);
             }
+            else if(details.Cstatus === "Absent" && details.Rstatus !== "Absent"){
+                await updateDoc(mainDocRef, {
+                  complainantAbsents: (data?.respondentAbsents || 0) + 1,
+              })
 
-            
-        //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-
-
-            
+            }
+            else if(details.Cstatus === "Absent" && details.Rstatus === "Absent"){
+              await updateDoc(mainDocRef, {
+                complainantAbsents: (data?.respondentAbsents || 0) + 1,
+                respondentAbsents: (data?.respondentAbsents || 0) + 1,
+              })
+            }
+            else if (details.Cstatus !== "Absent" && details.Rstatus !== "Absent") {
+              setShowDoneIncidentPopup(true);
+            }                                              
             console.log("Saving dialogue data:", details);
-          //console.log("Document written with ID: ", docRef.id);
         } catch (error: any) {
           console.error("Error saving data:", error.message);
           throw error;
         }
       };
     
+      const handleRescheduleMeeting = async (date: string) => {
+          const mainDocRef = doc(db, "IncidentReports", id);
+          await updateDoc(mainDocRef, {
+            refailureExplainationMeetingDialogue: date
+          })
+      }
+
     const confirmSubmit = async () => {
         setShowSubmitPopup(false);
       
@@ -349,29 +363,14 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             setShowPopup(false);
                       if(department !== "Lupon"){
             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-          }
-          else{
-            setShowSubmitPopupB(true);
-          }
+            }
+            else{
+              setShowSubmitPopupB(true);
+            }
           }, 3000);
 
         }
-        else{
-          // If the case is not closed, update the status to "cfa"
-          setPopupMessage("Incident case has been set to CFA.");
-          setShowPopup(true);
-          await updateDoc(docRef, {
-            status: "CFA",
-            statusPriority: 4,
-          });
-          setTimeout(() => {
-            setShowPopup(false);
-            //router.push(`/dashboard/IncidentModule/Department?id=${departmentId}&incidentId=${docId}`);
-            //window.location.reload(); // Reload the page to ensure all data is fresh
-          }, 3000);
-          router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-        }
-      }
+    }
     
     return (
         <>
@@ -442,11 +441,11 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                                     type="checkbox"
                                                                     name="Cstatus"
                                                                     disabled={existingData}
-                                                                    checked={details.Cstatus === "" || details.Cstatus === "Present"}
+                                                                    checked={details.Cstatus === "Present"}
                                                                     onChange={(e) =>
                                                                     setDetails((prev: any) => ({
                                                                         ...prev,
-                                                                        Cstatus: e.target.checked ? "" : "Absent"
+                                                                        Cstatus: e.target.checked ? "Present" : "Absent"
                                                                     }))
                                                                     }
                                                                 />
@@ -492,11 +491,11 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                                                                     type="checkbox"
                                                                     name="Rstatus"
                                                                     disabled={existingData}
-                                                                    checked={details.Rstatus === "" || details.Rstatus === "Present"}
+                                                                    checked={details.Rstatus === "Present"}
                                                                     onChange={(e) =>
                                                                     setDetails((prev: any) => ({
                                                                         ...prev,
-                                                                        Rstatus: e.target.checked ? "" : "Absent"
+                                                                        Rstatus: e.target.checked ? "Present" : "Absent"
                                                                     }))
                                                                     }
                                                                 />
@@ -951,14 +950,67 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 </div>
             )}
 
-            {showErrorPopup && (
-                <div className={`error-popup-overlay-add show`}>
-                    <div className="popup-add">
-                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
-                      <p>{popupErrorMessage}</p>
-                    </div>
+        {showErrorPopup && (
+            <div className={`error-popup-overlay-add show`}>
+                <div className="popup-add">
+                  <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                  <p>{popupErrorMessage}</p>
                 </div>
-            )}
+            </div>
+        )}
+
+        {showSetRefailureMeetingPopup && (
+          <div className="confirmation-popup-overlay-add">
+            <div className="confirmation-popup-add">
+              <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
+              <p>Set meeting to explain failure to appear</p>
+              <div className="yesno-container-add">
+                <input
+                  className=""
+                  name="resheduleDateTime"
+                  id="resheduleDateTime"
+                  value={resheduleDateTime}
+                  onChange={(e) => setResheduleDateTime(e.target.value)}
+                  type="date"
+                  min={(() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    // Format as yyyy-MM-dd for date input
+                    const pad = (n: number) => n.toString().padStart(2, "0");
+                    const yyyy = tomorrow.getFullYear();
+                    const mm = pad(tomorrow.getMonth() + 1);
+                    const dd = pad(tomorrow.getDate());
+                    return `${yyyy}-${mm}-${dd}`;
+                  })()}
+                  required
+                />
+                <button
+                  onClick={() => {
+                    if (!resheduleDateTime) {
+                      alert("Please select a date before submitting.");
+                      return;
+                    }
+                    handleRescheduleMeeting(resheduleDateTime);
+                    setShowSetRefailureMeetingPopup(false);
+                    setPopupMessage("Successfully Set Meeting to Explain Failure to Appear");
+                    setShowPopup(true);
+                    setTimeout(() => {
+                      setShowPopup(false);
+                      //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                    }, 3000);
+                    handleLetterOfFailure(id, resheduleDateTime, complainantName, respondentName, "dialogue");
+                  }}
+                  className="yes-button-add"
+                  disabled={!resheduleDateTime}
+                >
+                  Submit
+                </button>
+              </div>
+            </div>  
+          </div>
+        )}
+
+
         </>
     )
 }
