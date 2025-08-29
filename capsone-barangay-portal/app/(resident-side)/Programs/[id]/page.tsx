@@ -732,18 +732,31 @@ const confirmSubmit = async () => {
         <div className="programs-underline-specific"></div>
 
         <div className="slideshow-container-specific">
-          {images.length > 0 && (
-            <div className="slideshow-specific">
-              {images.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  alt={`Slide ${index + 1}`}
-                  className={`slideshow-image-specific ${index === currentSlide ? "active" : ""}`}
-                />
-              ))}
-            </div>
+           {images.length > 0 && (
+            <>
+              <div className="slideshow-specific">
+                {images.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img}
+                    alt={`Slide ${index + 1}`}
+                    className={`slideshow-image-specific ${index === currentSlide ? "active" : ""}`}
+                  />
+                ))}
+              </div>
+
+              <div className="slideshow-dots-specific">
+                {images.map((_, index) => (
+                  <span
+                    key={index}
+                    className={`dot-specific ${index === currentSlide ? "active" : ""}`}
+                    onClick={() => setCurrentSlide(index)} 
+                  ></span>
+                ))}
+              </div>
+            </>
           )}
+
         </div>
 
         <p className="programs-description-specific">

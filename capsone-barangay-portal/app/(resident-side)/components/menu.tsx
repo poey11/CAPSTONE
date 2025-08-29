@@ -544,7 +544,9 @@ const handleDeleteNotification = async (notificationId: string) => {
           </div>
         )}
 
+
         {/* ===== BOT: launcher button + Messenger popup ===== */}
+    {/*
         <div className="dropdown-Container">
           <button
             className="dropdown-item"
@@ -614,7 +616,10 @@ const handleDeleteNotification = async (notificationId: string) => {
             </div>
           )}
         </div>
+    */}
         {/* ===== /BOT ===== */}
+
+    
 
       </div>
     </div>

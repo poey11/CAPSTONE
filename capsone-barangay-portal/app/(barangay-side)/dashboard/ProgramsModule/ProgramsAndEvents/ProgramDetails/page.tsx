@@ -908,6 +908,24 @@ export default function ProgramDetails() {
 
                       <div className="fields-section-edit-programs">
                         <p>
+                          Program Location<span className="required">*</span>
+                        </p>
+                        <input
+                          type="text"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.location ? "input-error" : "",
+                            shake.location ? "shake" : "",
+                          ].join(" ").trim()}
+                          placeholder="Location (E.g. Barangay Hall)"
+                          value={location}
+                          onChange={(e) => setLocation(e.target.value)}
+                          disabled={isReadOnly}
+                        />
+                      </div>
+
+                      <div className="fields-section-edit-programs">
+                        <p>
                           Number of Participants<span className="required">*</span>
                         </p>
                         <input
@@ -970,7 +988,7 @@ export default function ProgramDetails() {
                         <p>
                           Age Restriction<span className="required">*</span>
                         </p>
-                        <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                        <label className="flex-center-gap">
                           <input
                             type="checkbox"
                             checked={noAgeLimit}
@@ -991,7 +1009,7 @@ export default function ProgramDetails() {
                           <span>No age limit</span>
                         </label>
 
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        <div className="grid-2col-gap">
                           <input
                             type="number"
                             min={0}
@@ -1027,22 +1045,7 @@ export default function ProgramDetails() {
                         )}
                       </div>
 
-                      <div className="fields-section-edit-programs">
-                        <p>
-                          Time Start<span className="required">*</span>
-                        </p>
-                        <input
-                          type="time"
-                          className={[
-                            "edit-programs-input-field",
-                            errors.timeStart ? "input-error" : "",
-                            shake.timeStart ? "shake" : "",
-                          ].join(" ").trim()}
-                          value={timeStart}
-                          onChange={(e) => setTimeStart(e.target.value)}
-                          disabled={isReadOnly}
-                        />
-                      </div>
+                      
                     </div>
 
                     <div className="edit-program-section-2-right-side">
@@ -1177,6 +1180,23 @@ export default function ProgramDetails() {
 
                       <div className="fields-section-edit-programs">
                         <p>
+                          Time Start<span className="required">*</span>
+                        </p>
+                        <input
+                          type="time"
+                          className={[
+                            "edit-programs-input-field",
+                            errors.timeStart ? "input-error" : "",
+                            shake.timeStart ? "shake" : "",
+                          ].join(" ").trim()}
+                          value={timeStart}
+                          onChange={(e) => setTimeStart(e.target.value)}
+                          disabled={isReadOnly}
+                        />
+                      </div>
+
+                      <div className="fields-section-edit-programs">
+                        <p>
                           Time End<span className="required">*</span>
                         </p>
                         <input
@@ -1192,23 +1212,7 @@ export default function ProgramDetails() {
                         />
                       </div>
 
-                      <div className="fields-section-edit-programs">
-                        <p>
-                          Program Location<span className="required">*</span>
-                        </p>
-                        <input
-                          type="text"
-                          className={[
-                            "edit-programs-input-field",
-                            errors.location ? "input-error" : "",
-                            shake.location ? "shake" : "",
-                          ].join(" ").trim()}
-                          placeholder="Location (E.g. Barangay Hall)"
-                          value={location}
-                          onChange={(e) => setLocation(e.target.value)}
-                          disabled={isReadOnly}
-                        />
-                      </div>
+                      
                     </div>
                   </div>
                 </>
@@ -1461,7 +1465,7 @@ export default function ProgramDetails() {
                                     </button>
                                   )}
                                 </div>
-                              </div>
+                              </div> 
 
                               <div className="photosprogram-thumbnails">
                                 {previewURLs.length > 1 && (
@@ -1482,12 +1486,19 @@ export default function ProgramDetails() {
                                 {existingPhotoURLs.length > 0 && (
                                   <div className="thumbs-section">
                                     <div className="thumbs-label">* Existing Photos *</div>
-                                    <div className="thumbs-grid">
+                                    <div
+                                      className={`thumbs-grid ${
+                                        existingPhotoURLs.length <= 2 ? "center-grid" : ""
+                                      }`}
+                                    >
                                       {existingPhotoURLs.map((u, i) => (
                                         <div key={`old-${i}-${u}`} className="thumb-wrapper">
                                           <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
                                           {!isReadOnly && (
-                                            <button className="delete-btn" onClick={() => handleDeleteExisting(i)}>
+                                            <button
+                                              className="delete-btn"
+                                              onClick={() => handleDeleteExisting(i)}
+                                            >
                                               ✕
                                             </button>
                                           )}
