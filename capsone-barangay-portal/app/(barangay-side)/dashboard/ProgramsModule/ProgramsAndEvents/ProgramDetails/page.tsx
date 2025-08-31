@@ -175,7 +175,10 @@ export default function ProgramDetails() {
     return false;
   })();
   const isReadOnly = !canEdit;
-  const showActiveToggle = isHigherUp && approvalStatus !== "Pending"; // hide toggle when Pending
+  
+  const showActiveToggle =
+  isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" &&progressStatus !== "Completed";
+
 
   // Load program
   useEffect(() => {
@@ -681,6 +684,17 @@ export default function ProgramDetails() {
   };
   const togglePredefinedOpen = () => setIsPredefinedOpen((prev) => !prev);
 
+
+  useEffect(() => {
+  if (showPopup) {
+    const timer = setTimeout(() => {
+      setShowPopup(false);
+    }, 3000); // hides after 2 seconds
+    return () => clearTimeout(timer);
+  }
+}, [showPopup]);
+
+
   return (
     <main className="edit-program-main-container">
       {/* Reject popups & generic popup (unchanged) */}
@@ -877,7 +891,7 @@ export default function ProgramDetails() {
                 {section === "details" && "Details"}
                 {section === "reqs" && "Requirements"}
                 {section === "others" && "Others"}
-                {section === "reject" && "Rejected"}
+                {section === "reject" && "Reason for Reject"}
               </button>
             ))}
           </nav>

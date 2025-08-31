@@ -12,7 +12,7 @@ import ExcelJS from "exceljs";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { saveAs } from "file-saver";
 
-const statusOptions = ["Pending", "CFA", "Settled", "Archived"];
+const statusOptions = ["Pending", "CFA", "Settled", "Archived", "Refer to Government Agency"];
 
 export default function Department() {
   const user = useSession().data?.user;
@@ -1051,7 +1051,7 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                       </button>
                       {isAuthorized && (
                         <>
-                        {incident.status !== "settled" && incident.status !== "CFA" && (
+                        {incident.status !== "settled" && incident.status !== "CFA" && incident.status !=="Refer to Government Agency" && (
                           <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
                         )}
                           <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>

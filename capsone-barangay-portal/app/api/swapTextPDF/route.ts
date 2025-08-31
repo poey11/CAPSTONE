@@ -34,6 +34,9 @@ export async function POST(req: NextRequest) {
       marginRight = 100;
       yPosition = 670;
     }
+    else if (purpose === "Letter of Refailure") {
+      yPosition = 712;
+    }
 
     const maxWidth = pageWidth - marginLeft - marginRight;
 
@@ -155,15 +158,20 @@ export async function POST(req: NextRequest) {
 
       // Draw final line (not justified)
       if (currentLine.length > 0) {
-        const indentX = isFirstLineOfParagraph ? marginLeft + 40 : marginLeft;
+        // const indentX = isFirstLineOfParagraph ? marginLeft + 40 : marginLeft;
+        const indentX =
+          isFirstLineOfParagraph && purpose !== "Letter of Refailure"
+            ? marginLeft + 40
+            : marginLeft;
         drawJustifiedLine(currentLine, true, indentX, yPosition, fontSize);
         yPosition -= lineHeight;
       }
     }
 
     const pdfBytes = await pdfDoc.save();
+    const pdfBuffer = Buffer.from(pdfBytes);
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(pdfBuffer, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

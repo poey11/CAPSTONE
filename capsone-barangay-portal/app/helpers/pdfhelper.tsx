@@ -935,7 +935,132 @@ const handleGenerateDocumentTypeB = async(documentB:any, id:any) => {
 
 }
 
+
+const handleLetterOfFailure = async(id:string, refailureExplainationMeeting: string,complainant: string, respondent:string, letterType:string, i?: number,  ) => {
+    console.log("Generating Letter of Failure for ID:", id);
+    console.log("Explanation/Meeting Details:", refailureExplainationMeeting);
+    console.log("Letter Type:", letterType);
+    const docRef = doc(db, "DocumentBody", "shkJbVzbpNhJsuoWHoHb");
+    const docSnapshot = await getDoc(docRef);
+    if (!docSnapshot.exists()) {
+        console.error("Body Document not found for ID: shkJbVzbpNhJsuoWHoHb");
+        return;
+    }
+    const documentData = docSnapshot.data();
     
-export {handlePrint, handleGenerateDocument, handleGenerateDocumentTypeB};
+    const dateToday = getLocalDateString(new Date());
+    const dayToday = getOrdinal(parseInt(dateToday.split("-")[2]));
+    const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
+    const yearToday = dateToday.split("-")[0];
+
+    const failureMeetingMonth = refailureExplainationMeeting.split('-')[1] ;
+    const failureMeetingDay = refailureExplainationMeeting.split('-')[2];
+    const failureMeetingYear = refailureExplainationMeeting.split('-')[0];
+    
+    
+    console.log("Document Data:", documentData);
+
+    const incidentRef = query(
+      collection(db, "IncidentReports", id, "GeneratedLetters"),
+      where("letterType", "==", letterType)
+    );
+
+    const incidentSnapshot = await getDocs(incidentRef);
+
+    const incidentData: any[] = incidentSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log("Incident Data:", incidentData);
+    
+
+    const newBody = replacePlaceholders(documentData?.Body, {
+      dayToday,
+      monthToday,
+      yearToday,
+      ...(letterType === "dialogue" && {
+        DateTimeOfMeeting: new Date(incidentData[0].DateTimeOfMeeting).toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false // set to true if you want AM/PM
+        }).replace(",", " at"),
+      }),
+      ...(letterType === "summon" && {
+        DateTimeOfMeeting: new Date(incidentData[i || 0].DateTimeOfMeeting).toLocaleString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true
+        }).replace(",", " at"),
+      }),
+      CName: complainant.toUpperCase(),
+      RName: respondent.toUpperCase(),
+      refailureExplainationMeeting: `${getMonthName(parseInt(failureMeetingMonth))} ${failureMeetingDay}, ${failureMeetingYear}`,
+    });
+
+    
+
+    const formatDateTime = (dateStr: string) =>
+      new Date(dateStr).toLocaleString("en-PH", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true // change to true for AM/PM
+      }).replace(",", " at");
+  
+    const boldWords: any[] = [
+      dayToday,
+      monthToday,
+      yearToday,
+      complainant.toUpperCase(),
+      respondent.toUpperCase(),
+      `${getMonthName(parseInt(failureMeetingMonth))} ${failureMeetingDay}, ${failureMeetingYear}`,
+      ...(letterType === "dialogue" ? [formatDateTime(incidentData[0].DateTimeOfMeeting)] : []),
+      ...(letterType === "summon" ? [formatDateTime(incidentData[i || 0].DateTimeOfMeeting)] : []),
+    ];
+
+
+
+    console.log("Bold Words:", boldWords);
+
+    console.log("Replaced Body:", newBody);
+    
+    const response = await fetch('/api/swapTextPDF', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            location: "letter of refailure template.pdf",
+            body: newBody,
+            boldWords: boldWords,
+            purpose: "Letter of Refailure",
+        }),
+    });    
+    if (!response.ok) {
+        console.error("Failed to generate PDF");
+        return;
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download=`Letter of Failure_${respondent.toUpperCase()}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+    link.remove();
+
+
+}
+
+export {handlePrint, handleGenerateDocument, handleGenerateDocumentTypeB, handleLetterOfFailure};
 
 

@@ -28,6 +28,7 @@ type Program = {
   activeStatus: "Active" | "Inactive" | "Rejected"; // includes Rejected
   createdAt?: Timestamp | null;
   dateCreated: string;
+  startDate: string;
 };
 
 type Participant = {
@@ -258,6 +259,8 @@ export default function ProgramsModule() {
             updates.push(updateDoc(doc(db, "Programs", docu.id), patch));
           }
 
+        const startDate = d.startDate || ""; 
+
           const dateCreated =
             tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
           list.push({
@@ -268,6 +271,7 @@ export default function ProgramsModule() {
             activeStatus: active,
             createdAt: d.createdAt ?? null,
             dateCreated,
+            startDate,
           });
         });
 
@@ -731,7 +735,7 @@ export default function ProgramsModule() {
                 <thead>
                   <tr>
                     <th>Program Name</th>
-                    <th>Date Created</th>
+                    <th>Start Date</th>
                     <th>Approval Status</th>
                     <th>Progress Status</th>
                     <th>Active/Inactive</th>
@@ -742,7 +746,7 @@ export default function ProgramsModule() {
                   {currentPrograms.map((program) => (
                     <tr key={program.id}>
                       <td>{program.programName}</td>
-                      <td>{program.dateCreated}</td>
+                      <td>{program.startDate}</td>
                       <td>
                         <span
                           className={`status-badge-programs ${program.approvalStatus
@@ -772,7 +776,23 @@ export default function ProgramsModule() {
                       </td>
                       <td>
                         <div className="actions-programs">
+                              {program.approvalStatus === "Rejected" ||
+                              program.progressStatus === "Completed" ? (
+
                           <button
+                            className="action-programs-button"
+                            onClick={() => handleEditClick(program.id)}
+                          >
+                            <img
+                              src="/Images/view.png"
+                              alt="Edit"
+                              className="action-programs-view"
+                            />
+                          </button>
+
+                             ) : (
+
+                           <button
                             className="action-programs-button"
                             onClick={() => handleEditClick(program.id)}
                           >
@@ -782,6 +802,9 @@ export default function ProgramsModule() {
                               className="action-programs-edit"
                             />
                           </button>
+
+                              )}
+
                           {canDelete && (
                             <button
                               className="action-programs-button"
