@@ -827,19 +827,19 @@ export default function ProgramsModule() {
           </div>
 
           <div className="redirection-section">
-            <button onClick={prevPage} disabled={currentPage === 1}>
+            <button onClick={prevPage} disabled={currentPage === 1} className="redirection-section-btn">
               &laquo;
             </button>
             {getPageNumbers().map((number, index) => (
               <button
                 key={index}
                 onClick={() => typeof number === "number" && paginate(number)}
-                className={currentPage === number ? "active" : ""}
+                className={`redirection-section-btn ${currentPage === number ? "active" : ""}`}
               >
                 {number}
               </button>
             ))}
-            <button onClick={nextPage} disabled={currentPage === totalPages}>
+            <button onClick={nextPage} disabled={currentPage === totalPages} className="redirection-section-btn">
               &raquo;
             </button>
           </div>
@@ -960,6 +960,7 @@ export default function ProgramsModule() {
 
             <div className="redirection-section">
               <button
+                className="redirection-section-btn"
                 onClick={prevParticipantsPage}
                 disabled={participantsPage === 1}
               >
@@ -972,7 +973,7 @@ export default function ProgramsModule() {
                 <button
                   key={num}
                   onClick={() => paginateParticipants(num)}
-                  className={participantsPage === num ? "active" : ""}
+                  className={`redirection-section-btn ${participantsPage === num ? "active" : ""}`}
                 >
                   {num}
                 </button>
@@ -980,6 +981,7 @@ export default function ProgramsModule() {
               <button
                 onClick={nextParticipantsPage}
                 disabled={participantsPage === participantsTotalPages}
+                className="redirection-section-btn"
               >
                 &raquo;
               </button>

@@ -429,7 +429,7 @@ export default function EditParticipantModal({
 
                   {/* ===== Requirements ===== */}
                   {activeTab === "reqs" && (
-                    <div className="participant-uploaded-photo-section" style={{ width: "100%" }}>
+                    <div className="participant-uploaded-photo-section" >
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
