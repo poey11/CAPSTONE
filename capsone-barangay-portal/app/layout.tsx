@@ -13,7 +13,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
+
+  // normalize (optional): remove trailing slash except for root
+  const normalized = pathname === "/" ? "/" : pathname.replace(/\/$/, "");
+
+  const residentRoutes = [
+    "/aboutus",
+    "/Announcements",
+    "/IncidentReport",
+    "/official",
+    "/OfficialsPage",
+    "/Programs",
+    "/register",
+    "/resident",
+    "/ResidentAccount",
+    "/services"
+  ];
+
+  const isHome = normalized === "/";
+  const isOtherResident = residentRoutes.some((route) => normalized.startsWith(route));
+
+  const isResidentSide = isHome || isOtherResident;
+
 
   return (
     <html lang="en">
@@ -23,11 +45,10 @@ export default function RootLayout({
               <TopNav />
               <RoleChecker children={children}/>
 
-              {/* Floating chatbot */}
-              <Chatbot />
+             {/* show only on resident-side (exact root OR any resident route) */}
+            {isResidentSide && <Chatbot />}
 
-              {/* Conditionally render Footer */}
-              {pathname !== '/official/login' && pathname !== '/resident/login' && <Footer />}
+            {normalized !== "/official/login" && normalized !== "/resident/login" && <Footer />}
             </SessionProvider>
         </AuthProvider>
       </body>
