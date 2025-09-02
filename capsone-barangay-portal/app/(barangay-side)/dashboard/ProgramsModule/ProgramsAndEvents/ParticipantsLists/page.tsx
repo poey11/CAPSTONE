@@ -34,6 +34,7 @@ type Participant = {
   residentId?: string;
   role?: string; // "Participant" | "Volunteer"
   approvalStatus?: string;
+  attendance?: boolean; // new field
 };
 
 type Resident = {
@@ -94,8 +95,8 @@ export default function ParticipantsList() {
   const [roleFilter, setRoleFilter] = useState("");
 
   // Program meta + requirements
-  const [programCapacity, setProgramCapacity] = useState<number | null>(null); // participants max
-  const [programVolunteerCapacity, setProgramVolunteerCapacity] = useState<number | null>(null); // volunteers max
+  const [programCapacity, setProgramCapacity] = useState<number | null>(null);
+  const [programVolunteerCapacity, setProgramVolunteerCapacity] = useState<number | null>(null);
   const [programTitle, setProgramTitle] = useState<string>("");
   const [programStatus, setProgramStatus] = useState<string>("");
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
@@ -133,7 +134,7 @@ export default function ParticipantsList() {
     }
   };
 
-  // Load program meta (including both capacities)
+  // Load program meta
   useEffect(() => {
     let cancelled = false;
     const loadProgram = async () => {
@@ -191,7 +192,7 @@ export default function ParticipantsList() {
     };
   }, [programId]);
 
-  // Live list (Approved only)
+  // Live list of approved participants
   useEffect(() => {
     setLoading(true);
     const colRef = collection(db, "ProgramsParticipants");
@@ -206,10 +207,22 @@ export default function ParticipantsList() {
 
     const unsub = onSnapshot(
       qRef,
-      (snap) => {
+      async (snap) => {
         const rows: Participant[] = [];
+        const inits: Array<Promise<any>> = [];
+
         snap.forEach((docu) => {
           const d = docu.data() as any;
+          const hasAttendance = typeof d.attendance === "boolean";
+          const attendance = hasAttendance ? d.attendance : false;
+
+          // Initialize missing attendance to false
+          if (!hasAttendance) {
+            inits.push(
+              updateDoc(doc(db, "ProgramsParticipants", docu.id), { attendance: false }).catch(() => {})
+            );
+          }
+
           rows.push({
             id: docu.id,
             fullName: d.fullName ?? "",
@@ -224,8 +237,12 @@ export default function ParticipantsList() {
             residentId: d.residentId ?? "",
             role: d.role ?? "Participant",
             approvalStatus: d.approvalStatus ?? "Approved",
+            attendance,
           });
         });
+
+        if (inits.length) Promise.allSettled(inits);
+
         setParticipants(rows);
         setLoading(false);
       },
@@ -245,11 +262,9 @@ export default function ParticipantsList() {
     const q = searchName.trim().toLowerCase();
 
     return participants.filter((p) => {
-      // name check
       const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
       const matchesName = !q || name.includes(q);
 
-      // role check
       const role = (p.role || "Participant").toLowerCase();
       const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
 
@@ -257,7 +272,7 @@ export default function ParticipantsList() {
     });
   }, [searchName, roleFilter, participants]);
 
-  // Role-specific counts (from the already-filtered Approved list)
+  // Role-specific counts
   const participantCount = useMemo(
     () => participants.filter((p) => (p.role || "Participant").toLowerCase() === "participant").length,
     [participants]
@@ -281,16 +296,22 @@ export default function ParticipantsList() {
     [programStatus]
   );
 
-  // Add button capacity reflects only Participant capacity
+  // Add button capacity check
   const isAtCapacity = useMemo(
     () => programCapacity !== null && participantCount >= programCapacity,
     [programCapacity, participantCount]
   );
 
-  // ✅ Guard: show V badge only if volunteers capacity exists and > 0
+  // Show volunteers badge only if capacity exists
   const showVolunteerBadge = useMemo(
     () => typeof programVolunteerCapacity === "number" && programVolunteerCapacity > 0,
     [programVolunteerCapacity]
+  );
+
+  // Attendance can be edited only if program is ongoing
+  const isAttendanceEditable = useMemo(
+    () => (programStatus || "").toLowerCase() === "ongoing",
+    [programStatus]
   );
 
   const openAddPopup = async () => {
@@ -327,6 +348,7 @@ export default function ParticipantsList() {
     setShowResidentsPopup(true);
   };
 
+  // Close residents popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (residentPopUpRef.current && !residentPopUpRef.current.contains(event.target as Node)) {
@@ -413,6 +435,7 @@ export default function ParticipantsList() {
       setTimeout(() => setShowErrorToast(false), 2500);
     }
   };
+
   const handleReject = async (participantId: string, reason: string) => {
     try {
       await updateDoc(doc(db, "ProgramsParticipants", participantId), {
@@ -434,6 +457,36 @@ export default function ParticipantsList() {
   const openEditModal = (p: Participant) => {
     setSelectedParticipant(p);
     setShowViewModal(true);
+  };
+
+  // Toggle attendance with optimistic UI
+  const handleToggleAttendance = async (p: Participant) => {
+    if (!isAttendanceEditable) {
+      setErrorToastMsg(`Attendance can only be updated when the program is Ongoing.`);
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 2500);
+      return;
+    }
+
+    const nextValue = !Boolean(p.attendance);
+
+    setParticipants((prev) =>
+      prev.map((row) => (row.id === p.id ? { ...row, attendance: nextValue } : row))
+    );
+
+    try {
+      await updateDoc(doc(db, "ProgramsParticipants", p.id), { attendance: nextValue });
+      setSuccessToastMsg("Attendance updated.");
+      setShowSuccessToast(true);
+      setTimeout(() => setShowSuccessToast(false), 1800);
+    } catch {
+      setParticipants((prev) =>
+        prev.map((row) => (row.id === p.id ? { ...row, attendance: !nextValue } : row))
+      );
+      setErrorToastMsg("Failed to update attendance.");
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 2500);
+    }
   };
 
   return (
@@ -460,16 +513,12 @@ export default function ParticipantsList() {
             <button onClick={handleBack}>
               <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
             </button>
-            <h1>
-              {programTitle }
-            </h1>
+            <h1>{programTitle}</h1>
           </div>
 
           <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
             <div className="participants-count">{badgeParticipantsText}</div>
-            {showVolunteerBadge && (
-              <div className="participants-count">{badgeVolunteersText}</div>
-            )}
+            {showVolunteerBadge && <div className="participants-count">{badgeVolunteersText}</div>}
           </div>
         </div>
 
@@ -522,11 +571,12 @@ export default function ParticipantsList() {
             ) : (
               <table className="participants-table fixed-columns">
                 <colgroup>
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "25%" }} />
-                  <col style={{ width: "25%" }} />
+                  <col style={{ width: "24%" }} />
+                  <col style={{ width: "16%" }} />
+                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "20%" }} />
+                  <col style={{ width: "12%" }} />
+                  <col style={{ width: "8%" }} />
                 </colgroup>
 
                 <thead>
@@ -536,6 +586,7 @@ export default function ParticipantsList() {
                     <th>Email Address</th>
                     <th>Location</th>
                     <th>Role</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -553,6 +604,22 @@ export default function ParticipantsList() {
                         <td className="td-truncate">{p.emailAddress || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
                         <td className="td-truncate">{p.role || "Participant"}</td>
+                        <td
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ textAlign: "center" }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={!!p.attendance}
+                            disabled={!isAttendanceEditable}
+                            onChange={() => handleToggleAttendance(p)}
+                            title={
+                              isAttendanceEditable
+                                ? "Mark attendance"
+                                : `Attendance disabled — program is ${programStatus || "not ongoing"}`
+                            }
+                          />
+                        </td>
                       </tr>
                     );
                   })}
@@ -567,12 +634,11 @@ export default function ParticipantsList() {
       {showResidentsPopup && (
         <div className="program-popup-overlay">
           <div className="program-popup" ref={residentPopUpRef}>
-
             <div className="view-participant-backbutton-container">
-                <button onClick={() => setShowResidentsPopup(false)}>
-                  <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
-                </button>
-              </div>    
+              <button onClick={() => setShowResidentsPopup(false)}>
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+              </button>
+            </div>
 
             <h2>Residents List</h2>
             <h1>* Please select Resident's Name *</h1>
@@ -583,7 +649,7 @@ export default function ParticipantsList() {
                 onClick={openManualEntry}
                 title="Add a non-resident walk-in"
               >
-                Manual Entry <br/>
+                Manual Entry <br />
               </button>
             </div>
 
@@ -628,8 +694,6 @@ export default function ParticipantsList() {
                 </table>
               )}
             </div>
-
-            
           </div>
         </div>
       )}
@@ -641,15 +705,14 @@ export default function ParticipantsList() {
             setShowAddWalkInModal(false);
             setResidentForAdd(null);
           }}
-
           onBack={() => {
             setShowAddWalkInModal(false);
-            setShowResidentsPopup(true);  //reopen residents popup
+            setShowResidentsPopup(true);
           }}
           programId={programId}
           programName={programTitle}
           textFields={textFieldsToRender}
-          fileFields={reqFileFields}
+          fileFields={fileFieldsToRender}
           resident={residentForAdd}
           onSaved={handleWalkInSaved}
           onError={handleWalkInError}
