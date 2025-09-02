@@ -97,174 +97,89 @@ export default function Services() {
         <p>SERVICES</p>
       </div>
 
-
-{/*
-      <div className="services-main-container">
-        <div className="documents-upper">
-          <div className="documents-container">
-
-            <div className="documents-container-column">
-              <div className="tooltip-wrapper">
-                <div
-                  className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") ? "disabled-card" : ""}`}
-                  onClick={goToServices}
-                  id="Barangay Certificate"
-                >
-                  <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-                  <h1>Barangay Certificate</h1>
-                </div>
-                {isGuest && !isAllowedForGuest("Barangay Certificate") && (
-                  <span className="tooltip-text">Login/Verification required to request this document</span>
-                )}
-              </div>
-
-              <div className="tooltip-wrapper">
-                <div
-                  className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Indigency") ? "disabled-card" : ""}`}
-                  onClick={goToServices}
-                  id="Barangay Indigency"
-                >
-                  <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-                  <h1>Barangay Indigency</h1>
-                </div>
-                {isGuest && !isAllowedForGuest("Barangay Indigency") && (
-                  <span className="tooltip-text">Login/Verification required to request this document</span>
-                )}
-              </div>
-            </div>
-
-            <div className="documents-container-column">
-              <div className="tooltip-wrapper">
-                <div
-                  className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
-                  onClick={goToServices}
-                  id="Barangay Clearance"
-                >
-                  <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-                  <h1>Barangay Clearance</h1>
-                </div>
-                {isGuest && !isAllowedForGuest("Barangay Clearance") && (
-                  <span className="tooltip-text">Login/Verification required to request this document</span>
-                )}
-              </div>
-
-              <div className="documents-card dropdown-container">
-              <div className="card-content-up">
-                <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-                <h1>Barangay Permits</h1>
-                </div>
-                <div className="dropdown">
-                  <p id="Business Permit" onClick={goToServices}>Business Permit</p>
-                  <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
-                  <p id="Construction" onClick={goToServices}>Construction Permit</p>
-                  {permitOptions.map((title, index) => (
-                    <p key={index} id={title} onClick={goToServices}>
-                      {title}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
+    
+    <div className="services-section-withbg">
+      {/* Left document cards */}
+      <div className={`button-column button-left`}>
+        <div className="tooltip-wrapper">
+          <div
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") ? "disabled-card" : ""}`}
+            onClick={goToServices}
+            id="Barangay Certificate"
+          >
+            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <h1>Barangay Certificate</h1>
           </div>
+          {isGuest && !isAllowedForGuest("Barangay Certificate") && (
+            <span className="tooltip-text">Login/Verification required to request this document</span>
+          )}
         </div>
 
-        <div className="documents-lower">
-          <div className="documents-container-column-other">
-            <div className="documents-card" onClick={goToServices} id="Other Documents">
-              <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-              <h1>Other Documents</h1>
-            </div>
+        <div className="tooltip-wrapper">
+          <div
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Indigency") ? "disabled-card" : ""}`}
+            onClick={goToServices}
+            id="Barangay Indigency"
+          >
+            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <h1>Barangay Indigency</h1>
           </div>
+          {isGuest && !isAllowedForGuest("Barangay Indigency") && (
+            <span className="tooltip-text">Login/Verification required to request this document</span>
+          )}
+        </div>
+
+        <div className="tooltip-wrapper">
+          <div
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
+            onClick={goToServices}
+            id="Barangay Clearance"
+          >
+            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <h1>Barangay Clearance</h1>
+          </div>
+          {isGuest && !isAllowedForGuest("Barangay Clearance") && (
+            <span className="tooltip-text">Login/Verification required to request this document</span>
+          )}
         </div>
       </div>
-*/}
 
+      {/* Center image stack */}
+      <div className="center-images">
+        <img src="/Images/bluebg1.png" alt="Background" className="background-services" />
+        <img src="/Images/brgy_fairview_pic.png" alt="Kapitan" className="kap-services" />
 
-    
-<div className="services-section-withbg">
-  {/* Left document cards */}
-  <div className={`button-column button-left`}>
-    <div className="tooltip-wrapper">
-      <div
-        className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") ? "disabled-card" : ""}`}
-        onClick={goToServices}
-        id="Barangay Certificate"
-      >
-        <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-        <h1>Barangay Certificate</h1>
+        <div className="services-header">
+            <h1 className="services-title">Offered Document Services</h1>
+            <div className="services-underline"></div>
+        </div>
       </div>
-      {isGuest && !isAllowedForGuest("Barangay Certificate") && (
-        <span className="tooltip-text">Login/Verification required to request this document</span>
-      )}
-    </div>
 
-    <div className="tooltip-wrapper">
-      <div
-        className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Indigency") ? "disabled-card" : ""}`}
-        onClick={goToServices}
-        id="Barangay Indigency"
-      >
-        <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-        <h1>Barangay Indigency</h1>
-      </div>
-      {isGuest && !isAllowedForGuest("Barangay Indigency") && (
-        <span className="tooltip-text">Login/Verification required to request this document</span>
-      )}
-    </div>
-
-    <div className="tooltip-wrapper">
-      <div
-        className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
-        onClick={goToServices}
-        id="Barangay Clearance"
-      >
-        <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-        <h1>Barangay Clearance</h1>
-      </div>
-      {isGuest && !isAllowedForGuest("Barangay Clearance") && (
-        <span className="tooltip-text">Login/Verification required to request this document</span>
-      )}
-    </div>
-  </div>
-
-  {/* Center image stack */}
-  <div className="center-images">
-    <img src="/Images/bluebg1.png" alt="Background" className="background-services" />
-    <img src="/Images/brgy_fairview_pic.png" alt="Kapitan" className="kap-services" />
-
-    <div className="services-header">
-        <h1 className="services-title">Offered Document Services</h1>
-        <div className="services-underline"></div>
-    </div>
-  </div>
-
-  {/* Right document cards */}
-  <div className={`button-column button-right`}>
-    <div className="documents-card dropdown-container">
-      <div className="card-content-up">
-        <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-        <h1>Barangay Permits</h1>
-      </div>
-      <div className="dropdown">
-        <p id="Business Permit" onClick={goToServices}>Business Permit</p>
-        <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
-        <p id="Construction" onClick={goToServices}>Construction Permit</p>
-        {permitOptions.map((title, index) => (
-          <p key={title.id || index} onClick={()=>handleSubmitOther(title)}>
-            {title.title}
-          </p>
-        ))}
+      {/* Right document cards */}
+      <div className={`button-column button-right`}>
+        <div className="documents-card dropdown-container">
+          <div className="card-content-up">
+            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <h1>Barangay Permits</h1>
+          </div>
+          <div className="dropdown">
+            <p id="Business Permit" onClick={goToServices}>Business Permit</p>
+            <p id="Temporary Business Permit" onClick={goToServices}>Temporary Business Permit</p>
+            <p id="Construction" onClick={goToServices}>Construction Permit</p>
+            {permitOptions.map((title, index) => (
+              <p key={title.id || index} onClick={()=>handleSubmitOther(title)}>
+                {title.title}
+              </p>
+            ))}
+          </div>
+        </div>
+        
+        <div className="documents-card" onClick={goToServices} id="Other Documents">
+          <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+          <h1>Other Documents</h1>
+        </div>
       </div>
     </div>
-    
-    <div className="documents-card" onClick={goToServices} id="Other Documents">
-      <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-      <h1>Other Documents</h1>
-    </div>
-  </div>
-</div>
 
     </main>
   );
