@@ -3,20 +3,19 @@
     width: 100%;
 }
 
-
 .headerpic-abtus {
- position: relative;
-  height: 250px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgb(255, 255, 255);
-  font-size: 50px;
-  font-weight:bolder;
-  overflow: hidden; 
+    position: relative;
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgb(255, 255, 255);
+    font-size: clamp(24px, 6vw, 50px); /* responsive text */
+    font-weight: bolder;
+    overflow: hidden; 
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
               url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
-   background-position: center 55%; 
+    background-position: center 55%; 
 }
 
 @keyframes fadeInSlideUp {
@@ -30,20 +29,18 @@
   }
 }
 
-
-
-.aboutus-main-container{
-     background-image: url('/Images/bghome.jpg');
+.aboutus-main-container {
+    background-image: url('/Images/bghome.jpg');
     display: flex;
     flex-direction: column;  
     justify-content: center;
     align-items: center;
     height: 100%;
     width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
     animation: fadeInSlideUp 1s ease-out;
 }
-
-
 
 .about-section {
   max-width: 900px;
@@ -55,17 +52,15 @@
   text-align: center;
 }
 
-
-
-
 /* Leader Section */
 .leader-section {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 60%;
+  width: 100%;
+  max-width: 900px;
   margin: auto;
-  padding: 40px 0;
+  padding: 40px 15px;
 }
 
 .leader-card {
@@ -79,20 +74,21 @@
   box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
 
-
-
 .leader-photo-wrapper {
+  flex-shrink: 0; /* prevent shrinking on wide screens */
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .captain-photo {
-  width: 260px;    /* bigger */
-  height: 260px;
+  width: 240px;      /* slightly smaller for balance */
+  height: 240px;
+  aspect-ratio: 1/1; /* always keep square */
   border-radius: 50%;
   object-fit: cover;
   border: 4px solid #24354C;
+  background: #fff;  /* avoids transparent edges looking weird */
 }
 
 
@@ -146,26 +142,16 @@
   color: #333;
 }
 
-
-
-
-
-
-
-
-
-
 /* Core Value Cards with Images */
-
 .about-cards-section {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 60%;
+  width: 100%;
+  max-width: 1100px;
   margin: auto;
-  padding: 40px 0;
+  padding: 40px 15px;
 }
-
 
 .about-cards {
   display: flex;
@@ -176,8 +162,6 @@
   margin: 40px auto;
   padding: 20px;
 }
-
-
 
 .card {
   background: #fff;
@@ -219,7 +203,6 @@
   line-height: 1.5;
 }
 
-
 .fade-in {
   opacity: 0;
   transform: translateY(20px);
@@ -232,7 +215,6 @@
     transform: translateY(0);
   }
 }
-
 
 /* History Section */
 .history-section {
@@ -253,7 +235,7 @@
 }
 
 .section-title {
-  font-size: 2rem;              
+  font-size: 2rem;
   font-weight: 700;
   color: #222;                   
   text-align: center;
@@ -273,7 +255,6 @@
   height: 3px;
   border-radius: 3px;
   background-color: #DF7426;
-
 }
 
 .history-content p {
@@ -293,7 +274,7 @@
   border-radius: 18px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   max-width: 480px;
-  height: 320px; /* fixed height for consistency */
+  height: 320px;
   position: relative;
 }
 
@@ -311,7 +292,6 @@
   box-shadow: 0 12px 32px rgba(0,0,0,0.15);
 }
 
-
 .slideshow {
   width: 100%;
   height: 100%;
@@ -328,7 +308,6 @@
   animation: fadeSlide 12s infinite;
 }
 
-/* Each image will fade in/out in sequence */
 .slideshow img:nth-child(1) {
   animation-delay: 0s;
 }
@@ -348,18 +327,53 @@
 }
 
 
-/* Make it responsive */
+
+/* Make History Section Responsive */
 @media (max-width: 900px) {
   .history-section {
-    flex-direction: column;
+    flex-direction: column; /* stack instead of side-by-side */
+    padding: 20px;
     text-align: center;
   }
 
-  .history-image img {
-    max-width: 100%;
+  .history-content {
+    width: 100%;
   }
-}
 
+  .history-content p {
+    text-align: left; /* keep readability */
+    font-size: 0.95rem;
+  }
+
+  .history-image {
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16/9; /* keeps slideshow visible */
+    margin-top: 20px;
+    position: relative; /* ensure absolute children stay inside */
+  }
+
+  .slideshow {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  .slideshow img {
+    position: absolute; /* stack images */
+    inset: 0;           /* shorthand for top/right/bottom/left: 0 */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    opacity: 0;
+    animation: fadeSlide 12s infinite;
+  }
+
+  .slideshow img:nth-child(1) { animation-delay: 0s; }
+  .slideshow img:nth-child(2) { animation-delay: 4s; }
+  .slideshow img:nth-child(3) { animation-delay: 8s; }
+}
 
 
 
@@ -368,13 +382,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  width: 60%;
+  width: 100%;
+  max-width: 900px;
   margin: auto;
-  padding: 40px 0;
+  padding: 40px 15px;
   gap: 50px;
 }
 
-/* Card Styling */
 .vision-mission-card {
   background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
   padding: 30px 20px;
@@ -389,7 +403,6 @@
   box-shadow: 0 12px 28px rgba(0,0,0,0.12);
 }
 
-/* Image Styling */
 .card-image {
   width: 80px;
   height: 80px;
@@ -402,7 +415,6 @@
   object-fit: contain;
 }
 
-/* Text */
 .vision-mission-card h3 {
   font-size: 1.4rem;
   font-weight: 700;
@@ -414,6 +426,78 @@
   font-size: 1rem;
   line-height: 1.7;
   color: #4a5568;
+}
+
+/* ---------- RESPONSIVE BREAKPOINTS ---------- */
+
+/* History responsive */
+@media (max-width: 900px) {
+  .history-section {
+    flex-direction: column;
+    padding: 20px;
+    text-align: center;
+  }
+  .history-image {
+    max-width: 100%;
+    height: auto;
+  }
+  .history-image img {
+    height: auto;
+  }
+}
+
+/* Leader responsive */
+@media (max-width: 768px) {
+  .leader-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+  .captain-photo {
+    width: 180px;
+    height: 180px;
+  }
+  .leader-info h3 {
+    font-size: 20px;
+  }
+  .leader-info p {
+    font-size: 14px;
+  }
+
+
+}
+
+/* Core values responsive */
+@media (max-width: 768px) {
+  .about-cards {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .card {
+    width: 100%;
+  }
+}
+
+/* Vision & Mission responsive */
+@media (max-width: 768px) {
+  .vision-mission-card {
+    padding: 20px 15px;
+  }
+  .vision-mission-card h3 {
+    font-size: 18px;
+  }
+  .vision-mission-card p {
+    font-size: 14px;
+  }
+}
+
+/* Header responsive */
+@media (max-width: 600px) {
+  .headerpic-abtus {
+    height: 150px;
+    font-size: 20px;
+  }
 }
 
 
