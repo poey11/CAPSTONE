@@ -107,8 +107,10 @@ export default function Services() {
             onClick={goToServices}
             id="Barangay Certificate"
           >
-            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-            <h1>Barangay Certificate</h1>
+            <div className="card-content-up">
+              <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+              <h1>Barangay Certificate</h1>
+            </div>
           </div>
           {isGuest && !isAllowedForGuest("Barangay Certificate") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
@@ -121,8 +123,10 @@ export default function Services() {
             onClick={goToServices}
             id="Barangay Indigency"
           >
-            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-            <h1>Barangay Indigency</h1>
+            <div className="card-content-up">
+              <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+              <h1>Barangay Indigency</h1>
+            </div>
           </div>
           {isGuest && !isAllowedForGuest("Barangay Indigency") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
@@ -135,8 +139,10 @@ export default function Services() {
             onClick={goToServices}
             id="Barangay Clearance"
           >
-            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-            <h1>Barangay Clearance</h1>
+              <div className="card-content-up">
+                <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+                <h1>Barangay Clearance</h1>
+              </div>
           </div>
           {isGuest && !isAllowedForGuest("Barangay Clearance") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
@@ -175,8 +181,10 @@ export default function Services() {
         </div>
         
         <div className="documents-card" onClick={goToServices} id="Other Documents">
-          <img src="/images/document.png" alt="Document Icon" className="document-icon" />
-          <h1>Other Documents</h1>
+          <div className="card-content-up">
+            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <h1>Other Documents</h1>
+          </div>
         </div>
       </div>
     </div>

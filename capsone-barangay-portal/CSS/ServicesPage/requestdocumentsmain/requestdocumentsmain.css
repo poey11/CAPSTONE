@@ -101,7 +101,7 @@ padding-top: 30px;
     gap: 55px;
     align-items: center;
     z-index: 10;
-    width: 350px; /* Adjusted for better fit */
+    width: 350px;
     max-width: 90%; /* Responsive width */
     text-align: center;
     justify-content: center;
@@ -151,16 +151,16 @@ padding-top: 30px;
 .dropdown {
     display: none;
     position: absolute;
-    top: 70px;
+    top: 100%;
     left: 0;
- background: linear-gradient(to right, #3a5a63, #4b7088, #5e8ca3);
+    background: linear-gradient(to right, #3a5a63, #4b7088, #5e8ca3);
 
     border: 1px solid rgba(44, 62, 80, 0.7); /* similar border */
     border-radius: 10px; /* match card radius */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* deeper shadow for depth */
     padding: 10px;
     z-index: 100;
-    width: 332px;
+    width: 100%;
     height: 160px;
     overflow-y: auto;
 }
@@ -304,7 +304,7 @@ to {
   align-items: center;
 }
 
-.documents-card.dropdown-container .card-content-up {
+ .card-content-up {
   display: flex;
   align-items: center;
   gap: 55px;
@@ -507,12 +507,13 @@ to {
     display: flex;
     flex-direction: column; /* stack buttons vertically */
     align-items: center;
-    width: 90%; /* same width as image */
-    max-width: 400px;
+    width: 100%; /* same width as image */
+    max-width: 40%;
     gap: 10px;
     margin-bottom: 1rem;
     transform: none;
   }
+
 
   /* Right buttons below left */
   .button-right {
@@ -521,8 +522,8 @@ to {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90%; /* same width as left buttons */
-    max-width: 400px;
+    width: 100%; /* same width as left buttons */
+    max-width: 40%;
     gap: 10px;
     margin-bottom: 1rem;
     transform: none;
@@ -581,7 +582,6 @@ to {
     order: 1;
     width: 90%;
     margin-bottom: 1.5rem;
-    margin-top: 1.5rem;
   }
 
   .button-left,
@@ -612,7 +612,7 @@ to {
   }
 
   .kap-services {
-    width: 60%;
+    width: 100%;
     max-width: 300px;
   }
 
