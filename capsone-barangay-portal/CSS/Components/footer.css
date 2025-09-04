@@ -91,6 +91,73 @@
 
 
 
+/* 📱 Mobile Responsive Footer */
+@media (max-width: 768px) {
+  .footer-container {
+    padding: 20px;
+    height: auto; /* allow footer to expand */
+    font-size: 14px;
+  }
+
+  .footer-top {
+    flex-direction: column; /* stack vertically */
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .footer-section1 {
+    margin-left: 0;
+    width: 100%;
+    padding-right: 0;
+    flex-direction: column;
+  }
+
+  .footer-section1 p {
+    margin-left: 0;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+
+  .footer-logo {
+    width: 60px; /* bigger on mobile */
+  }
+
+  .footer-section2 {
+    width: 100%;
+    padding: 0;
+  }
+
+  .footer-section2 h1 {
+    font-size: 14px;
+  }
+
+  .contactinfo-email,
+  .contactinfo-phone,
+  .contactinfo-loc {
+    flex-direction: column; /* stack icon + text */
+    align-items: center;
+    padding-left: 0;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .contactinfo-email p,
+  .contactinfo-phone p,
+  .contactinfo-loc p {
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .contacticon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .footer-bottom {
+    margin-top: 15px;
+  }
+}
 
 
 
