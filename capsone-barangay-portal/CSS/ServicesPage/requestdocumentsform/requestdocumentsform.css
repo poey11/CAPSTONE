@@ -691,3 +691,95 @@ padding-left: 2rem;
 .file-upload-container-required-documents:hover {
   background-color: rgba(245, 143, 88, 0.2);
 }
+
+
+
+/* Tablets (portrait & small landscape) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .document-req-section {
+    max-width: 85%;
+    padding: 1.5rem;
+    /*margin-top: 2rem;
+    margin-bottom: 2rem;*/
+    margin: 1.5rem auto;
+  }
+
+  .document-req-form-container {
+    flex-direction: row; /* keep two columns */
+    gap: 1.5rem;
+  }
+
+  .document-req-form-container-left-side,
+  .document-req-form-container-right-side {
+    width: 48%;          
+    padding: 0 0.5rem;
+  }
+
+  .submit-button-document-req {
+    width: 100%;
+    max-width: 280px; /* smaller cap for tablets */
+  }
+
+  .headerpic-report {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .submit-button-document-req {
+    max-width: 220px;     /* cap size */
+    padding: 0.75rem 1.5rem;
+
+    display: block;
+  }
+
+    .document-req-section h1 {
+      font-size: 22px; 
+    }
+}
+
+/* Phones (portrait & small landscape) */
+@media (max-width: 768px) {
+  .document-req-section {
+    width: 80%; /* make card wider on small screens */
+    padding: 1rem;
+    /*margin-top: 1rem;
+    margin-bottom: 1rem;*/
+    margin: 1.5rem auto;
+  }
+
+  .document-req-form-container {
+    flex-direction: column; /* stack */
+    gap: 1rem;
+  }
+
+  .document-req-form-container-left-side,
+  .document-req-form-container-right-side {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .submit-button-document-req {
+    width: 100%; /* button full width */
+    max-width: none; /* no artificial limit */
+  }
+
+  .headerpic-report {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .submit-button-document-req {
+       /* don’t stretch full width */
+    max-width: 200px;     /* smaller cap for phones */
+    padding: 0.6rem 1.2rem;
+
+    display: block;
+  }
+
+    .document-req-section h1 {
+      font-size: 22px; 
+    }
+}
