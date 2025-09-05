@@ -1708,7 +1708,7 @@ const handleFileChange = (
 
     <main className="main-form-container">
         <div className="headerpic-report">
-          <p>Document Request</p>
+          <p>DOCUMENT REQUEST</p>
         </div>
 
 
