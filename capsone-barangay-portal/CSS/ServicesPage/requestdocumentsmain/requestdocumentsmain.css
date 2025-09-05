@@ -101,7 +101,7 @@ padding-top: 30px;
     gap: 55px;
     align-items: center;
     z-index: 10;
-    width: 350px; /* Adjusted for better fit */
+    width: 350px;
     max-width: 90%; /* Responsive width */
     text-align: center;
     justify-content: center;
@@ -151,16 +151,16 @@ padding-top: 30px;
 .dropdown {
     display: none;
     position: absolute;
-    top: 70px;
+    top: 100%;
     left: 0;
- background: linear-gradient(to right, #3a5a63, #4b7088, #5e8ca3);
+    background: linear-gradient(to right, #3a5a63, #4b7088, #5e8ca3);
 
     border: 1px solid rgba(44, 62, 80, 0.7); /* similar border */
     border-radius: 10px; /* match card radius */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* deeper shadow for depth */
     padding: 10px;
     z-index: 100;
-    width: 332px;
+    width: 100%;
     height: 160px;
     overflow-y: auto;
 }
@@ -304,7 +304,7 @@ to {
   align-items: center;
 }
 
-.documents-card.dropdown-container .card-content-up {
+ .card-content-up {
   display: flex;
   align-items: center;
   gap: 55px;
@@ -481,3 +481,159 @@ to {
   transform: scale(1) translateY(0);
 }
 
+
+/* ---------- Responsive for tablets and smaller ---------- */
+@media (max-width: 1024px) {
+  .services-section-withbg {
+    display: flex;
+    flex-direction: column; /* stack vertically */
+    align-items: center;
+    height: auto;
+    padding: 2rem 0;
+  }
+
+  /* Center images on top */
+  .center-images {
+    order: 1;
+    width: 90%;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+  }
+
+  /* Left buttons below center */
+  .button-left {
+    order: 2;
+    position: static;
+    display: flex;
+    flex-direction: column; /* stack buttons vertically */
+    align-items: center;
+    width: 100%; /* same width as image */
+    max-width: 40%;
+    gap: 10px;
+    margin-bottom: 1rem;
+    transform: none;
+  }
+
+
+  /* Right buttons below left */
+  .button-right {
+    order: 3;
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* same width as left buttons */
+    max-width: 40%;
+    gap: 10px;
+    margin-bottom: 1rem;
+    transform: none;
+  }
+
+  /* Make all buttons full width */
+  .button-column button,
+  .button-left .documents-card,
+  .button-right .documents-card {
+    width: 100%; /* fill parent container */
+    box-sizing: border-box;
+  }
+
+  .kap-services {
+    width: 50%;
+    max-width: 400px;
+  }
+
+  .background-services {
+    width: 80%;
+  }
+
+  .services-header {
+    width: 90%;
+    top: 10%;
+  }
+
+  .services-title {
+    font-size: 2rem;
+  }
+
+  .headerpic-services {
+    height: 140px;
+    font-size: 32px;
+    background-position: center 50%;
+  }
+
+  /* Remove transforms from cards and tooltips */
+  .button-left .tooltip-wrapper,
+  .button-right .documents-card {
+    transform: none !important;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+/* ---------- Mobile phones ---------- */
+@media (max-width: 768px) {
+  .services-section-withbg {
+    flex-direction: column; /* stack vertically */
+    align-items: center;
+    padding: 1.5rem 0;
+  }
+
+  .center-images {
+    order: 1;
+    width: 90%;
+    margin-bottom: 1.5rem;
+  }
+
+  .button-left,
+  .button-right {
+    order: 2;
+    width: 100%;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .button-left .tooltip-wrapper,
+  .button-right .documents-card {
+    transform: none !important;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .button-column button,
+  .button-left .documents-card,
+  .button-right .documents-card {
+    width: 100%; /* buttons and cards fill container */
+    box-sizing: border-box;
+  }
+
+  .kap-services {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .background-services {
+    width: 90%;
+  }
+
+  .services-title {
+    font-size: 1.5rem;
+  }
+
+  .documents-card {
+    width: 100%;
+    flex-direction: column;
+    padding: 10px;
+    gap: 5px;
+  }
+
+  .headerpic-services {
+    height: 120px;
+    font-size: 28px;
+    background-position: center 50%;
+  }
+}

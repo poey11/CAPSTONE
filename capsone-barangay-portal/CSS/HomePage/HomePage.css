@@ -421,7 +421,7 @@ TRY NEW
 .main-container-home-page {
   scroll-snap-type: y mandatory;
   overflow-y: scroll;
-  height: 100vh;
+ /* height: 100vh;*/ 
       scrollbar-width: thin;
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
 }
@@ -843,4 +843,74 @@ position: relative;
 
 .slide-button:hover {
   background-color: #ffffff;
+}
+
+
+/* Mobile view: stack services cards vertically */
+@media (max-width: 768px) {
+  .services-content-home {
+    flex-direction: column;   /* stack instead of row */
+    gap: 24px;                /* reduce spacing */
+    align-items: center;      /* center cards */
+  }
+
+  .services-card {
+    width: 90%;              /* take most of screen width */
+    max-width: 500px;        /* prevent stretching too wide */
+    height: auto;            /* adjust height naturally */
+    text-align: center;      /* keep content centered */
+  }
+
+  .services-description h3 {
+    font-size: 1.1rem;       /* slightly smaller heading */
+  }
+
+  .services-description p {
+    font-size: 0.95rem;      /* readable text size */
+  }
+}
+
+@media (max-width: 768px) {
+  .icon-image {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+  .second-section-home,
+  .third-section-home,
+  .fourth-section-home {
+    height: auto;        /* let section grow naturally */
+    padding: 80px 20px;  /* add breathing room */
+  }
+
+  .third-section-container {
+    flex-direction: column;   /* stack image & text */
+    gap: 40px;
+    text-align: center;
+  }
+
+  .captain-info {
+    text-align: center;
+  }
+
+  .captain-image {
+    width: 100%;
+    max-width: 350px;   /* smaller image on mobile */
+    height: auto;
+  }
+
+  .captain-name {
+    font-size: 2rem;
+  }
+
+  .captain-quote {
+    font-size: 1rem;
+  }
+
+  .captain-description {
+    font-size: 0.95rem;
+  }
 }
