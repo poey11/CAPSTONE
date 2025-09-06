@@ -6,7 +6,9 @@
   "scripts": {
     "build:replies": "tsx src/buildReplies.ts",
     "sync:entities": "tsx src/cx/syncEntities.ts",
-    "sync:intents": "tsx src/cx/syncIntents.ts"
+    "sync:intents": "tsx src/cx/syncIntents.ts",
+    "sync:all": "tsx src/cx/syncAll.ts"
+
   },
 "dependencies": {
   "@google-cloud/dialogflow-cx": "^5.3.0",
