@@ -352,7 +352,7 @@ export default function AddWalkInParticipantModal({
         <div className="program-popup">
           <div className="walkin-participant-backbutton-container">
             <button onClick={onBack}>
-              <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+              <img src="/Images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
             </button>
           </div>
 

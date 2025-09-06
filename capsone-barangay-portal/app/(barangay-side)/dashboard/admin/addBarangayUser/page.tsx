@@ -183,7 +183,7 @@ export default function AddBarangayUser() {
                 <div className="add-barangayuser-main-section1">
                     <div className="add-barangayuser-main-section1-left">
                         <button onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> New Barangay User </h1>

@@ -16,7 +16,7 @@
   font-weight:bolder;
   overflow: hidden; 
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+              url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
    background-position: center 55%; 
   margin-bottom: 50px;
 }

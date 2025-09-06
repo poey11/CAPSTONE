@@ -582,7 +582,7 @@ export default function AddFirstTimeJobSeeker() {
                                     <span>{file.name}</span>
                                     <div className="delete-container">
                                       <button type="button" onClick={() => handleVerificationFileDelete(index)} className="delete-button">
-                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                        <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                       </button>
                                     </div>
                                   </div>
@@ -631,7 +631,7 @@ export default function AddFirstTimeJobSeeker() {
                       <span>{file.name}</span>
                       <div className="delete-container">
                         <button type="button" onClick={handleFileDelete} className="delete-button">
-                          <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                          <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                         </button>
                       </div>
                     </div>

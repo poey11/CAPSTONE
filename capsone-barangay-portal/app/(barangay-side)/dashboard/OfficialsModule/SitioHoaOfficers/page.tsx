@@ -15,21 +15,21 @@ const metadata: Metadata = {
 
 // Dummy officials data with 11 entries
 const officersData = [
-  { id: 1, name: "Mr. Faustino Madriaga", position: "Association President", contact: "09171234567", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 2, name: "Mr. Jun Palatan", position: "Association President", contact: "09182345678", gender: "Male", location: "West Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 3, name: "Mr. Nestor Torsiende", position: "Association President", contact: "09193456789", gender: "Male", location: "South Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 4, name: "Mr. Ronald Bas", position: "Association President", contact: "09204567890", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 5, name: "Mr. Ronald Bas", position: "Association President", contact: "09215678901", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 6, name: "Ms. Linda Gagasa", position: "Association President", contact: "09226789012", gender: "Female", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 7, name: "Mr. Enrique Sumugba", position: "Association President", contact: "09237890123", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 8, name: "Mr. Francis Camacho", position: "Association President", contact: "09248901234", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 9, name: "Mr. Enrico Testa", position: "Association President", contact: "09259012345", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 10, name: "Mr. Nonong Paggabao", position: "Association President", contact: "09260123456", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
+  { id: 1, name: "Mr. Faustino Madriaga", position: "Association President", contact: "09171234567", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 2, name: "Mr. Jun Palatan", position: "Association President", contact: "09182345678", gender: "Male", location: "West Fairview", clusterSection: "RINA SAMAFA", image: "/Images/CaptainImage.jpg" },
+  { id: 3, name: "Mr. Nestor Torsiende", position: "Association President", contact: "09193456789", gender: "Male", location: "South Fairview", clusterSection: "Colt HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 4, name: "Mr. Ronald Bas", position: "Association President", contact: "09204567890", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 5, name: "Mr. Ronald Bas", position: "Association President", contact: "09215678901", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/Images/CaptainImage.jpg" },
+  { id: 6, name: "Ms. Linda Gagasa", position: "Association President", contact: "09226789012", gender: "Female", location: "West Fairview", clusterSection: "Colt HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 7, name: "Mr. Enrique Sumugba", position: "Association President", contact: "09237890123", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 8, name: "Mr. Francis Camacho", position: "Association President", contact: "09248901234", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/Images/CaptainImage.jpg" },
+  { id: 9, name: "Mr. Enrico Testa", position: "Association President", contact: "09259012345", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 10, name: "Mr. Nonong Paggabao", position: "Association President", contact: "09260123456", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/Images/CaptainImage.jpg" },
   { id: 11, name: "Ms. Nenita Ong", position: "Association President", contact: "09271234568", gender: "Female", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 12, name: "Dr. Leo Ceno", position: "Association President", contact: "09282345679", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 13, name: "Ms. Veronica Pagayatan", position: "Association President", contact: "09293456780", gender: "Female", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 14, name: "Ms. Daisy Barcelon", position: "Association President", contact: "09304567891", gender: "Female", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 15, name: "Mr. Edevico T. De Mayo Jr", position: "Association President", contact: "09315678902", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" }
+  { id: 12, name: "Dr. Leo Ceno", position: "Association President", contact: "09282345679", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 13, name: "Ms. Veronica Pagayatan", position: "Association President", contact: "09293456780", gender: "Female", location: "East Fairview", clusterSection: "Falcon HOA", image: "/Images/CaptainImage.jpg" },
+  { id: 14, name: "Ms. Daisy Barcelon", position: "Association President", contact: "09304567891", gender: "Female", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/Images/CaptainImage.jpg" },
+  { id: 15, name: "Mr. Edevico T. De Mayo Jr", position: "Association President", contact: "09315678902", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/Images/CaptainImage.jpg" }
 ];
 
 export default function SitioHoaOfficersModule() {
@@ -154,7 +154,7 @@ export default function SitioHoaOfficersModule() {
       <div className="officers-main-section">
         {currentUser.length === 0 ? (
           <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
             <p className="no-results-department">No Results Found</p>
           </div>
         ) : (

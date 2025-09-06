@@ -462,7 +462,7 @@ const confirmAccept = async () => {
     >
           {currentUser.length === 0 ? (
             <div className="no-result-card">
-              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+              <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
               <p className="no-results-department">No Results Found</p>
             </div>
           ) : (
@@ -849,7 +849,7 @@ const confirmAccept = async () => {
 
                   <div className="view-user-backbutton-container">
                     <button onClick={closePopup}>
-                      <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident" />
                     </button>
                   </div>
                         <h2>

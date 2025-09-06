@@ -306,7 +306,7 @@ export default function SettingsPageResident({searchParams}: any) {
                     ) : resident.userIcon ? (
                         <img src={resident.userIcon} alt="User Icon" className="profile-image" />
                     ) : (
-                        <img src="/images/user.png" alt="User Icon" className="profile-image" />
+                        <img src="/Images/user.png" alt="User Icon" className="profile-image" />
                     )}
                     <input
                         type="file"

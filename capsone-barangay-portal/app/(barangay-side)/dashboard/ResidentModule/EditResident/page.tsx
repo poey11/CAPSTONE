@@ -1149,7 +1149,7 @@ export default function EditResident() {
                                           <span>{pwdIdFile?.name || "PWD ID"}</span>
                                           <div className="delete-container">
                                             <button type="button" onClick={handlePwdIdFileDelete} className="delete-button">
-                                              <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                              <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                             </button>
                                           </div>
                                         </div>
@@ -1239,7 +1239,7 @@ export default function EditResident() {
                                       {(identificationFile || identificationPreview) && (
                                         <div className="delete-container">
                                           <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
-                                            <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                            <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                           </button>
                                         </div>
                                       )}

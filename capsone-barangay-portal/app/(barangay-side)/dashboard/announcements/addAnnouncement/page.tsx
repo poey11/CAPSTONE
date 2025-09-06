@@ -58,7 +58,7 @@ export default function addAnnouncements() {
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
                         <button onClick={handleAddAnnouncement}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/>
                         </button>
 
                         <h1>New Announcement</h1>
@@ -156,7 +156,7 @@ export default function addAnnouncements() {
                                                                 className="delete-button"
                                                             >
                                                                 <img
-                                                                    src="/images/trash.png"  
+                                                                    src="/Images/trash.png"  
                                                                     alt="Delete"
                                                                     className="delete-icon"
                                                                 />

@@ -876,7 +876,7 @@ const [activeSection, setActiveSection] = useState("basic");
                                                 onClick={handlePwdIdFileDelete}
                                                 className="delete-button"
                                               >
-                                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                               </button>
                                             </div>
                                           </div>
@@ -971,7 +971,7 @@ const [activeSection, setActiveSection] = useState("basic");
                                             <span>{identificationFile.name}</span>
                                             <div className="delete-container">
                                               <button type="button" onClick={handleIdentificationFileDelete} className="delete-button">
-                                                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                               </button>
                                             </div>
                                           </div>
@@ -1007,7 +1007,7 @@ const [activeSection, setActiveSection] = useState("basic");
                                               <span>{file.name}</span>
                                               <div className="delete-container">
                                                 <button type="button" onClick={() => handleVerificationFileDelete(index)} className="delete-button">
-                                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                  <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                                 </button>
                                               </div>
                                             </div>

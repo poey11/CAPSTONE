@@ -111,7 +111,7 @@ export default function AboutUs() {
   <h2 className="section-title">Meet Our Leader</h2>
   <div className="leader-card">
     <div className="leader-photo-wrapper">
-      <img src="/images/kap.jpg" alt="Barangay Captain" className="captain-photo"/>
+      <img src="/Images/kap.jpg" alt="Barangay Captain" className="captain-photo"/>
     </div>
     <div className="leader-info">
       <h3>Hon. Jonell Quebal</h3>
@@ -129,15 +129,15 @@ export default function AboutUs() {
         
 
         <div className="aboutus-contactinfo-item">
-          <img src="/images/email1.png" alt="Email" className="aboutus-contacticon" />
+          <img src="/Images/email1.png" alt="Email" className="aboutus-contacticon" />
           <p>barangayfairviewpark@gmail.com</p>
         </div>
         <div className="aboutus-contactinfo-item">
-          <img src="/images/phone1.png" alt="Phone" className="aboutus-contacticon" />
+          <img src="/Images/phone1.png" alt="Phone" className="aboutus-contacticon" />
           <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
         </div>
         <div className="aboutus-contactinfo-item">
-          <img src="/images/location1.png" alt="Location" className="aboutus-contacticon" />
+          <img src="/Images/location1.png" alt="Location" className="aboutus-contacticon" />
           <p>West Fairview, 9 A Dahlia Ave, West Fairview,<br/>Quezon City, 1118 Metro Manila</p>
         </div>
       </div>

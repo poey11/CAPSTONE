@@ -207,7 +207,7 @@ useEffect(() => {
           <p>Loading programs...</p>
         ) : currentAnnouncements.length === 0 ? (
           <div className="no-result-card-programs">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
             <p className="no-results-programs">No Results Found</p>
           </div>
         ) : (

@@ -178,7 +178,7 @@ export default function EditOfficial() {
                                                 {(identificationFile || identificationPreview) && (
                                                     <div className="delete-container">
                                                     <button type="button" /*onClick={handleIdentificationFileDelete}*/ className="delete-button">
-                                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                                        <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                                     </button>
                                                     </div>
                                                 )}
