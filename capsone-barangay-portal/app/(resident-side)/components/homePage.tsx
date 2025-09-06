@@ -92,17 +92,17 @@ const homePage:React.FC = () => {
     }, []);
     
 
-    const nextSlide = () => {
-      setCurrentSlide((prev) =>
-        prev + 3 >= facilities.length ? 0 : prev + 1
-      );
-    };
+ const nextSlide = () => {
+  setCurrentSlide((prev) =>
+    prev + cardsPerPage >= facilities.length ? 0 : prev + cardsPerPage
+  );
+};
 
-    const prevSlide = () => {
-      setCurrentSlide((prev) =>
-        prev === 0 ? Math.max(facilities.length - 3, 0) : prev - 1
-      );
-    };
+const prevSlide = () => {
+  setCurrentSlide((prev) =>
+    prev === 0 ? Math.max(facilities.length - cardsPerPage, 0) : prev - cardsPerPage
+  );
+};
 
     const heroRef = useRef(null);
 const servicesRef = useRef(null);
@@ -146,6 +146,24 @@ useEffect(() => {
 
 
 const router = useRouter();
+
+const [cardsPerPage, setCardsPerPage] = useState(3);
+
+useEffect(() => {
+  const handleResize = () => {
+    if (window.innerWidth <= 768) {
+      setCardsPerPage(1);  // mobile → 1 card
+    } else {
+      setCardsPerPage(3);  // desktop → 3 cards
+    }
+  };
+
+  handleResize(); // run on mount
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
 
 	return (
@@ -281,20 +299,17 @@ const router = useRouter();
     <button className="slide-button" onClick={prevSlide}>&lt;</button>
 
   <div className="facilities-content-home">
-  {facilities.slice(currentSlide, currentSlide + 3).map((item, index) => (
-    <div className="facilities-card" key={index}>
-      
-      <div className="facilities-image-wrapper">
-        <img src={item.image} alt={item.facility} className="facilities-image" />
-      </div>
-
-      <div className="facilities-info">
-        <h3>{item.facility}</h3>
-        <p>{item.location}</p>
-      </div>
-
+{facilities.slice(currentSlide, currentSlide + cardsPerPage).map((item, index) => (
+  <div className="facilities-card" key={index}>
+    <div className="facilities-image-wrapper">
+      <img src={item.image} alt={item.facility} className="facilities-image" />
     </div>
-  ))}
+    <div className="facilities-info">
+      <h3>{item.facility}</h3>
+      <p>{item.location}</p>
+    </div>
+  </div>
+))}
 </div>
 
 
@@ -307,174 +322,6 @@ const router = useRouter();
 
 
 
-
-
-
-
-
-
-
-          {/*
-          
-   
-          <div className="homepage-container-home">
-
-
-          <div className="slideshowpics">
-    
-          </div>
-        
-
-            <div className="first-container-home">
-
-
-            
-                <div className="first-section-home">
-                      <p className="first-paragraph-home"> Discover Our Community</p>
-                      <p className="second-paragraph-home"> Barangay Fairview</p>
-                      <p className="third-paragraph-home"> The thriving heart of Barangay Fairview—where opportunities and progress come together. 
-                        Let’s move forward as one community!</p>
-                      
-                        <Link href="/aboutus"> 
-                            <button type="button" className="learn-more-button-home">
-                              Learn More
-                            </button>
-                        </Link> 
-                    
-                </div>
-
-                <div className="second-section-home">
-
-                <img 
-                  src="/Images/CaptainImage.jpg" 
-                  alt="Barangay Captain" 
-                  className="captain-image-home" 
-                />
-
-                </div>
-            
-                
-
-              </div>
-
-
-                  <div className="second-container-home">
-
-                      <div className="card-home">
-                            <p className="quantity-home"> 81k</p>
-                            <p className="name-home">Population </p>
-                      </div>
-
-                      <div className="card-home">
-                            <p className="quantity-home"> 22k</p>
-                            <p className="name-home">Households </p>
-                      </div>
-
-                      <div className="card-home">
-                            <p className="quantity-home"> 312</p>
-                            <p className="name-home">Hectares</p>
-                      </div>
-
-                      <div className="card-home">
-                            <p className="quantity-home"> 81k</p>
-                            <p className="name-home">Population </p>
-                      </div>
-
-
-                      
-
-                    </div>
-
-
-              <hr/>
-
-
-              <div className="third-container-home">
-
-                  <div className="third-container-column1-home">
-                    
-                        <p className="barangaycaptain-home"> Barangay Captain </p>
-                  </div>
-                  
-                  <div className="third-container-column2-home">
-
-                      <div className="column2-section1-home">
-                          
-                        <img 
-                          src="/Images/CaptainImage.jpg" 
-                          alt="Barangay Captain" 
-                          className="captain-image2-home" 
-                        />
-
-                      </div>
-
-                      <div className="column2-section2-home">
-
-                            <p className="section2-title-home"> JONEL L. QUEBAL</p>
-
-                            <p className="section2-quote-home">
-
-                            “Great leaders inspire unity, progress, and hope within their community” 
-                            </p>
-
-                            <p className="section2-description-home">
-                            Barangay Captain Jonel Quebal, a dedicated public servant and a true 
-                            advocate for the well-being of Barangay Fairview.
-                            A proud product of our barangay, Captain Jonel Quebal has been serving 
-                            the community with passion and commitment since 2013. Learn more about Barangay 
-                            Captain Jonel Quebal and his vision for Barangay Fairview. Read his blog to stay
-                            connected and inspired!
-                            </p>
-
-                      </div>
-
-
-
-                  </div>
-
-              </div>
-      
-
-              <hr/>
-
-              <div className="fourth-container-home">
-              <div className="fourth-container-column1">
-                <p className="BarangayFacilities">Barangay Facilities</p>
-              </div>
-
-              <div className="slideshow-container">
-                <button onClick={prevSlide} className="slideshow-button left">
-                  &#8249;
-                </button>
-
-                <div className="facilities-cards">
-                  {facilities
-                    .slice(currentSlide, currentSlide + 3)
-                    .map((facility, index) => (
-                      <div key={index} className="facilities-card">
-                        <img
-                          src={facility.image}
-                          alt={facility.facility}
-                          className="facility-image"
-                        />
-                        <div className="facility-content">
-                          <p className="facility">{facility.facility}</p>
-                          <p className="location">{facility.location}</p>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-
-                <button onClick={nextSlide} className="slideshow-button right">
-                  &#8250;
-                </button>
-              </div>
-            </div>
-    
-
-        </div>
-
-       */}
      
       </main>
       

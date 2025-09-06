@@ -135,9 +135,9 @@ export default function Announcement() {
         <p>ANNOUNCEMENTS</p>
       </div>
 
-      <div className="officials-header">
-        <h1 className="officials-title">Latest News and Announcements</h1>
-        <div className="officials-underline"></div>
+      <div className="announcements-header">
+        <h1 className="announcements-title">Latest News and Announcements</h1>
+        <div className="announcements-underline"></div>
       </div>
 
       

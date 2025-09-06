@@ -301,3 +301,107 @@
   font-size: 0.75rem;
   color: gray;
 }
+
+/* Tablets (portrait & small landscape) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .headerpic-specific-announcement {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .announcement-header {
+    margin: 2rem auto 1.5rem auto;
+    padding: 0 2rem;
+  }
+
+  .announcement-title {
+    font-size: 2rem;
+    gap: 0.5rem;
+  }
+
+  .announcement-title::before,
+  .announcement-title::after {
+    flex: 0.5; /* shorter side lines */
+  }
+
+  .layout-specificannouncement {
+    flex-direction: column;   /* stack */
+    margin: 0 auto;
+    padding: 1rem;
+    max-width: 900px;         /* prevent too wide stretch */
+  }
+
+  .left-section-specificannouncement {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .announcement-image-specificannouncement {
+    height: auto;            /* scale naturally */
+    max-height: 400px;
+  }
+}
+
+/* Phones (portrait & small landscape) */
+@media (max-width: 768px) {
+  .headerpic-specific-announcement {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .announcement-header {
+    margin: 1.5rem auto 1rem auto;
+    padding: 0 1rem;
+  }
+
+  .announcement-title {
+    font-size: 1.6rem;
+    flex-direction: column; /* stack title + underline */
+    gap: 0.3rem;
+  }
+
+  .announcement-title::before,
+  .announcement-title::after {
+    display: none; /* hide side lines on mobile */
+  }
+
+  .layout-specificannouncement {
+    flex-direction: column;
+    margin: 0 auto;
+    padding: 0.8rem;
+    max-width: 95%;           /* almost full width */
+  }
+
+  .left-section-specificannouncement {
+    width: 100%;
+    padding: 0;
+  }
+
+  .announcement-card-specificannouncement {
+    margin-bottom: 1rem;
+  }
+
+  .announcement-image-specificannouncement {
+    width: 100%;
+    height: auto;             /* no fixed height */
+    max-height: 300px;        /* keep proportion on small screens */
+    padding: 20px;               /* remove extra side padding */
+  }
+
+  .announcement-content-specificannouncement {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .announcement-title-specific-announcement {
+    font-size: 1.3rem;
+    text-align: center;       /* better for mobile */
+  }
+
+  .announcement-description-specific-announcement {
+    font-size: 0.85rem;
+    padding: 0;
+  }
+}
