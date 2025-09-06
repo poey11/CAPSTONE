@@ -9,7 +9,7 @@
       "Barangay Indigency": "/services/action?docB=Barangay%20Indigency",
       "Barangay Clearance": "/services/action?docB=Barangay%20Clearance",
       "Business Permit": "/services/action?docB=Business%20Permit",
-      "Temporary Business Permit": "/services/action? docB=Temporary%20Business%20Permit",
+      "Temporary Business Permit": "/services/action?docB=Temporary%20Business%20Permit",
       "Construction Permit": "/services/action?docB=Construction%20Permit",
       "Other Documents": "/services/action?docB=Other%20Documents"
     },
