@@ -514,7 +514,7 @@ const confirmSubmit = async () => {
 
 
         <div className="headerpic-report">
-          <p>File an Incident Report</p>
+          <p>FILE AN INCIDENT</p>
         </div>
 
        

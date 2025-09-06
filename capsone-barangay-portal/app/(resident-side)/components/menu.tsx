@@ -379,6 +379,33 @@ const handleDeleteNotification = async (notificationId: string) => {
 
   // ======================================================
 
+  /* responsive */
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+   const [mobileOpen, setMobileOpen] = useState(false);
+   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
+    const [officialsDropdownOpen, setOfficialsDropdownOpen] = useState(false);
+
+    const [servicesOpen, setServicesOpen] = useState(false);
+    const [officialsOpen, setOfficialsOpen] = useState(false);
+
+    useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      setMobileOpen(false);
+    }
+  };
+
+  if (mobileOpen) {
+    document.addEventListener("mousedown", handleClickOutside);
+  } else {
+    document.removeEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [mobileOpen]);
+
   return (
 <>
   {/* Add new links as we go */}
@@ -386,7 +413,8 @@ const handleDeleteNotification = async (notificationId: string) => {
     <div className="navbar-card">
       <img src="/Images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
 
-      <div className="navbar-links">
+      {/* ====== DESKTOP NAV LINKS ====== */}
+      <div className="navbar-links hidden md:flex">
         <div className="navbar-indiv-container">
           <div className="dropdown-Container">
             <Link href="/">
@@ -403,15 +431,22 @@ const handleDeleteNotification = async (notificationId: string) => {
           </div>
         </div>
 
-        <div className="dropdown-Container">
-          <div className="menu-section-container">
+        <div className="dropdown-Container"
+          onMouseEnter={() => setServicesDropdownOpen(true)}
+          onMouseLeave={() => setServicesDropdownOpen(false)}
+        >
+          
+          <div className="menu-section-container" onClick={() => setServicesDropdownOpen(prev => !prev)}>
             <p className="dropdown-item-resident">Services</p>
             <img src="/Images/down-arrow.png" className="dropdown-icon" />
           </div>
-          <div className="Dropdown-services"> {/* CHANGE HERE */}
-            <Link href="/services"><p>Request Documents</p></Link>
-            <Link href="/IncidentReport"><p>File an Incident</p></Link>
-          </div>
+
+          {servicesDropdownOpen && (
+            <div className="Dropdown-services"> {/* CHANGE HERE */}
+              <Link href="/services"><p>Request Documents</p></Link>
+              <Link href="/IncidentReport"><p>File an Incident</p></Link>
+            </div>
+          )}
         </div>
 
         <div className="navbar-indiv-container">
@@ -433,29 +468,35 @@ const handleDeleteNotification = async (notificationId: string) => {
         
 
         
-          <div className="dropdown-Container">
-            <div className="menu-section-container">
+          <div className="dropdown-Container"
+            onMouseEnter={() => setOfficialsDropdownOpen(true)}
+            onMouseLeave={() => setOfficialsDropdownOpen(false)}
+          >
+            <div className="menu-section-container" onClick={() => setOfficialsDropdownOpen(prev => !prev)}>
               <p className="dropdown-item-resident">Officials</p>
               <img src="/Images/down-arrow.png" className="dropdown-icon" />
             </div>
-            <div className="Dropdown">
-              <Link href="/OfficialsPage">
-                <p className="dropdown-item-resident">Barangay Officials</p>
-              </Link>
-              <Link href="/OfficialsPage/HOAOfficersPage">
-                <p className="dropdown-item-resident">HOA Officers</p>
-              </Link>
-              <Link href="/OfficialsPage/SitioOfficersPage">
-                <p className="dropdown-item-resident">Sitio Officers</p>
-              </Link>
-            </div>
+
+            {officialsDropdownOpen && (
+              <div className="Dropdown">
+                <Link href="/OfficialsPage">
+                  <p className="dropdown-item-resident">Barangay Officials</p>
+                </Link>
+                <Link href="/OfficialsPage/HOAOfficersPage">
+                  <p className="dropdown-item-resident">HOA Officers</p>
+                </Link>
+                <Link href="/OfficialsPage/SitioOfficersPage">
+                  <p className="dropdown-item-resident">Sitio Officers</p>
+                </Link>
+              </div>
+            )}
           </div>
         
       </div>
       
 
       {/* CHANGE HERE */}
-      <div className="navbar-icons-wrapper" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+     <div className="navbar-icons-wrapper hidden md:flex" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
         {/* FOR NOTIFICATIONS */}
         {!loading && user ? (
           <>
@@ -535,94 +576,108 @@ const handleDeleteNotification = async (notificationId: string) => {
         ) : (
           <div className="dropdown-Container">
             <div className="menu-section-container" ref={loginMenuRef}>
-              <p id="login-link" className="dropdown-item">Login</p>
+              <p id="login-link" className="dropdown-item-resident">Login</p>
+              
+
               <div className="Dropdown">
-                <Link href="/resident/login"><p className="dropdown-item">Log In</p></Link>
-                <Link href="/register"><p className="dropdown-item">Register</p></Link>
+                <Link href="/resident/login"><p className="dropdown-item-resident">Log In</p></Link>
+                <Link href="/register"><p className="dropdown-item-resident">Register</p></Link>
               </div>
             </div>
           </div>
         )}
 
-
-        {/* ===== BOT: launcher button + Messenger popup ===== */}
-    {/*
-        <div className="dropdown-Container">
-          <button
-            className="dropdown-item"
-            onClick={() => setBotOpen((v) => !v)}
-            style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #ddd", background: "#fff", cursor: "pointer" }}
-          >
-            💬 Barangay Assistant
+         {/* ====== HAMBURGER BUTTON (only small screens) ====== */}
+        <div className="md:hidden ml-auto">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="hamburger-btn">
+            {mobileOpen ? (
+              <span className="hamburger-icon">×</span>
+            ) : (
+              <span className="hamburger-icon">☰</span>
+            )}
           </button>
+        </div>
 
-          {botOpen && (
-            <div
-              className="bot-messenger"
-              onMouseEnter={() => setIsOpen(false)} // close notif dropdown when chat is focused
-            >
-              <div className="chat-header">
-                <div>
-                  Barangay Assistant
-                  <div className="sublabel">Dialogflow CX</div>
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <button className="mini-btn" onClick={() => setBotOpen(false)}>Close</button>
-                </div>
-              </div>
+      </div>
 
-              <div ref={chatBodyRef} className="chat-body">
-                {chat.map((m) => (
-                  <div key={m.id} className={`chat-row ${m.role}`}>
-                    {m.role === "bot" && <div className="chat-avatar">B</div>}
-                    <div>
-                      <div className="bubble">{m.text}</div>
-                      <div className="msg-time">
-                        {new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+       
+         
 
-                {botTyping && <div className="chat-typing">Assistant is typing…</div>}
+    </div>
 
-                <div className="quick-chips">
-                  {["hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
-                    <button
-                      key={q}
-                      className="quick-chip"
-                      onClick={() => sendToBot(q)}
-                    >
-                      {q}
-                    </button>
-                  ))}
-                </div>
-              </div>
+    {mobileOpen && (
+      <div ref={mobileMenuRef} className="md:hidden mobile-menu-container">
+        {/* Home & About */}
+        <Link href="/" onClick={() => setMobileOpen(false)}>
+          <p className="dropdown-item-resident">Home</p>
+        </Link>
+        <Link href="/aboutus" onClick={() => setMobileOpen(false)}>
+          <p className="dropdown-item-resident">About Us</p>
+        </Link>
 
-              <div className="chat-footer">
-                <div className="chat-inputwrap">
-                  <input
-                    className="chat-input"
-                    value={botInput}
-                    onChange={(e) => setBotInput(e.target.value)}
-                    placeholder="Message Barangay Assistant"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") sendToBot(botInput);
-                    }}
-                  />
-                  <button className="chat-send" onClick={() => sendToBot(botInput)}>Send</button>
-                </div>
-              </div>
+        {/* Services dropdown */}
+        <div className="mobile-dropdown group">
+          <button
+            className="mobile-dropdown-btn dropdown-item-resident-burgermenu"
+            onClick={() => setServicesOpen(!servicesOpen)}
+          >
+            Services
+            <img
+              src="/Images/down-arrow.png"
+              className={`dropdown-icon-burgermenu ${servicesOpen ? "rotate" : ""}`}
+            />
+          </button>
+          {servicesOpen && (
+            <div className="mobile-submenu">
+              <Link href="/services" onClick={() => setMobileOpen(false)}>
+                <p className="dropdown-item-resident-burgermenu">Request Documents</p>
+              </Link>
+              <Link href="/IncidentReport" onClick={() => setMobileOpen(false)}>
+                <p className="dropdown-item-resident-burgermenu">File an Incident</p>
+              </Link>
             </div>
           )}
         </div>
-    */}
-        {/* ===== /BOT ===== */}
 
-    
+        {/* Programs & News */}
+        <Link href="/Programs" onClick={() => setMobileOpen(false)}>
+          <p className="dropdown-item-resident">Programs</p>
+        </Link>
+        <Link href="/Announcements" onClick={() => setMobileOpen(false)}>
+          <p className="dropdown-item-resident">News</p>
+        </Link>
 
+        {/* Officials dropdown */}
+        <div className="mobile-dropdown">
+          <button
+            className="mobile-dropdown-btn dropdown-item-resident"
+            onClick={() => setOfficialsOpen(!officialsOpen)}
+          >
+            Officials
+            <img
+              src="/Images/down-arrow.png"
+              className={`dropdown-icon-burgermenu ${officialsOpen ? "rotate" : ""}`}
+            />
+          </button>
+          {officialsOpen && (
+            <div className="mobile-submenu">
+              <Link href="/OfficialsPage" onClick={() => setMobileOpen(false)}>
+                <p className="dropdown-item-resident">Barangay Officials</p>
+              </Link>
+              <Link href="/OfficialsPage/HOAOfficersPage" onClick={() => setMobileOpen(false)}>
+                <p className="dropdown-item-resident">HOA Officers</p>
+              </Link>
+              <Link href="/OfficialsPage/SitioOfficersPage" onClick={() => setMobileOpen(false)}>
+                <p className="dropdown-item-resident">Sitio Officers</p>
+              </Link>
+            </div>
+          )}
+        </div>
+
+      
       </div>
-    </div>
+    )}
+
   </div>
 </>
 );
