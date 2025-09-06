@@ -617,3 +617,10 @@ padding: 20px;
 .arrow.rotate {
   transform: rotate(180deg);
 }
+ 
+@media (max-width: 768px) {
+  .header-brgylogo {
+    margin-left: 0px; /* reduce left margin */
+    width: 55px; /* optional: shrink logo slightly for mobile */
+  }
+}

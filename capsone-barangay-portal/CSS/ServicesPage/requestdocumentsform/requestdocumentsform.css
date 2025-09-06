@@ -745,8 +745,6 @@ padding-left: 2rem;
   .document-req-section {
     width: 90%; /* make card wider on small screens */
     padding: 1rem;
-    /*margin-top: 1rem;
-    margin-bottom: 1rem;*/
     margin: 1.5rem auto;
   }
 

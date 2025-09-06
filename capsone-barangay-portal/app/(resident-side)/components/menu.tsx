@@ -46,6 +46,7 @@ const Menu = () => {
   const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
   const db = getFirestore();
   const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const menuRef = useRef(null);
 
   const [resident, setResident] = useState<Resident | null>(null);
   
@@ -588,17 +589,33 @@ const handleDeleteNotification = async (notificationId: string) => {
         )}
 
          {/* ====== HAMBURGER BUTTON (only small screens) ====== */}
-        <div className="md:hidden ml-auto">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="hamburger-btn">
-            {mobileOpen ? (
+      
+        <div ref={menuRef} className="md:hidden ml-auto">
+          {mobileOpen ? (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="hamburger-btn"
+            >
               <span className="hamburger-icon">×</span>
-            ) : (
+            </button>
+          ) : (
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="hamburger-btn"
+            >
               <span className="hamburger-icon">☰</span>
-            )}
-          </button>
+            </button>
+          )}
         </div>
 
+        {mobileOpen && (
+          <div className="mobile-menu">
+            {/* your menu links here */}
+          </div>
+        )}
       </div>
+
+
 
        
          
