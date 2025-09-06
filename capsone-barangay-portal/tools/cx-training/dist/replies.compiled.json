@@ -1,0 +1,471 @@
+{
+  "services": {
+    "common": {
+      "gating_login": "Online submission is available to verified residents (sign in to continue).",
+      "question_requirements": "Would you like me to list the requirements?"
+    },
+    "links": {
+      "Barangay Certificate": "/services/action?docB=Barangay%20Certificate",
+      "Barangay Indigency": "/services/action?docB=Barangay%20Indigency",
+      "Barangay Clearance": "/services/action?docB=Barangay%20Clearance",
+      "Business Permit": "/services/action?docB=Business%20Permit",
+      "Temporary Business Permit": "/services/action? docB=Temporary%20Business%20Permit",
+      "Construction Permit": "/services/action?docB=Construction%20Permit",
+      "Other Documents": "/services/action?docB=Other%20Documents"
+    },
+    "intents": {
+      "REQUEST_SERVICE": "Here’s where to request **{doc_base}{variant_suffix} **: **{link}**. {gating}",
+      "REQUIREMENTS_QUERY": "Requirements for **{doc_base}{variant_suffix}** (Age: {age}; Validity: {validity}; Frequency: {frequency}):\n{bullets}\nStarthere: **{link}**"
+    }
+  },
+  "navigation": {
+    "Home": "/",
+    "About Us": "/aboutus",
+    "Services": "/services",
+    "Incident Reports": "/IncidentReport",
+    "Programs": "/Programs",
+    "News/Announcements": "/Announcements",
+    "Officials": "/OfficialsPage",
+    "HOA Officers": "/OfficialsPage/HOAOfficersPage",
+    "Sitio Officers": "/OfficialsPage/SitioOfficersPage"
+  },
+  "requirements": [
+    {
+      "base": "Barangay Certificate",
+      "variant": "Residency",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Picture taking at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Occupancy",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Estate Tax",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Death Certificate"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Death Residency",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Death Certificate"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "No Income",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Cohabitation",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Guardianship",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Good Moral and Probation",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Garage/PUV",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Certificate",
+      "variant": "Garage/TRU",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Certificate"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "No Income",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "Public Attorney’s Office",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "Financial Subsidy of Solo Parent",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "Fire Victims",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "Flood Victims",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "PhilHealth Sponsor",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Indigency",
+      "variant": "Medical Assistance",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+        "Interview at the barangay"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Indigency"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Loan",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Bank Transaction",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Residency",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Local Employment",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Maynilad",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Meralco",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Barangay Clearance",
+      "variant": "Bail Bond",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Barangay%20Clearance"
+    },
+    {
+      "base": "Business Permit",
+      "variant": "New",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID",
+        "Certified True Copy of Title of Property / Contract of Lease",
+        "Certified True Copy of DTI Registration",
+        "Picture of CCTV installed in the establishment"
+      ],
+      "requestor": "Residents / Non Residents",
+      "link": "/services/action?docB=Business%20Permit"
+    },
+    {
+      "base": "Business Permit",
+      "variant": "Renewal",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID",
+        "Certified True Copy of Title of Property / Contract of Lease",
+        "Certified True Copy of DTI Registration",
+        "Picture of CCTV installed in the establishment"
+      ],
+      "requestor": "Residents / Non Residents",
+      "link": "/services/action?docB=Business%20Permit"
+    },
+    {
+      "base": "Temporary Business Permit",
+      "variant": "New",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID",
+        "Certified True Copy of Title of Property / Contract of Lease",
+        "Certified True Copy of DTI Registration",
+        "Picture of CCTV installed in the establishment"
+      ],
+      "requestor": "Residents / Non Residents",
+      "link": "/services/action?docB=Temporary%20Business%20Permit"
+    },
+    {
+      "base": "Temporary Business Permit",
+      "variant": "Renewal",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID",
+        "Certified True Copy of Title of Property / Contract of Lease",
+        "Certified True Copy of DTI Registration",
+        "Picture of CCTV installed in the establishment"
+      ],
+      "requestor": "Residents / Non Residents",
+      "link": "/services/action?docB=Temporary%20Business%20Permit"
+    },
+    {
+      "base": "Construction Permit",
+      "variant": "Standard",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID",
+        "Certified True Copy of Title of Property / Contract of Lease",
+        "Certified True Copy of Tax Declaration",
+        "Approved Building / Construction Plan"
+      ],
+      "requestor": "Residents / Non Residents",
+      "link": "/services/action?docB=Construction%20Permit"
+    },
+    {
+      "base": "Other Documents",
+      "variant": "Barangay ID",
+      "age": "18+",
+      "frequency": "No limit",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "Valid ID with an address in Barangay Fairview",
+        "2x2 Picture (optional)"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Other%20Documents"
+    },
+    {
+      "base": "Other Documents",
+      "variant": "First Time Jobseeker",
+      "age": "18+",
+      "frequency": "First request (no payment); succeeding requests (with payment)",
+      "validity": "1 year",
+      "documents": [
+        "Signature over printed name",
+        "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President"
+      ],
+      "requestor": "Residents",
+      "link": "/services/action?docB=Other%20Documents"
+    }
+  ],
+  "_meta": {
+    "generatedAt": "2025-09-05T07:22:06.983Z",
+    "counts": {
+      "requirements": 31,
+      "serviceLinks": 7,
+      "navigationItems": 9
+    }
+  }
+}

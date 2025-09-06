@@ -1,0 +1,11 @@
+{
+ "Home": "/",
+ "About Us": "/aboutus",
+ "Services": "/services",
+ "Incident Reports": "/IncidentReport",
+ "Programs": "/Programs",
+ "News/Announcements": "/Announcements",
+ "Officials": "/OfficialsPage",
+ "HOA Officers": "/OfficialsPage/HOAOfficersPage",
+ "Sitio Officers": "/OfficialsPage/SitioOfficersPage"
+}

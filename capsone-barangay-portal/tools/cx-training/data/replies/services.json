@@ -1,0 +1,19 @@
+{
+ "common": {
+ "gating_login": "Online submission is available to verified residents (sign in to continue).",
+ "question_requirements": "Would you like me to list the requirements?"
+ },
+ "links": {
+ "Barangay Certificate": "/services/action?docB=Barangay%20Certificate",
+ "Barangay Indigency": "/services/action?docB=Barangay%20Indigency",
+ "Barangay Clearance": "/services/action?docB=Barangay%20Clearance",
+ "Business Permit": "/services/action?docB=Business%20Permit",
+ "Temporary Business Permit": "/services/action? docB=Temporary%20Business%20Permit",
+ "Construction Permit": "/services/action?docB=Construction%20Permit",
+ "Other Documents": "/services/action?docB=Other%20Documents"
+ },
+ "intents": {
+ "REQUEST_SERVICE": "Here’s where to request **{doc_base}{variant_suffix} **: **{link}**. {gating}",
+ "REQUIREMENTS_QUERY": "Requirements for **{doc_base}{variant_suffix}** (Age: {age}; Validity: {validity}; Frequency: {frequency}):\n{bullets}\nStarthere: **{link}**"
+ }
+}
