@@ -697,10 +697,8 @@ padding-left: 2rem;
 /* Tablets (portrait & small landscape) */
 @media (max-width: 1024px) and (min-width: 769px) {
   .document-req-section {
-    max-width: 85%;
+    max-width: 95%;
     padding: 1.5rem;
-    /*margin-top: 2rem;
-    margin-bottom: 2rem;*/
     margin: 1.5rem auto;
   }
 
@@ -736,12 +734,16 @@ padding-left: 2rem;
     .document-req-section h1 {
       font-size: 22px; 
     }
+
+  .info-toggle-btn {
+    font-size: 14px;
+  }
 }
 
 /* Phones (portrait & small landscape) */
 @media (max-width: 768px) {
   .document-req-section {
-    width: 80%; /* make card wider on small screens */
+    width: 90%; /* make card wider on small screens */
     padding: 1rem;
     /*margin-top: 1rem;
     margin-bottom: 1rem;*/
@@ -782,4 +784,8 @@ padding-left: 2rem;
     .document-req-section h1 {
       font-size: 22px; 
     }
+
+  .info-toggle-btn {
+    font-size: 14px;
+  }
 }
