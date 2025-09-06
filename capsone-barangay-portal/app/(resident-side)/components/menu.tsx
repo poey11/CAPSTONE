@@ -589,17 +589,7 @@ const handleDeleteNotification = async (notificationId: string) => {
         )}
 
          {/* ====== HAMBURGER BUTTON (only small screens) ====== */}
-        {/*<div className="md:hidden ml-auto">
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="hamburger-btn">
-            {mobileOpen ? (
-              <span className="hamburger-icon">×</span>
-            ) : (
-              <span className="hamburger-icon">☰</span>
-            )}
-          </button>
-        </div>*/}
-
-        
+      
         <div ref={menuRef} className="md:hidden ml-auto">
           {mobileOpen ? (
             <button
