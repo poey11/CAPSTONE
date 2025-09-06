@@ -1,0 +1,22 @@
+{
+"name": "cx-training-kit",
+"version": "1.0.0",
+"private": true,
+"type": "module",
+  "scripts": {
+    "build:replies": "tsx src/buildReplies.ts",
+    "sync:entities": "tsx src/cx/syncEntities.ts",
+    "sync:intents": "tsx src/cx/syncIntents.ts",
+    "sync:all": "tsx src/cx/syncAll.ts"
+
+  },
+"dependencies": {
+  "@google-cloud/dialogflow-cx": "^5.3.0",
+  "dotenv": "^16.4.5"
+},
+"devDependencies": {
+    "tsx": "^4.7.0",
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.0"
+  }
+}

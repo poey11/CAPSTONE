@@ -267,3 +267,19 @@
   background: #fff;
   cursor: pointer;
 }
+
+
+.bubble a.chat-link {
+  color: #2563eb;            /* blue-600 */
+  text-decoration: underline;
+}
+
+.bubble a.chat-link:hover,
+.bubble a.chat-link:focus {
+  color: #1d4ed8;            /* blue-700 */
+  text-decoration-thickness: 2px;
+}
+
+.bubble a.chat-link:active {
+  color: #1e40af;            /* blue-800 */
+}

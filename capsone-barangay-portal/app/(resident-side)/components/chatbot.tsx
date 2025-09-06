@@ -1,18 +1,23 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import "@/CSS/Components/chatbot.css"; // keep your chatbot styles
+import Link from "next/link";
+// @ts-ignore – quiet incompatible React type signatures in some setups
+import ReactMarkdown from "react-markdown";
+// @ts-ignore
+import remarkGfm from "remark-gfm";
+// @ts-ignore
+import rehypeSanitize from "rehype-sanitize";
+import "@/CSS/Components/chatbot.css";
 
 export default function Chatbot({ user }: { user?: { uid?: string } }) {
-  // ========= BOT: Messenger-style chat additions =========
   type ChatMsg = { id: string; role: "user" | "bot"; text: string; ts: number };
 
-  const [botOpen, setBotOpen] = useState(false); // chat visibility
+  const [botOpen, setBotOpen] = useState(false);
   const [botInput, setBotInput] = useState("");
   const [chat, setChat] = useState<ChatMsg[]>([]);
   const [botTyping, setBotTyping] = useState(false);
 
-  // stable session id for Dialogflow context
   const sessionId =
     (user?.uid ?? "") ||
     ("guest-" +
@@ -20,7 +25,6 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
         ? window.navigator.userAgent.replace(/\W+/g, "").slice(0, 16)
         : "web"));
 
-  // auto-scroll ref for chat body
   const chatBodyRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (chatBodyRef.current) {
@@ -28,7 +32,6 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
     }
   }, [chat, botTyping]);
 
-  // helper to push messages
   function pushMsg(role: "user" | "bot", text: string) {
     setChat((prev) => [
       ...prev,
@@ -36,18 +39,16 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
     ]);
   }
 
-  // optional: greet when chat opens
   useEffect(() => {
     if (botOpen && chat.length === 0) {
       pushMsg(
         "bot",
-        "Hi! I can help with Services (request documents, file incidents), Programs, News, and Tracking."
+        "Hi! I can help with **Services** (request documents, file incidents), **Programs**, **News**, and **Tracking**.\n\nTry: [Services](/services), [File an Incident](/IncidentReport), [Programs](/Programs), [Announcements](/Announcements)."
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [botOpen]);
 
-  // call your /api/dialogflow and manage bubbles
   async function sendToBot(message: string) {
     if (!message.trim()) return;
     pushMsg("user", message);
@@ -76,26 +77,54 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
       setBotTyping(false);
     }
   }
-  // ======================================================
+
+  // ---- Markdown helpers (typed as any to avoid React type incompatibilities) ----
+  const MdLink: any = (props: { href?: string; children?: any }) => {
+    const href = props.href || "#";
+    const isInternal = href.startsWith("/");
+    if (isInternal) {
+      return (
+        <Link href={href} className="chat-link">
+          {props.children}
+        </Link>
+      );
+    }
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className="chat-link">
+        {props.children}
+      </a>
+    );
+  };
+
+  const MD: any = ReactMarkdown as any;
+
+  function BotBubble({ text }: { text: string }) {
+    return (
+      <div className="bubble">
+        {/* @ts-ignore – relax types for components map */}
+        <MD remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}
+          components={{
+            a: MdLink,
+            p: (props: any) => <p className="bubble-p">{props.children}</p>,
+            strong: (props: any) => <strong className="bubble-strong">{props.children}</strong>,
+          }}
+        >
+          {text}
+        </MD>
+      </div>
+    );
+  }
+  // -----------------------------------------------------------------------------
 
   return (
     <>
-      {/* ===== BOT: floating launcher button + Messenger popup ===== */}
       <div className="chatbot-container">
-        {/* Floating button */}
-        <button
-          onClick={() => setBotOpen((v) => !v)}
-          className="chatbot-btn"
-        >
+        <button onClick={() => setBotOpen((v) => !v)} className="chatbot-btn">
           💬
         </button>
 
-        {/* Chat popup */}
         {botOpen && (
-          <div
-            className="bot-messenger"
-           
-          >
+          <div className="bot-messenger">
             <div className="chat-header">
               <div>
                 Barangay Assistant
@@ -113,35 +142,23 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
                 <div key={m.id} className={`chat-row ${m.role}`}>
                   {m.role === "bot" && <div className="chat-avatar">B</div>}
                   <div>
-                    <div className="bubble">{m.text}</div>
+                    {m.role === "bot" ? (
+                      <BotBubble text={m.text} />
+                    ) : (
+                      <div className="bubble">{m.text}</div>
+                    )}
                     <div className="msg-time">
-                      {new Date(m.ts).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {new Date(m.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </div>
                 </div>
               ))}
 
-              {botTyping && (
-                <div className="chat-typing">Assistant is typing…</div>
-              )}
+              {botTyping && <div className="chat-typing">Assistant is typing…</div>}
 
               <div className="quick-chips">
-                {[
-                  "hello",
-                  "Services",
-                  "Request Document",
-                  "File an Incident",
-                  "Programs",
-                  "Announcements",
-                ].map((q) => (
-                  <button
-                    key={q}
-                    className="quick-chip"
-                    onClick={() => sendToBot(q)}
-                  >
+                {["hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
+                  <button key={q} className="quick-chip" onClick={() => sendToBot(q)}>
                     {q}
                   </button>
                 ))}
@@ -159,10 +176,7 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
                     if (e.key === "Enter") sendToBot(botInput);
                   }}
                 />
-                <button
-                  className="chat-send"
-                  onClick={() => sendToBot(botInput)}
-                >
+                <button className="chat-send" onClick={() => sendToBot(botInput)}>
                   Send
                 </button>
               </div>
@@ -170,7 +184,6 @@ export default function Chatbot({ user }: { user?: { uid?: string } }) {
           </div>
         )}
       </div>
-      {/* ===== /BOT ===== */}
     </>
   );
 }
