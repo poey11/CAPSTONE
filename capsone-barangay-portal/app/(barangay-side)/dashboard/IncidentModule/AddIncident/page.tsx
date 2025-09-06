@@ -1389,7 +1389,7 @@ const handleSubmit = async (event: React.FormEvent) => {
                                               className="delete-button-add"
                                             >
                                               <img
-                                                src="/Images/trash.png"
+                                                src="/images/trash.png"
                                                 alt="Delete"
                                                 className="delete-icon-add"
                                               />

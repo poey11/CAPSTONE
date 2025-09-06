@@ -269,7 +269,7 @@ export default function ViewApprovedParticipantModal({
               <div className="view-participant-backbutton-container">
                 <button onClick={onClose}>
                   <img
-                    src="/Images/left-arrow.png"
+                    src="/images/left-arrow.png"
                     alt="Left Arrow"
                     className="participant-back-btn-resident"
                   />
@@ -382,12 +382,12 @@ export default function ViewApprovedParticipantModal({
                     <div className="participant-uploaded-photo-section" style={{ width: "100%" }}>
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
-                          <img src="/Images/no-results.png" alt="Loading" className="no-result-icon-programs" />
+                          <img src="/images/no-results.png" alt="Loading" className="no-result-icon-programs" />
                           <p className="no-results-programs">Loading uploads…</p>
                         </div>
                       ) : (isVolunteer ? filteredFileNames : Object.keys(filesMap)).length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
-                          <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
+                          <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-programs" />
                           <p className="no-results-programs">No files uploaded</p>
                         </div>
                       ) : (

@@ -260,7 +260,7 @@ export default function EditParticipantModal({
               <div className="view-participant-backbutton-container">
                 <button onClick={onClose}>
                   <img
-                    src="/Images/left-arrow.png"
+                    src="/images/left-arrow.png"
                     alt="Left Arrow"
                     className="participant-back-btn-resident"
                   />
@@ -433,7 +433,7 @@ export default function EditParticipantModal({
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
-                            src="/Images/no-results.png"
+                            src="/images/no-results.png"
                             alt="Loading"
                             className="no-result-icon-programs"
                           />
@@ -442,7 +442,7 @@ export default function EditParticipantModal({
                       ) : fileEntries.length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
-                            src="/Images/no-results.png"
+                            src="/images/no-results.png"
                             alt="No results icon"
                             className="no-result-icon-programs"
                           />

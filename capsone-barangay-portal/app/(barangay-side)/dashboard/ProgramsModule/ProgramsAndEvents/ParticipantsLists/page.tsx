@@ -636,7 +636,7 @@ export default function ParticipantsList() {
           <div className="program-popup" ref={residentPopUpRef}>
             <div className="view-participant-backbutton-container">
               <button onClick={() => setShowResidentsPopup(false)}>
-                <img src="/Images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
               </button>
             </div>
 

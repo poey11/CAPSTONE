@@ -402,7 +402,7 @@ const getViewedRequests = (): string[] => {
        >
         {currentIncidents.length === 0 ? (
           <div className="no-result-card">
-            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
+            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
             <p className="no-results-department">No Results Found</p>
           </div>
         ) : (
@@ -484,7 +484,7 @@ const getViewedRequests = (): string[] => {
         <div className="main-section-online-reports-tasks ">
         {taskAssignedData.length === 0 ? (
           <div className="no-task-card">
-            <img src="/Images/customer-service.png" alt="No results icon" className="no-task-icon" />
+            <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon" />
             <p className="no-task-department">You have no Tasks For Today!</p>
           </div>
         ) : (

@@ -84,7 +84,7 @@ export default function EditAppointment() {
                     <div className="viewonlinereq-section-1">
                         <div className="viewonlinereq-main-section1-left">
                                 <button onClick={handleBack}>
-                                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                                    <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                                 </button>
 
                                 <h1>Appointment Details</h1>

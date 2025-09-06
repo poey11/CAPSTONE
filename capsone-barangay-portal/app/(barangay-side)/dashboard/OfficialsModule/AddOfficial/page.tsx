@@ -181,7 +181,7 @@ export default function AddOfficial() {
                                         className="delete-button"
                                         >
                                         <img
-                                            src="/Images/trash.png"  
+                                            src="/images/trash.png"  
                                             alt="Delete"
                                             className="delete-icon"
                                         />

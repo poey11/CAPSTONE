@@ -537,7 +537,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             <p className="error">{error}</p>
           ) : filteredOnlineRequests.length === 0 ? (
             <div className="no-result-card-services">
-              <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-services" />
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" />
               <p className="no-results-services">No Results Found</p>
             </div>
           ) : (
@@ -677,7 +677,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
             <p className="error">{error}</p>
           ) : currentTaskRequests.length === 0 ? (
             <div className="no-result-card-services" /* edited this class */>
-              <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-services" /* edited this class *//>
+              <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-services" /* edited this class *//>
               <p className="no-results-services" /* edited this class */>No Results Found</p>
             </div>
           ) : (

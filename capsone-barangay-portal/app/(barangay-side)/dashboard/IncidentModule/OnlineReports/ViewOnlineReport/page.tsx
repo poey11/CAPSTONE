@@ -466,7 +466,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
          
             <div className="section-1-online-report-left-side">
               <button type="button" onClick={() => router.back()}>
-                 <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-button-reports"/>
+                 <img src="/images/left-arrow.png" alt="Left Arrow" className="back-button-reports"/>
               </button>
               <h1>Online Report Details</h1>
             </div>

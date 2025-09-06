@@ -182,7 +182,7 @@ export default function EditOfficer() {
                                                 {(identificationFile || identificationPreview) && (
                                                     <div className="delete-container">
                                                     <button type="button" /*onClick={handleIdentificationFileDelete}*/ className="delete-button">
-                                                        <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
+                                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
                                                     </button>
                                                     </div>
                                                 )}

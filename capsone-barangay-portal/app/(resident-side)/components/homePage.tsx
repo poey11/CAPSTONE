@@ -204,7 +204,7 @@ useEffect(() => {
               <div className="services-card" onClick={() => router.push('/services')}>
 
                     <div className="services-image">
-                        <img src="/Images/document.png" alt="Document Request Icon" className="icon-image" />
+                        <img src="/images/document.png" alt="Document Request Icon" className="icon-image" />
                     </div>
 
                     <div className="services-description">

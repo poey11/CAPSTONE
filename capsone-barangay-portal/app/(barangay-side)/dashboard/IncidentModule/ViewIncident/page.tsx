@@ -349,7 +349,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
           <div className="view-incident-header-body-top-section">
             <div className="view-incident-backbutton-container">
               <button onClick={handleViewLupon}>
-                <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
+                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn-main-resident"/> 
               </button>
             </div>
 

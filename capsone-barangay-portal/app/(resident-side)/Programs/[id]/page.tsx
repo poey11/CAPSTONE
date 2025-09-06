@@ -860,7 +860,7 @@ const confirmSubmit = async () => {
                   >
                     {selectedAction === action.key && (
                       <img
-                        src="/Images/left-arrow.png"
+                        src="/images/left-arrow.png"
                         alt="Left Arrow"
                         className="back-btn"
                         onClick={() => setSelectedAction(null)}

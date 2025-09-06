@@ -515,7 +515,7 @@ const confirmSubmit = async () => {
                                             className="delete-button-register"
                                             >
                                             <img
-                                                src="/Images/trash.png"
+                                                src="/images/trash.png"
                                                 alt="Delete"
                                                 className="delete-icon-register"
                                             />
