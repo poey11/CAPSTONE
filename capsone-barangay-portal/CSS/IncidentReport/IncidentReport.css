@@ -11,7 +11,6 @@
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
               url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
    background-position: center 55%; 
-
 }
 
   
@@ -431,7 +430,7 @@ Redirection
 }
 
 .register-section-upper {
-    padding-top: 25px;
+  padding-top: 25px;
   padding-left: 35px;
   padding-right: 35px;
   height: 100%;
@@ -624,4 +623,93 @@ FOR ERROR INVALID FIELDS
 
 .error-popup-overlay-online.hide {
   animation: slideOut 0.5s ease-out;
+}
+
+/* ---------- Responsive for tablets and smaller ---------- */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .headerpic-report {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .register-section-incident-report {
+    width: 95%;
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+  }
+
+  .register-section-incident-report h1{
+    font-size: 22px; 
+  }
+
+  .incident-report-form-container {
+    flex-direction: row; /* still 2 columns */
+    gap: 1.5rem;
+  }
+
+  .incident-report-container-left-side,
+  .incident-report-container-right-side,
+  .incident-report-container-left-side-complainant,
+  .incident-report-container-right-side-complainant {
+    width: 48%;
+    padding: 0 0.5rem;
+    margin-top: 0;
+  }
+
+  .submit-button-incident-report {
+    max-width: 220px;     
+    padding: 0.6rem 1.2rem;
+
+    display: block;
+  }
+
+  .info-toggle-btn {
+    font-size: 14px;
+  }
+}
+
+/* ---------- Mobile phones ---------- */
+@media (max-width: 768px) {
+  .headerpic-report {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .register-section-incident-report {
+    width: 90%;
+    padding: 1rem;
+    margin: 1.5rem auto;
+  }
+
+  .register-section-incident-report h1{
+    font-size: 22px; 
+  }
+
+  .incident-report-form-container {
+    flex-direction: column; /* stack vertically */
+    gap: 1rem;
+  }
+
+  .incident-report-container-left-side,
+  .incident-report-container-right-side,
+  .incident-report-container-left-side-complainant,
+  .incident-report-container-right-side-complainant {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .submit-button-incident-report {
+    max-width: 200px;     
+    padding: 0.6rem 1.2rem;
+
+    display: block;
+  }
+
+  .info-toggle-btn {
+    font-size: 14px;
+  }
+
 }
