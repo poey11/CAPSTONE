@@ -693,3 +693,90 @@ LALA
     .popup-register-error p{
        color: rgb(97, 97, 97);
     }
+
+
+/* Tablets (portrait & small landscape) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .headerpic-reg {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .register-section-register-form {
+    max-width: 95%;
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+  }
+
+  .register-section-register-form h1 {
+    font-size: 22px; 
+  }
+
+  .form-container {
+    flex-direction: column; /* keep two columns */
+    gap: 1.5rem;
+  }
+
+  .form-container-upper {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .form-container-left-side,
+  .form-container-right-side {
+    width: 100%;          
+    padding: 0 0.5rem;
+  }
+
+  .submit-button {
+    max-width: 220px;     /* cap size */
+    padding: 0.75rem 1.5rem;
+
+    display: block;
+  }
+}
+
+/* Phones (portrait & small landscape) */
+@media (max-width: 768px) {
+  .headerpic-reg {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+  .register-section-register-form {
+    width: 90%; /* make card wider on small screens */
+    padding: 1rem;
+    margin: 1.5rem auto;
+  }
+
+  .register-section-register-form h1 {
+    font-size: 22px; 
+  }
+
+  .form-container {
+    flex-direction: column; /* stack */
+    gap: 1rem;
+  }
+
+  .form-container-upper {
+    flex-direction: column; 
+    gap: 1rem;
+  }
+
+  .form-container-left-side,
+  .form-container-right-side {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+  }
+
+  .submit-button {
+       /* don’t stretch full width */
+    max-width: 200px;     /* smaller cap for phones */
+    padding: 0.6rem 1.2rem;
+
+    display: block;
+  }
+}

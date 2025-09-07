@@ -713,10 +713,6 @@ padding-left: 2rem;
     padding: 0 0.5rem;
   }
 
-  .submit-button-document-req {
-    width: 100%;
-    max-width: 280px; /* smaller cap for tablets */
-  }
 
   .headerpic-report {
     height: 120px;
@@ -760,10 +756,7 @@ padding-left: 2rem;
     margin-top: 0;
   }
 
-  .submit-button-document-req {
-    width: 100%; /* button full width */
-    max-width: none; /* no artificial limit */
-  }
+
 
   .headerpic-report {
     height: 120px;
