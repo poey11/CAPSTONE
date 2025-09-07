@@ -709,3 +709,83 @@ For age
 .dot-specific.active {
   background-color: #DF7426;
 }
+
+
+
+
+
+
+
+/* Tablet view */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .programs-header-specific {
+    margin: 2rem auto 1.5rem auto;
+    padding: 0 2rem;
+  }
+
+  .programs-title-specific {
+    font-size: 2rem;
+    gap: 0.5rem;
+  }
+
+  .programs-title::before,
+  .programs-title::after {
+    flex: 0.5; /* shorter side lines */
+  }
+
+
+
+
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+  
+  
+    .programs-header-specific {
+    margin: 1.5rem auto 1rem auto;
+    padding: 15 1rem;
+  }
+
+  .programs-title-specific {
+    font-size: 1.6rem;
+    flex-direction: column; /* stack title + underline */
+    gap: 0.3rem;
+  }
+
+  .programs-title-specific::before,
+  .programs-title-specific::after {
+    display: none; /* hide side lines on mobile */
+  }
+
+
+  
+  
+
+}
+
+
+
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-specific {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+/* Header responsive and mobile */
+@media (max-width: 768px) {
+  .headerpic-specific {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+
+
+
+
