@@ -271,72 +271,7 @@ const rLoginForm:React.FC = () => {
             </div>
 
 
-           
-            {/*
-            
-                    OLD
-           
-            <div className="login-contents-resident">
-
-
-                <div className="login-card-resident">
-                <div className="login-title-page">
-                <h1>User Login</h1>
-                </div>
-              
-
-                    <form onSubmit={handleLogin}>
-                        <div className="section1-resident">
-                            <div className="form-group-resident">
-                                <label htmlFor="Email" className="form-label-resident">Email:</label>
-                                <input 
-                                    onChange={handleChange}
-                                    value={resident.email}
-                                    type="text"  
-                                    id="email"  
-                                    name="email"  
-                                    className="form-input-resident"  
-                                    required  
-                                />
-                            </div>
-
-                            <div className="form-group-resident">
-                                <label htmlFor="password" className="form-label-resident">Password:</label>
-                                <div className="relative">
-                                <input 
-                                    onChange={handleChange}
-                                    value={resident.password}
-                                    type={showPassword ? "text" : "password"}
-                                    id="password"  
-                                    name="password"  
-                                    className="form-input-resident" 
-                                    required  
-                                />
-                                <button
-                                                                    type="button"
-                                                                    className="toggle-password-btn"
-                                                                    onClick={() => setShowPassword(!showPassword)}
-                                                                >
-                                                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                                </button>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="section2-resident">
-                            <button type="button" className="section2options-resident" onClick={handleForgotPassword}>Forgot Password</button>
-                            <button type="button"className="section2options-resident" onClick={handleRegister}>Create an Account</button>
-                        </div>
-
-                        <div className="section3-resident">
-                            <button type="submit" className="submit-button-resident">Login</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            */}
+        
 
             {showVerifyPopup && (
                 <div className="popup-overlay-login">
