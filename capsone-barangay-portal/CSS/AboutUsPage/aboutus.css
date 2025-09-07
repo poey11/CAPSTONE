@@ -493,7 +493,7 @@
 }
 
 /* Header responsive */
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
   .headerpic-abtus {
     height: 150px;
     font-size: 20px;
@@ -501,6 +501,26 @@
 }
 
 
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-abtus {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+
+
+
+/* Header responsive */
+@media (max-width: 768px) {
+  .headerpic-abtus {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
 
 
 

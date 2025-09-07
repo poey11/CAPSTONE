@@ -384,3 +384,95 @@ NEW
   display: flex;
   align-items: center;
 }
+
+
+
+
+
+
+
+
+
+/* Tablet (769px – 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .login-card-wrapper {
+    width: 90%;
+    height: auto;
+    flex-direction: row; /* still side by side */
+  }
+
+  .login-left-panel,
+  .login-right-panel {
+    padding: 20px;
+  }
+
+  .form-input-resident {
+    width: 100%; /* stretch inside column */
+  }
+
+  .section2-resident {
+    gap: 60px; /* reduce spacing */
+  }
+}
+
+
+/* Mobile (≤768px) */
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+  .login-container-resident {
+    padding: 1rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .login-card-wrapper {
+    flex-direction: column; /* stack panels */
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  /* Put image (right panel) on top */
+  .login-right-panel {
+    order: -1; /* moves it before left panel */
+    width: 100%;
+    padding: 20px;
+  }
+
+  .login-left-panel {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .login-heading {
+    font-size: 22px;
+  }
+
+  .form-input-resident {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .submit-button-resident {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+  }
+  .section2-resident {
+    flex-direction: row;       /* keep in 1 row */
+    justify-content: space-between;
+    gap: 20px;                 /* smaller gap for mobile */
+    margin-top: 20px;
+  }
+
+  .section2options-resident {
+    font-size: 14px;           /* slightly smaller text */
+  }
+  .login-right-panel h2 {
+    font-size: 24px;
+  }
+
+  .qc-logo {
+    width: 100px;
+  }
+}
