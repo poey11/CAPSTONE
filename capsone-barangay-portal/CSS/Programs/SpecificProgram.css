@@ -735,6 +735,28 @@ For age
   }
 
 
+    /* ADDED*/
+    /* Slideshow smaller */
+  .slideshow-specific {
+    width: 500px;
+    height: 320px;
+  }
+
+  /* Reduce side padding */
+  .get-involved,
+  .programs-header-specific {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  /* Info cards stacked 2 per row */
+  .info-cards-specific {
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .info-card-specific {
+    flex: 1 1 calc(50% - 2rem);
+  }
 
 
 }
@@ -757,6 +779,50 @@ For age
   .programs-title-specific::before,
   .programs-title-specific::after {
     display: none; /* hide side lines on mobile */
+  }
+
+
+
+
+   /* Make slideshow full width */
+  .slideshow-specific {
+    width: 100%;
+    max-width: 100%;
+    height: 240px;
+  }
+
+  /* Adjust description */
+  .programs-description-specific {
+    font-size: 1rem;
+    margin-top: 30px;
+    line-height: 1.6;
+  }
+
+  /* Details grid → single column */
+  .programs-details-specific {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Info cards → stacked */
+  .info-cards-specific {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Forms and buttons full width */
+  .form-input-specific,
+  .register-button-specific {
+    width: 100%;
+  }
+
+  .register-button-specific {
+    max-width: 100%;
+  }
+
+  /* Reduce section padding */
+  .get-involved {
+    padding: 2rem 1rem;
   }
 
 
