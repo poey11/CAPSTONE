@@ -656,4 +656,144 @@ For the conditional Reupload Button
 }
 
 
+/* Tablets (portrait & small landscape) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .account-section-incident-report {
+    max-width: 95%;
+    padding: 1.5rem;
+    margin: 1.5rem auto;
+  }
 
+  .account-section-incident-report h1 {
+    font-size: 22px; 
+  }
+
+  .profile-right {
+    max-width: 100%;
+    padding-left: 0px;
+  }
+
+  .profile-right h2{
+    font-size: 1.6rem;
+    align-self: center;
+  }
+
+  .transactions-link-modern {
+    align-self: center;
+  }
+
+  .note-box {
+    font-size: 13px;
+  }
+
+  .upload-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 13px;
+  }
+
+  .account-profile-section-modern {
+    padding: 1rem;
+  }
+
+  .account-details-upper {
+    flex-direction: column;   
+    gap: 20px;               
+  }
+
+  .account-details-section-left,
+  .account-details-section-right {
+    width: 100%;             
+  }
+}
+
+/* Phones (portrait & small landscape) */
+@media (max-width: 768px) {
+  .account-section-incident-report {
+    width: 90%; /* make card wider on small screens */
+    padding: 1rem;
+    margin: 1.5rem auto;
+  }
+
+  .account-section-incident-report h1 {
+    font-size: 22px; 
+  }
+
+  .profile-right {
+    max-width: 100%;
+    padding-left: 0px;
+  }
+
+  .profile-right h2{
+    font-size: 1.5rem;
+    align-self: center;
+  }
+
+  .transactions-link-modern {
+    align-self: center;
+  }
+
+  .note-box {
+    font-size: 13px;
+  }
+
+  .upload-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 13px;
+  }
+
+  .account-profile-section-modern {
+    padding: 1rem;
+  }
+
+  .account-details-upper {
+    flex-direction: column;   
+    gap: 20px;               
+  }
+
+  .account-details-section-left,
+  .account-details-section-right {
+    width: 100%;             
+  }
+
+  .status-badge {
+    align-self: center;
+  }
+
+  .status-badge {
+    align-self: center;
+  }
+}
+
+
+.status-badge {
+  display: inline-block;   
+  width: 200px;           
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  white-space: nowrap;    
+  text-align: center;
+}
+
+/* Different colors per status */
+.status-unverified {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-verified {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-resubmission {
+  background: #cce5ff;
+  color: #004085;
+}

@@ -324,8 +324,11 @@ export default function SettingsPageResident({searchParams}: any) {
                     </div>
 
                   
-                    <div className="profile-right">
+                  <div className="profile-right">
                     <h2>{resident.first_name} {resident.last_name}</h2>
+                    <div className={`status-badge status-${formData.status?.toLowerCase()}`}>
+                      Account is {formData.status || "No Status"}
+                    </div>
 
                     <a href="/ResidentAccount/Transactions" className="transactions-link-modern">
                         View Transactions →
@@ -397,61 +400,7 @@ export default function SettingsPageResident({searchParams}: any) {
                                             disabled={formData.status === "Verified"}                        />
                                     </div>
 
-                                 <div className="form-group-profile-section">
-                                        <label htmlFor="email" className="form-label-profile-section">Email:</label>
-                                        <input 
-                                            id="email" 
-                                            name="email"
-                                            value={formData.email} 
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            className="form-input-profile-section" 
-                                            required 
-                                            disabled={formData.status === "Verified"}
-                                        />
-                                    </div>
-
-                                <div className="form-group-profile-section">
-                                    <label htmlFor="password" className="form-label-profile-section">New Password:</label>
-                                    <div className="relative">
-                                        <input 
-                                                id="password" 
-                                                name="password"
-                                                className="form-input-profile-section" 
-                                                type={showNewPassword ? "text" : "password"}
-                                                title="Please enter a password with a minimum of 6 characters"
-                                                onChange={handleChange}
-                                            />
-                                            <button
-                                                    type="button"
-                                                    className="toggle-password-btn"
-                                                    onClick={() => setShowNewPassword(!showNewPassword)}
-                                                            >
-                                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                            </button>
-
-                                    </div>
-                                </div>
-                                        
-                            </div>
-
-                            <div className="account-details-section-right">
-
-                                     <div className="form-group-profile-section">
-                                            <label htmlFor="status" className="form-label-profile-section">Status:</label>
-                                            <input 
-                                                id="status" 
-                                                name="status"
-                                                value={
-                                                    formData.status === "Rejected" || formData.status === "Resubmission"
-                                                        ? "Unverified"
-                                                        : formData.status
-                                                }
-                                                className="form-input-profile-section" 
-                                                disabled 
-                                            />
-                                        </div>
-
-                                      <div className="form-group-profile-section-dropdown">
+                                    <div className="form-group-profile-section-dropdown">
                                             <label htmlFor="sex" className="form-label-profile-section">Gender:</label>
                                             <select
                                                 id="sex"
@@ -466,6 +415,25 @@ export default function SettingsPageResident({searchParams}: any) {
                                                 <option value="Female">Female</option>
                                             </select>
                                         </div>
+
+                                  <div className="form-group-profile-section">
+                                        <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                                        <input 
+                                            id="address" 
+                                            name="address"
+                                            value={formData.address}  
+                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            className="form-input-profile-section" 
+                                            required 
+                                            disabled={formData.status === "Verified"}
+                                        />
+                                    </div>
+
+                                        
+                            </div>
+
+                            <div className="account-details-section-right">
+                                      
 
                                   <div className="form-group-profile-section">
                                         <label htmlFor="phone" className="form-label-profile-section">Phone:</label>
@@ -487,18 +455,42 @@ export default function SettingsPageResident({searchParams}: any) {
                                         />
                                     </div>
 
-                                    <div className="form-group-profile-section">
-                                        <label htmlFor="address" className="form-label-profile-section">Address:</label>
+                                     <div className="form-group-profile-section">
+                                        <label htmlFor="email" className="form-label-profile-section">Email:</label>
                                         <input 
-                                            id="address" 
-                                            name="address"
-                                            value={formData.address}  
-                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                            id="email" 
+                                            name="email"
+                                            value={formData.email} 
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             className="form-input-profile-section" 
                                             required 
                                             disabled={formData.status === "Verified"}
                                         />
                                     </div>
+
+                                    
+
+                                    <div className="form-group-profile-section">
+                                    <label htmlFor="password" className="form-label-profile-section">New Password:</label>
+                                    <div className="relative">
+                                        <input 
+                                                id="password" 
+                                                name="password"
+                                                className="form-input-profile-section" 
+                                                type={showNewPassword ? "text" : "password"}
+                                                title="Please enter a password with a minimum of 6 characters"
+                                                onChange={handleChange}
+                                            />
+                                            <button
+                                                    type="button"
+                                                    className="toggle-password-btn"
+                                                    onClick={() => setShowNewPassword(!showNewPassword)}
+                                                            >
+                                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+
+                                    </div>
+                                </div>
 
                                     <div className="form-group-profile-section">
                                         <label htmlFor="confirmPassword" className="form-label-profile-section">Confirm Password:</label>
