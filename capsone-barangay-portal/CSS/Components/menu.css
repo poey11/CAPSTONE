@@ -667,6 +667,10 @@ padding: 20px;
   .notification-title {
     font-size: 18px;
   }
+
+  .message-section p{
+    font-size: 14px;
+  }
 }
 
 
