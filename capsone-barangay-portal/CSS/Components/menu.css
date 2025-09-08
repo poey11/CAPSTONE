@@ -668,8 +668,12 @@ padding: 20px;
     font-size: 18px;
   }
 
+  .message-section {
+      padding: 0px;
+  }
+
   .message-section p{
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
