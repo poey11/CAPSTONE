@@ -615,13 +615,14 @@ const handleDeleteNotification = async (notificationId: string) => {
         ) : (
           <div className="dropdown-Container">
             <div className="menu-section-container" ref={loginMenuRef}>
-              <p id="login-link" className="dropdown-item-resident">Login</p>
+              <p id="login-link" className="dropdown-item-resident" onClick={toggleLoginOptions}>Login</p>
               
-
-              <div className="Dropdown">
-                <Link href="/resident/login"><p className="dropdown-item-resident">Log In</p></Link>
-                <Link href="/register"><p className="dropdown-item-resident">Register</p></Link>
-              </div>
+              {showLoginOptions && (
+                <div className="Dropdown">
+                  <Link href="/resident/login" onClick={toggleLoginOptionsOff}><p className="dropdown-item-resident">Log In</p></Link>
+                  <Link href="/register" onClick={toggleLoginOptionsOff}><p className="dropdown-item-resident">Register</p></Link>
+                </div>
+              )}
             </div>
           </div>
         )}
