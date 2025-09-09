@@ -667,6 +667,26 @@ FOR ERROR INVALID FIELDS
   .info-toggle-btn {
     font-size: 14px;
   }
+
+  .popup-fileincident,
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
+
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
 }
 
 /* ---------- Mobile phones ---------- */
@@ -712,4 +732,23 @@ FOR ERROR INVALID FIELDS
     font-size: 14px;
   }
 
+  .popup-fileincident,
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
+
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
 }
