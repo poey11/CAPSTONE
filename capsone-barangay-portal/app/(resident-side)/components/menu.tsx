@@ -272,6 +272,8 @@ case "document":
 const handleNotificationClick = async (notification: Notification) => {
   console.log("Notification clicked:", notification);
 
+  setIsOpen(false);
+
   // Mark as read if unread
   if (!notification.isRead) {
     try {
