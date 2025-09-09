@@ -70,12 +70,16 @@
 
   border-radius: 16px;
   text-align: center;
-  background: #FFFFFF;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-
-
      scrollbar-width: thin;
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+  /*
+
+  Commented derick
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+*/
 }
 
 .table-section-transactions table {
@@ -263,12 +267,6 @@
 /* For Mobile */
 
 @media (max-width: 768px) {
-  .headerpic-transactions {
-    height: 150px;
-    font-size: 28px;
-    text-align: center;
-    padding: 0 10px;
-  }
 
   .filter-section-transactions {
     margin-top: 20px;
@@ -288,8 +286,10 @@
   .transactions-history-transactions {
     width: 95%;
     margin: 1rem auto;
-    height: auto;
+    min-height: 400px; /* keeps it tall even with no data */
+    height: auto;      /* allows it to expand if needed */
   }
+
 
   .table-section-transactions {
     overflow-x: auto; /* horizontal scroll */
@@ -306,10 +306,15 @@
     font-size: 14px;
     padding: 0.5rem;
   }
+  .no-transactions {
+    min-height: 100%;   /* centers message vertically */
+  }
 
   .no-transactions p {
     font-size: 1.2rem;
   }
+
+  
 }
 
 
