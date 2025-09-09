@@ -758,7 +758,18 @@ For age
     flex: 1 1 calc(50% - 2rem);
   }
 
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
 
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
 }
 
 /* Mobile view */
@@ -826,7 +837,18 @@ For age
   }
 
 
-  
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
   
 
 }

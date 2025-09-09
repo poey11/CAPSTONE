@@ -193,7 +193,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1.2rem;
+        gap: 1rem;
       }
       
       .valid-id-preview {
@@ -533,7 +533,7 @@ For the popup if reupload
 .valid-id-content {
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1rem;
   align-items: center;
   margin-top: 1.5rem;
 }
@@ -704,6 +704,52 @@ For the conditional Reupload Button
   .account-details-section-right {
     width: 100%;             
   }
+
+  .popup-modal {
+    height: auto;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .popup-modal h3 {
+    font-size: 1.3rem;
+  }
+
+  .popup-modal p {
+    font-size: 14px;
+  }
+
+  .no-valid-id-text {
+    font-size: 13px;
+  }
+
+  .valid-id-preview {
+    width: 180px;
+  }
+
+  .upload-btn-popup {
+    width: 120px;
+    font-size: 13px;
+  }
+
+  .close-btn {
+    width: 80px;
+    font-size: 13px;
+  }
+
+  .popup {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
 }
 
 /* Phones (portrait & small landscape) */
@@ -762,6 +808,53 @@ For the conditional Reupload Button
   .status-badge {
     align-self: center;
   }
+
+  .popup-modal {
+    height: auto;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .popup-modal h3 {
+    font-size: 1.2rem;
+  }
+
+  .popup-modal p {
+    font-size: 13px;
+  }
+
+  .no-valid-id-text {
+    font-size: 13px;
+  }
+
+  .valid-id-preview {
+    width: 180px;
+  }
+
+  .upload-btn-popup {
+    width: 120px;
+    font-size: 13px;
+  }
+
+  .close-btn {
+    width: 80px;
+    font-size: 13px;
+  }
+
+  .popup {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
+
 }
 
 

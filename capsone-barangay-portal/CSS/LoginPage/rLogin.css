@@ -413,6 +413,17 @@ NEW
   .section2-resident {
     gap: 60px; /* reduce spacing */
   }
+
+  .popup-login.modern {
+    height: 180px;
+    width: 300px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
 }
 
 
@@ -475,4 +486,28 @@ NEW
   .qc-logo {
     width: 100px;
   }
+
+  .popup-login.modern {
+    height: 180px;
+    width: 300px;
+  }
+
+  .continue-button{
+    font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+  }
+
+  .popup-login.modern h1 {
+  font-size: 20px;
+  color: #2d3748;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.popup-login.modern p {
+  font-size: 15px;
+  color: #4a5568;
+  margin-top: 5px;
+}
 }

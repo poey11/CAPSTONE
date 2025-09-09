@@ -418,16 +418,20 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
   if (invalidFields.length > 0) {
     setInvalidFields(invalidFields);
-    setPopupErrorMessage("Please fill up all required fields. Check all sections");
-    setShowErrorPopup(true);
+    setErrorPopup({
+              show: true,
+              message: "Please fill up all required fields. Check all sections.",
+          });
     setTimeout(() => {
       setShowErrorPopup(false);
     }, 3000);
     return;
   }
   if(filesContainer1.length === 0 && !incidentReport.file) {
-    setPopupErrorMessage("Please upload a audio, video or image as proof of incident.");
-    setShowErrorPopup(true);
+    setErrorPopup({
+              show: true,
+              message: "Please upload a audio, video or image as proof of incident.",
+          });
     setTimeout(() => {
       setShowErrorPopup(false);
     }
@@ -911,24 +915,7 @@ const confirmSubmit = async () => {
             </div>
             )}
 
-              {errorPopup.show && (
-                <div className="popup-overlay error">
-                    <div className="popup">
-                        <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" />
-                        <p>{errorPopup.message}</p>
-                        <button onClick={() => setErrorPopup({ show: false, message: "" })} className="close-button">Close</button>
-                    </div>
-                </div>
-            )}
-
-            {showErrorPopup && (
-                <div className={`error-popup-overlay-online show`}>
-                    <div className="popup-ad-online">
-                        <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
-                        <p>{popupErrorMessage}</p>
-                    </div>
-                </div>
-                )}
+             
 
 
 
