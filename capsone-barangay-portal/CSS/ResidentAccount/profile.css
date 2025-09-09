@@ -738,6 +738,11 @@ For the conditional Reupload Button
     width: 80px;
     font-size: 13px;
   }
+
+  .popup {
+    height: 200px;
+    width: 320px;
+  }
 }
 
 /* Phones (portrait & small landscape) */
@@ -830,6 +835,12 @@ For the conditional Reupload Button
     width: 80px;
     font-size: 13px;
   }
+
+  .popup {
+    height: 200px;
+    width: 320px;
+  }
+
 }
 
 
