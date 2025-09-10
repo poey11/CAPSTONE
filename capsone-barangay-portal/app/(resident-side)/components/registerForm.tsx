@@ -419,11 +419,16 @@ const confirmSubmit = async () => {
 
                             <div className="form-group-register-form">
                                 <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth test!!:<span className="required">*</span> </label>
-                                <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                                type="date" name="dateOfBirth" 
-                                 className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                max={today}
-                                required />
+                                <div className="date-wrapper">
+                                    <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                                    type="date" name="dateOfBirth" 
+                                    className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                    max={today}
+                                    required />
+                                    <span className="date-placeholder">
+                                        MM/DD/YYYY
+                                    </span>
+                                </div>
                             </div>
 
                             <div className="form-group-register-form">
