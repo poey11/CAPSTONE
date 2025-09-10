@@ -418,7 +418,7 @@ const confirmSubmit = async () => {
                             </div>
 
                             <div className="form-group-register-form">
-                                <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth!!test:<span className="required">*</span> </label>
+                                <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth test:<span className="required">*</span> </label>
                                 <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
                                 type="date" name="dateOfBirth" 
                                  className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}

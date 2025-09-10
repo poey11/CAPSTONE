@@ -781,11 +781,13 @@ LALA
 }
 
 /* try fix date input */
-input[type="date"] {
+input[type="date"],
+input[type="select"] {
   -webkit-appearance: none;  
   -moz-appearance: none;
   appearance: none;
-  width: 100%;               
+  width: 100%;     
+  height: 40px;          
   padding: 8px;             /* same as text inputs */
   box-sizing: border-box;   
   font-size: 16px;    
