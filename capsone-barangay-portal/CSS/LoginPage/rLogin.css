@@ -414,6 +414,12 @@ NEW
     gap: 60px; /* reduce spacing */
   }
 
+  .successful-icon-popup {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 15px;
+  }
+
   .popup-login.modern {
     height: 180px;
     width: 300px;
@@ -424,7 +430,21 @@ NEW
     width: 100px;
     margin-top: 10px;
   }
+
+    .popup-login.modern h1 {
+    font-size: 20px;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .popup-login.modern p {
+    font-size: 15px;
+    color: #4a5568;
+    margin-top: 5px;
+  }
 }
+
 
 
 /* Mobile (≤768px) */
@@ -496,6 +516,12 @@ NEW
     font-size: 16px;
     width: 100px;
     margin-top: 10px;
+  }
+
+  .successful-icon-popup {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 15px;
   }
 
   .popup-login.modern h1 {

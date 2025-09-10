@@ -811,25 +811,3 @@ select {
   color: #000;
   cursor: pointer; /* optional: shows pointer on hover */
 }
-
-.date-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-@media (max-width: 1024px) {
-  .date-wrapper .date-placeholder {
-    position: absolute;
-    top: 58%;
-    left: 12px;
-    transform: translateY(-50%);
-    color: #acabab;
-    pointer-events: none;
-    font-size: 16px;
-  }
-
-  .date-wrapper input[type="date"]:not(:placeholder-shown) + .date-placeholder,
-  .date-wrapper input[type="date"].has-value + .date-placeholder {
-    display: none;
-  }
-}
