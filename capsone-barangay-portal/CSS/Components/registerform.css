@@ -104,9 +104,9 @@
 
 
   .form-group-register-form {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
   }
 
   .form-group-register-form input, 
@@ -125,7 +125,6 @@
   font-weight: bold;
   color: #2C3E50;
   }
-
 
 
   .form-input-register-form:focus {
@@ -779,4 +778,22 @@ LALA
 
     display: block;
   }
+}
+
+/* try fix date input */
+input[type="date"] {
+  -webkit-appearance: none;  
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;               
+  padding: 8px;             
+  box-sizing: border-box;   
+  font-size: 16px;         
+}
+
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  right: 10px;
+  color: #f49028; 
+  opacity: 1;
 }
