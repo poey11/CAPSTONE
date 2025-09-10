@@ -786,15 +786,12 @@ input[type="date"] {
   -moz-appearance: none;
   appearance: none;
   width: 100%;               
-  padding: 8px;             
+  padding: 8px;             /* same as text inputs */
   box-sizing: border-box;   
   font-size: 16px;    
-  background-color: pink;     
-}
-
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  right: 10px;
-  color: #f49028; 
-  opacity: 1;
+  line-height: 1.5;          /* ensures text vertically centered */
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  background-color: #fff;    /* optional, match others */
+  color: #000;
 }
