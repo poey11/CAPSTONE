@@ -817,17 +817,19 @@ select {
   width: 100%;
 }
 
-.date-wrapper .date-placeholder {
-  position: absolute;
-  top: 50%;
-  left: 12px;
-  transform: translateY(-50%);
-  color: #999;
-  pointer-events: none;
-  font-size: 16px;
-}
+@media (max-width: 1024px) {
+  .date-wrapper .date-placeholder {
+    position: absolute;
+    top: 58%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: #acabab;
+    pointer-events: none;
+    font-size: 16px;
+  }
 
-.date-wrapper input[type="date"]:not(:placeholder-shown) + .date-placeholder,
-.date-wrapper input[type="date"].has-value + .date-placeholder {
-  display: none;
+  .date-wrapper input[type="date"]:not(:placeholder-shown) + .date-placeholder,
+  .date-wrapper input[type="date"].has-value + .date-placeholder {
+    display: none;
+  }
 }
