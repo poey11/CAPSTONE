@@ -785,7 +785,7 @@ input[type="date"] {
   -webkit-appearance: none;  
   -moz-appearance: none;
   appearance: none;
-  width: 100%;               
+  width: 80%;               
   padding: 8px;             
   box-sizing: border-box;   
   font-size: 16px;         
