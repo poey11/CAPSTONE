@@ -339,6 +339,15 @@ const confirmSubmit = async () => {
                             </div>
 
                             <div className="form-group-register-form">
+                                <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
+                                <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
+                                type="text" name="middle_name" 
+                                className="form-input-register-form "
+                                placeholder= "Enter Middle Name" />
+
+                            </div>
+
+                            <div className="form-group-register-form">
                                 <label htmlFor="last_name" className="form-label-register-form" >Last Name:<span className="required">*</span> </label>  
                                 
 
@@ -350,18 +359,7 @@ const confirmSubmit = async () => {
 
                             </div>
 
-                              
-
-                            <div className="form-group-register-form">
-                                <label htmlFor="middle_name" className="form-label-register-form">Middle Name: </label>
-                                <input value={resident.middle_name} onChange={handleChange} id="middle_name" 
-                                type="text" name="middle_name" 
-                                className="form-input-register-form "
-                                placeholder= "Enter Middle Name" />
-
-                            </div>
-
-                                
+                               
 
                             <div className="form-group-register-form">
                                     <label htmlFor="sex" className="form-label-register-form">Gender:<span className="required">*</span></label>
@@ -372,31 +370,28 @@ const confirmSubmit = async () => {
                                     </select>
                             </div>
 
+                            <div className="form-group-register-form">
+                                <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
+                                    <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
+                                    type="date" name="dateOfBirth" 
+                                    className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
+                                    max={today}
+                                    required />
+                            </div>
 
-                              <div className="form-group-register-form">
-                                    <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
-                                    <div className="relative">
-                                        <input value={resident.password} onChange={handleChange} id="password"
-                                            type={showPassword ? "text" : "password"}
-                                            name="password" 
-                                             className={`form-input-register-form ${invalidFields.includes("password") ? "input-error" : ""}`}
-                                            placeholder="Enter Password"
-                                            required/>
-                                            <button
-                                                 type="button"
-                                                 className="toggle-password-btn"
-                                                 onClick={() => setShowPassword(!showPassword)}
-                                                        >
-                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                                </button>
-                                    </div>
-                                </div>
 
                         </div>
 
                          <div className="form-container-right-side">
                             
-                            
+                            <div className="form-group-register-form">
+                                <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
+                                <input value={resident.address} onChange={handleChange} id="address" 
+                                type="text" name="address" 
+                               className={`form-input-register-form ${invalidFields.includes("address") ? "input-error" : ""}`}
+                                placeholder="Enter Address"
+                                required />
+                            </div>
 
                             
                             <div className="form-group-register-form">
@@ -417,23 +412,7 @@ const confirmSubmit = async () => {
                                 required />
                             </div>
 
-                            <div className="form-group-register-form">
-                                <label htmlFor="dateOfBirth" className="form-label-register-form" >Date of Birth:<span className="required">*</span> </label>
-                                    <input   value={resident.dateOfBirth} onChange={handleChange} id="dateOfBirth" 
-                                    type="date" name="dateOfBirth" 
-                                    className={`form-input-register-form ${invalidFields.includes("dateOfBirth") ? "input-error" : ""}`}
-                                    max={today}
-                                    required />
-                            </div>
-
-                            <div className="form-group-register-form">
-                                <label htmlFor="address" className="form-label-register-form">Address:<span className="required">*</span> </label>
-                                <input value={resident.address} onChange={handleChange} id="address" 
-                                type="text" name="address" 
-                               className={`form-input-register-form ${invalidFields.includes("address") ? "input-error" : ""}`}
-                                placeholder="Enter Address"
-                                required />
-                            </div>
+                        
 
                             <div className="form-group-register-form">
                                 <label htmlFor="email" className="form-label-register-form" >Email Address:<span className="required">*</span> </label>
@@ -443,6 +422,25 @@ const confirmSubmit = async () => {
                                 placeholder="Enter Email"
                                 required />
                             </div>
+
+                            <div className="form-group-register-form">
+                                    <label htmlFor="password" className="form-label-register-form">Password:<span className="required">*</span> </label>
+                                    <div className="relative">
+                                        <input value={resident.password} onChange={handleChange} id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            name="password" 
+                                             className={`form-input-register-form ${invalidFields.includes("password") ? "input-error" : ""}`}
+                                            placeholder="Enter Password"
+                                            required/>
+                                            <button
+                                                 type="button"
+                                                 className="toggle-password-btn"
+                                                 onClick={() => setShowPassword(!showPassword)}
+                                                        >
+                                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                </button>
+                                    </div>
+                                </div>
 
                              <div className="form-group-register-form">
                         <label htmlFor="confirm_password" className="form-label-register-form">Confirm Password:<span className="required">*</span></label>
