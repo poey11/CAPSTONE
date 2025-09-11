@@ -327,30 +327,6 @@
 
 
 
-/* Header responsive for tablets */
-@media (max-width: 1024px) {
-  .headerpic-transactions {
-    height: 120px;
-    font-size: 23px;
-    background-position: center 50%;
-  }
-
-
-}
-
-/* Header responsive and mobile */
-@media (max-width: 768px) {
-  .headerpic-transactions {
-    height: 120px;
-    font-size: 23px;
-    background-position: center 50%;
-  }
-
-}
-
-
-
-
 
 
 
@@ -1013,6 +989,43 @@ Barangay Response
 
   .document-requirements-container {
     width: 100%;
+  }
+}
+
+
+
+
+/* Header CSS for both main and specific programs*/
+
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+    .headerpic-specific-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+
+}
+
+/* Header responsive and mobile */
+@media (max-width: 768px) {
+  .headerpic-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+    .headerpic-specific-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
   }
 }
 
