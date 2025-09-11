@@ -70,12 +70,16 @@
 
   border-radius: 16px;
   text-align: center;
-  background: #FFFFFF;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-
-
      scrollbar-width: thin;
     scrollbar-color:rgba(36, 53, 76, 0.7) transparent; 
+
+
+  /*
+
+  Commented derick
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+*/
 }
 
 .table-section-transactions table {
@@ -134,16 +138,6 @@
 
 
 
-@media (max-width: 768px) {
-    .table-section-transactions table {
-        display: block;
-        overflow-x: auto;
-    }
-
-    .transactions-history-transactions {
-        padding: 1.5rem;
-    }
-} 
 
 .no-transactions {
   display: flex;
@@ -183,8 +177,6 @@
 .resident-module-filter option {
   color: #000000; 
 }
-
-
 
 
 
@@ -241,17 +233,93 @@
   box-shadow: 0 0 0 2px #60a5fa;
 }
 
-/* Responsive fallback: stack filters on smaller screens */
+
+
+
+/* For Tablet */
+
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .filter-section-transactions-inner {
+    gap: 1rem;
+    padding: 15px 20px;
+    flex-wrap: wrap; /* wrap if space is tight */
+  }
+
+  .filter-group {
+    min-width: 160px;
+    flex: 1 1 45%; /* 2 filters per row */
+  }
+
+  .table-section-transactions th,
+  .table-section-transactions td {
+    font-size: 16px;
+    padding: 0.75rem;
+  }
+
+  .transactions-history-transactions {
+    width: 95%;
+    height: auto; /* allow dynamic height */
+  }
+}
+
+
+/* For Mobile */
+
 @media (max-width: 768px) {
+
+  .filter-section-transactions {
+    margin-top: 20px;
+  }
+
   .filter-section-transactions-inner {
     flex-direction: column;
-    align-items: stretch;
+    gap: 1rem;
+    padding: 15px;
   }
 
   .filter-group {
     width: 100%;
+    min-width: unset;
   }
+
+  .transactions-history-transactions {
+    width: 95%;
+    margin: 1rem auto;
+    min-height: 400px; /* keeps it tall even with no data */
+    height: auto;      /* allows it to expand if needed */
+  }
+
+
+  .table-section-transactions {
+    overflow-x: auto; /* horizontal scroll */
+    height: auto;
+  }
+
+  .table-section-transactions table {
+    min-width: 600px; /* shrink min width for mobile */
+    font-size: 14px;
+  }
+
+  .table-section-transactions th,
+  .table-section-transactions td {
+    font-size: 14px;
+    padding: 0.5rem;
+  }
+  .no-transactions {
+    min-height: 100%;   /* centers message vertically */
+  }
+
+  .no-transactions p {
+    font-size: 1.2rem;
+  }
+
+  
 }
+
+
+
+
 
 
 
@@ -635,21 +703,6 @@ align-items: center;
     height: 200px;
   }
   
-  @media (max-width: 768px) {
-    .incident-content {
-      width: 90%;
-    }
-  
-    .title, .description {
-      width: 100%;
-      text-align: left;
-      padding: 1rem;
-    }
-  
-    .details-section {
-      flex-direction: column;
-    }
-  }
 
   .proof-incident-transactions {
     display: flex;
@@ -811,6 +864,174 @@ Barangay Response
 
 
 
+/* Tablet (769px – 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .incident-content {
+    width: 85%;
+    margin-top: 2rem;
+  }
+
+  .incident-content-section-1 {
+    flex-direction: row;         /* keep in one line */
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.25rem;
+    padding: 1rem 1.5rem;
+  }
+
+    .section-1-left {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .incident-main-right {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .details-section-document,
+  .details-section-response,
+  .details-section-upload {
+    height: auto;
+    min-height: unset;
+  }
+
+    .status-container {
+    margin: 0;
+    align-self: center;
+  }
+}
+
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+
+  .incident-content {
+    width: 95%;
+    margin-top: 1.5rem;
+  }
+
+  .incident-content-section-1 {
+    flex-direction: row;         /* try to keep inline */
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;             /* wrap if too small */
+    gap: 0.5rem;
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+
+  .section-1-left {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-1-left h1 {
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .status-container {
+    margin: 0;
+    align-self: center;
+  }
+  .incident-main-content-upper {
+    padding: 10px;
+  }
+
+  .incidents-transactions-info-toggle-wrapper {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  .incident-main-content-lower {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .incident-container-upper {
+    flex-direction: column;
+  }
+
+  .incident-main-left,
+  .incident-main-right {
+    width: 100%;
+    padding: 0.5rem;
+  }
+
+  .details-section-document,
+  .details-section-response,
+  .details-section-upload,
+  .details-section-response-upload {
+    height: auto;
+    min-height: unset;
+    padding: 0.75rem;
+  }
+
+  .title p {
+    font-size: 1rem;
+  }
+
+  .description p {
+    font-size: 0.95rem;
+  }
+
+  .requirements-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .document-requirements-container {
+    width: 100%;
+  }
+}
+
+
+
+
+/* Header CSS for both main and specific programs*/
+
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+    .headerpic-specific-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+
+}
+
+/* Header responsive and mobile */
+@media (max-width: 768px) {
+  .headerpic-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+
+    .headerpic-specific-transactions {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+
+
+
 
 
 .loading-or-error-container {
@@ -832,3 +1053,8 @@ Barangay Response
   font-weight: 600;
   color: red;
 }
+
+
+
+
+
