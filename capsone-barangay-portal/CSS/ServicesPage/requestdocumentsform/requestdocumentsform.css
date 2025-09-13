@@ -728,7 +728,8 @@ padding-left: 2rem;
   }
 
   /* added code para isang pababa nalang yung container */
-  .document-req-form-container {
+  .document-req-form-container,
+  .document-req-form-container-requirements {
     height: auto;
   }
 
@@ -789,11 +790,11 @@ padding-left: 2rem;
     display: block;
   }
 
-  .document-req-form-container {
-  height: auto;
-   overflow-y:auto;
-   
- }
+  .document-req-form-container,
+  .document-req-form-container-requirements {
+    height: auto; 
+  }
+
 
     .document-req-section h1 {
       font-size: 22px; 
