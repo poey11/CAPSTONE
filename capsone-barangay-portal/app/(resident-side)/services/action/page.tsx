@@ -164,7 +164,7 @@ useEffect(() => {
 
   // verified & allowed
   setCheckingAccess(false);
-}, [docB, user, userData, router]);
+}, [docB, user, userData]);
 
   const [nos, setNos] = useState(0);
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
@@ -1104,14 +1104,11 @@ const handleFileChange = (
 
 
 
-    const handleSubmit = async (event: React.FormEvent) => {
-      if (RESTRICTED_DOCS.has(docB) && (!user || userData?.status !== "Verified")) {
-        setErrorMessage("You must be a verified resident to request this document.");
-        setShowErrorPopup(true);
-        router.replace("/services");
-        return;
-      }      
+    const handleSubmit = async (event: React.FormEvent) => {  
       event.preventDefault(); // Prevent default form submission
+      if (RESTRICTED_DOCS.has(docB) && (!user || userData?.status !== "Verified")) {
+        return;
+      }    
       if((clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docB === "Barangay Indigency") {
         
         const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
