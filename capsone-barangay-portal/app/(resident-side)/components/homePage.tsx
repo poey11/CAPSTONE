@@ -230,7 +230,7 @@ useEffect(() => {
                 </div>
 
 
-                   <div className="services-card">
+                   <div className="services-card" onClick={() => router.push('/Programs')} >
 
                     <div className="services-image">
                         <img src="/Images/training-program.png" alt="Document Request Icon" className="icon-image" />
