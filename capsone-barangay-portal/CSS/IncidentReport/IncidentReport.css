@@ -710,6 +710,7 @@ FOR ERROR INVALID FIELDS
   .incident-report-form-container {
     flex-direction: column; /* stack vertically */
     gap: 1rem;
+     height: auto;
   }
 
   .incident-report-container-left-side,
@@ -751,6 +752,17 @@ FOR ERROR INVALID FIELDS
     height: 35px;
     padding: 0%;
   }
+
+    .file-upload-container-incident-report {
+    width: 100%;     
+    min-height: 160px;  
+    padding: 1.5rem;   
+  }
+
+  .upload-link-incident-report {
+    font-size: 14px;
+  }
+  
 }
 
 /* fix date input */
