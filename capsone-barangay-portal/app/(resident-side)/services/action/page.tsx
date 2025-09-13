@@ -906,7 +906,7 @@ const handleFileChange = (
               : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
 
       timestamp: new Date(),
-      requestorId: userData?.residentId,
+      requestorId: userData?.residentId || "Guest",
       isRead: false,
       ...(documentTypeIs !== "" ? {
         transactionType: documentTypeIs,}:
@@ -929,7 +929,7 @@ const handleFileChange = (
     
   
   await addDoc(collection(db, "Notifications"), {
-    residentID: userData?.residentId,
+    residentID: userData?.residentId || "Guest",
     requestID: newDoc,
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
