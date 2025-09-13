@@ -777,33 +777,33 @@ export default function ProgramsModule() {
                       <td>
                         <div className="actions-programs">
                           <button
-      className="action-programs-button"
-      onClick={() => handleEditClick(program.id)}
-    >
-      <img
-        src={
-          program.approvalStatus === "Rejected" ||
-          program.progressStatus === "Completed"
-            ? "/Images/view.png"
-            : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
-                position
-              )
-            ? "/Images/edit.png"
-            : "/Images/view.png"
-        }
-        alt="Action"
-        className={
-          program.approvalStatus === "Rejected" ||
-          program.progressStatus === "Completed"
-            ? "action-programs-view"
-            : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
-                position
-              )
-            ? "action-programs-edit"
-            : "action-programs-view"
-        }
-      />
-    </button>
+                            className="action-programs-button"
+                            onClick={() => handleEditClick(program.id)}
+                          >
+                            <img
+                              src={
+                                program.approvalStatus === "Rejected" ||
+                                program.progressStatus === "Completed"
+                                  ? "/Images/view.png"
+                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
+                                      position
+                                    )
+                                  ? "/Images/edit.png"
+                                  : "/Images/view.png"
+                              }
+                              alt="Action"
+                              className={
+                                program.approvalStatus === "Rejected" ||
+                                program.progressStatus === "Completed"
+                                  ? "action-programs-view"
+                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
+                                      position
+                                    )
+                                  ? "action-programs-edit"
+                                  : "action-programs-view"
+                              }
+                            />
+                          </button>
 
                           {canDelete && (
                             <button
