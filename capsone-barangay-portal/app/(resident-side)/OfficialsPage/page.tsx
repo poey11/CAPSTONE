@@ -2,72 +2,128 @@
 
 
 import "@/CSS/OfficialsPage/OfficialsPage.css";
+import { useState,useEffect } from "react";
+import { collection, onSnapshot} from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+interface Official {
+  id: string;
+  name: string;
+  position: string;
+  term: string;
+  contact: string;
+  image?: string;
+  email?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+}
 
 
 export default function Official() {
-  const captain = {
-    Name: "Jonel Quebal",
-    Role: "Barangay Captain",
-    Term: "2024-2025",
-    image: "/Images/CaptainImage.jpg",
-    Phonenumber: "09176219123",
-  };
+  // const captain = {
+  //   Name: "Jonel Quebal",
+  //   Role: "Barangay Captain",
+  //   Term: "2024-2025",
+  //   image: "/Images/CaptainImage.jpg",
+  //   Phonenumber: "09176219123",
+  // };
 
-  const officials = [
-    {
-      Name: "Jane Doe",
-      Role: "Barangay Secretary",
-      Term: "2024-2025",
-      image: "/Images/anak.jpg",
-      Phonenumber: "09176219124",
-    },
-    {
-      Name: "John Smith",
-      Role: "Barangay Treasurer",
-      Term: "2024-2025",
-      image: "/Images/anak.jpg",
-      Phonenumber: "09176219125",
-    },
-    {
-      Name: "Alice Brown",
-      Role: "Barangay Councilor",
-      Term: "2024-2025",
-      image: "/Images/anak.jpg",
-      Phonenumber: "09176219126",
-    },
-    {
-      Name: "Robert Black",
-      Role: "Barangay Councilor",
-      Term: "2024-2025",
-      image: "/Images/anak.jpg",
-      Phonenumber: "09176219127",
-    },
+  // const officials = [
+  //   {
+  //     Name: "Jane Doe",
+  //     Role: "Barangay Secretary",
+  //     Term: "2024-2025",
+  //     image: "/Images/anak.jpg",
+  //     Phonenumber: "09176219124",
+  //   },
+  //   {
+  //     Name: "John Smith",
+  //     Role: "Barangay Treasurer",
+  //     Term: "2024-2025",
+  //     image: "/Images/anak.jpg",
+  //     Phonenumber: "09176219125",
+  //   },
+  //   {
+  //     Name: "Alice Brown",
+  //     Role: "Barangay Councilor",
+  //     Term: "2024-2025",
+  //     image: "/Images/anak.jpg",
+  //     Phonenumber: "09176219126",
+  //   },
+  //   {
+  //     Name: "Robert Black",
+  //     Role: "Barangay Councilor",
+  //     Term: "2024-2025",
+  //     image: "/Images/anak.jpg",
+  //     Phonenumber: "09176219127",
+  //   },
 
-    {
-        Name: "Robert Black",
-        Role: "Barangay Councilor",
-        Term: "2024-2025",
-        image: "/Images/anak.jpg",
-        Phonenumber: "09176219127",
-      },
+  //   {
+  //       Name: "Robert Black",
+  //       Role: "Barangay Councilor",
+  //       Term: "2024-2025",
+  //       image: "/Images/anak.jpg",
+  //       Phonenumber: "09176219127",
+  //     },
 
-      {
-        Name: "Robert Black",
-        Role: "Barangay Councilor",
-        Term: "2024-2025",
-        image: "/Images/anak.jpg",
-        Phonenumber: "09176219127",
-      }, 
-      {
-        Name: "Robert Black",
-        Role: "Barangay Councilor",
-        Term: "2024-2025",
-        image: "/Images/anak.jpg",
-        Phonenumber: "09176219127",
-      }, 
+  //     {
+  //       Name: "Robert Black",
+  //       Role: "Barangay Councilor",
+  //       Term: "2024-2025",
+  //       image: "/Images/anak.jpg",
+  //       Phonenumber: "09176219127",
+  //     }, 
+  //     {
+  //       Name: "Robert Black",
+  //       Role: "Barangay Councilor",
+  //       Term: "2024-2025",
+  //       image: "/Images/anak.jpg",
+  //       Phonenumber: "09176219127",
+  //     }, 
       
 
-  ];
+  // ];
+
+  const [captain, setCaptain] = useState<Official | undefined>(undefined);
+  const [officials, setOfficials] = useState<Official[]>([]);
+
+  const [listOfficials, setListOfficials] = useState<Official[]>([]);
+
+  useEffect(() => {
+    const docRef = collection(db, "BarangayUsers");
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+          
+      const data: Official[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
+          .filter(Boolean) // removes null, undefined, and empty strings
+          .join(" "),
+          position: doc.data().position === "LF Staff"
+            ? `${doc.data().position} (${doc.data().department || "N/A"})`
+            : doc.data().position || "N/A",          
+        term: doc.data().term || "N/A",
+        contact: doc.data().phone,
+        image: doc.data().image || "/images/default-profile.png",
+        email: doc.data().email || "N/A",
+        createdBy: doc.data().createdBy || "N/A",
+        createdAt: doc.data().createdAt,
+        updatedBy: doc.data().updatedBy || "N/A",
+      }));
+      setListOfficials(data);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const captainData = listOfficials.find(
+      (official) => official.position === "Punong Barangay"
+    );
+    setCaptain(captainData);
+    const otherOfficials = listOfficials.filter(
+      (official) => official.position !== "Punong Barangay"
+    );
+    setOfficials(otherOfficials);
+  }, [listOfficials]);
 
   return (
 
@@ -87,12 +143,18 @@ export default function Official() {
         <div className="officials-punong-brgy-section">
           <div className="officials-punong-brgy-card">
             <div className="officials-punong-brgy-image">
-              <img src={captain.image} className="Captain-image-officials" alt="Captain" />
+              <img src={captain?.image ||"/Images/default-identificationpic.jpg"} className="Captain-image-officials" alt="Captain"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/Images/default-identificationpic.jpg";
+                }}
+              />
             </div>
             <div className="officials-punong-brgy-details">
-              <p className="official-role-punong-brgy">{captain.Role}</p>
-              <h2 className="official-name-punong-brgy">{captain.Name}</h2>
-              <p className="official-phonenumber-punong-brgy">Contact Information: {captain.Phonenumber}</p>
+              <p className="official-role-punong-brgy">{captain?.position}</p>
+              <h2 className="official-name-punong-brgy">{captain?.name}</h2>
+              <p className="official-phonenumber-punong-brgy">Term Duration: {captain?.term || "N/A"}</p>
+              <p className="official-phonenumber-punong-brgy">Email: {captain?.email || "N/A"}</p>
+              <p className="official-phonenumber-punong-brgy">Contact Information: {captain?.contact}</p>
             </div>
           </div>
         </div>
@@ -102,14 +164,23 @@ export default function Official() {
             <div key={index} className="official-card-officials">
               <img
                 src={official.image}
-                alt={official.Name}
+                alt={official.name}
                 className="official-image-officials"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/Images/default-identificationpic.jpg";
+                }}
               />
               <div className="official-content-officials">
-                <p className="official-role-officials">{official.Role}</p>
-                <h2 className="official-name-officials">{official.Name}</h2>
+                <p className="official-role-officials">{official.position}</p>
+                <h2 className="official-name-officials">{official.name}</h2>
                 <p className="official-phonenumber-officials">
-                  Contact Information: {official.Phonenumber}
+                  Term Duration: {official.term}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Email: {official.email || "N/A"}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Contact Information: {official.contact}
                 </p>
               </div>
             </div>

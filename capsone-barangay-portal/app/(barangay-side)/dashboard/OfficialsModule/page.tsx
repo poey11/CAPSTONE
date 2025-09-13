@@ -5,33 +5,46 @@ import React,{useState, useEffect, useRef} from "react";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import { collection, onSnapshot} from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
 
-
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
+interface Official {
+  id: string;
+  name: string;
+  position: string;
+  term: string;
+  contact: string;
+  image?: string;
+  email?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedBy?: string;
+}
 
 // Dummy officials data with 11 entries
-const officialsData = [
-  { id: 1, name: "Juan Dela Cruz", position: "Punong Barangay", term: "2023-2026", contact: "09171234567", gender: "Male", image: "/images/CaptainImage.jpg" },
-  { id: 2, name: "Maria Lopez Santos", position: "Secretary", term: "2023-2026", contact: "09182345678", gender: "Female", image: "/images/CaptainImage.jpg" },
-  { id: 3, name: "Roberto Garcia", position: "Asst Secretary", term: "2023-2026", contact: "09193456789", gender: "Male", image: "/images/CaptainImage.jpg" },
-  { id: 4, name: "Angela Rivera", position: "Admin Staff", term: "2023-2026", contact: "09204567890", gender: "Female", image: "/images/CaptainImage.jpg" },
-  { id: 5, name: "Paulo Mendoza", position: "LF Staff", term: "2023-2026", contact: "09215678901", gender: "Male", image: "/images/CaptainImage.jpg" },
-  { id: 6, name: "Catherine Cruz", position: "Admin Staff", term: "2023-2026", contact: "09226789012", gender: "Female", image: "/images/CaptainImage.jpg" },
-  { id: 7, name: "Emmanuel Reyes", position: "LF Staff", term: "2023-2026", contact: "09237890123", gender: "Male", image: "/images/CaptainImage.jpg" },
-  { id: 8, name: "Isabella Flores", position: "Secretary", term: "2023-2026", contact: "09248901234", gender: "Female", image: "/images/CaptainImage.jpg" },
-  { id: 9, name: "Mark Villanueva", position: "Asst Secretary", term: "2023-2026", contact: "09259012345", gender: "Male", image: "/images/CaptainImage.jpg" },
-  { id: 10, name: "Grace Bautista", position: "Admin Staff", term: "2023-2026", contact: "09260123456", gender: "Female", image: "/images/CaptainImage.jpg" },
-  { id: 11, name: "Francis Lim", position: "LF Staff", term: "2023-2026", contact: "09271234568", gender: "Male", image: "/images/CaptainImage.jpg" },
-];
+// const officialsData = [
+//   { id: 1, name: "Juan Dela Cruz", position: "Punong Barangay", term: "2023-2026", contact: "09171234567", gender: "Male", image: "/images/CaptainImage.jpg" },
+//   { id: 2, name: "Maria Lopez Santos", position: "Secretary", term: "2023-2026", contact: "09182345678", gender: "Female", image: "/images/CaptainImage.jpg" },
+//   { id: 3, name: "Roberto Garcia", position: "Asst Secretary", term: "2023-2026", contact: "09193456789", gender: "Male", image: "/images/CaptainImage.jpg" },
+//   { id: 4, name: "Angela Rivera", position: "Admin Staff", term: "2023-2026", contact: "09204567890", gender: "Female", image: "/images/CaptainImage.jpg" },
+//   { id: 5, name: "Paulo Mendoza", position: "LF Staff", term: "2023-2026", contact: "09215678901", gender: "Male", image: "/images/CaptainImage.jpg" },
+//   { id: 6, name: "Catherine Cruz", position: "Admin Staff", term: "2023-2026", contact: "09226789012", gender: "Female", image: "/images/CaptainImage.jpg" },
+//   { id: 7, name: "Emmanuel Reyes", position: "LF Staff", term: "2023-2026", contact: "09237890123", gender: "Male", image: "/images/CaptainImage.jpg" },
+//   { id: 8, name: "Isabella Flores", position: "Secretary", term: "2023-2026", contact: "09248901234", gender: "Female", image: "/images/CaptainImage.jpg" },
+//   { id: 9, name: "Mark Villanueva", position: "Asst Secretary", term: "2023-2026", contact: "09259012345", gender: "Male", image: "/images/CaptainImage.jpg" },
+//   { id: 10, name: "Grace Bautista", position: "Admin Staff", term: "2023-2026", contact: "09260123456", gender: "Female", image: "/images/CaptainImage.jpg" },
+//   { id: 11, name: "Francis Lim", position: "LF Staff", term: "2023-2026", contact: "09271234568", gender: "Male", image: "/images/CaptainImage.jpg" },
+// ];
+
 
 export default function OfficialsModule() {
-
+  const [officialsData, setOfficialsData] = useState<Official[]>([]);
+  const { data: session } = useSession();
+  const user = session?.user?.position;
   const router = useRouter();
-  const handleEditClick = () => {
-    router.push("/dashboard/OfficialsModule/EditOfficial");
+  const handleEditClick = (id:string) => {
+    router.push("/dashboard/OfficialsModule/EditOfficial"+`?id=${id}`);
   };
 
    /* NEW UPDATED ADDED */
@@ -52,6 +65,33 @@ export default function OfficialsModule() {
       }
     }, []);
 
+    useEffect(() => {
+      const docRef = collection(db, "BarangayUsers");
+      const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      
+        const data: Official[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
+            .filter(Boolean) // removes null, undefined, and empty strings
+            .join(" "),
+            position: doc.data().position === "LF Staff"
+              ? `${doc.data().position} (${doc.data().department || "N/A"})`
+              : doc.data().position || "N/A",          
+          term: doc.data().term || "N/A",
+          contact: doc.data().phone,
+          image: doc.data().image || "/images/default-profile.png",
+          email: doc.data().email || "N/A",
+          createdBy: doc.data().createdBy || "N/A",
+          createdAt: doc.data().createdAt,
+          updatedBy: doc.data().updatedBy || "N/A",
+        }));
+        setOfficialsData(data);
+      });
+      return () => unsubscribe();
+
+    },[])
+
+    console.log(officialsData);
       
     const [showAddOfficialPopup, setShowAddOfficialPopup] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -67,10 +107,11 @@ export default function OfficialsModule() {
     const [currentPage, setCurrentPage] = useState(1);
     const UserPerPage = 10; 
 
-
+    const [selectedOfficial, setSelectedOfficial] = useState<Official | null>(null);
   // Open popup
-    const openPopup = () => {
+    const openPopup = (i:any) => {
       setIsPopupOpen(true);
+      setSelectedOfficial(i);
     };
 
     // Close popup
@@ -81,7 +122,7 @@ export default function OfficialsModule() {
       // Load dummy data on first render
       useEffect(() => {
         setFilteredUser(officialsData);
-      }, []);
+      }, [officialsData]);
 
    
   // Apply filter by name & position
@@ -105,7 +146,7 @@ export default function OfficialsModule() {
 
     setFilteredUser(filtered);
     setCurrentPage(1); // reset to first page on filter change
-  }, [nameSearch, positionDropdown]);
+  }, [nameSearch, positionDropdown, officialsData]);
 
 
     // Pagination logic
@@ -133,17 +174,18 @@ export default function OfficialsModule() {
     return pageNumbersToShow;
   };
 
-
+  console.log("Filtered Officials:", filteredUser); 
+  console.log("Current Page Officials:", currentUser);
   return (
     <main className="brgy-officials-main-container">
 
       <div className="brgy-officials-section-1"> 
-        <button 
+        {/* <button 
           className="add-brgy-official-btn add-brgy-official-animated"
           onClick={() => setShowAddOfficialPopup(true)}
         >
           Add New Official
-        </button>
+        </button> */}
       </div>
       
       <div className={`brgy-officials-section-2 ${filtersLoaded ? "filters-animated" : ""}`}>
@@ -192,17 +234,21 @@ export default function OfficialsModule() {
               {currentUser.map((official) => (
                 <tr key={official.id}>
                   <td>
-                  <div className="official-info">
-                    <div className="official-image-wrapper">
-                      <img
-                        src={official.image}
-                        alt="Official Profile"
-                        className="official-image"
-                      />
+                    <div className="official-info">
+                      <div className="official-image-wrapper">
+                        <img
+                          src={official.image || "/Images/default-identificationpic.jpg"}
+                          alt="Official Profile"
+                          className="official-image"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/Images/default-identificationpic.jpg";
+                          }}
+                        />
+
+                      </div>
+                      <div className="official-name">{official.name}</div>
                     </div>
-                    <div className="official-name">{official.name}</div>
-                  </div>
-                </td>
+                  </td>
                   <td>{official.position}</td>
                   <td>{official.term}</td>
                   <td>{official.contact}</td>
@@ -210,21 +256,25 @@ export default function OfficialsModule() {
                     <div className="bry-official-actions">
                       <button 
                         className="brgy-official-action-view"
-                        onClick={openPopup}
+                        onClick={() => openPopup(official)}
                       >
                         <img src="/Images/view.png" alt="View"/>
                       </button>
+                      {user === "Admin Staff" && (
+                        <>
+                          <button 
+                            className="brgy-official-action-edit"
+                            onClick={()=>handleEditClick(official.id.toString())}
+                           >
+                            <img src="/Images/edit.png" alt="Edit"/>
+                          </button>
+                        </>
+                      )}
+                    
 
-                     <button 
-                      className="brgy-official-action-edit"
-                      onClick={handleEditClick}
-                     >
-                         <img src="/Images/edit.png" alt="Edit"/>
-                      </button>
-
-                      <button className="brgy-official-action-delete">
+                      {/* <button className="brgy-official-action-delete">
                          <img src="/Images/delete.png" alt="Delete" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -328,7 +378,7 @@ export default function OfficialsModule() {
                               onChange={(e) => setPosition(e.target.value)}
                               required
                             >
-                              <option value="">Select a Position</option>
+                              <option value="" disabled>Select a Position</option>
                               <option value="Punong Barangay">Punong Barangay</option>
                               <option value="Secretary">Secretary</option>
                               <option value="Assistant Secretary">Asst Secretary</option>
@@ -439,9 +489,12 @@ export default function OfficialsModule() {
                     <span className="user-details-label">Official Details</span>
                     <div className="user-profile-container">
                       <img
-                        src={"/Images/default-identificationpic.jpg"}
+                        src={selectedOfficial?.image || "/Images/default-identificationpic.jpg"}
                         alt="Identification"
                         className="resident-id-photo"
+                        onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = "/Images/default-identificationpic.jpg";
+                          }}
                       />
                     </div>
                   </div>
@@ -455,6 +508,11 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.name.split(" ").length === 3
+                                  ? selectedOfficial.name.split(" ")[2] // last name
+                                  : selectedOfficial?.name.split(" ")[1] 
+                                  || "" // last name if no middle name 
+                                }
                                 readOnly
                               /> 
                             </div>
@@ -463,6 +521,7 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.name.split(" ")[0] || ""}
                                 readOnly
                               /> 
                             </div>
@@ -471,6 +530,11 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={
+                                     selectedOfficial?.name.split(" ").length === 3
+                                       ? selectedOfficial.name.split(" ")[1] // middle name
+                                       : "N/A"
+                                   }                                
                                 readOnly
                               /> 
                             </div>
@@ -479,6 +543,7 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.contact || ""}
                                 readOnly
                               /> 
                             </div>
@@ -489,16 +554,18 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.position || ""}
                                 readOnly
                               /> 
                             </div>
 
-                            {position === "LF Staff" && (
+                            {selectedOfficial?.position?.includes("LF Staff") && (
                               <div className="view-user-fields-section">
                                 <p>Department</p>
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value={selectedOfficial?.position?.match(/\(([^)]+)\)/)?.[1] || ""}
                                   readOnly
                                 /> 
                               </div>
@@ -509,6 +576,7 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.term || ""}
                                 readOnly
                               /> 
                             </div>
@@ -518,6 +586,7 @@ export default function OfficialsModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value={selectedOfficial?.email || ""}
                                 readOnly
                               /> 
                             </div>
@@ -532,6 +601,7 @@ export default function OfficialsModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value={selectedOfficial?.createdBy || ""}
                                   readOnly
                                 /> 
                             </div>
@@ -540,6 +610,7 @@ export default function OfficialsModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value={selectedOfficial?.createdAt || ""}
                                   readOnly
                                 /> 
                             </div>
@@ -550,6 +621,7 @@ export default function OfficialsModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value={selectedOfficial?.updatedBy || ""}
                                   readOnly
                                 /> 
                             </div>
