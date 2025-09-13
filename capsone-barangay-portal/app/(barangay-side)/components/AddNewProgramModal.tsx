@@ -388,7 +388,6 @@ export default function AddNewProgramModal({
 
   const endTimeMin = isSameDay() && timeStart ? addMinutes(timeStart, 180) : undefined;
 
-
   const handleSave = () => {
     if (!validate()) {
       setActiveSection("details");
@@ -522,8 +521,7 @@ export default function AddNewProgramModal({
     }
   };
 
-
-  {/*
+  {/* 
   const handleSave = async () => {
     if (saving) return;
     if (!validate()) {
@@ -656,6 +654,19 @@ export default function AddNewProgramModal({
 
   const togglePredefinedOpen = () => {
     setIsPredefinedOpen((prev) => !prev);
+  };
+
+  // --- NEW: date helpers to enforce multi-day end >= start + 1 (kept separate to avoid touching existing helpers)
+  const formatYMD = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate()
+    ).padStart(2, "0")}`;
+
+  const nextDayOf = (dateStr: string) => {
+    if (!dateStr) return "";
+    const d = new Date(`${dateStr}T00:00:00`);
+    d.setDate(d.getDate() + 1);
+    return formatYMD(d);
   };
 
   return (
@@ -1034,17 +1045,12 @@ export default function AddNewProgramModal({
                             onChange={(e) => {
                               const newStart = e.target.value;
                               setStartDate(newStart);
-                              if (endDate && new Date(endDate) < new Date(newStart)) {
-                                setEndDate(newStart);
+                              // Enforce: end date must be at least the next day of start date
+                              const minEnd = nextDayOf(newStart);
+                              if (!endDate || new Date(endDate) <= new Date(newStart)) {
+                                setEndDate(minEnd);
                               }
-                              if (
-                                isSameDay() &&
-                                timeStart &&
-                                timeEnd &&
-                                toMinutes(timeEnd) < toMinutes(timeStart)
-                              ) {
-                                setTimeEnd(timeStart);
-                              }
+                              // If previously same-day, any timeEnd constraints are irrelevant now
                             }}
                           />
                         </div>
@@ -1061,23 +1067,17 @@ export default function AddNewProgramModal({
                             ]
                               .join(" ")
                               .trim()}
-                            min={startDate || minStartDate}
+                            // Enforce in the picker: cannot choose same day; must be start + 1
+                            min={startDate ? nextDayOf(startDate) : minStartDate}
                             value={endDate}
                             onChange={(e) => {
                               const newEnd = e.target.value;
-                              if (startDate && new Date(newEnd) < new Date(startDate)) {
-                                setEndDate(startDate);
-                              } else {
-                                setEndDate(newEnd);
+                              if (startDate && new Date(newEnd) <= new Date(startDate)) {
+                                // Auto-correct to the earliest valid value
+                                setEndDate(nextDayOf(startDate));
+                                return;
                               }
-                              if (
-                                isSameDay() &&
-                                timeStart &&
-                                timeEnd &&
-                                toMinutes(timeEnd) < toMinutes(timeStart)
-                              ) {
-                                setTimeEnd(timeStart);
-                              }
+                              setEndDate(newEnd);
                             }}
                           />
                         </div>
