@@ -776,34 +776,34 @@ export default function ProgramsModule() {
                       </td>
                       <td>
                         <div className="actions-programs">
-                              {program.approvalStatus === "Rejected" ||
-                              program.progressStatus === "Completed" ? (
-
                           <button
                             className="action-programs-button"
                             onClick={() => handleEditClick(program.id)}
                           >
                             <img
-                              src="/Images/view.png"
-                              alt="Edit"
-                              className="action-programs-view"
+                              src={
+                                program.approvalStatus === "Rejected" ||
+                                program.progressStatus === "Completed"
+                                  ? "/Images/view.png"
+                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
+                                      position
+                                    )
+                                  ? "/Images/edit.png"
+                                  : "/Images/view.png"
+                              }
+                              alt="Action"
+                              className={
+                                program.approvalStatus === "Rejected" ||
+                                program.progressStatus === "Completed"
+                                  ? "action-programs-view"
+                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
+                                      position
+                                    )
+                                  ? "action-programs-edit"
+                                  : "action-programs-view"
+                              }
                             />
                           </button>
-
-                             ) : (
-
-                           <button
-                            className="action-programs-button"
-                            onClick={() => handleEditClick(program.id)}
-                          >
-                            <img
-                              src="/Images/edit.png"
-                              alt="Edit"
-                              className="action-programs-edit"
-                            />
-                          </button>
-
-                              )}
 
                           {canDelete && (
                             <button
