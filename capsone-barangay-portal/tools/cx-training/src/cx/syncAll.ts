@@ -1,17 +1,14 @@
-// tools/cx-training/src/cx/syncAll.ts
-//
-// One-shot setup for your agent:
-// - Ensures core intents exist (NAV_*, INFO_*, INCIDENT_*, REQUEST_SERVICE, REQUIREMENTS_QUERY)
-// - Creates/updates Flow-level route groups: "Navigation", "Info & FAQs", "Incidents & Justice"
-// - Creates/updates Page: "Services" (slot-filling doc_base/doc_variant + smart routes)
-// - Wires Flow start -> Services for REQUEST_SERVICE / REQUIREMENTS_QUERY (no Start Page needed)
-// - Adds helpful flow fallbacks + sets classification threshold
-//
-// Run: npm run sync:all
-//
-// Prereqs:
-// - .env in tools/cx-training has PROJECT_ID, LOCATION, AGENT_ID, LANGUAGE_CODE, GOOGLE_APPLICATION_CREDENTIALS
-// - Entities 'doc_base' and 'doc_variant' already created via sync:entities
+/**
+ * tools/cx-training/src/cx/syncAll.ts
+ *
+ * One-shot setup for your agent with **no file reads** (all data inlined).
+ *
+ * Run: npm run sync:all
+ *
+ * Prereqs:
+ * - .env in tools/cx-training has PROJECT_ID, LOCATION, AGENT_ID, LANGUAGE_CODE, GOOGLE_APPLICATION_CREDENTIALS
+ * - Entities 'doc_base' and 'doc_variant' already created via sync:entities (or create them manually first)
+ */
 
 import "dotenv/config";
 import {
@@ -20,10 +17,123 @@ import {
   TransitionRouteGroupsClient,
   EntityTypesClient,
   IntentsClient,
+  protos,
 } from "@google-cloud/dialogflow-cx";
 import { cxConfig } from "./auth.js";
 
-// ---------- Env / config ----------
+// ---------- Inline data (edit/extend as you wish) ----------
+
+// Top-level configuration strings
+const BARANGAY_NAME = process.env.BARANGAY_NAME || "Barangay Fairview Park";
+const OFFICE_HOURS = process.env.OFFICE_HOURS || "Mon–Fri, 8:00 AM–5:00 PM";
+const CONTACT_PHONE = process.env.CONTACT_PHONE || "0917-XXX-XXXX";
+const INCIDENT_LINK = process.env.INCIDENT_LINK || "/IncidentReport";
+const STATUS_PORTAL_LINK = process.env.STATUS_PORTAL_LINK || "/IncidentReport";
+const HALL_ADDRESS =
+  process.env.HALL_ADDRESS || "Barangay Hall (set exact address)";
+const CLASSIFICATION_THRESHOLD = Number(
+  process.env.CLASSIFICATION_THRESHOLD || "0.28"
+);
+
+// Static links per base (used when only doc_base is known)
+const SERVICE_LINK = (base: string) =>
+  `/services/action?docB=${encodeURIComponent(base)}`;
+
+const GATING_LOGIN =
+  "Online submission is available to verified residents (sign in to continue).";
+
+// A **small** starter set of requirements. Add more entries from your JSON
+// by copying objects with the same shape (base, variant, bullets, age, etc.).
+type Requirement = {
+  base: string;
+  variant: string;
+  age?: string;
+  frequency?: string;
+  validity?: string;
+  documents?: string[];
+  requestor?: string;
+  link?: string;
+};
+
+const REQS: Requirement[] = [
+  // Barangay Certificate — Residency
+  {
+    base: "Barangay Certificate",
+    variant: "Residency",
+    age: "18+",
+    frequency: "No limit",
+    validity: "1 year",
+    documents: [
+      "Signature over printed name",
+      "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+      "Picture taking at the barangay",
+    ],
+    link: SERVICE_LINK("Barangay Certificate"),
+  },
+  // Barangay Indigency — No Income
+  {
+    base: "Barangay Indigency",
+    variant: "No Income",
+    age: "18+",
+    frequency: "No limit",
+    validity: "1 year",
+    documents: [
+      "Signature over printed name",
+      "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+      "Interview at the barangay",
+    ],
+    link: SERVICE_LINK("Barangay Indigency"),
+  },
+  // Barangay Clearance — Loan
+  {
+    base: "Barangay Clearance",
+    variant: "Loan",
+    age: "18+",
+    frequency: "No limit",
+    validity: "1 year",
+    documents: [
+      "Signature over printed name",
+      "One of: Valid ID with a Barangay Fairview address / Barangay ID / Endorsement Letter from Homeowner/Sitio President",
+    ],
+    link: SERVICE_LINK("Barangay Clearance"),
+  },
+  // Business Permit — New
+  {
+    base: "Business Permit",
+    variant: "New",
+    age: "18+",
+    frequency: "No limit",
+    validity: "1 year",
+    documents: [
+      "Signature over printed name",
+      "Valid ID",
+      "Certified True Copy of Title of Property / Contract of Lease",
+      "Certified True Copy of DTI Registration",
+      "Picture of CCTV installed in the establishment",
+    ],
+    requestor: "Residents / Non Residents",
+    link: SERVICE_LINK("Business Permit"),
+  },
+  // Construction Permit — Standard
+  {
+    base: "Construction Permit",
+    variant: "Standard",
+    age: "18+",
+    frequency: "No limit",
+    validity: "1 year",
+    documents: [
+      "Signature over printed name",
+      "Valid ID",
+      "Certified True Copy of Title of Property / Contract of Lease",
+      "Certified True Copy of Tax Declaration",
+      "Approved Building / Construction Plan",
+    ],
+    requestor: "Residents / Non Residents",
+    link: SERVICE_LINK("Construction Permit"),
+  },
+];
+
+// ---------- Clients / config ----------
 const cfg = cxConfig();
 const apiEndpoint =
   cfg.location && cfg.location !== "global"
@@ -36,36 +146,30 @@ const trgc = new TransitionRouteGroupsClient({ apiEndpoint });
 const entities = new EntityTypesClient({ apiEndpoint });
 const intentsClient = new IntentsClient({ apiEndpoint });
 
-const BARANGAY_NAME = process.env.BARANGAY_NAME || "Barangay Fairview Park";
-const OFFICE_HOURS = process.env.OFFICE_HOURS || "Mon–Fri, 8:00 AM–5:00 PM";
-const CONTACT_PHONE = process.env.CONTACT_PHONE || "0917-XXX-XXXX";
-const INCIDENT_LINK = process.env.INCIDENT_LINK || "/IncidentReport";
-const STATUS_PORTAL_LINK = process.env.STATUS_PORTAL_LINK || "/IncidentReport";
-const HALL_ADDRESS = process.env.HALL_ADDRESS || "Barangay Hall (set exact address)";
-const CLASSIFICATION_THRESHOLD = Number(process.env.CLASSIFICATION_THRESHOLD || "0.28");
-
-// Optional: "1" to force-delete & recreate Services page on this run
-const FORCE_RECREATE_SERVICES = process.env.FORCE_RECREATE_SERVICES === "1";
-
 // ---------- Helpers ----------
 function text(msg: string) {
   return { messages: [{ text: { text: [msg] } }] };
 }
 
 function mergeEventHandlers(
-  existing: any[] | null | undefined,
-  upsert: { event: string; triggerFulfillment: any }
+  existing: protos.google.cloud.dialogflow.cx.v3.IEventHandler[] | null | undefined,
+  upsert: protos.google.cloud.dialogflow.cx.v3.IEventHandler
 ) {
   const list = [...(existing ?? [])];
   const idx = list.findIndex((h) => h.event === upsert.event);
-  if (idx >= 0) list[idx] = { ...list[idx], triggerFulfillment: upsert.triggerFulfillment };
-  else list.push(upsert);
+  if (idx >= 0) {
+    list[idx] = { ...list[idx], triggerFulfillment: upsert.triggerFulfillment };
+  } else {
+    list.push(upsert);
+  }
   return list;
 }
 
 function dedupeRoutes(existing: any[] = [], adds: any[] = []) {
   const key = (r: any) =>
-    `${r.intent || ""}|${r.condition || ""}|${r.targetPage || ""}`;
+    `${r.intent || ""}|${r.condition || ""}|${r.targetPage || ""}|${
+      r.targetFlow || ""
+    }`;
   const map = new Map(existing.map((r) => [key(r), r]));
   for (const r of adds) map.set(key(r), r);
   return Array.from(map.values());
@@ -73,7 +177,8 @@ function dedupeRoutes(existing: any[] = [], adds: any[] = []) {
 
 async function getDefaultStartFlowName(): Promise<string> {
   const [list] = await flows.listFlows({ parent: cfg.parent });
-  const found = list.find((f) => f.displayName === "Default Start Flow") || list[0];
+  const found =
+    list.find((f) => f.displayName === "Default Start Flow") || list[0];
   if (!found?.name) throw new Error("No Flow found in this agent.");
   return found.name!;
 }
@@ -83,46 +188,24 @@ async function listPages(flowName: string) {
   return list;
 }
 
-// ---------- Upsert Page (recreate-on-error / optional force) ----------
 async function upsertPage(
   flowName: string,
-  payload: any,
+  payload: protos.google.cloud.dialogflow.cx.v3.IPage,
   updatePaths: string[]
 ) {
   const list = await listPages(flowName);
   const existing = list.find((p) => p.displayName === payload.displayName);
-
-  if (existing && FORCE_RECREATE_SERVICES && payload.displayName === "Services") {
-    console.warn("FORCE_RECREATE_SERVICES=1 — deleting Services page before recreate...");
-    await pages.deletePage({ name: existing.name! });
-  }
-
-  const list2 = await listPages(flowName);
-  const current = list2.find((p) => p.displayName === payload.displayName);
-
-  if (!current) {
+  if (!existing) {
     const [resp] = await pages.createPage({ parent: flowName, page: payload });
     console.log(`Created page: ${resp.displayName}`);
     return resp;
-  }
-
-  try {
+  } else {
     const [resp] = await pages.updatePage({
-      page: { name: current.name, ...payload },
+      page: { name: existing.name, ...payload },
       updateMask: { paths: updatePaths },
     });
     console.log(`Updated page: ${resp.displayName}`);
     return resp;
-  } catch (e: any) {
-    const msg = String(e?.message || e);
-    if (msg.includes("form parameter 'doc_base'")) {
-      console.warn("Services page has stale/invalid parameter handlers. Recreating...");
-      await pages.deletePage({ name: current.name! });
-      const [resp] = await pages.createPage({ parent: flowName, page: payload });
-      console.log(`Recreated page: ${resp.displayName}`);
-      return resp;
-    }
-    throw e;
   }
 }
 
@@ -256,15 +339,24 @@ const NAV_INTENTS: IntentDef[] = [
   {
     displayName: "NAV_SERVICES",
     trainingPhrases: [
-      "services", "service", "request documents", "request document",
-      "open services", "services page", "serbisyo", "humiling ng dokumento",
+      "services",
+      "service",
+      "request documents",
+      "request document",
+      "open services",
+      "services page",
+      "serbisyo",
+      "humiling ng dokumento",
     ],
   },
   {
     displayName: "NAV_FILE_INCIDENT",
     trainingPhrases: [
-      "file an incident", "incident", "report incident",
-      "mag file ng reklamo", "reklamo",
+      "file an incident",
+      "incident",
+      "report incident",
+      "mag file ng reklamo",
+      "reklamo",
     ],
   },
   {
@@ -277,7 +369,12 @@ const NAV_INTENTS: IntentDef[] = [
   },
   {
     displayName: "NAV_OFFICIALS",
-    trainingPhrases: ["officials", "barangay officials", "opisyal", "sino ang mga opisyal"],
+    trainingPhrases: [
+      "officials",
+      "barangay officials",
+      "opisyal",
+      "sino ang mga opisyal",
+    ],
   },
   {
     displayName: "NAV_HOA_OFFICERS",
@@ -308,6 +405,7 @@ const SERVICE_INTENTS: IntentDef[] = [
       "Need barangay certificate",
       "Kailangan ko ng certificate",
       "Get barangay certificate online",
+      "requirements for barangay certificate residency",
     ],
     parameters: [
       { id: "doc_base", entityDisplayName: "doc_base" },
@@ -344,7 +442,12 @@ const INFO_INTENTS: IntentDef[] = [
   },
   {
     displayName: "INFO_LOCATION",
-    trainingPhrases: ["where is the barangay hall", "saan ang barangay hall", "location", "address"],
+    trainingPhrases: [
+      "where is the barangay hall",
+      "saan ang barangay hall",
+      "location",
+      "address",
+    ],
   },
   {
     displayName: "INFO_ANNOUNCEMENTS",
@@ -352,7 +455,11 @@ const INFO_INTENTS: IntentDef[] = [
   },
   {
     displayName: "INFO_OFFICIALS",
-    trainingPhrases: ["who are the barangay officials", "sino ang mga opisyal", "officials"],
+    trainingPhrases: [
+      "who are the barangay officials",
+      "sino ang mga opisyal",
+      "officials",
+    ],
   },
 ];
 
@@ -386,11 +493,19 @@ const INCIDENT_INTENTS: IntentDef[] = [
   },
   {
     displayName: "INCIDENT_FIRST_STEP_DIALOGUE",
-    trainingPhrases: ["first step to resolve incident", "unang hakbang sa reklamo", "dialogue meeting"],
+    trainingPhrases: [
+      "first step to resolve incident",
+      "unang hakbang sa reklamo",
+      "dialogue meeting",
+    ],
   },
   {
     displayName: "INCIDENT_ONLINE_VS_MAJOR",
-    trainingPhrases: ["pwede ba online lang", "is online filing enough", "minor vs major incident"],
+    trainingPhrases: [
+      "pwede ba online lang",
+      "is online filing enough",
+      "minor vs major incident",
+    ],
   },
   {
     displayName: "INCIDENT_PENDING_TOO_LONG",
@@ -402,11 +517,19 @@ const INCIDENT_INTENTS: IntentDef[] = [
   },
   {
     displayName: "INCIDENT_CONTACT_INFO",
-    trainingPhrases: ["contact number ng barangay", "how can I contact you", "saan ang barangay hall"],
+    trainingPhrases: [
+      "contact number ng barangay",
+      "how can I contact you",
+      "saan ang barangay hall",
+    ],
   },
   {
     displayName: "INCIDENT_MULTIPLE_INCIDENTS",
-    trainingPhrases: ["file multiple incidents", "pwede bang dalawa o higit pa", "separate cases"],
+    trainingPhrases: [
+      "file multiple incidents",
+      "pwede bang dalawa o higit pa",
+      "separate cases",
+    ],
   },
   {
     displayName: "INCIDENT_SAFETY_ESCALATION",
@@ -505,8 +628,32 @@ function buildIncidentRoutes(map: Map<string, string>) {
   return routes;
 }
 
-// ---------- Services page (NO parameter-level reprompts) ----------
-function servicesPagePayload(entityDocBase: string, entityDocVariant: string) {
+// ---------- Services page ----------
+function servicesPagePayload(
+  entityDocBase: string,
+  entityDocVariant: string
+): protos.google.cloud.dialogflow.cx.v3.IPage {
+  // Build per-combination routes from REQS
+  const perComboRoutes = REQS.map((r) => {
+    const bullets = (r.documents ?? []).map((d) => `- ${d}`).join("\n");
+    const header = `Requirements for **${r.base} – ${r.variant}**${
+      r.age || r.frequency || r.validity
+        ? ` (Age: ${r.age || "—"}; Frequency: ${r.frequency || "—"}; Validity: ${
+            r.validity || "—"
+          })`
+        : ""
+    }:`;
+
+    const body = [header, bullets, `Start here: **${r.link || SERVICE_LINK(r.base)}**`]
+      .filter(Boolean)
+      .join("\n");
+
+    return {
+      condition: `$session.params.doc_base = "${r.base}" && $session.params.doc_variant = "${r.variant}"`,
+      triggerFulfillment: text(body),
+    };
+  });
+
   return {
     displayName: "Services",
     form: {
@@ -516,36 +663,72 @@ function servicesPagePayload(entityDocBase: string, entityDocVariant: string) {
           entityType: entityDocBase,
           required: true,
           fillBehavior: {
-            // Only initial prompt; parameter reprompts omitted to avoid API restriction
             initialPromptFulfillment: text(
               "Which document do you need? (Barangay Certificate, Indigency, Clearance, Business Permit, Temporary Business Permit, Construction Permit, Other Documents)"
             ),
+            // Parameter-level reprompts must use specific system events
+            repromptEventHandlers: [
+              {
+                event: "sys.no-match-1",
+                triggerFulfillment: text(
+                  "Sure — which document do you need? (e.g., Barangay Certificate, Indigency, Clearance)"
+                ),
+              },
+              {
+                event: "sys.no-input-1",
+                triggerFulfillment: text(
+                  "I didn’t hear a document name. Try “Barangay Certificate”, “Indigency”, or “Clearance”."
+                ),
+              },
+            ],
           },
         },
-        { displayName: "doc_variant", entityType: entityDocVariant, required: false },
+        {
+          displayName: "doc_variant",
+          entityType: entityDocVariant,
+          required: false,
+          fillBehavior: {
+            repromptEventHandlers: [
+              {
+                event: "sys.no-match-1",
+                triggerFulfillment: text(
+                  "If you have a specific variant (e.g., Residency, No Income, Loan, Standard), say it now — or say “skip”."
+                ),
+              },
+            ],
+          },
+        },
       ],
     },
     transitionRoutes: [
+      // Variant only -> ask user to pick base
       {
-        condition: 'has($session.params.doc_variant) && !has($session.params.doc_base)',
+        condition:
+          'has($session.params.doc_variant) && !has($session.params.doc_base)',
         triggerFulfillment: text(
-          "Got it: **$session.params.doc_variant**. Is that for **Barangay Certificate** or **Barangay Indigency**?"
+          "Got it: **$session.params.doc_variant**. Is that for **Barangay Certificate**, **Barangay Indigency**, **Barangay Clearance**, **Business Permit**, **Temporary Business Permit**, **Construction Permit**, or **Other Documents**?"
         ),
       },
+      // Base only -> generic link + gating
       {
-        condition: 'has($session.params.doc_base) && !has($session.params.doc_variant)',
+        condition:
+          'has($session.params.doc_base) && !has($session.params.doc_variant)',
         triggerFulfillment: text(
-          "You can request **$session.params.doc_base** here: /services"
+          `Here’s where to request **$session.params.doc_base**: **/services/action?docB=$session.params.doc_base**. ${GATING_LOGIN}`
         ),
       },
+      // Specific base+variant combos with full requirement text
+      ...perComboRoutes,
+      // Fallback when both base+variant present but not in the hard-coded list
       {
-        condition: 'has($session.params.doc_base) && has($session.params.doc_variant)',
+        condition:
+          'has($session.params.doc_base) && has($session.params.doc_variant)',
         triggerFulfillment: text(
-          "Here’s the link for **$session.params.doc_base – $session.params.doc_variant**: /services/action?docB=$session.params.doc_base"
+          `Here’s the link for **$session.params.doc_base – $session.params.doc_variant**: /services/action?docB=$session.params.doc_base`
         ),
       },
     ],
-    // Page-level fallbacks (allowed to use -default variants)
+    // Page-level fallbacks (allowed events)
     eventHandlers: [
       {
         event: "sys.no-match-default",
@@ -556,35 +739,84 @@ function servicesPagePayload(entityDocBase: string, entityDocVariant: string) {
       {
         event: "sys.no-input-default",
         triggerFulfillment: text(
-          "Are you still there? Say 'services' to start or name a document (e.g., Barangay Certificate)."
+          `I can help with Services, Incidents, Programs, Announcements, and Officials. Try: "services", "file an incident", or "announcements".`
         ),
       },
     ],
   };
 }
 
-// ---------- Flow-level start routing (no Start Page needed) ----------
-async function wireStartFlowRoutes(
+// ---------- Start wiring helpers (resilient) ----------
+async function upsertFlowRoutes(flowName: string, adds: any[]) {
+  const [flow] = await flows.getFlow({ name: flowName });
+  const merged = dedupeRoutes(flow.transitionRoutes || [], adds);
+  await flows.updateFlow({
+    flow: { name: flowName, transitionRoutes: merged },
+    updateMask: { paths: ["transition_routes"] },
+  });
+  console.log("Upserted flow-level transition routes.");
+}
+
+async function wireEntrypoints(
   flowName: string,
   servicesPageName: string,
   map: Map<string, string>
 ) {
+  // Build the three “go to Services” routes (NAV_SERVICES, REQUEST_SERVICE, REQUIREMENTS_QUERY)
+  const toServices: any[] = [];
+  const navSvc = map.get("NAV_SERVICES");
   const reqSvc = map.get("REQUEST_SERVICE");
   const reqReq = map.get("REQUIREMENTS_QUERY");
 
-  const toServices: any[] = [];
+  if (navSvc) toServices.push({ intent: navSvc, targetPage: servicesPageName });
   if (reqSvc) toServices.push({ intent: reqSvc, targetPage: servicesPageName });
   if (reqReq) toServices.push({ intent: reqReq, targetPage: servicesPageName });
 
-  const [flow] = await flows.getFlow({ name: flowName });
-  const mergedRoutes = dedupeRoutes(flow.transitionRoutes || [], toServices);
+  // Try to wire the Start Page if we can find it…
+  const list = await listPages(flowName);
+  const start =
+    list.find((p) => p.displayName === "Start Page") ||
+    list.find((p) => (p.displayName || "").toLowerCase().includes("start"));
 
-  await flows.updateFlow({
-    flow: { name: flowName, transitionRoutes: mergedRoutes },
-    updateMask: { paths: ["transition_routes"] },
-  });
+  if (start?.name) {
+    const mergedRoutes = dedupeRoutes(start.transitionRoutes || [], toServices);
+    const mergedHandlers = mergeEventHandlers(start.eventHandlers, {
+      event: "sys.no-match-default",
+      triggerFulfillment: text(
+        `I can help with **Services**, **Incidents**, **Programs**, **Announcements**, and **Officials**.\nTry: "services", "request barangay certificate", "file an incident", "announcements".`
+      ),
+    });
 
-  console.log("Updated FLOW start routes: REQUEST_SERVICE/REQUIREMENTS_QUERY → Services.");
+    await pages.updatePage({
+      page: {
+        name: start.name,
+        displayName: start.displayName,
+        transitionRoutes: mergedRoutes,
+        eventHandlers: mergedHandlers,
+      },
+      updateMask: { paths: ["transition_routes", "event_handlers"] },
+    });
+    console.log("Updated Start Page: merged routes + fallback.");
+  } else {
+    // …otherwise, fall back to Flow-level transition routes (works regardless of the start page name)
+    await upsertFlowRoutes(flowName, toServices);
+
+    // Also ensure a good flow-level fallback (in case a page-level one doesn’t exist)
+    const [flow] = await flows.getFlow({ name: flowName });
+    const mergedHandlers = mergeEventHandlers(flow.eventHandlers, {
+      event: "sys.no-match-default",
+      triggerFulfillment: text(
+        `I can help with **Services**, **Incidents**, **Programs**, **Announcements**, and **Officials**.\nTry: "services", "request barangay certificate", "file an incident", "announcements".`
+      ),
+    });
+    await flows.updateFlow({
+      flow: { name: flowName, eventHandlers: mergedHandlers },
+      updateMask: { paths: ["event_handlers"] },
+    });
+    console.log(
+      "Start Page not found — added entry routes at flow level instead."
+    );
+  }
 }
 
 // ---------- Flow-level fallback + NLU threshold ----------
@@ -630,20 +862,22 @@ async function tuneFlow(flowName: string) {
     ];
     const intentMap = await upsertIntents(allIntentDefs);
 
-    // 2) Tune flow + fallback
+    // 2) Tune flow + fallback (merged)
     await tuneFlow(flowName);
 
-    // 3) Route groups
+    // 3) Route groups (flow-level)
     const navRoutes = buildNavRoutes(intentMap);
     if (navRoutes.length) await upsertTRG(flowName, "Navigation", navRoutes);
 
     const infoRoutes = buildInfoRoutes(intentMap);
-    if (infoRoutes.length) await upsertTRG(flowName, "Info & FAQs", infoRoutes);
+    if (infoRoutes.length)
+      await upsertTRG(flowName, "Info & FAQs", infoRoutes);
 
     const incidentRoutes = buildIncidentRoutes(intentMap);
-    if (incidentRoutes.length) await upsertTRG(flowName, "Incidents & Justice", incidentRoutes);
+    if (incidentRoutes.length)
+      await upsertTRG(flowName, "Incidents & Justice", incidentRoutes);
 
-    // 4) Services page (no parameter-level reprompts)
+    // 4) Services page (no webhook; uses inline data above)
     const { base, variant } = await resolveDocEntities();
     const servicesPage = await upsertPage(
       flowName,
@@ -651,8 +885,8 @@ async function tuneFlow(flowName: string) {
       ["display_name", "form", "transition_routes", "event_handlers"]
     );
 
-    // 5) Wire Flow start -> Services for doc intents
-    await wireStartFlowRoutes(flowName, servicesPage.name!, intentMap);
+    // 5) Wire entry routes (Start Page if found, else flow-level)
+    await wireEntrypoints(flowName, servicesPage.name!, intentMap);
 
     console.log("sync:all completed ✅");
   } catch (err: any) {
