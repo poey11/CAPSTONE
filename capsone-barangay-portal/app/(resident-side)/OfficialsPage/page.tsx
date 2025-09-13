@@ -78,7 +78,7 @@ export default function Official() {
         <p>BARANGAY OFFICIALS</p>
       </div>
 
-      <div className="officials-header">
+      <div className="officials-header-main">
         <h1 className="officials-title">Elected Officials</h1>
         <div className="officials-underline"></div>
       </div>

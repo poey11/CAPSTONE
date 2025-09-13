@@ -49,6 +49,7 @@ const Menu = () => {
   const menuRef = useRef(null);
 
   const [resident, setResident] = useState<Resident | null>(null);
+
   
   const handleLogout = async() => {
     await signOut(auth);
@@ -122,8 +123,11 @@ const Menu = () => {
   const [filter, setFilter] = useState<"all" | "unread" | "incident" | "document">("all");
 
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const inboxIconRef = useRef<HTMLDivElement | null>(null);
   const toggleNotificationSection = () => setIsOpen((prev) => !prev);
 
+
+  /*
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -133,6 +137,22 @@ const Menu = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  */
+
+  useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node) &&
+      inboxIconRef.current &&
+      !inboxIconRef.current.contains(event.target as Node)
+    ) {
+      setIsOpen(false);
+    }
+  };
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
 
   
@@ -251,6 +271,8 @@ case "document":
 
 const handleNotificationClick = async (notification: Notification) => {
   console.log("Notification clicked:", notification);
+
+  setIsOpen(false);
 
   // Mark as read if unread
   if (!notification.isRead) {
@@ -502,7 +524,7 @@ const handleDeleteNotification = async (notificationId: string) => {
         {!loading && user ? (
           <>
             <div className="dropdown-Container-notifications">
-              <div className="dropdown-item-no-hover-notifications">
+              <div className="dropdown-item-no-hover-notifications" ref={inboxIconRef} >
                 <p id="inbox-link" onClick={toggleNotificationSection} className="inbox-container">
                   <img src="/Images/inbox.png" alt="Inbox Icon" className="header-inboxicon" />
                   {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
@@ -560,6 +582,7 @@ const handleDeleteNotification = async (notificationId: string) => {
                     <img src="/images/user.png" alt="Default User" className="header-usericon" />
                   )}
                 </p>
+                {/*
                 <div className="Dropdown-profile">
                   <Link href={`/ResidentAccount/Profile?id=${user?.uid}`}>
                     <p className="dropdown-item-resident">Profile</p>
@@ -571,22 +594,42 @@ const handleDeleteNotification = async (notificationId: string) => {
                     <p className="dropdown-item-resident">Logout</p>
                   </Link>
                 </div>
+                */}
+
+                {showLoginOptions && (
+                  <div className="Dropdown-profile">
+                    <Link href={`/ResidentAccount/Profile?id=${user?.uid}`} onClick={toggleLoginOptionsOff}>
+                      <p className="dropdown-item-resident">Profile</p>
+                    </Link>
+                    <Link href={"/ResidentAccount/Transactions"} onClick={toggleLoginOptionsOff}>
+                      <p className="dropdown-item-resident">Transactions</p>
+                    </Link>
+                    <Link href={"/"} onClick={() => { handleLogout(); toggleLoginOptionsOff(); }}>
+                      <p className="dropdown-item-resident">Logout</p>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </>
         ) : (
           <div className="dropdown-Container">
             <div className="menu-section-container" ref={loginMenuRef}>
-              <p id="login-link" className="dropdown-item-resident">Login</p>
+              <p id="login-link" className="dropdown-item-resident" onClick={toggleLoginOptions}>Login</p>
               
-
-              <div className="Dropdown">
-                <Link href="/resident/login"><p className="dropdown-item-resident">Log In</p></Link>
-                <Link href="/register"><p className="dropdown-item-resident">Register</p></Link>
-              </div>
+              {showLoginOptions && (
+                <div className="Dropdown">
+                  <Link href="/resident/login" onClick={toggleLoginOptionsOff}><p className="dropdown-item-resident">Log In</p></Link>
+                  <Link href="/register" onClick={toggleLoginOptionsOff}><p className="dropdown-item-resident">Register</p></Link>
+                </div>
+              )}
             </div>
           </div>
         )}
+
+
+
+
 
          {/* ====== HAMBURGER BUTTON (only small screens) ====== */}
       

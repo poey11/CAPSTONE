@@ -4,7 +4,7 @@
   left: 0;
   width: 10rem;
   z-index: 50;
-}
+background-color: pink;}
 
 .dropdown-content {
   background-color: #cbd5e1; 
@@ -96,7 +96,19 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.Dropdown-services, .Dropdown-profile {
+.Dropdown-services {
+  display: none;
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
+  padding: 10px;
+  z-index: 2000; 
+  width: 250px;
+  
+}
+
+.Dropdown-profile {
   display: none;
   position: absolute;
   top: 100%; 
@@ -190,7 +202,7 @@
 }
 
 .header-inboxicon:hover{
-  filter: invert(24%) sepia(19%) saturate(924%) hue-rotate(174deg) brightness(93%) contrast(89%);
+  filter: invert(61%) sepia(15%) saturate(900%) hue-rotate(165deg) brightness(110%) contrast(85%);
 }
 
 .navbar-links {
@@ -282,14 +294,19 @@ WITH INFO
 */
 .notification-section {
   position: absolute;
-  top: 72px; 
+  top: 60px; 
   right: 0px;
   width: 380px;
   height: 600px;
   background-color: #f9fafb;
-border-radius: 12px;
+
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+
   /*padding: 20px;*/
-box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -617,10 +634,48 @@ padding: 20px;
 .arrow.rotate {
   transform: rotate(180deg);
 }
- 
-@media (max-width: 768px) {
+
+
+
+@media (max-width: 1024px) {
+  .notification-section {
+    position: fixed !important;
+    top: 90px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+
+    width: 90% !important;       /* force width */
+    max-width: 600px !important; /* limit max width */
+    min-width: 300px !important; /* prevent collapsing */
+    height: 70vh !important;
+
+    background: white !important;
+    z-index: 9999 !important; /* keep it above */
+    display: block !important;
+  }
+
   .header-brgylogo {
     margin-left: 0px; /* reduce left margin */
     width: 55px; /* optional: shrink logo slightly for mobile */
   }
+  .filter-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .notification-title {
+    font-size: 18px;
+  }
+
+  .message-section {
+      padding: 0px;
+  }
+
+  .message-section p{
+    font-size: 15px;
+  }
 }
+
+
+

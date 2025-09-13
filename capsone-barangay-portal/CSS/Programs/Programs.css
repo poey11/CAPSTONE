@@ -63,28 +63,154 @@
     background-image: url('/Images/bghome.jpg');
   }
 
-  .programs-section-programs {
-    display: grid;
+.programs-section-programs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3.5rem;
+  padding: 3rem 10rem;
+    align-items: stretch; /* makes all cards in a row same height */
+}
+
+
+
+
+
+
+
+  .programs-header {
+  text-align: center;
+  margin: 3rem auto 2rem auto;
+  margin-left: 170px;
+  margin-right: 170px;
+  padding: 0 1rem;
+  padding-top: 50px;
+}
+
+  .programs-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #214666;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  animation: slideDown 1s ease forwards 0.3s;
+
+  transform: translateY(-50px);
+  opacity: 0;
+
+}
+
+@keyframes slideDown {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.programs-title::before,
+.programs-title::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid #ccc;
+}
+
+.programs-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
+}
+
+
+
+  
+/* Tablet view */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .programs-header {
+    margin: 2rem auto 1.5rem auto;
+    padding: 0 2rem;
+  }
+
+  .programs-title {
+    font-size: 2rem;
+    gap: 0.5rem;
+  }
+
+  .programs-title::before,
+  .programs-title::after {
+    flex: 0.5; /* shorter side lines */
+  }
+
+
+    .programs-section-programs {
     grid-template-columns: repeat(2, 1fr);
-    gap: 3.5rem;
-    padding-top: 3rem;
-    padding-left: 10rem;
-    padding-right: 10rem; 
-    padding-bottom: 3rem;
+    gap: 2rem;
+    padding: 2rem 3rem;
   }
 
-  @media (min-width: 640px) {
+  .programs-card-programs {
+    padding: 0.8rem;
+  }
+
+  .programs-image-programs {
+    height: 200px;
+  }
+
+
+
+
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+  
+  
+    .programs-header {
+    margin: 1.5rem auto 1rem auto;
+    padding: 15 1rem;
+  }
+
+  .programs-title {
+    font-size: 1.6rem;
+    flex-direction: column; /* stack title + underline */
+    gap: 0.3rem;
+  }
+
+  .programs-title::before,
+  .programs-title::after {
+    display: none; /* hide side lines on mobile */
+  }
+
     .programs-section-programs {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
   }
 
-  @media (min-width: 1024px) {
-    .programs-section-programs {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  .programs-card-programs {
+    padding: 0.8rem;
   }
 
+  .programs-image-programs {
+    height: 180px;
+  }
+
+  .programs-title-programs {
+    font-size: 1.2rem;
+  }
+
+  .programs-desc-programs {
+    font-size: 0.9rem;
+    height: auto; /* allow full text instead of forcing 70px */
+  }
+  
+  
+
+}
 
 
 
@@ -94,12 +220,13 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* space evenly */
+  height: 100%; /* stretch equal height */
   padding: 1rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-
 .programs-card-programs:hover {
   transform: translateY(-6px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
@@ -161,52 +288,7 @@
   color: #374151; /* darker grey */
 }
 
-  .programs-header {
-  text-align: center;
-  margin: 3rem auto 2rem auto;
-  margin-left: 170px;
-  margin-right: 170px;
-  padding: 0 1rem;
-  padding-top: 50px;
-}
 
-  .programs-title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #214666;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  animation: slideDown 1s ease forwards 0.3s;
-
-  transform: translateY(-50px);
-  opacity: 0;
-
-}
-
-@keyframes slideDown {
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.programs-title::before,
-.programs-title::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid #ccc;
-}
-
-.programs-underline {
-  width: 100px;
-  height: 4px;
-  background-color: #DF7426; 
-  margin: 0.5rem auto 1.5rem auto;
-  border-radius: 5px;
-}
 
 /* Toast container */
 .popup-overlay-program {
@@ -247,3 +329,33 @@
 
 /* Optional: error variant (used by inline style above if you prefer a class) */
 .popup-overlay-program.error { background: #ad3b3b; border-left-color: #7e2929; }
+
+
+
+
+
+
+
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-programs {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+/* Header responsive and mobile */
+@media (max-width: 768px) {
+  .headerpic-programs {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+
+
+
+
+

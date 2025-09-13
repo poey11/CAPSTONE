@@ -156,7 +156,7 @@ export default function addAnnouncements() {
                                                                 className="delete-button"
                                                             >
                                                                 <img
-                                                                    src="/images/trash.png"  
+                                                                    src="/Images/trash.png"  
                                                                     alt="Delete"
                                                                     className="delete-icon"
                                                                 />

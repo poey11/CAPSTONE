@@ -9,7 +9,7 @@
   font-weight:bolder;
   overflow: hidden; 
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-              url('/images/brgyheaderpic.JPG') no-repeat center center/cover;
+              url('/Images/brgyheaderpic.JPG') no-repeat center center/cover;
    background-position: center 55%; 
    margin-bottom: 50px;
 }
@@ -709,3 +709,188 @@ For age
 .dot-specific.active {
   background-color: #DF7426;
 }
+
+
+
+
+
+
+
+/* Tablet view */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .programs-header-specific {
+    margin: 2rem auto 1.5rem auto;
+    padding: 0 2rem;
+  }
+
+  .programs-title-specific {
+    font-size: 2rem;
+    gap: 0.5rem;
+  }
+
+  .programs-title::before,
+  .programs-title::after {
+    flex: 0.5; /* shorter side lines */
+  }
+
+
+    /* ADDED*/
+    /* Slideshow smaller */
+  .slideshow-specific {
+    width: 500px;
+    height: 320px;
+  }
+
+  /* Reduce side padding */
+  .get-involved,
+  .programs-header-specific {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  /* Info cards stacked 2 per row */
+  .info-cards-specific {
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .info-card-specific {
+    flex: 1 1 calc(50% - 2rem);
+  }
+
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
+}
+
+/* Mobile view */
+@media (max-width: 768px) {
+  
+  
+    .programs-header-specific {
+    margin: 1.5rem auto 1rem auto;
+    padding: 15 1rem;
+  }
+
+  .programs-title-specific {
+    font-size: 1.6rem;
+    flex-direction: column; /* stack title + underline */
+    gap: 0.3rem;
+  }
+
+  .programs-title-specific::before,
+  .programs-title-specific::after {
+    display: none; /* hide side lines on mobile */
+  }
+
+
+
+
+   /* Make slideshow full width */
+  .slideshow-specific {
+    width: 100%;
+    max-width: 100%;
+    height: 240px;
+  }
+
+  /* Adjust description */
+  .programs-description-specific {
+    font-size: 1rem;
+    margin-top: 30px;
+    line-height: 1.6;
+  }
+
+  /* Details grid → single column */
+  .programs-details-specific {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Info cards → stacked */
+  .info-cards-specific {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Forms and buttons full width */
+  .form-input-specific,
+  .register-button-specific {
+    width: 100%;
+  }
+
+  .register-button-specific {
+    max-width: 100%;
+  }
+
+  /* Reduce section padding */
+  .get-involved {
+    padding: 2rem 1rem;
+  }
+
+
+  .confirmation-popup-online {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+  }
+
+  .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
+  
+
+}
+
+
+
+/* Header responsive for tablets */
+@media (max-width: 1024px) {
+  .headerpic-specific {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+/* Header responsive and mobile */
+@media (max-width: 768px) {
+  .headerpic-specific {
+    height: 120px;
+    font-size: 23px;
+    background-position: center 50%;
+  }
+}
+
+/* fix date input */
+input[type="date"] {
+  -webkit-appearance: none;  
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;     
+  height: 40px;          
+  padding: 8px;             /* same as text inputs */
+  box-sizing: border-box;   
+  font-size: 16px;    
+  line-height: 1.5;          /* ensures text vertically centered */
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  background-color: #fff;    /* optional, match others */
+  color: #000;
+}
+
+
+
+
+

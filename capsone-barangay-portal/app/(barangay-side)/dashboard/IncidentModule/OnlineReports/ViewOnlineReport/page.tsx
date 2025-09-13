@@ -872,7 +872,7 @@ NOTE: SAME YUNG 2ND DIV NG ERROR AT SHOWPOPUP LANH
                                                             className="delete-button"
                                                           >
                                                             <img
-                                                              src="/images/trash.png"
+                                                              src="/Images/trash.png"
                                                               alt="Delete"
                                                               className="delete-icon"
                                                             />
