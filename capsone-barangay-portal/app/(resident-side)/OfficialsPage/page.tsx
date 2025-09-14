@@ -13,6 +13,7 @@ interface Official {
   contact: string;
   image?: string;
   email?: string;
+  facebook?: string;
   createdBy?: string;
   createdAt?: string;
   updatedBy?: string;
@@ -20,69 +21,7 @@ interface Official {
 
 
 export default function Official() {
-  // const captain = {
-  //   Name: "Jonel Quebal",
-  //   Role: "Barangay Captain",
-  //   Term: "2024-2025",
-  //   image: "/Images/CaptainImage.jpg",
-  //   Phonenumber: "09176219123",
-  // };
-
-  // const officials = [
-  //   {
-  //     Name: "Jane Doe",
-  //     Role: "Barangay Secretary",
-  //     Term: "2024-2025",
-  //     image: "/Images/anak.jpg",
-  //     Phonenumber: "09176219124",
-  //   },
-  //   {
-  //     Name: "John Smith",
-  //     Role: "Barangay Treasurer",
-  //     Term: "2024-2025",
-  //     image: "/Images/anak.jpg",
-  //     Phonenumber: "09176219125",
-  //   },
-  //   {
-  //     Name: "Alice Brown",
-  //     Role: "Barangay Councilor",
-  //     Term: "2024-2025",
-  //     image: "/Images/anak.jpg",
-  //     Phonenumber: "09176219126",
-  //   },
-  //   {
-  //     Name: "Robert Black",
-  //     Role: "Barangay Councilor",
-  //     Term: "2024-2025",
-  //     image: "/Images/anak.jpg",
-  //     Phonenumber: "09176219127",
-  //   },
-
-  //   {
-  //       Name: "Robert Black",
-  //       Role: "Barangay Councilor",
-  //       Term: "2024-2025",
-  //       image: "/Images/anak.jpg",
-  //       Phonenumber: "09176219127",
-  //     },
-
-  //     {
-  //       Name: "Robert Black",
-  //       Role: "Barangay Councilor",
-  //       Term: "2024-2025",
-  //       image: "/Images/anak.jpg",
-  //       Phonenumber: "09176219127",
-  //     }, 
-  //     {
-  //       Name: "Robert Black",
-  //       Role: "Barangay Councilor",
-  //       Term: "2024-2025",
-  //       image: "/Images/anak.jpg",
-  //       Phonenumber: "09176219127",
-  //     }, 
-      
-
-  // ];
+ 
 
   const [captain, setCaptain] = useState<Official | undefined>(undefined);
   const [officials, setOfficials] = useState<Official[]>([]);
@@ -108,6 +47,7 @@ export default function Official() {
         createdBy: doc.data().createdBy || "N/A",
         createdAt: doc.data().createdAt,
         updatedBy: doc.data().updatedBy || "N/A",
+        facebook: doc.data().facebook || "N/A",
       }));
       setListOfficials(data);
     });
@@ -153,6 +93,7 @@ export default function Official() {
               <p className="official-role-punong-brgy">{captain?.position}</p>
               <h2 className="official-name-punong-brgy">{captain?.name}</h2>
               <p className="official-phonenumber-punong-brgy">Term Duration: {captain?.term || "N/A"}</p>
+              <p className="official-phonenumber-punong-brgy">Facebook: {captain?.facebook || "N/A"}</p>
               <p className="official-phonenumber-punong-brgy">Email: {captain?.email || "N/A"}</p>
               <p className="official-phonenumber-punong-brgy">Contact Information: {captain?.contact}</p>
             </div>
@@ -175,6 +116,9 @@ export default function Official() {
                 <h2 className="official-name-officials">{official.name}</h2>
                 <p className="official-phonenumber-officials">
                   Term Duration: {official.term}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Facebook: {official.facebook || "N/A"}
                 </p>
                 <p className="official-phonenumber-officials">
                   Email: {official.email || "N/A"}

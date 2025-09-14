@@ -17,6 +17,7 @@ interface Official {
   contact: string;
   image?: string;
   email?: string;
+  facebook?: string;
   createdBy?: string;
   createdAt?: string;
   updatedBy?: string;
@@ -84,6 +85,7 @@ export default function OfficialsModule() {
           createdBy: doc.data().createdBy || "N/A",
           createdAt: doc.data().createdAt,
           updatedBy: doc.data().updatedBy || "N/A",
+          facebook: doc.data().facebook || "N/A",
         }));
         setOfficialsData(data);
       });

@@ -2,57 +2,42 @@
 
 import "@/CSS/OfficialsPage/HOA.css";
 
+import { useState,useEffect } from "react";
+import { collection, onSnapshot,query,where} from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+
+interface NewOfficerDetails {
+  id?: string;
+  fullName: string;
+  email: string;
+  facebook: string;
+  position: string;
+  otherPosition?: string;
+  location: string;
+  clusterSection: string;
+  otherClusterSection?: string;
+  contact: string;
+  department: string;
+  image: string;
+  createdAt?: String;
+  updatedAt?: String;
+  createdBy?: string;
+}
+
 
 export default function HOAOfficersPage() {
   
-  const officials = [
-    {
-      Name: "Jane Doe",
-      Role: "HOA Oficer",
-      Location: "Rabosna Hoa, Ruby Street",
-      image: "/Images/HOA.jpg",
-      Phonenumber: "09176219124",
-    },
-    {
-      Name: "John Smith",
-      Role: "HOA Oficer",
-      Location: "Rabosna Hoa, Ruby Street",
-      image: "/Images/HOA.jpg",
-      Phonenumber: "09176219125",
-    },
-    {
-      Name: "Alice Brown",
-      Role: "HOA Oficer",
-      Location: "Rabosna Hoa, Ruby Street",
-      image: "/Images/HOA.jpg",
-      Phonenumber: "09176219126",
-    },
-    {
-      Name: "Robert Black",
-      Role: "HOA Oficer",
-      Location: "Rabosna Hoa, Ruby Street",
-      image: "/Images/HOA.jpg",
-      Phonenumber: "09176219127",
-    },
 
-    {
-        Name: "Robert Black",
-        Role: "HOA Oficer",
-        Location: "Rabosna Hoa, Ruby Street",
-        image: "/Images/HOA.jpg",
-        Phonenumber: "09176219127",
-      },
+  const [officials, setOfficial] = useState<NewOfficerDetails[]>([]);
+  useEffect(() => {
+    const docRef = query(collection(db, "hoaSitioOfficers"), where("department", "==", "HOA") );
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      const data: NewOfficerDetails[] = snapshot.docs.map((doc) => (doc.data() as NewOfficerDetails));
+      setOfficial(data);
+    });
+    return () => unsubscribe();
 
-      {
-        Name: "Robert Black",
-        Role: "HOA Oficer",
-        Location: "Rabosna Hoa, Ruby Street",
-        image: "/Images/HOA.jpg",
-        Phonenumber: "09176219127",
-      }, 
-
-  ];
-
+  },[])
   return (
 
     
@@ -73,15 +58,32 @@ export default function HOAOfficersPage() {
             <div key={index} className="official-card-officials">
               <img
                 src={official.image}
-                alt={official.Name}
+                alt={official.image}
                 className="official-image-officials"
               />
               <div className="official-content-officials">
-                <p className="official-role-officials">{official.Role}</p>
-                <h2 className="official-name-officials">{official.Name}</h2>
+                <p className="official-role-officials">{official.position}</p>
+                <h2 className="official-name-officials">{official.fullName}</h2>
+                
                 <p className="official-phonenumber-officials">
-                  Contact Information: {official.Phonenumber}
+                  Contact Information: {official.contact}
                 </p>
+                <p className="official-phonenumber-officials">
+                  Location: {official.location}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Email: {official.email || "N/A"}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Facebook: {official.facebook || "N/A"}
+                </p>
+                <p className="official-phonenumber-officials">
+                  Cluster/Section: {official.clusterSection}
+                  {official.clusterSection === "Others"
+                    ? ` - ${official.otherClusterSection}`
+                    : ""}
+                </p>
+                    
               </div>
             </div>
           ))}
