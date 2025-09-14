@@ -50,6 +50,9 @@ export default function AddNewProgramModal({
 
   // Submit Confirmation
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false); 
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
   // Age restriction
   const [noAgeLimit, setNoAgeLimit] = useState(true);
@@ -392,7 +395,10 @@ export default function AddNewProgramModal({
   const handleSave = () => {
     if (!validate()) {
       setActiveSection("details");
-      return;
+
+      setPopupErrorMessage("Please fill up all required fields."); //add
+       setShowErrorPopup(true); //add
+       return setTimeout(() => setShowErrorPopup(false), 3000); //add
     }
     setShowConfirmation(true); // show confirmation popup if no errors
   };
@@ -1491,6 +1497,18 @@ export default function AddNewProgramModal({
                             </div>
                   </div>
           )}
+
+
+
+          
+        {showErrorPopup && (
+                <div className={`addprogram-error-popup-overlay show`}>
+                    <div className="addprogram-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert-program"/>
+                        <p>{popupErrorMessage}</p>
+                    </div>
+                </div>
+                )}
     </div>
   );
 }
