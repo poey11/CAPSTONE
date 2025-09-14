@@ -13,17 +13,17 @@ import { db,storage } from "@/app/db/firebase";
 
 interface NewOfficerDetails {
   id?: string;
-  fullName: string;
-  email: string;
-  facebook: string;
-  position: string;
+  fullName?: string;
+  email?: string;
+  facebook?: string;
+  position?: string;
   otherPosition?: string;
-  location: string;
-  clusterSection: string;
+  location?: string;
+  clusterSection?: string;
   otherClusterSection?: string;
-  contact: string;
-  department: string;
-  image: string;
+  contact?: string;
+  department?: string;
+  image?: string;
   createdAt?: String;
   updatedAt?: String;
   createdBy?: string;
@@ -55,7 +55,12 @@ export default function SitioHoaOfficersModule() {
 
   const [filtersLoaded, setFiltersLoaded] = useState(false);
   const hasAnimatedOnce = useRef(false);
-  const [newOfficerDetails, setNewOfficerDetails] = useState<Partial<NewOfficerDetails>>({});
+  const [newOfficerDetails, setNewOfficerDetails] = useState<NewOfficerDetails>({
+      department: "SITIO",
+      position: "Sitio President",
+      location: "East Fairview",
+      clusterSection: "SITIO KISLAP",
+  });
 
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
@@ -174,12 +179,12 @@ export default function SitioHoaOfficersModule() {
     }
   };
 
-  const deleteOfficer = (id: string) => {
+  const deleteOfficer = async(id: string) => {
     const officerToDelete = officersData.find((officer) => officer.id === id);
     if (officerToDelete) {
       if (officerToDelete.image) {
         const imageRef = ref(storage, officerToDelete.image);
-        deleteObject(imageRef).catch((error) => {
+        await deleteObject(imageRef).catch((error) => {
           console.error("Error deleting image from storage: ", error);
         });
       }
@@ -489,15 +494,16 @@ export default function SitioHoaOfficersModule() {
                               onChange={(e) => setNewOfficerDetails({...newOfficerDetails, position: e.target.value})}
                             >
                               <option value="" disabled>Position</option>
-                              {newOfficerDetails.department === "HOA" ? (
+                              {newOfficerDetails.department === "SITIO" ? (
                                 <>
-                                  <option value="Association President">Association President</option>
-                                  <option value="Association Officer">Association Officer</option>
+                                  
+                                  <option value="Sitio President">Sitio President</option>
+                                  <option value="Sitio Officer">Sitio Officer</option>
                                 </>
                               ):(
                                 <>
-                                  <option value="Sitio President">Sitio President</option>
-                                  <option value="Sitio Officer">Sitio Officer</option>
+                                  <option value="Association President">Association President</option>
+                                  <option value="Association Officer">Association Officer</option>
                                 </>
                               )}
                               <option value="Others">Others</option>

@@ -1,17 +1,125 @@
 "use client";
 import "@/CSS/ProgramsBrgy/EditAnnouncement.css";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useState,useEffect, use } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {  onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db,storage } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
 
-
-
+interface AnnouncementFormProps {
+  announcementHeadline?: string;
+  featuredInAnnouncements?: string;
+  category?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  image?:string;
+  content?: string;
+  isActive?: boolean;
+  isInFeatured?: string;
+  updatedBy?: string;
+}
 export default function AnnouncementDetails() {
 
-     const router = useRouter();
+    const { data: session } = useSession();
+    const searchParams = useSearchParams();
+    const announcementId = searchParams.get("id");
+    const [announcementData, setAnnouncementData] = useState<AnnouncementFormProps | null>(null);
+    const [selectedAnnnouncementData, setSelectedAnnouncementData] = useState<AnnouncementFormProps | null>(null);
+    const [dataSet, setDataSet] = useState(false);
+
+    useEffect(() => {
+      if (!announcementId) return;
+      const docRef = doc(db, "announcements", announcementId);
+      const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+          setAnnouncementData(doc.data() as AnnouncementFormProps);
+          setDataSet(true);
+        } else {
+          console.log("No such document!");
+        } 
+      });
+      return () => unsubscribe();
+    }, [announcementId]);
+
+    useEffect(() => {
+        setSelectedAnnouncementData(announcementData);
+    }, [dataSet]);
+
+    const router = useRouter();
 
     const handleBack = () => {
-    router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
-  };
+      router.back();
+    };
+
+
+    const [preview, setPreview] = useState<string | null>(null);
+    const [file, setFile] = useState<File | null>(null);
+
+    useEffect(() => {
+        if(announcementData?.image){
+          setPreview(announcementData.image);
+        }
+    },[announcementData])
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = e.target.files?.[0];
+      if (selectedFile) {
+        setFile(selectedFile);
+        setPreview(URL.createObjectURL(selectedFile)); // create preview
+      }
+      e.target.value = ""; // reset the input value to allow re-uploading the same file
+    };
+
+    const handleDelete = () => {
+      if(!selectedAnnnouncementData?.image) return;
+      setPreview(selectedAnnnouncementData?.image);
+      setFile(null);
+      setAnnouncementData((prev) => prev ? { ...prev, image: selectedAnnnouncementData?.image } : null);
+    };
+
+    const handleSaveChanges = async () => {
+      if (!announcementId || !announcementData) return;
+      try {
+        const docRef = doc(db, "announcements", announcementId);
+        let updatedData = {
+          ...announcementData,
+          updatedAt: new Date().toLocaleString(),
+          updatedBy: session?.user?.fullName || "Unknown",
+        };
+      
+        if (file && !(announcementData.image && announcementData.image.includes(file.name))) {
+          // Delete old image if exists
+          if (announcementData.image) {
+            const oldImageRef = ref(storage, announcementData.image);
+            await deleteObject(oldImageRef).catch((error) => {
+              console.log("No previous image to delete or error deleting:", error);
+            });
+          }
+        
+          // Upload new image
+          const storageRef = ref(
+            storage,
+            `announcementsPictures/${Date.now()}-${announcementData.announcementHeadline}`
+          );
+          await uploadBytes(storageRef, file);
+          const imageUrl = await getDownloadURL(storageRef);
+        
+          updatedData = {
+            ...updatedData,
+            image: imageUrl,
+          };
+        }
+      
+        await updateDoc(docRef, updatedData);
+        alert("Announcement updated successfully!");
+        router.push("/dashboard/ProgramsModule/Announcements");
+      } catch (error) {
+        console.error("Error updating announcement:", error);
+        alert("There was an error updating the announcement.");
+      }
+    };
 
 
     const [activeSection, setActiveSection] = useState<"details" | "description" | "others">("details");
@@ -26,8 +134,11 @@ return (
                     <h1> Edit Announcement Details </h1>
                 </div>
                 <div className="action-btn-section-program">
-                    <button className="action-discard">Discard</button>
-                     <button className="action-save">Save</button>
+                    <button onClick={()=>{
+                      setAnnouncementData(selectedAnnnouncementData)
+                      handleDelete()
+                      }} className="action-discard">Discard</button>
+                     <button type ="button" onClick={handleSaveChanges} className="action-save">Save</button>
                 </div>
 
 
@@ -55,11 +166,41 @@ return (
                                 <label className="switch-label">
                                     Featured in Announcements
                                     <label className="switch">
-                                    <input type="checkbox" defaultChecked />
+                                    <input type="checkbox" 
+                                    checked={announcementData?.isInFeatured === "Active" || false}
+                                    onChange={(e) => {
+                                      const updatedValue = e.target.checked ? "Active" : "Inactive";
+                                      setAnnouncementData((prev) => ({
+                                        ...prev,
+                                        isInFeatured: updatedValue,
+                                      }));
+                                    }}    
+                                    />
                                     <span className="slider round"></span>
                                     </label>
                                 </label>
+                                
                         </div>    
+                        <div className="active-button-section-edit-announcement">
+                                <label className="switch-label">
+                                    Set as Active
+                                    <label className="switch">
+                                    <input type="checkbox" 
+                                    checked={announcementData?.isActive || false}
+                                    onChange={(e) => {
+                                      const updatedValue = e.target.checked;
+                                      setAnnouncementData((prev) => ({
+                                        ...prev,
+                                        isActive: updatedValue,
+                                      }));
+                                    }}
+
+                                    />
+                                    <span className="slider round"></span>
+                                    </label>
+                                </label>
+                                
+                        </div>  
 
                         <form className="edit-announcement-section-2" >
                         {activeSection === "details" && (
@@ -72,16 +213,32 @@ return (
                                     type="text"
                                     className="edit-announcement-input-field"
                                     placeholder="Program Name (E.g. Feeding Program)"
+                                    id="announcementHeadline"
+                                    value={announcementData?.announcementHeadline || ""}
+                                    onChange={(e) =>
+                                      setAnnouncementData((prev) => ({
+                                        ...prev,
+                                        announcementHeadline: e.target.value,
+                                      }))
+                                    }
                                     />
                                 </div>
 
                               <div className="fields-section-edit-announcement">
                                 <p>Announcement Category<span className="required">*</span></p>
-                                        <select className="edit-announcement-input-field">
-                                            <option value="">Choose Category</option>
-                                            <option value="">Public Advisory</option>
-                                            <option value="">Emergency</option>
-                                            <option value="">Barangay Event</option>
+                                        <select className="edit-announcement-input-field"
+                                            value={announcementData?.category || ""}
+                                            onChange={(e) =>
+                                              setAnnouncementData((prev) => ({
+                                                ...prev,
+                                                category: e.target.value,
+                                              }))
+                                            }
+                                          >
+                                            <option disabled value="">Choose Category</option>
+                                            <option value="Public Advisory">Public Advisory</option>
+                                            <option value="Emergency">Emergency</option>
+                                            <option value="Barangay Event">Barangay Event</option>
                                         </select>
                                 </div>
 
@@ -92,16 +249,20 @@ return (
                                  <div className="fields-section-edit-announcement">
                                     <p> Published Date <span className="required">*</span></p>
                                         <input
-                                        type="date"
-                                        className="edit-announcement-input-field"
+                                          type="text"
+                                          className="edit-announcement-input-field"
+                                          value={announcementData?.createdAt || ""}
+                                          readOnly
                                         />
                                     </div>
 
                                 <div className="fields-section-edit-announcement">
                                     <p>Author<span className="required">*</span></p>
                                     <input
-                                    type="text"
-                                    className="edit-announcement-input-field"
+                                      type="text"
+                                      className="edit-announcement-input-field"
+                                      value={announcementData?.createdBy || ""}
+                                      readOnly
                                     />
                                 </div>
 
@@ -121,7 +282,16 @@ return (
                                               Full Content / Description
                                           </div>
                                           <div className="edit-box-container-description-announcements">
-                                            <textarea className="edit-description-input-field-announcements" />
+                                            <textarea 
+                                              value={announcementData?.content || ""}
+                                              onChange={(e) =>
+                                                setAnnouncementData((prev) => ({
+                                                  ...prev,
+                                                  content: e.target.value,
+                                                }))
+                                              }
+                                              placeholder="Write the full content or description of the announcement here..."
+                                            className="edit-description-input-field-announcements" />
                                           </div>
                                       </div>
                                  </div>
@@ -132,48 +302,52 @@ return (
                         )}
                         
                         {activeSection === "others" && (
-                        <>
-
-                      <div className="box-container-outer-announcementpic">
-                        <div className="title-announcementpic">Photo</div>
-                        <div className="box-container-announcementpic">
-                          <div className="identificationpic-container-announcement">
-                            <label
-                              htmlFor="identification-file-upload"
-                              className="upload-link"
-
-                            >
-                              Click to Upload File
-                            </label>
-                            <input
-                              id="identification-file-upload"
-                              type="file"
-                              className="file-upload-input"
-                              accept=".jpg,.jpeg,.png"
-          
-                            />
-
-                            
-                              <div className="identificationpic-display-announcement">
-                                <div className="identification-picture-announcement">
-                                    <img  alt="Preview" style={{ height: "200px" }} />
-                                </div>
-                              </div>
-          
-                         
-                              <div className="delete-container">
-                                <button
-                                  type="button"
-                                  className="delete-button"
-
+                          <>
+                           <div className="box-container-outer-announcementpic"  style={{ display: activeSection === "others" ? "block" : "none" }}>
+                            <div className="title-announcementpic">Photo</div>
+                            <div className="box-container-announcementpic">
+                              <div className="identificationpic-container-announcement">
+                                <label
+                                  htmlFor="identification-file-upload"
+                                  className="upload-link"
                                 >
-                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                </button>
+                                  Click to Upload File
+                                </label>
+                                <input
+                                  id="identification-file-upload"
+                                  type="file"
+                                  className="file-upload-input"
+                                  accept=".jpg,.jpeg,.png"
+                                  onChange={handleFileChange}
+                                />
+                      
+                                {preview && (
+                                  <div className="identificationpic-display-announcement">
+                                    <div className="identification-picture-announcement">
+                                      <img src={preview} alt="Preview" style={{ height: "200px" }} />
+                                    </div>
+                                  </div>
+                                )}
+                      
+                                {preview && (
+                                  <div className="delete-container">
+                                    <button
+                                      type="button"
+                                      className="delete-button"
+                                      onClick={handleDelete}
+                                    >
+                                      <img
+                                        src="/images/trash.png"
+                                        alt="Delete"
+                                        className="delete-icon"
+                                      />
+                                    </button>
+                                  </div>
+                                )}
                               </div>
-                          
+                            </div>
                           </div>
-                        </div>
-                      </div>
+
 
                           </>
                         )}
