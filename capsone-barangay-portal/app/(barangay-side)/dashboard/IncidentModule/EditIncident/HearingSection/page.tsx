@@ -266,7 +266,7 @@ export default function HearingSection() {
                             setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;
                         }
-                         if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                         if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
                           setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
                           setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;

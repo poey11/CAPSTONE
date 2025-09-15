@@ -2260,3 +2260,49 @@ input[type="checkbox"] {
 .no-button-add:hover {
   background-color:  #c2352b; 
 } 
+
+
+
+
+.addprogram-error-popup-overlay{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  color: white;
+  width: 430px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 3000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.addprogram-error-popup-overlay{
+  background: #cc3434;
+  border-left: 10px solid #8a0f0f;
+}
+
+.addprogram-error-popup-overlay.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.addprogram-error-popup-overlay.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+.addprogram-popup{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.icon-alert-program {
+  width: 27px;
+  height: 27px;
+}

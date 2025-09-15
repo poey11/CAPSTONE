@@ -2,74 +2,149 @@
 import "@/CSS/AnnouncementsBrgy/Announcements.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
+import {useSession} from "next-auth/react";
+import { addDoc, collection, onSnapshot, deleteDoc, doc} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db,storage } from "@/app/db/firebase";
+interface AnnouncementHeader {
+  id: string;
+  announcementHeadline: string;
+  category: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  updatedBy?: string;
+  image:string;
+  isInFeatured?: string;
+}
+interface AnnouncementFormProps {
+  announcementHeadline?: string;
+  category?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  image?:string;
+  content?: string;
+  isActive?: boolean;
+  isInFeatured?: string;
+}
 export default function AnnouncementModule() {
+  const { data: session } = useSession();
+  const user = session?.user;
   const router = useRouter();
 
-
-// Dummy data for announcements
-const dummyAnnouncements = [
-  {
-    id: "1",
-    announcementHeadline: "Barangay Clean-up Drive This Saturday",
-    featuredInAnnouncements: "Inactive",
-    publishedDate: "2025-07-25",
-    createdBy: "Admin Staff",
-  },
-  {
-    id: "2",
-    announcementHeadline: "Free Health Check-up for Residents",
-    featuredInAnnouncements: "Inactive",
-    publishedDate: "2025-06-15",
-    createdBy: "Barangay Secretary",
-  },
-  {
-    id: "3",
-    announcementHeadline: "Youth Sports Fest Registration Now Open",
-    featuredInAnnouncements: "Inactive",
-    publishedDate: "2025-05-10",
-    createdBy: "Barangay Treasurer",
-  },
-  {
-    id: "4",
-    announcementHeadline: "Senior Citizen Monthly Gathering",
-    featuredInAnnouncements: "Inactive",
-    publishedDate: "2025-04-20",
-    createdBy: "Lupon Staff",
-  },
-  {
-    id: "5",
-    announcementHeadline: "Tree Planting Activity Next Week",
-    featuredInAnnouncements: "Inactive",
-    publishedDate: "2025-02-22",
-    createdBy: "Punong Barangay",
-  },
-];
-
-
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementHeader[]>([]);
   const [filteredAnnouncements, setFilteredAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 10;
 
-  // Simulate fetch
+
+  const [announcementFile, setAnnouncementFile] = useState<File | null>(null);
+  const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
+
+  const handleAnnouncementFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAnnouncementFile(file);
+      setAnnouncementPreview(URL.createObjectURL(file)); // show preview
+    }
+  };
+
+
+
   useEffect(() => {
-    setTimeout(() => {
-      setAnnouncements(dummyAnnouncements);
+    const unsubscribe = onSnapshot(collection(db, "announcements"), (snapshot) => {
+      const data: AnnouncementHeader[] = snapshot.docs.map((doc) => ({
+        ...(doc.data() as AnnouncementHeader),
+        id: doc.id,
+      }));
+      setAnnouncements(data);
+      setFilteredAnnouncements(data);
       setLoading(false);
-    }, 500);
+    });
+    return () => unsubscribe();
   }, []);
 
+  const [newAnnouncement, setNewAnnouncement] = useState<AnnouncementFormProps>({
+    createdAt: new Date().toLocaleString(),
+    createdBy: user?.fullName || "",
+    category: "Public Advisory",
+    isInFeatured: "Active",
+    isActive: true,
+  });
+
+  const createAnnouncement= async() => {
+    if(!newAnnouncement.announcementHeadline){
+      alert("Please fill in the program headline.");
+      return;
+    }
+    if(!newAnnouncement.category){
+      alert("Please select the program category.");
+      return;
+    }
+    if(!newAnnouncement.content){
+      alert("Please fill in the program content/description.");
+      return;
+    } 
+    if(!announcementFile){
+      alert("Please upload the program photo.");
+      return;
+    }
+    try {
+      const storageRef = ref(storage, `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`);
+      let imageurl = "";
+      if (announcementFile) {
+        await uploadBytes(storageRef, announcementFile);
+        const downloadURL = await getDownloadURL(storageRef);
+        imageurl = downloadURL;
+      }
+      const announcementData = {
+        ...newAnnouncement,
+        image: imageurl,
+      }
+
+      const docRef = await addDoc(collection(db, "announcements"), announcementData);
+      alert("Announcement created successfully!");
+      setShowAddAnnouncementPopup(false);
+      setAnnouncementFile(null);
+      setAnnouncementPreview(null);
+      setNewAnnouncement({ 
+        createdAt: new Date().toLocaleString(),
+        createdBy: user?.fullName || "",
+        category: "Public Advisory",
+        isInFeatured: "Inactive",
+        isActive: true,
+      });
+
+    } catch (error) {
+      
+    }
+  }
   
-  const [searchName, setSearchName] = useState("");
+  const deleteAnnnounce = async (id: string) => {
+    if (confirm("Are you sure you want to delete this program?")) {
+      const announcementToDelete = announcements.find((a) => a.id === id);
+        if(announcementToDelete){
+          if(announcementToDelete.image){
+            const imageRef = ref(storage, announcementToDelete.image);
+            await deleteObject(imageRef).catch((error) => {
+              console.error("Error deleting image from storage: ", error);
+            });
+          }
+        
+          await deleteDoc(doc(db, "announcements", id));
+          alert("Announcement deleted successfully!");
+        }
+    }
+    
+  }
+
   const [activeFilter, setActiveFilter] = useState("");
   const [searchHeadline, setSearchHeadline] = useState("");
-const [searchDate, setSearchDate] = useState("");
+  const [searchDate, setSearchDate] = useState("");
 
 
 useEffect(() => {
@@ -84,13 +159,18 @@ useEffect(() => {
 
   // Published date filter
   if (searchDate) {
-    filtered = filtered.filter((a) => a.publishedDate === searchDate);
-  }
+  filtered = filtered.filter((a) => {
+    const createdDate = new Date(a.createdAt).toLocaleDateString(); 
+    const searchDateStr = new Date(searchDate).toLocaleDateString(); 
+    return createdDate === searchDateStr;
+  });
+}
+
 
   // Active/Inactive filter
   if (activeFilter) {
     filtered = filtered.filter(
-      (a) => a.featuredInAnnouncements.toLowerCase() === activeFilter.toLowerCase()
+      (a) => a.isInFeatured && a.isInFeatured.toLowerCase() === activeFilter.toLowerCase()
     );
   }
 
@@ -122,13 +202,6 @@ useEffect(() => {
     return pageNumbersToShow;
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this program?")) {
-      setAnnouncements((prev) => prev.filter((announcements) => announcements.id !== id));
-      alert("Program deleted successfully!");
-    }
-  };
-
 
 
 
@@ -149,24 +222,21 @@ useEffect(() => {
       setIsPopupOpen(false);
     };
 
-    const handleEditClick = () => {
-    router.push("/dashboard/ProgramsModule/Announcements/AnnouncementDetails");
-  };
-
-
-  const [activeSection, setActiveSection] = useState("details");
-
-
+    const handleEditClick = async(id:string) => {
+      router.push(`/dashboard/ProgramsModule/Announcements/AnnouncementDetails?id=${id}`)
+    };
 
   return (
     <main className="announcement-main-container">
     <div className="announcement-module-section-1">
-      <button 
-        className="add-announcement-btn"
-        onClick={() => setShowAddAnnouncementPopup(true)}
-      >
-        Add New Announcement
-      </button>
+      {user?.position === "Admin Staff" &&(
+        <button 
+          className="add-announcement-btn"
+          onClick={() => setShowAddAnnouncementPopup(true)}
+        >
+          Add New Announcement
+        </button>
+      )}
 
     </div>
 
@@ -194,7 +264,7 @@ useEffect(() => {
                 value={activeFilter}
                 onChange={(e) => setActiveFilter(e.target.value)}
             >
-                <option value="">All Active/Inactive</option>
+                <option value="" disabled>All Active/Inactive</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
             </select>
@@ -215,8 +285,11 @@ useEffect(() => {
             <thead>
               <tr>
                 <th>Headline</th>
+                <th>Category</th>
+                <th>Author</th>
                 <th>Published Date</th>
                 <th>Featured</th>
+                <th>Showing</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -224,14 +297,25 @@ useEffect(() => {
               {currentAnnouncements.map((announcement) => (
                 <tr key={announcement.id}>
                   <td>{announcement.announcementHeadline}</td>
-                  <td>{announcement.publishedDate}</td>              
+                  <td>{announcement.category}</td>
+                  <td>{announcement.createdBy}</td>
+                  <td>{announcement.createdAt}</td>              
                   <td>
                     <span
-                      className={`status-badge-programs ${announcement.featuredInAnnouncements
+                      className={`status-badge-programs ${announcement.isInFeatured
                         .toLowerCase()
                         .replace(/\s*-\s*/g, "-")}`}
                     >
-                      <p>{announcement.featuredInAnnouncements}</p>
+                      <p>{announcement.isInFeatured}</p>
+                    </span>
+                  </td>
+                  <td>
+                     <span
+                      className={`status-badge-programs ${String(announcement.isActive ? "Active" : "Inactive")
+                        .toLowerCase()
+                        .replace(/\s*-\s*/g, "-")}`}
+                    >
+                      <p>{announcement.isActive ? "Active" : "Inactive"}</p>
                     </span>
                   </td>
   
@@ -253,24 +337,30 @@ useEffect(() => {
 
                       */}
                       
+                      {user?.position === "Admin Staff" && (
+                        <>
+                          <button
+                            type="button"
+                            className="action-announcements-button"
+                            onClick={() => handleEditClick(announcement.id)}
+                          >
+                            <img
+                              src="/Images/edit.png"
+                              alt="Edit"
+                              className="action-announcements-edit"
+                            />
+                          </button>
 
-                      <button
-                        className="action-announcements-button"
-                        onClick={handleEditClick}
-                      >
-                        <img
-                          src="/Images/edit.png"
-                          alt="Edit"
-                          className="action-announcements-edit"
-                        />
-                      </button>
+                          <button
+                            type="button"
+                            onClick={() => { deleteAnnnounce(announcement.id); }}
+                            className="action-announcements-button"
+                          >
 
-                            <button
-                        className="action-announcements-button"
-                      >
-
-                        <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
-                      </button>
+                            <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
+                          </button>
+                        </>
+                      )}
 
 
                     </div>
@@ -316,17 +406,34 @@ useEffect(() => {
 
 
           <div className="add-announcements-photo-section">
-           <span className="add-announcements-details-label"> Photo </span>
-             <div className="add-announcements-profile-container">
-                  <img
-                     src={"/Images/thumbnail.png"}
-                     alt="Identification"
-                     className="add-announcements-photo"
-                  />
+            <span className="add-announcements-details-label">Photo</span>
 
-             </div>
-              <label htmlFor="identification-file-upload" className="add-announcements-upload-link">Click to Upload File</label>
+            <div className="add-announcements-profile-container">
+              <img
+                src={announcementPreview || "/Images/thumbnail.png"} 
+                alt="Announcement"
+                className="add-announcements-photo"
+              />
+            </div>
+
+            <label htmlFor="announcement-file-upload" className="add-announcements-upload-link">
+              Click to Upload File
+            </label>
+            <input
+              id="announcement-file-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAnnouncementFileChange}
+            />
+
+            {/* {announcementFile && (
+              <button type="button" onClick={handleAnnouncementFileDelete} className="delete-button">
+                <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+              </button>
+            )} */}
           </div>
+
 
           <div className="add-announcements-info-main-container">
 
@@ -340,45 +447,56 @@ useEffect(() => {
                   type="text"
                   className="add-announcements-input-field"
                   placeholder="Program Name (E.g. Feeding Program)"
+                  value ={newAnnouncement.announcementHeadline|| ""}
+                  onChange={(e) => setNewAnnouncement({...newAnnouncement, announcementHeadline: e.target.value})}
+                  required
                   />
               </div>
 
            <div className="fields-section-add-announcements">
               <p>Announcement Category<span className="required">*</span></p>
-              <select className="add-announcements-input-field">
-                <option value="">Choose Category</option>
-                <option value="">Public Advisory</option>
-                <option value="">Emergency</option>
-                <option value="">Barangay Event</option>
+              <select className="add-announcements-input-field"
+                value ={newAnnouncement.category}
+                onChange={(e) => setNewAnnouncement({...newAnnouncement, category: e.target.value})}
+                required
+              >
+                <option value="" disabled>Choose Category</option>
+                <option value="Public Advisory">Public Advisory</option>
+                <option value="Emergency">Emergency</option>
+                <option value="Barangay Event">Barangay Event</option>
               </select>
             </div>
 
 
 
-
-
-            </div>
-
-            <div className="add-announcements-content-right-side">
-
-{/*}
-                <div className="fields-section-add-announcements">
+              <div className="fields-section-add-announcements">
                 <label className="switch-label">
-                    Featured in Announcements
+                    <p>Featured in Announcements</p>
                     <label className="switch">
-                    <input type="checkbox" defaultChecked />
+                    <input type="checkbox" defaultChecked 
+                    onChange={(e) => setNewAnnouncement({...newAnnouncement, isInFeatured: e.target.checked ? "Active" : "Inactive"})}
+
+                    />
                     <span className="slider round"></span>
                     </label>
                 </label>
                 </div>
-*/}
+
+            </div>
+
+            <div className="add-announcements-content-right-side">
+              
+                
+             
 
 
               <div className="fields-section-add-announcements">
                   <p> Published Date <span className="required">*</span></p>
                     <input
-                    type="date"
+                    type="text"
                     className="add-announcements-input-field"
+                    value = {newAnnouncement.createdAt}
+                    readOnly
                     />
                 </div>
 
@@ -387,6 +505,9 @@ useEffect(() => {
                   <input
                   type="text"
                   className="add-announcements-input-field"
+                  placeholder="Author"
+                  value ={newAnnouncement.createdBy}
+                  readOnly
                   />
               </div>
 
@@ -398,16 +519,21 @@ useEffect(() => {
 
 
             <div className="add-announcements-lower-section">
-                                    <div className="announcements-description-container">
-                                      <div className="box-container-outer-description-announcements">
-                                          <div className="title-description-announcements">
-                                              Full Content / Description
-                                          </div>
-                                          <div className="box-container-description-announcements">
-                                            <textarea className="description-input-field-announcements" />
-                                          </div>
-                                      </div>
-                                    </div>
+              <div className="announcements-description-container">
+                <div className="box-container-outer-description-announcements">
+                    <div className="title-description-announcements">
+                        Full Content / Description
+                    </div>
+                    <div className="box-container-description-announcements">
+                      <textarea
+                      placeholder="Write the full content/description of the announcement here..."
+                      value ={newAnnouncement.content|| ""}
+                      onChange={(e) => setNewAnnouncement({...newAnnouncement, content: e.target.value})}
+                      required
+                      className="description-input-field-announcements" />
+                    </div>
+                </div>
+              </div>
 
             </div>
             
@@ -419,8 +545,19 @@ useEffect(() => {
 
 
        <div className="announcement-yesno-container">
-             <button onClick={() => setShowAddAnnouncementPopup(false)} className="announcement-no-button">Cancel</button>
-                     <button className="announcement-yes-button">
+             <button onClick={() => {
+                setShowAddAnnouncementPopup(false);
+                setAnnouncementFile(null);
+                setAnnouncementPreview(null);
+                setNewAnnouncement({ 
+                  createdAt: new Date().toLocaleString(),
+                  createdBy: user?.fullName || "",
+                  category: "Public Advisory",
+                  isInFeatured: "Inactive",
+                  isActive: true,
+                });
+             }} className="announcement-no-button">Cancel</button>
+                     <button type = "button" onClick={createAnnouncement} className="announcement-yes-button">
                      Save
                 </button>
 
