@@ -2,37 +2,38 @@
 
 //import "@/CSS/OfficialsModuleBarangdaySide/SitioModule.css";
 import "@/CSS/OfficialsModuleBarangdaySide/module.css";
-import type { Metadata } from "next";
-import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import React,{useState, useEffect, useRef} from "react";
+import {useSession} from "next-auth/react";
+import { addDoc, collection, onSnapshot, deleteDoc, doc} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db,storage } from "@/app/db/firebase";
 
 
-const metadata: Metadata = {
-  title: "Announcement Page for Residents",
-  description: "Stay updated with the latest announcements",
-};
 
-// Dummy officials data with 11 entries
-const officersData = [
-  { id: 1, name: "Mr. Faustino Madriaga", position: "Association President", contact: "09171234567", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 2, name: "Mr. Jun Palatan", position: "Association President", contact: "09182345678", gender: "Male", location: "West Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 3, name: "Mr. Nestor Torsiende", position: "Association President", contact: "09193456789", gender: "Male", location: "South Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 4, name: "Mr. Ronald Bas", position: "Association President", contact: "09204567890", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 5, name: "Mr. Ronald Bas", position: "Association President", contact: "09215678901", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 6, name: "Ms. Linda Gagasa", position: "Association President", contact: "09226789012", gender: "Female", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 7, name: "Mr. Enrique Sumugba", position: "Association President", contact: "09237890123", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 8, name: "Mr. Francis Camacho", position: "Association President", contact: "09248901234", gender: "Male", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 9, name: "Mr. Enrico Testa", position: "Association President", contact: "09259012345", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 10, name: "Mr. Nonong Paggabao", position: "Association President", contact: "09260123456", gender: "Male", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 11, name: "Ms. Nenita Ong", position: "Association President", contact: "09271234568", gender: "Female", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 12, name: "Dr. Leo Ceno", position: "Association President", contact: "09282345679", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" },
-  { id: 13, name: "Ms. Veronica Pagayatan", position: "Association President", contact: "09293456780", gender: "Female", location: "East Fairview", clusterSection: "Falcon HOA", image: "/images/CaptainImage.jpg" },
-  { id: 14, name: "Ms. Daisy Barcelon", position: "Association President", contact: "09304567891", gender: "Female", location: "South Fairview", clusterSection: "RINA SAMAFA", image: "/images/CaptainImage.jpg" },
-  { id: 15, name: "Mr. Edevico T. De Mayo Jr", position: "Association President", contact: "09315678902", gender: "Male", location: "West Fairview", clusterSection: "Colt HOA", image: "/images/CaptainImage.jpg" }
-];
+interface NewOfficerDetails {
+  id?: string;
+  fullName?: string;
+  email?: string;
+  facebook?: string;
+  position?: string;
+  otherPosition?: string;
+  location?: string;
+  clusterSection?: string;
+  otherClusterSection?: string;
+  contact?: string;
+  department?: string;
+  image?: string;
+  createdAt?: String;
+  updatedAt?: String;
+  createdBy?: string;
+}
+
 
 export default function SitioHoaOfficersModule() {
+  const {data:session} = useSession();
+  const user = session?.user;
+  const router = useRouter();
 
   const [nameSearch, setNameSearch] = useState("");
   const [title, setTitle] = useState("");
@@ -46,13 +47,156 @@ export default function SitioHoaOfficersModule() {
   const [currentPage, setCurrentPage] = useState(1);
   const UserPerPage = 10; 
 
-  const router = useRouter();
-  const handleEditClick = () => {
-    router.push("/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer");
+  const [officersData, setOfficersData] = useState<NewOfficerDetails[]>([]);
+  const [selectedOfficer, setSelectedOfficer] = useState<NewOfficerDetails | null>(null);
+  const handleEditClick = (id:string) => {
+    router.push("/dashboard/OfficialsModule/SitioHoaOfficers/EditSitioHoaOfficer"+`?id=${id}`);
   };
 
   const [filtersLoaded, setFiltersLoaded] = useState(false);
   const hasAnimatedOnce = useRef(false);
+  const [newOfficerDetails, setNewOfficerDetails] = useState<NewOfficerDetails>({
+      department: "SITIO",
+      position: "Sitio President",
+      location: "East Fairview",
+      clusterSection: "SITIO KISLAP",
+  });
+
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+
+  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIdentificationFile(file);
+      setIdentificationPreview(URL.createObjectURL(file)); // temporary preview
+    }
+  };
+  useEffect(() => {
+    const officersCollection = collection(db, "hoaSitioOfficers");
+    const unsubscribe = onSnapshot(officersCollection, (snapshot) => {
+      const data: NewOfficerDetails[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        fullName: doc.data().fullName,
+        email: doc.data().email ,
+        facebook: doc.data().facebook,
+        position: doc.data().position,
+        ...(doc.data().position === "Others" && { otherPosition: doc.data().otherPosition }),
+        location: doc.data().location,
+        clusterSection: doc.data().clusterSection,
+        ...(doc.data().clusterSection === "Others" && { otherClusterSection: doc.data().otherClusterSection }),
+        contact: doc.data().contact,
+        department: doc.data().department,
+        image: doc.data().image ||"/images/default-profile.png",
+        createdAt: doc.data().createdAt ,
+        updatedAt: doc.data().updatedAt,
+        createdBy: doc.data().createdBy || "Unknown",
+      }));
+      setOfficersData(data);
+    });
+    return () => unsubscribe();
+
+  }, []);
+
+
+  console.log("Officers Data:", officersData);
+
+
+  const addNewOfficer = async () => {
+    if (!identificationFile) {
+      alert("Please upload an identification picture.");
+      return;
+    }
+    if(!newOfficerDetails.fullName){
+      alert("Please enter the officer's full name.");
+      return;
+    }
+    if(!newOfficerDetails.email){
+      alert("Please enter the officer's email.");
+      return;
+    }
+    if(!newOfficerDetails.facebook){
+      alert("Please enter the officer's facebook link.");
+      return;
+    }
+    if(!newOfficerDetails.position){
+      alert("Please select the officer's position.");
+      return;
+    } 
+    if(newOfficerDetails.position === "Others" && !newOfficerDetails.otherPosition){
+      alert("Please specify the officer's position.");
+      return;
+    }
+    if(!newOfficerDetails.location){
+      alert("Please select the officer's location.");
+      return;
+    }
+    if(!newOfficerDetails.clusterSection){
+      alert("Please select the officer's cluster/section.");
+      return;
+    }
+    if(newOfficerDetails.clusterSection === "Others" && !newOfficerDetails.otherClusterSection){
+      alert("Please specify the officer's cluster/section.");
+      return;
+    }
+    if(!newOfficerDetails.contact){
+      alert("Please enter the officer's contact number.");
+      return;
+    }
+    if(!newOfficerDetails.department){
+      alert("Please select the officer's department.");
+      return;
+    }
+    
+
+    try {
+      // Upload identification picture to Firebase Storage
+      const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile.name}`);
+      await uploadBytes(storageRef, identificationFile);
+      const imageUrl = await getDownloadURL(storageRef);
+
+      // Prepare officer object with image included
+      const officerData = {
+        ...newOfficerDetails,
+        image: imageUrl,
+        createdAt: new Date().toLocaleString(),
+        createdBy: user?.fullName || "Unknown",
+        updatedAt: new Date().toLocaleString(),
+      };
+
+      // Save officer details to Firestore
+      const officersCollection = collection(db, "hoaSitioOfficers");
+      await addDoc(officersCollection, officerData);
+
+      alert("New officer added successfully.");
+      setNewOfficerDetails({});
+      setIdentificationFile(null);
+      setIdentificationPreview(null);
+      setShowAddOOfficerPopup(false);
+    } catch (error) {
+      console.error("Error adding new officer: ", error);
+      alert("There was an error adding the new officer. Please try again.");
+    }
+  };
+
+  const deleteOfficer = async(id: string) => {
+    const officerToDelete = officersData.find((officer) => officer.id === id);
+    if (officerToDelete) {
+      if (officerToDelete.image) {
+        const imageRef = ref(storage, officerToDelete.image);
+        await deleteObject(imageRef).catch((error) => {
+          console.error("Error deleting image from storage: ", error);
+        });
+      }
+      const officerDoc = deleteDoc(doc(db, "hoaSitioOfficers", id));
+      officerDoc.catch((error) => {
+        console.error("Error deleting officer document: ", error);
+      });
+    }
+    
+  }
+
+
 
   useEffect(() => {
     if (!hasAnimatedOnce.current) {
@@ -68,8 +212,10 @@ export default function SitioHoaOfficersModule() {
   }, []);
 
    // Open popup
-      const openPopup = () => {
+      const openPopup = (official:NewOfficerDetails) => {
         setIsPopupOpen(true);
+        setSelectedOfficer(official);
+
       };
   
       // Close popup
@@ -80,9 +226,27 @@ export default function SitioHoaOfficersModule() {
         // Load dummy data on first render
         useEffect(() => {
           setFilteredUser(officersData);
-        }, []);
+        }, [officersData]);
 
+  useEffect(() => {
+    let filtered = [...officersData];
+    if (nameSearch.trim()) {
+      filtered = filtered.filter((officer) =>
+        officer.fullName?.toLowerCase().includes(nameSearch.toLowerCase())
+      );
+    }
 
+    if (positionDropdown) {
+      filtered = filtered.filter((officer) => officer.position === positionDropdown);
+    }
+
+    if (locationDropdown) {
+      filtered = filtered.filter((officer) => officer.location === locationDropdown);
+    }
+
+    setFilteredUser(filtered);
+    setCurrentPage(1); // Reset to first page on filter change
+  },[nameSearch, officersData, positionDropdown, locationDropdown]);
   // Pagination logic
   const indexOfLastUser = currentPage * UserPerPage;
   const indexOfFirstUser = indexOfLastUser - UserPerPage;
@@ -112,12 +276,14 @@ export default function SitioHoaOfficersModule() {
 
     <main className="officiers-main-container">
       <div className="officers-section-1"> 
-        <button 
+        {user?.position === "Admin Staff" && (
+          <button 
           className="add-officers-btn add-officers-animated"
           onClick={() => setShowAddOOfficerPopup(true)}
-        >
-          Add New Officer
-        </button>
+          >
+            Add New Officer
+          </button>
+        )}
       </div>
 
       <div className={`officers-section-2 ${filtersLoaded ? "filters-animated" : ""}`}>
@@ -136,6 +302,10 @@ export default function SitioHoaOfficersModule() {
           >
             <option value="">Position</option>
             <option value="Association President">Association President</option>
+            <option value="Association Officer">Association Officer</option>
+            <option value="Sitio President">Sitio President</option>
+            <option value="Sitio Officer">Sitio Officer</option>
+            <option value="Others">Others</option>
             {/* not sure if pwede may ibang position*/}
           </select>
 
@@ -163,6 +333,7 @@ export default function SitioHoaOfficersModule() {
               <tr>
                 <th>Officer Name</th>
                 <th>Position</th>
+                <th>Department</th>
                 <th>Cluster/Section</th>
                 <th>Location</th>
                 <th>Contact Information</th>
@@ -181,32 +352,45 @@ export default function SitioHoaOfficersModule() {
                         className="official-image"
                       />
                     </div>
-                    <div className="official-name">{official.name}</div>
+                    <div className="official-name">{official.fullName}</div>
                   </div>
                 </td>
-                  <td>{official.position}</td>
-                  <td>{official.clusterSection}</td>
+                  {official.position === "Others" ? (
+                    <td>{official.otherPosition}</td>
+                  ) : (
+                    <td>{official.position}</td>
+                  )}
+                  <td>{official.department}</td>
+                  {official.clusterSection === "Others" ? (
+                    <td>{official.otherClusterSection}</td>
+                  ) : (
+                    <td>{official.clusterSection}</td>
+                  )}
                   <td>{official.location}</td>
                   <td>{official.contact}</td>
                   <td>
                     <div className="bry-official-actions">
                       <button 
                         className="brgy-official-action-view"
-                        onClick={openPopup}
+                        onClick={()=> openPopup(official)}
                       >
                         <img src="/Images/view.png" alt="View"/>
                       </button>
 
-                     <button 
-                      className="brgy-official-action-edit"
-                      onClick={handleEditClick}
-                     >
-                         <img src="/Images/edit.png" alt="Edit"/>
-                      </button>
-
-                      <button className="brgy-official-action-delete">
-                         <img src="/Images/delete.png" alt="Delete" />
-                      </button>
+                      {user?.position === "Admin Staff" && (
+                        <>
+                          <button 
+                          className="brgy-official-action-edit"
+                          onClick={()=>handleEditClick(official.id||"")}
+                          >
+                            <img src="/Images/edit.png" alt="Edit"/>
+                          </button>
+                            
+                          <button type = "button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
+                             <img src="/Images/delete.png" alt="Delete" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -245,60 +429,78 @@ export default function SitioHoaOfficersModule() {
                     <div className="add-officer-main-container">
                       <div className="add-officer-photo-section">
                         <span className="add-officer-details-label">Identification Picture</span>
+                            
                         <div className="add-officer-profile-container">
                           <img
-                            src={"/Images/default-identificationpic.jpg"}
+                            src={identificationPreview || "/Images/default-identificationpic.jpg"}
                             alt="Identification"
                             className="add-officer-id-photo"
                           />
                         </div>
-                        <label htmlFor="identification-file-upload" className="add-officer-upload-link">Click to Upload File</label>
+                            
+                        <label htmlFor="identification-file-upload" className="add-officer-upload-link">
+                          Click to Upload File
+                        </label>
+                        <input
+                          id="identification-file-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden" // hides the raw input, use the label instead
+                          onChange={handleIdentificationFileChange}
+                        />
                       </div>
 
                       <div className="add-officer-info-main-container">
                         <div className="add-officer-content-left-side">
                             <div className="fields-section">
-                                <p>Last Name<span className="required">*</span></p>
+                                <p>Officer Full Name<span className="required">*</span></p>
                                 <input
                                   type="text"
                                   className="add-officer-input-field"
-                                  placeholder="Enter Last Name"
-                                  name="lastName"
+                                  placeholder="Enter Full  Name"
+                                  value={newOfficerDetails.fullName||""}
+                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, fullName: e.target.value})}
+                                  name="fullName"
                                   required
                                 />
                              </div>
-                             <div className="fields-section">
-                                <p>First Name<span className="required">*</span></p>
+                            <div className="fields-section">
+                                <p>Email<span className="required">*</span></p>
                                 <input
                                   type="text"
                                   className="add-officer-input-field"
-                                  placeholder="Enter First Name"
-                                  name="firstName"
+                                  placeholder="Enter Email"
+                                  name="email"
+                                  value={newOfficerDetails.email||""}
+                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, email: e.target.value})}
                                   required
                                 />
-                             </div>
+                             </div> 
+
                              <div className="fields-section">
-                                <p>Middle Name</p>
+                                <p>Facebook Link<span className="required">*</span></p>
                                 <input
                                   type="text"
                                   className="add-officer-input-field"
-                                  placeholder="Enter Middle Name"
-                                  name="middleName"
+                                  placeholder="Enter Facebook Link"
+                                  value={newOfficerDetails.facebook||""}
+                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, facebook: e.target.value})}
+                                  name="facebook"
                                   required
                                 />
                              </div>
 
                              <div className="fields-section">
-                              <p>Title<span className="required">*</span></p>
+                              <p>Department<span className="required">*</span></p>
                               <select
                                 className="add-officer-input-field"
-                                name="position"
+                                name="department"
                                 required
-                                onChange={(e) => setTitle(e.target.value)}
+                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, department: e.target.value})}
                               >
-                                <option value="">Select a Title</option>
-                                <option value="Ms.">Ms.</option>
-                                <option value="Mr.">Mr.</option>
+                                <option value="" disabled>Select a Department</option>
+                                <option value="SITIO">SITIO</option>
+                                <option value="HOA">HOA</option>
                               
                               </select>
                             </div>
@@ -311,20 +513,48 @@ export default function SitioHoaOfficersModule() {
                               className="add-officer-input-field"
                               name="position"
                               required
+                              onChange={(e) => setNewOfficerDetails({...newOfficerDetails, position: e.target.value})}
                             >
-                              <option value="">Position</option>
-                              <option value="Association President">Association President</option>
+                              <option value="" disabled>Position</option>
+                              {newOfficerDetails.department === "SITIO" ? (
+                                <>
+                                  
+                                  <option value="Sitio President">Sitio President</option>
+                                  <option value="Sitio Officer">Sitio Officer</option>
+                                </>
+                              ):(
+                                <>
+                                  <option value="Association President">Association President</option>
+                                  <option value="Association Officer">Association Officer</option>
+                                </>
+                              )}
+                              <option value="Others">Others</option>
                               {/* not sure if pwede may ibang position*/}
                             </select>
                           </div>
+                          {newOfficerDetails.position === "Others" && (
+                            <div className="fields-section">
+                              <p>Please Specify Position<span className="required">*</span></p>
+                              <input
+                                type="text"
+                                className="add-officer-input-field"
+                                placeholder="Enter Position"
+                                value={newOfficerDetails.otherPosition||""}
+                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, otherPosition: e.target.value})}
+                                name="otherPosition"  
+                                required
+                              />
+                            </div>
+                          )}
                         <div className="fields-section">
                             <p>Location<span className="required">*</span></p>
                             <select
                               className="add-officer-input-field"
-                              name="position"
+                              name="location"
                               required
+                              onChange={(e) => setNewOfficerDetails({...newOfficerDetails, location: e.target.value})}
                             >
-                              <option value="">Location</option>
+                              <option value="" disabled>Location</option>
                               <option value="East Fairview">East Fairview</option>
                               <option value="West Fairview">West Fairview</option>
                               <option value="South Fairview">South Fairview</option>
@@ -333,21 +563,48 @@ export default function SitioHoaOfficersModule() {
 
                         <div className="fields-section">
                                 <p>Cluster/Section</p>
-                                <input
-                                  type="text"
+                                <select
                                   className="add-officer-input-field"
-                                  placeholder="Enter Middle Name"
-                                  name="middleName"
+                                  name="clusterSection"
+                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, clusterSection: e.target.value})}
                                   required
-                                />
+                                >
+                                  
+                                  <option value="" disabled>Select Cluster/Section</option>
+                                  <option value="SITIO KISLAP">SITIO KISLAP</option>
+                                  <option value="URLINA">URLINA</option>
+                                  <option value="EFHAI">EFHAI</option>
+                                  <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
+                                  <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
+                                  <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
+                                  <option value="Others">Others</option>
+                                  {/* Add more options as needed */}
+                                </select>
                           </div>
+                          {newOfficerDetails.clusterSection === "Others" && (
+                            <div className="fields-section">
+                              <p>Please Specify Cluster/Section<span className="required">*</span></p>
+                              <input
+                                type="text"
+                                className="add-officer-input-field"
+                                placeholder="Enter Cluster/Section"
+                                value={newOfficerDetails.otherClusterSection||""}
+                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, otherClusterSection: e.target.value})}
+                                name="otherClusterSection"
+                                required
+                              />
+                            </div>
+                          )}
 
                           <div className="fields-section">
                                       <p>Contact Number<span className="required">*</span></p>
                                       <input 
                                         type="tel" 
                                         className="add-officer-input-field"
-                                        name="contactNumber"
+                                        name="contact"
+                                        value={newOfficerDetails.contact||""}
+                                        onChange={(e) => setNewOfficerDetails({...newOfficerDetails, contact: e.target.value})}
+                                        required
                                         pattern="^[0-9]{11}$" 
                                         placeholder="Enter 11-digit phone number" 
                                       />
@@ -362,8 +619,13 @@ export default function SitioHoaOfficersModule() {
                 
                     {/* Buttons */}
                     <div className="officer-yesno-container">
-                        <button onClick={() => setShowAddOOfficerPopup(false)} className="official-no-button">Cancel</button>
-                        <button className="official-yes-button">
+                        <button onClick={() => {
+                          setShowAddOOfficerPopup(false);
+                          setNewOfficerDetails({});
+                          setIdentificationFile(null);
+                          setIdentificationPreview(null);
+                        }} className="official-no-button">Cancel</button>
+                        <button type="button" onClick={addNewOfficer} className="official-yes-button">
                             Save
                         </button>
                     </div>
@@ -415,7 +677,7 @@ export default function SitioHoaOfficersModule() {
                     <span className="user-details-label">Officer Details</span>
                     <div className="user-profile-container">
                       <img
-                        src={"/Images/default-identificationpic.jpg"}
+                        src={ selectedOfficer?.image|| "/Images/default-identificationpic.jpg"}
                         alt="Identification"
                         className="resident-id-photo"
                       />
@@ -427,34 +689,38 @@ export default function SitioHoaOfficersModule() {
                         <>
                           <div className="view-mainresident-content-left-side">
                             <div className="view-user-fields-section">
-                              <p>Last Name</p>
+                              <p>Officer Full Name</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.fullName || ""}
                                 readOnly
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>First Name</p>
+                              <p>Email</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.email || ""}
                                 readOnly
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>Middle Name</p>
+                              <p>Facebook</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.facebook || ""}
                                 readOnly
                               /> 
                             </div>
                             <div className="view-user-fields-section">
-                              <p>Title</p>
+                              <p>Department</p>
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.department || ""}
                                 readOnly
                               /> 
                             </div>
@@ -465,6 +731,7 @@ export default function SitioHoaOfficersModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.position === "Others" ? selectedOfficer?.otherPosition : selectedOfficer?.position || ""}
                                 readOnly
                               /> 
                             </div>
@@ -474,6 +741,7 @@ export default function SitioHoaOfficersModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.location || ""}
                                 readOnly
                               /> 
                             </div>
@@ -483,6 +751,7 @@ export default function SitioHoaOfficersModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.clusterSection === "Others" ? selectedOfficer?.otherClusterSection : selectedOfficer?.clusterSection || ""}
                                 readOnly
                               /> 
                             </div>
@@ -491,6 +760,7 @@ export default function SitioHoaOfficersModule() {
                               <input
                                 type="text"
                                 className="view-user-input-field"
+                                value = {selectedOfficer?.contact || ""}
                                 readOnly
                               /> 
                             </div>
@@ -505,6 +775,7 @@ export default function SitioHoaOfficersModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value = {selectedOfficer?.createdBy || "N/A"}
                                   readOnly
                                 /> 
                             </div>
@@ -513,6 +784,7 @@ export default function SitioHoaOfficersModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value = {selectedOfficer?.createdAt ? selectedOfficer.createdAt.toString() : "N/A"}
                                   readOnly
                                 /> 
                             </div>
@@ -523,6 +795,7 @@ export default function SitioHoaOfficersModule() {
                                 <input
                                   type="text"
                                   className="view-user-input-field"
+                                  value = {selectedOfficer?.updatedAt ? selectedOfficer.updatedAt.toString() : "N/A"}
                                   readOnly
                                 /> 
                             </div>

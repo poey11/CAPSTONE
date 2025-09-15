@@ -1,18 +1,73 @@
 "use client";
 import "@/CSS/OfficialsModuleBarangdaySide/editOfficialOfficer.css";
-import { useState } from "react";
+import { useState,useEffect, use } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {  onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db,storage } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
+interface NewOfficerDetails {
+  id?: string;
+  fullName?: string;
+  email?: string;
+  facebook?: string;
+  position?: string;
+  otherPosition?: string;
+  location?: string;
+  clusterSection?: string;
+  otherClusterSection?: string;
+  contact?: string;
+  department?: string;
+  image?: string;
+  createdAt?: String;
+  updatedAt?: String;
+  createdBy?: string;
+}
 
 export default function EditOfficer() {
 
+    const { data: session } = useSession();
+    const user =  session?.user;    
+    const searchParams = useSearchParams();
+    const officialId = searchParams.get("id");
+    const router = useRouter();
     const [activeSection, setActiveSection] = useState("details");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
-    const [position, setPosition] = useState("");
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
-    const [title, setTitle] = useState("");
+    const [selectedOfficial, setSelectedOfficial] = useState<NewOfficerDetails>({});
+    const [selectedOfficialData, setSelectedOfficialData] = useState<NewOfficerDetails>({});
+    const [dataSet, setDataSet] = useState(false);
+    
+    useEffect(()=>{
+        if (!officialId) return;
+        const docRef = doc(db, "hoaSitioOfficers", officialId as string);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                console.log("Document data:", doc.data());
+                setSelectedOfficial(doc.data());
+                setDataSet(true);
+            }
+        });
 
+        return () => unsubscribe();
+    },[officialId])
+
+    useEffect(() => {
+        if (selectedOfficial.image) {
+            setIdentificationPreview(selectedOfficial.image);
+        }
+
+    },[selectedOfficial])
+
+    
+    useEffect(() => {
+        setSelectedOfficialData(selectedOfficial);
+    },[dataSet])
+
+    console.log("selectef official",selectedOfficial);
     const handleBack = () => {
-      window.location.href = "/dashboard/OfficialsModule/SitioHoaOfficers";
+        router.back();
     };
 
     const handleDiscardClick = async () => {
@@ -28,6 +83,38 @@ export default function EditOfficer() {
 
     };
 
+    const handleSaveChanges = async () => {
+        if (!officialId) return;
+        try {
+            const docRef = doc(db, "hoaSitioOfficers", officialId as string);
+            let updateData={
+                ...selectedOfficial,
+                updatedAt: new Date().toLocaleString(),
+                updatedBy: user?.fullName || "Unknown",
+            };
+            if (identificationFile && !(selectedOfficial.image && selectedOfficial.image.includes(identificationFile.name))) {
+            
+                const imageRef = ref(storage, selectedOfficial.image);
+                await deleteObject(imageRef).catch((error) => { 
+                    console.log("No previous image to delete or error deleting:", error);
+                });
+                const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile.name}`);
+                await uploadBytes(storageRef, identificationFile);
+                const downloadURL = await getDownloadURL(storageRef);
+                updateData = {
+                  ...updateData,
+                  image: downloadURL,
+                };
+            }
+
+            await updateDoc(docRef, updateData);
+            alert("Officer details updated successfully!");
+            router.push("/dashboard/OfficialsModule/SitioHoaOfficers");
+        } catch (error) {
+            
+        }
+    }
+
     return (
         <main className="edit-officer-main-container">
             <div className="edit-officer-main-content">
@@ -42,7 +129,7 @@ export default function EditOfficer() {
 
                     <div className="action-btn-section">
                         <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-                        <button className="action-save">
+                        <button type = "button" onClick={handleSaveChanges} className="action-save">
                             Save
                         </button>
                     </div>
@@ -70,35 +157,38 @@ export default function EditOfficer() {
                                     <div className="edit-officer-section-2-full-top">
                                         <div className="edit-official-section-2-left-side">
                                             <div className="fields-section-official">
-                                                <p>Last Name<span className="required">*</span></p>
+                                                <p>Officer Full Name<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
+                                                value ={selectedOfficial.fullName|| ""}
+                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, fullName: e.target.value})}
+                                                    className="edit-officer-input-field" />
+                                            </div>
+                                            <div className="fields-section-official">
+                                                <p>Email<span className="required">*</span></p>
+                                                <input type="text" 
+                                                value={selectedOfficial.email || ""}
+                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, email: e.target.value})}    
+                                        
                                                 className="edit-officer-input-field" />
                                             </div>
                                             <div className="fields-section-official">
-                                                <p>First Name<span className="required">*</span></p>
+                                                <p>Facebook</p>
                                                 <input type="text" 
-                                                required
+                                                value={selectedOfficial.facebook || ""}
+                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, facebook: e.target.value})}
                                                 className="edit-officer-input-field" />
                                             </div>
                                             <div className="fields-section-official">
-                                                <p>Middle Name</p>
-                                                <input type="text" 
-                                                required
-                                                className="edit-officer-input-field" />
-                                            </div>
-                                            <div className="fields-section-official">
-                                                <p>Title<span className="required">*</span></p>
+                                                <p>Department<span className="required">*</span></p>
                                                 <select
                                                     className="edit-officer-input-field"
                                                     name="position"
-                                                    required
-                                                    onChange={(e) => setTitle(e.target.value)}
+                                                    value={selectedOfficial.department || ""}
+                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, department: e.target.value})}
                                                 >
-                                                    <option value="">Select a Title</option>
-                                                    <option value="Ms.">Ms.</option>
-                                                    <option value="Mr.">Mr.</option>
-                                                
+                                                    <option value="" disabled>Select a Department</option>
+                                                    <option value="SITIO">SITIO</option>
+                                                    <option value="HOA">HOA</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -110,19 +200,42 @@ export default function EditOfficer() {
                                                 name="position"
                                                 required
                                                 >
-                                                <option value="">Position</option>
-                                                <option value="Association President">Association President</option>
-                                                {/* not sure if pwede may ibang position*/}
+                                                    <option value="" disabled>Position</option>
+                                                        {selectedOfficial.department === "HOA" ? (
+                                                          <>
+                                                            <option value="Association President">Association President</option>
+                                                            <option value="Association Officer">Association Officer</option>
+                                                          </>
+                                                        ):(
+                                                          <>
+                                                            <option value="Sitio President">Sitio President</option>
+                                                            <option value="Sitio Officer">Sitio Officer</option>
+                                                          </>
+                                                        )}
+                                                        <option value="Others">Others</option>
                                                 </select>
                                             </div>
+                                            {selectedOfficial.position === "Others" && (
+                                                <div className="fields-section-official">
+                                                    <p>Please Specify Position<span className="required">*</span></p>
+                                                    <input 
+                                                        type="text" 
+                                                        className="edit-officer-input-field"
+                                                        name="otherPosition"
+                                                        value={selectedOfficial.otherPosition || ""}
+                                                        onChange={(e) => setSelectedOfficial({...selectedOfficial, otherPosition: e.target.value})}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="fields-section-official">
                                                 <p>Location<span className="required">*</span></p>
                                                 <select
                                                 className="edit-officer-input-field"
                                                 name="position"
-                                                required
+                                                value={selectedOfficial.location || ""}
+                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, location: e.target.value})}
                                                 >
-                                                <option value="">Location</option>
+                                                <option value="" disabled>Location</option>
                                                 <option value="East Fairview">East Fairview</option>
                                                 <option value="West Fairview">West Fairview</option>
                                                 <option value="South Fairview">South Fairview</option>
@@ -130,18 +243,44 @@ export default function EditOfficer() {
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>Cluster/Section<span className="required">*</span></p>
-                                                <input type="text" 
-                                                required
-                                                className="edit-officer-input-field" />
+                                                <select 
+                                                    className="edit-officer-input-field"
+                                                    name="clusterSection"
+                                                    value={selectedOfficial.clusterSection || ""}
+                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, clusterSection: e.target.value})}
+                                                >
+                                                    <option value="" disabled>Select Cluster/Section</option>
+                                                    <option value="SITIO KISLAP">SITIO KISLAP</option>
+                                                    <option value="URLINA">URLINA</option>
+                                                    <option value="EFHAI">EFHAI</option>
+                                                    <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
+                                                    <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
+                                                    <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
+                                                    <option value="Others">Others</option>
+                                                </select>
                                             </div>
+                                            {selectedOfficial.clusterSection === "Others" && (
+                                                <div className="fields-section-official">
+                                                    <p>Please Specify Cluster/Section<span className="required">*</span></p>
+                                                    <input
+                                                        type="text"
+                                                        className="edit-officer-input-field"
+                                                        name="otherClusterSection"
+                                                        value={selectedOfficial.otherClusterSection || ""}
+                                                        onChange={(e) => setSelectedOfficial({...selectedOfficial, otherClusterSection: e.target.value})}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="fields-section-official">
                                                 <p>Contact Number<span className="required">*</span></p>
                                                 <input 
                                                     type="tel" 
                                                     className="edit-officer-input-field"
-                                                    name="contactNumber"
+                                                    name="contact"
                                                     pattern="^[0-9]{11}$" 
                                                     placeholder="Enter 11-digit phone number" 
+                                                    value={selectedOfficial.contact || ""}
+                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, contact: e.target.value})}
                                                 />
                                             </div>
                                         </div>
@@ -208,7 +347,12 @@ export default function EditOfficer() {
                                 <p>Are you sure you want to discard the changes?</p>
                                 <div className="yesno-container-add">
                                     <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
-                                    <button className="yes-button-add">Yes</button> 
+                                    <button type="button" onClick={()=>{
+                                        setSelectedOfficial(selectedOfficialData);
+                                        setShowDiscardPopup(false);
+                                        }} className="yes-button-add">
+                                            Yes
+                                    </button> 
                                 </div> 
                             </div>
                         </div>

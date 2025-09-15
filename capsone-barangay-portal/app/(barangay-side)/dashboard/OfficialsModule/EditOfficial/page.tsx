@@ -1,17 +1,90 @@
 
 "use client";
 import "@/CSS/OfficialsModuleBarangdaySide/editOfficialOfficer.css";
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {  onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db,storage } from "@/app/db/firebase";
 
+interface Official {
+    lastName?: string;
+    firstName?: string;
+    middleName?: string;
+    phone?: string;
+    position?: string;
+    department?: string;
+    term?: string;
+    identificationPic?: string;
+    email?: string;
+    id?: string;
+    image?: string;
+}
 
 export default function EditOfficial() {
+    const searchParams = useSearchParams();
+    const officialId = searchParams.get("id");
+    const router = useRouter();
 
+    const [selectedOfficial, setSelectedOfficial] = useState<Official>({});
     const [activeSection, setActiveSection] = useState("details");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
-    const [position, setPosition] = useState("");
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
 
+    
+    useEffect(()=>{
+        if (!officialId) return;
+        const docRef = doc(db, "BarangayUsers", officialId as string);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                console.log("Document data:", doc.data());
+                setSelectedOfficial(doc.data());
+            }
+        });
+
+        return () => unsubscribe();
+    },[officialId])
+
+    useEffect(() => {
+        if (selectedOfficial.image) {
+            setIdentificationPreview(selectedOfficial.image);
+        }
+
+    },[selectedOfficial])
+
+    console.log("selectef official",selectedOfficial);
+
+    
+    const handleUpload = async (e:any) => {
+      e.preventDefault();
+      if (!officialId) return;
+      if (!identificationFile) {
+        alert("No Image file selected.");
+        return;
+      }
+    
+      try {
+        const storageRef = ref(storage, `officialPictures/${officialId}/${identificationFile.name}`);
+        await uploadBytes(storageRef, identificationFile);
+        const downloadURL = await getDownloadURL(storageRef);
+    
+        await updateDoc(doc(db, "BarangayUsers", officialId), {
+          image: downloadURL,
+        });
+    
+        handleIdentificationFileDelete(); // clear state after successful upload
+        router.push("/dashboard/OfficialsModule");
+      } catch (error) {
+        console.log("Error uploading file:", error);
+        alert("Failed to upload file.");
+      }
+    };
+
+    const handleIdentificationFileDelete = () => {
+      setIdentificationFile(null);
+      setIdentificationPreview(null);
+    };
     const handleBack = () => {
       window.location.href = "/dashboard/OfficialsModule";
     };
@@ -21,12 +94,11 @@ export default function EditOfficial() {
     }
 
     const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-        setIdentificationFile(file);
-        setIdentificationPreview(URL.createObjectURL(file));
-    }
+      const file = e.target.files?.[0];
+      if (!file) return;
 
+      setIdentificationFile(file);
+      setIdentificationPreview(URL.createObjectURL(file)); // local preview
     };
 
     return (
@@ -43,7 +115,7 @@ export default function EditOfficial() {
 
                     <div className="action-btn-section">
                         <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-                        <button className="action-save">
+                        <button className="action-save" type="button" onClick={handleUpload}>
                             Save
                         </button>
                     </div>
@@ -73,52 +145,53 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Last Name<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
-                                                className="edit-official-input-field" />
+                                                value={selectedOfficial.lastName || "N/A"}
+                                                className="edit-official-input-field" 
+                                                readOnly
+                                                />
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>First Name<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
+                                                value={selectedOfficial.firstName || "N/A"}
+                                                readOnly
                                                 className="edit-official-input-field" />
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>Middle Name<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
+                                                value={selectedOfficial.middleName || "N/A"}
+                                                readOnly
                                                 className="edit-official-input-field" />
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>Contact Number<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
+                                                value={selectedOfficial.phone || "N/A"}
+                                                readOnly
                                                 className="edit-official-input-field" />
                                             </div>
                                         </div>
                                         <div className="edit-official-section-2-right-side">
                                             <div className="fields-section-official">
                                                 <p>Position<span className="required">*</span></p>
-                                                <select
+                                                <input 
+                                                    type="text"
                                                     required
                                                     className="edit-official-input-field"
                                                     name="position"
-                                                    value={position}
-                                                    onChange={(e) => setPosition(e.target.value)}
-                                                >
-                                                    <option value="">Select a Position</option>
-                                                    <option value="Punong Barangay">Punong Barangay</option>
-                                                    <option value="Secretary">Secretary</option>
-                                                    <option value="Assistant Secretary">Asst Secretary</option>
-                                                    <option value="Admin Staff">Admin Staff</option>
-                                                    <option value="LF Staff">LF Staff</option>
-                                                </select>
+                                                    value={selectedOfficial.position || "N/A"}
+                                                    readOnly
+                                                />
+                                                    
                                             </div>
 
-                                            {position === "LF Staff" && (
+                                            {selectedOfficial.position === "LF Staff" && (
                                                 <div className="fields-section-official">
                                                     <p>Department<span className="required">*</span></p>
                                                     <input type="text" 
-                                                    required
+                                                    value={selectedOfficial.department || "N/A"}
+                                                    readOnly
                                                     className="edit-official-input-field" />
                                                 </div>
                                             )}
@@ -126,18 +199,20 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Term Duration<span className="required">*</span></p>
                                                 <input
-                                                    type="date"
+                                                    type="text"
                                                     className="edit-official-input-field"
                                                     name="termDuration"
-                                                    required
-                                                    min={new Date().toISOString().split("T")[0]}
+                                                    value={selectedOfficial.term || "N/A"}
+                                                    readOnly
                                                 />
                                             </div>
 
                                             <div className="fields-section-official">
                                                 <p>Email Address<span className="required">*</span></p>
                                                 <input type="text" 
-                                                required
+                                                
+                                                value={selectedOfficial.email || "N/A"}
+                                                readOnly
                                                 className="edit-official-input-field" />
                                             </div>
                                         </div>
@@ -145,50 +220,70 @@ export default function EditOfficial() {
                                 </>
                             )}
                             {activeSection === "others" && (
-                                <>
-                                    <div className="edit-official-others-mainsection">
-                                        <div className="box-container-outer-resindentificationpic">
-                                            <div className="title-resindentificationpic">
-                                                Identification Picture
-                                            </div>
+                                <div className="edit-official-others-mainsection">
+                                    <div className="box-container-outer-resindentificationpic">
+                                      <div className="title-resindentificationpic">
+                                        Identification Picture
+                                      </div>
 
-                                            <div className="box-container-resindentificationpic">
+                                      <div className="box-container-resindentificationpic">
+                                        {/* File Upload Section */}
+                                        <div className="identificationpic-container">
+                                          <label htmlFor="identification-file-upload" className="upload-link">
+                                            Click to Upload File
+                                          </label>
+                                          <input
+                                            id="identification-file-upload"
+                                            type="file"
+                                            className="file-upload-input"
+                                            accept=".jpg,.jpeg,.png"
+                                            onChange={handleIdentificationFileChange}
+                                          />
 
-                                            {/* File Upload Section */}
-                                            <div className="identificationpic-container">
-                                                <label htmlFor="identification-file-upload" className="upload-link">Click to Upload File</label>
-                                                <input id="identification-file-upload" type="file" className="file-upload-input" accept=".jpg,.jpeg,.png" onChange={handleIdentificationFileChange}/>
-
-
-                                                {(identificationFile || identificationPreview) && (
-                                                    <div className="identificationpic-display">
-                                                    <div className="identification-picture">
-                                                        {identificationPreview && (
-                                                        <img
-                                                            src={identificationPreview}
-                                                            alt="Preview"
-                                                            style={{ height: '200px'}}
-                                                        />
-                                                        )}
-                                                    </div>
-                                                    
-                                                    </div>
-
+                                          {(identificationFile || identificationPreview) && (
+                                            <div className="identificationpic-display">
+                                              <div className="identification-picture">
+                                                {identificationPreview && (
+                                                  <img
+                                                    src={identificationPreview}
+                                                    alt="Preview"
+                                                    style={{ height: "200px" }}
+                                                  />
                                                 )}
-                                                {(identificationFile || identificationPreview) && (
-                                                    <div className="delete-container">
-                                                    <button type="button" /*onClick={handleIdentificationFileDelete}*/ className="delete-button">
-                                                        <img src="/images/trash.png" alt="Delete" className="delete-icon" />
-                                                    </button>
-                                                    </div>
-                                                )}
-                                                </div>
-                                            
+                                              </div>
                                             </div>
-                                        </div> 
+                                          )}
 
+                                          {(identificationFile || identificationPreview) && (
+                                            <div className="delete-container">
+                                              <button
+                                                type="button"
+                                                onClick={handleIdentificationFileDelete}
+                                                className="delete-button"
+                                              >
+                                                <img
+                                                  src="/images/trash.png"
+                                                  alt="Delete"
+                                                  className="delete-icon"
+                                                />
+                                              </button>
+                                            </div>
+                                          )}
+
+                                          {/* {(identificationFile || identificationPreview) && (
+                                            <button
+                                              type="button"
+                                              onClick={handleUpload}
+                                              className="upload-button"
+                                            >
+                                              Save Identification Picture
+                                            </button>
+                                          )} */}
+                                        </div>
+                                      </div>
                                     </div>
-                                </>
+                                </div>
+
                             )}
                         </form>
                     </div>

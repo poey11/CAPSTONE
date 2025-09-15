@@ -6,8 +6,6 @@ import { generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDoc, orderBy} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
-import { report } from "process";
-import { set } from "date-fns";
 
 
 export default function EditLuponIncident() {
@@ -667,7 +665,7 @@ useEffect(() => {
                           return;
                         }
 
-                        if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                        if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);

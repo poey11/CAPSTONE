@@ -11,33 +11,7 @@ export default function AnnouncementDetails() {
   const image = searchParams.get("image");
 
 
-    const recentPosts = [
-    {
-      title: "CITY OF ISABELA, BASILAN LGU BENCHMARKING ACTIVITY",
-      date: "Jul 29, 2025",
-      image: "/Images/anak.jpg",
-    },
-    {
-      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
-      date: "Feb 12, 2025",
-      image: "/Images/anak.jpg",
-    },
-    {
-      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
-      date: "Feb 05, 2025",
-      image: "/Images/anak.jpg",
-    },
-    {
-      title: "ALA-ALA NG IKA-80 TAONG KABAYANIHAN",
-      date: "Feb 12, 2025",
-      image: "/Images/anak.jpg",
-    },
-    {
-      title: "PASSPORT ON WHEELS, MATAGUMPAY NA ISINAGAWA",
-      date: "Feb 05, 2025",
-      image: "/Images/anak.jpg",
-    },
-  ];
+   
 
   return (
     <main className="main-container-specific-announcement">
