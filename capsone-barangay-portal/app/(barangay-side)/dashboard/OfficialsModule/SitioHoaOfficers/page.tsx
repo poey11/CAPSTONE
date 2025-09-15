@@ -228,7 +228,25 @@ export default function SitioHoaOfficersModule() {
           setFilteredUser(officersData);
         }, [officersData]);
 
+  useEffect(() => {
+    let filtered = [...officersData];
+    if (nameSearch.trim()) {
+      filtered = filtered.filter((officer) =>
+        officer.fullName?.toLowerCase().includes(nameSearch.toLowerCase())
+      );
+    }
 
+    if (positionDropdown) {
+      filtered = filtered.filter((officer) => officer.position === positionDropdown);
+    }
+
+    if (locationDropdown) {
+      filtered = filtered.filter((officer) => officer.location === locationDropdown);
+    }
+
+    setFilteredUser(filtered);
+    setCurrentPage(1); // Reset to first page on filter change
+  },[nameSearch, officersData, positionDropdown, locationDropdown]);
   // Pagination logic
   const indexOfLastUser = currentPage * UserPerPage;
   const indexOfFirstUser = indexOfLastUser - UserPerPage;
@@ -284,6 +302,10 @@ export default function SitioHoaOfficersModule() {
           >
             <option value="">Position</option>
             <option value="Association President">Association President</option>
+            <option value="Association Officer">Association Officer</option>
+            <option value="Sitio President">Sitio President</option>
+            <option value="Sitio Officer">Sitio Officer</option>
+            <option value="Others">Others</option>
             {/* not sure if pwede may ibang position*/}
           </select>
 

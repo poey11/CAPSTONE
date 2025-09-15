@@ -9,17 +9,16 @@ import { db,storage } from "@/app/db/firebase";
 interface AnnouncementHeader {
   id: string;
   announcementHeadline: string;
-  featuredInAnnouncements: string;
   category: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
   updatedBy?: string;
   image:string;
+  isInFeatured?: string;
 }
 interface AnnouncementFormProps {
   announcementHeadline?: string;
-  featuredInAnnouncements?: string;
   category?: string;
   createdBy?: string;
   createdAt?: string;
@@ -160,13 +159,18 @@ useEffect(() => {
 
   // Published date filter
   if (searchDate) {
-    filtered = filtered.filter((a) => a.createdAt === searchDate);
-  }
+  filtered = filtered.filter((a) => {
+    const createdDate = new Date(a.createdAt).toLocaleDateString(); 
+    const searchDateStr = new Date(searchDate).toLocaleDateString(); 
+    return createdDate === searchDateStr;
+  });
+}
+
 
   // Active/Inactive filter
   if (activeFilter) {
     filtered = filtered.filter(
-      (a) => a.featuredInAnnouncements.toLowerCase() === activeFilter.toLowerCase()
+      (a) => a.isInFeatured && a.isInFeatured.toLowerCase() === activeFilter.toLowerCase()
     );
   }
 
@@ -260,7 +264,7 @@ useEffect(() => {
                 value={activeFilter}
                 onChange={(e) => setActiveFilter(e.target.value)}
             >
-                <option value="">All Active/Inactive</option>
+                <option value="" disabled>All Active/Inactive</option>
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
             </select>

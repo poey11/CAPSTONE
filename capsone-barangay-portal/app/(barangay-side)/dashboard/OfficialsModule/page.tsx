@@ -23,21 +23,6 @@ interface Official {
   updatedBy?: string;
 }
 
-// Dummy officials data with 11 entries
-// const officialsData = [
-//   { id: 1, name: "Juan Dela Cruz", position: "Punong Barangay", term: "2023-2026", contact: "09171234567", gender: "Male", image: "/images/CaptainImage.jpg" },
-//   { id: 2, name: "Maria Lopez Santos", position: "Secretary", term: "2023-2026", contact: "09182345678", gender: "Female", image: "/images/CaptainImage.jpg" },
-//   { id: 3, name: "Roberto Garcia", position: "Asst Secretary", term: "2023-2026", contact: "09193456789", gender: "Male", image: "/images/CaptainImage.jpg" },
-//   { id: 4, name: "Angela Rivera", position: "Admin Staff", term: "2023-2026", contact: "09204567890", gender: "Female", image: "/images/CaptainImage.jpg" },
-//   { id: 5, name: "Paulo Mendoza", position: "LF Staff", term: "2023-2026", contact: "09215678901", gender: "Male", image: "/images/CaptainImage.jpg" },
-//   { id: 6, name: "Catherine Cruz", position: "Admin Staff", term: "2023-2026", contact: "09226789012", gender: "Female", image: "/images/CaptainImage.jpg" },
-//   { id: 7, name: "Emmanuel Reyes", position: "LF Staff", term: "2023-2026", contact: "09237890123", gender: "Male", image: "/images/CaptainImage.jpg" },
-//   { id: 8, name: "Isabella Flores", position: "Secretary", term: "2023-2026", contact: "09248901234", gender: "Female", image: "/images/CaptainImage.jpg" },
-//   { id: 9, name: "Mark Villanueva", position: "Asst Secretary", term: "2023-2026", contact: "09259012345", gender: "Male", image: "/images/CaptainImage.jpg" },
-//   { id: 10, name: "Grace Bautista", position: "Admin Staff", term: "2023-2026", contact: "09260123456", gender: "Female", image: "/images/CaptainImage.jpg" },
-//   { id: 11, name: "Francis Lim", position: "LF Staff", term: "2023-2026", contact: "09271234568", gender: "Male", image: "/images/CaptainImage.jpg" },
-// ];
-
 
 export default function OfficialsModule() {
   const [officialsData, setOfficialsData] = useState<Official[]>([]);
