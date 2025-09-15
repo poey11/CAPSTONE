@@ -84,7 +84,7 @@ export default function Announcement() {
       </div>
 
       <div className="announcements-header">
-        <h1 className="announcements-title">Latest News and Announcements</h1>
+        <h1 className="announcements-title">News and Announcements</h1>
         <div className="announcements-underline"></div>
       </div>
 
