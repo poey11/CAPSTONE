@@ -7,7 +7,10 @@
     "build:replies": "tsx src/buildReplies.ts",
     "sync:entities": "tsx src/cx/syncEntities.ts",
     "sync:intents": "tsx src/cx/syncIntents.ts",
-    "sync:all": "tsx src/cx/syncAll.ts"
+    "sync:all": "tsx src/cx/syncAll.ts",
+    "sync:all:files": "tsx src/cx/syncAllFromFiles.ts",
+    "sync:services-at-start": "tsx src/cx/syncServicesAtStart.ts"
+
 
   },
 "dependencies": {

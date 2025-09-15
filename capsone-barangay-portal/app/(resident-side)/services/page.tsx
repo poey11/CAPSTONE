@@ -74,7 +74,7 @@ export default function Services() {
     return (
       docType === "Temporary Business Permit" ||
       docType === "Business Permit" ||
-      docType === "Construction Permit" ||
+      docType === "Construction" ||
       docType === "Other Documents"
     );
   };

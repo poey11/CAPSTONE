@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/ProgramsBrgy/Programs.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import AddNewProgramModal from "@/app/(barangay-side)/components/AddNewProgramModal";
@@ -17,6 +17,8 @@ import {
   Timestamp,
   updateDoc,
   where,
+  writeBatch,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 
@@ -33,6 +35,7 @@ type Program = {
 
 type Participant = {
   id: string;
+  programId?: string; // <<— now using programId as the linkage
   fullName?: string;
   firstName?: string;
   lastName?: string;
@@ -42,7 +45,7 @@ type Participant = {
   role?: string;
   location?: string;
   address?: string;
-  programName?: string;
+  programName?: string; // kept for display/search
   idImageUrl?: string;
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
@@ -259,8 +262,7 @@ export default function ProgramsModule() {
             updates.push(updateDoc(doc(db, "Programs", docu.id), patch));
           }
 
-        const startDate = d.startDate || ""; 
-
+          const startDate = d.startDate || "";
           const dateCreated =
             tsToYMD(d.createdAt ?? null) || d.dateCreated || "";
           list.push({
@@ -305,6 +307,7 @@ export default function ProgramsModule() {
           const d = docu.data() as any;
           list.push({
             id: docu.id,
+            programId: d.programId ?? d.programID ?? "", // <<— pick up programId
             fullName: d.fullName ?? "",
             firstName: d.firstName ?? "",
             lastName: d.lastName ?? "",
@@ -330,6 +333,14 @@ export default function ProgramsModule() {
   }, []);
 
   // Section routing sync — enforce role access on URL
+  const handleSectionSwitch = (section: "main" | "programs" | "participants") => {
+    if (!allowedSections.includes(section)) return; // hard guard
+    setActiveSectionRedirection(section);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("section", section);
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   useEffect(() => {
     const section = searchParams.get("section") as
       | "main"
@@ -349,14 +360,6 @@ export default function ProgramsModule() {
       router.replace(`?${params.toString()}`, { scroll: false });
     }
   }, [searchParams, router, allowedSections]);
-
-  const handleSectionSwitch = (section: "main" | "programs" | "participants") => {
-    if (!allowedSections.includes(section)) return; // hard guard
-    setActiveSectionRedirection(section);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("section", section);
-    router.push(`?${params.toString()}`, { scroll: false });
-  };
 
   const handleEditClick = (id: string) => {
     router.push(
@@ -445,7 +448,7 @@ export default function ProgramsModule() {
       );
     }
 
-     if (participantRoleFilter) {
+    if (participantRoleFilter) {
       filtered = filtered.filter((p) => p.role === participantRoleFilter);
     }
 
@@ -554,6 +557,7 @@ export default function ProgramsModule() {
   const handleParticipantSave = async (updated: Participant) => {
     try {
       await updateDoc(doc(db, "ProgramsParticipants", updated.id), {
+        programId: updated.programId ?? "", // keep programId when editing
         firstName: updated.firstName ?? "",
         lastName: updated.lastName ?? "",
         fullName:
@@ -599,6 +603,76 @@ export default function ProgramsModule() {
       showToast("error", "Failed to reject participant.");
     }
   };
+
+  // ===== AUTO-REJECT: pending participants tied to ongoing/completed programs (by programId) =====
+  const autoRejectRunning = useRef(false);
+
+  const ongoingOrCompletedProgramIds = useMemo(() => {
+    // consider both approved/non-pending and pending arrays, just in case
+    const all = [...programs, ...programsAssignedData];
+    return new Set(
+      all
+        .filter((p) => p.progressStatus === "Ongoing" || p.progressStatus === "Completed")
+        .map((p) => p.id)
+    );
+  }, [programs, programsAssignedData]);
+
+  useEffect(() => {
+    // run when we have participants and program statuses
+    if (loadingParticipants || loadingPrograms) return;
+    if (autoRejectRunning.current) return;
+
+    const toReject = participantsListsData.filter((pp) => {
+      const isPending = (pp.approvalStatus ?? "Pending") === "Pending";
+      const pid = (pp.programId || "").trim();
+      return isPending && pid && ongoingOrCompletedProgramIds.has(pid);
+    });
+
+    if (toReject.length === 0) return;
+
+    const run = async () => {
+      autoRejectRunning.current = true;
+      try {
+        // Firestore write batch limit is 500 ops; keep a safe margin
+        const CHUNK = 400;
+        for (let i = 0; i < toReject.length; i += CHUNK) {
+          const slice = toReject.slice(i, i + CHUNK);
+          const batch = writeBatch(db);
+          slice.forEach((pp) => {
+            const ref = doc(db, "ProgramsParticipants", pp.id);
+            batch.update(ref, {
+              approvalStatus: "Rejected",
+              rejectionReason:
+                "Automatically rejected: program is already Ongoing/Completed.",
+              autoRejectedAt: serverTimestamp(),
+              autoRejectedBy: user?.email || "system",
+            });
+          });
+          await batch.commit();
+        }
+        showToast(
+          "success",
+          `Auto-rejected ${toReject.length} pending participant${
+            toReject.length > 1 ? "s" : ""
+          } for ongoing/completed programs.`
+        );
+      } catch (e) {
+        console.error(e);
+        showToast("error", "Auto-reject failed for some participants.");
+      } finally {
+        autoRejectRunning.current = false;
+      }
+    };
+
+    void run();
+  }, [
+    loadingParticipants,
+    loadingPrograms,
+    participantsListsData,
+    ongoingOrCompletedProgramIds,
+    user?.email,
+  ]);
+  // ===== END AUTO-REJECT =====
 
   return (
     <main className="programs-module-main-container">
@@ -776,34 +850,30 @@ export default function ProgramsModule() {
                       </td>
                       <td>
                         <div className="actions-programs">
-                          <button
-                            className="action-programs-button"
-                            onClick={() => handleEditClick(program.id)}
-                          >
-                            <img
-                              src={
-                                program.approvalStatus === "Rejected" ||
-                                program.progressStatus === "Completed"
-                                  ? "/Images/view.png"
-                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
-                                      position
-                                    )
-                                  ? "/Images/edit.png"
-                                  : "/Images/view.png"
-                              }
-                              alt="Action"
-                              className={
-                                program.approvalStatus === "Rejected" ||
-                                program.progressStatus === "Completed"
-                                  ? "action-programs-view"
-                                  : ["Punong Barangay", "Assistant Secretary", "Secretary"].includes(
-                                      position
-                                    )
-                                  ? "action-programs-edit"
-                                  : "action-programs-view"
-                              }
-                            />
-                          </button>
+                          {program.approvalStatus === "Rejected" ||
+                          program.progressStatus === "Completed" ? (
+                            <button
+                              className="action-programs-button"
+                              onClick={() => handleEditClick(program.id)}
+                            >
+                              <img
+                                src="/Images/view.png"
+                                alt="Edit"
+                                className="action-programs-view"
+                              />
+                            </button>
+                          ) : (
+                            <button
+                              className="action-programs-button"
+                              onClick={() => handleEditClick(program.id)}
+                            >
+                              <img
+                                src="/Images/edit.png"
+                                alt="Edit"
+                                className="action-programs-edit"
+                              />
+                            </button>
+                          )}
 
                           {canDelete && (
                             <button
@@ -858,7 +928,7 @@ export default function ProgramsModule() {
                 value={participantNameSearch}
                 onChange={(e) => setParticipantNameSearch(e.target.value)}
               />
-              
+
               <input
                 type="text"
                 className="programs-module-filter"
@@ -911,7 +981,7 @@ export default function ProgramsModule() {
                         <td>{participant.contactNumber}</td>
                         <td>{participant.location}</td>
                         <td>{participant.role}</td>
-                        
+
                         <td>
                           <span
                             className={`status-badge-programs ${String(

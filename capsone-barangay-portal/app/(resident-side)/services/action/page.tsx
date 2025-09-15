@@ -121,9 +121,52 @@ export default function Action({ searchParams }: any) {
   // const docB = searchParam.get("docB") || "";
   // const purpose = searchParam.get("purpose") || "";
   const router = useRouter();
-  const [nos, setNos] = useState(0);
-
   const [userData, setUserData] = useState<any>(null); // moved UP here
+
+
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+// docs that require a Verified resident
+const RESTRICTED_DOCS = new Set([
+  "Barangay Certificate",
+  "Barangay Indigency",
+  "Barangay Clearance",
+]);
+
+useEffect(() => {
+  // if no docB yet, don't block
+  if (!docB) {
+    setCheckingAccess(false);
+    return;
+  }
+
+  const isRestricted = RESTRICTED_DOCS.has(docB);
+
+  // if not restricted, allow
+  if (!isRestricted) {
+    setCheckingAccess(false);
+    return;
+  }
+
+  // logged-in but still loading userData? keep blocking UI
+  if (user && userData === null) {
+    setCheckingAccess(true);
+    return;
+  }
+
+  // when userData is ready, allow only if Verified
+  const isVerified = userData?.status === "Verified";
+  if (!isVerified) {
+    alert("You must be a verified resident to request this document.");
+    router.replace("/services");
+    return;
+  }
+
+  // verified & allowed
+  setCheckingAccess(false);
+}, [docB, user, userData]);
+
+  const [nos, setNos] = useState(0);
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
   const [otherDocFieldsByType, setOtherDocFieldsByType] = useState<{ [type: string]: string[] }>({});
   const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
@@ -222,20 +265,7 @@ export default function Action({ searchParams }: any) {
     twoByTwoPicture: null,
   })
 
-  useEffect(() => {
-    if (userData === null) return; // still loading Firestore
-    if (!docB) return; // no docB provided yet
-  
-    const restrictedDocs = ["Barangay Certificate", "Barangay Indigency", "Barangay Clearance"];
-    const tryingToAccessRestrictedDoc = restrictedDocs.includes(docB);
-    const isUnverifiedOrGuest = !user || userData?.status !== "Verified";
-  
-    if (tryingToAccessRestrictedDoc && isUnverifiedOrGuest) {
-      alert("You must be a verified resident to request this document.");
-      router.push("/services");
-    }
-  }, [user, userData, docB]);
-  
+
 
 
   useEffect(() => {
@@ -876,7 +906,7 @@ const handleFileChange = (
               : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
 
       timestamp: new Date(),
-      requestorId: userData?.residentId,
+      requestorId: userData?.residentId || "Guest",
       isRead: false,
       ...(documentTypeIs !== "" ? {
         transactionType: documentTypeIs,}:
@@ -899,7 +929,7 @@ const handleFileChange = (
     
   
   await addDoc(collection(db, "Notifications"), {
-    residentID: userData?.residentId,
+    residentID: userData?.residentId || "Guest",
     requestID: newDoc,
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
@@ -1074,8 +1104,11 @@ const handleFileChange = (
 
 
 
-    const handleSubmit = async (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {  
       event.preventDefault(); // Prevent default form submission
+      if (RESTRICTED_DOCS.has(docB) && (!user || userData?.status !== "Verified")) {
+        return;
+      }    
       if((clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docB === "Barangay Indigency") {
         
         const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
@@ -1703,6 +1736,16 @@ const handleFileChange = (
   const half = Math.ceil(filteredDynamicFields.length / 2);
   const leftFields = filteredDynamicFields.slice(0, half);
   const rightFields = filteredDynamicFields.slice(half);
+
+  if (checkingAccess) {
+  return (
+    <main className="main-form-container">
+      <div className="document-req-section">
+        <h1>Checking access…</h1>
+      </div>
+    </main>
+  );
+}
 
   return (
 
