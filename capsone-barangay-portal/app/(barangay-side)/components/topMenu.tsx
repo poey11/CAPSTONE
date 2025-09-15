@@ -565,7 +565,7 @@ export default function TopMenu() {
         <section className="menu-section" ref={dropdownRef}>
           <img src="/Images/down-arrow.png" alt="Menu Icon" className="menuIcon" onClick={toggleDropdown} />
           {isDropdownOpen && (
-            <div className="dropdown show">
+            <div className="dropdown-brgyside show">
               <ul>
                 <li
                   className="options-topmenu"
