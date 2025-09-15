@@ -103,7 +103,7 @@ export default function Services() {
       <div className={`button-column button-left`}>
         <div className="tooltip-wrapper">
           <div
-            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") ? "disabled-card" : ""}`}
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Certificate") || userData?.status !== "Verified" ? "disabled-card" : ""}`}
             onClick={goToServices}
             id="Barangay Certificate"
           >
@@ -112,14 +112,14 @@ export default function Services() {
               <h1>Barangay Certificate</h1>
             </div>
           </div>
-          {isGuest && !isAllowedForGuest("Barangay Certificate") && (
+          {((isGuest && !isAllowedForGuest("Barangay Certificate")) || userData?.status !== "Verified") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
           )}
         </div>
 
         <div className="tooltip-wrapper">
           <div
-            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Indigency") ? "disabled-card" : ""}`}
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Indigency") || userData?.status !== "Verified" ? "disabled-card" : ""}`}
             onClick={goToServices}
             id="Barangay Indigency"
           >
@@ -128,14 +128,14 @@ export default function Services() {
               <h1>Barangay Indigency</h1>
             </div>
           </div>
-          {isGuest && !isAllowedForGuest("Barangay Indigency") && (
+          {((isGuest && !isAllowedForGuest("Barangay Indigency")) || userData?.status !== "Verified") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
           )}
         </div>
 
         <div className="tooltip-wrapper">
           <div
-            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") ? "disabled-card" : ""}`}
+            className={`documents-card ${isGuest && !isAllowedForGuest("Barangay Clearance") || userData?.status !== "Verified" ? "disabled-card" : ""}`}
             onClick={goToServices}
             id="Barangay Clearance"
           >
@@ -144,7 +144,7 @@ export default function Services() {
                 <h1>Barangay Clearance</h1>
               </div>
           </div>
-          {isGuest && !isAllowedForGuest("Barangay Clearance") && (
+          {((isGuest && !isAllowedForGuest("Barangay Clearance")) || userData?.status !== "Verified") && (
             <span className="tooltip-text">Login/Verification required to request this document</span>
           )}
         </div>
