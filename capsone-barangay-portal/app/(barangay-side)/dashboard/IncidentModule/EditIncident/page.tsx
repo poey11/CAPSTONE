@@ -665,7 +665,7 @@ useEffect(() => {
                           return;
                         }
 
-                        if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                        if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
