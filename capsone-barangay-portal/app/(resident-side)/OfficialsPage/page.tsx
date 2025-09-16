@@ -28,6 +28,24 @@ export default function Official() {
 
   const [listOfficials, setListOfficials] = useState<Official[]>([]);
 
+  const getPositionLabel = (position?: string, department?: string) => {
+  if (position?.toLowerCase() === "lf staff") {
+    switch (department?.toUpperCase()) {
+      case "LUPON":
+        return "Lupon Tagapamayapa Staff";
+      case "BCPC":
+        return "BCPC Staff";
+      case "VAWC":
+        return "VAWC Staff";
+      case "GAD":
+        return "GAD Staff";
+      default:
+        return "LF Staff";
+    }
+  }
+  return position || "N/A";
+};
+
   useEffect(() => {
     const docRef = collection(db, "BarangayUsers");
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
@@ -37,9 +55,7 @@ export default function Official() {
         name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
           .filter(Boolean) // removes null, undefined, and empty strings
           .join(" "),
-          position: doc.data().position === "LF Staff"
-            ? `${doc.data().position} (${doc.data().department || "N/A"})`
-            : doc.data().position || "N/A",          
+        position: getPositionLabel(doc.data().position, doc.data().department),
         term: doc.data().term || "N/A",
         contact: doc.data().phone,
         image: doc.data().image || "/images/default-profile.png",
@@ -62,7 +78,30 @@ export default function Official() {
     const otherOfficials = listOfficials.filter(
       (official) => official.position !== "Punong Barangay"
     );
-    setOfficials(otherOfficials);
+
+    const order = [
+    "Secretary",
+    "Assistant Secretary",
+    "Admin Staff",
+    "Lupon Tagapamayapa Staff",
+    "BCPC Staff",
+    "VAWC Staff",
+    "GAD Staff",
+    ];
+
+  const sortedOfficials = otherOfficials.sort((a, b) => {
+    const indexA = order.indexOf(a.position);
+    const indexB = order.indexOf(b.position);
+
+    // If position not in order list, push to bottom
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+
+    return indexA - indexB;
+  });
+
+    setOfficials(sortedOfficials);
   }, [listOfficials]);
 
   return (

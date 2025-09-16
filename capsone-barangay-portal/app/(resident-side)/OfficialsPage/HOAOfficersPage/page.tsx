@@ -64,6 +64,11 @@ export default function HOAOfficersPage() {
               <div className="official-content-officials">
                 <p className="official-role-officials">{official.position}</p>
                 <h2 className="official-name-officials">{official.fullName}</h2>
+                <h3 className="official-cluster-officials">{official.clusterSection}
+                  {official.clusterSection === "Others"
+                    ? ` - ${official.otherClusterSection}`
+                    : ""}
+                </h3>
                 
                 <p className="official-phonenumber-officials">
                   Contact Information: {official.contact}
@@ -76,12 +81,6 @@ export default function HOAOfficersPage() {
                 </p>
                 <p className="official-phonenumber-officials">
                   Facebook: {official.facebook || "N/A"}
-                </p>
-                <p className="official-phonenumber-officials">
-                  Cluster/Section: {official.clusterSection}
-                  {official.clusterSection === "Others"
-                    ? ` - ${official.otherClusterSection}`
-                    : ""}
                 </p>
                     
               </div>

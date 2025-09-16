@@ -9,6 +9,44 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 const homePage:React.FC = () => {    
+
+    const news = [
+      {
+        title: "Community Clean-Up Drive",
+        description:
+          "Join us this Saturday for our barangay-wide clean-up drive. Volunteers are welcome! Volunteers are welcome! Volunteers are welcome! Volunteers are welcome!",
+        date: "Sept 10, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Health Mission",
+        description:
+          "Free medical check-ups and dental services will be held at the barangay hall.",
+        date: "Sept 12, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Youth Sports Festival",
+        description:
+          "Celebrate with us as we kick off the annual sports festival at Sapamanai Covered Court.",
+        date: "Sept 20, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Tree Planting Activity",
+        description: "Help us green Barangay Fairview by joining our tree planting event!",
+        date: "Sept 25, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Job Fair",
+        description:
+          "Barangay Fairview will host a local job fair. Don’t miss out on career opportunities!",
+        date: "Oct 1, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+    ];
+
     const facilities = [
         {
         image: "/Images/barangayhall.jpg",
@@ -44,6 +82,19 @@ const homePage:React.FC = () => {
 
     const [currentSlide, setCurrentSlide] = useState(0);
     const [siteVisits, setSiteVisits] = useState(0);
+    const [newsSlide, setNewsSlide] = useState(0);
+
+    const nextNews = () => {
+      setNewsSlide((prev) =>
+        prev + cardsPerPage >= news.length ? 0 : prev + cardsPerPage
+      );
+    };
+
+    const prevNews = () => {
+      setNewsSlide((prev) =>
+        prev === 0 ? Math.max(news.length - cardsPerPage, 0) : prev - cardsPerPage
+      );
+    };
 
     // Fetch the site visit count from Firestore
     const fetchSiteVisitCount = async () => {
@@ -109,6 +160,7 @@ const servicesRef = useRef(null);
 const serviceCardsRef = useRef<(HTMLDivElement | null)[]>([]);
 const thirdSectionRef = useRef(null);
 const facilitiesRef = useRef(null);
+const newsRef = useRef(null);
 
 
 useEffect(() => {
@@ -130,6 +182,7 @@ useEffect(() => {
     servicesRef.current,
     thirdSectionRef.current,
     facilitiesRef.current,
+    newsRef.current, 
     ...serviceCardsRef.current
   ];
 
@@ -283,6 +336,36 @@ useEffect(() => {
   </div>
 </div>
 
+  
+
+<div className="fifth-section-home">
+  <div className="fifth-section-home-upper">
+    <div className="section-content-home">
+      <h2>News & Announcements</h2>
+      <p>Stay updated with the latest news and announcements in Barangay Fairview.</p>
+    </div>
+  </div>
+
+  <div className="news-content-wrapper fade-slide-up" ref={newsRef}>
+    <button className="slide-button" onClick={prevNews}>&lt;</button>
+
+    <div className="news-cards-container">
+      {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
+        <div className="news-card" key={index}>
+          <img src={item.image} alt={item.title} className="news-image" />
+          <div className="news-info">
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+            <span className="news-date">{item.date}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <button className="slide-button" onClick={nextNews}>&gt;</button>
+  </div>
+</div>
+
 
 
  <div className="fourth-section-home">
@@ -299,18 +382,18 @@ useEffect(() => {
     <button className="slide-button" onClick={prevSlide}>&lt;</button>
 
   <div className="facilities-content-home">
-{facilities.slice(currentSlide, currentSlide + cardsPerPage).map((item, index) => (
-  <div className="facilities-card" key={index}>
-    <div className="facilities-image-wrapper">
-      <img src={item.image} alt={item.facility} className="facilities-image" />
+  {facilities.slice(currentSlide, currentSlide + cardsPerPage).map((item, index) => (
+    <div className="facilities-card" key={index}>
+      <div className="facilities-image-wrapper">
+        <img src={item.image} alt={item.facility} className="facilities-image" />
+      </div>
+      <div className="facilities-info">
+        <h3>{item.facility}</h3>
+        <p>{item.location}</p>
+      </div>
     </div>
-    <div className="facilities-info">
-      <h3>{item.facility}</h3>
-      <p>{item.location}</p>
-    </div>
+  ))}
   </div>
-))}
-</div>
 
 
     <button className="slide-button" onClick={nextSlide}>&gt;</button>
