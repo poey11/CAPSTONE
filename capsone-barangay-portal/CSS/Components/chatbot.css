@@ -30,9 +30,9 @@
   position: fixed;
   bottom: 20px; /* same as chatbot-btn */
   right: 20px;
-  width: 320px;
-  height: 500px;
-  max-height: 500px;
+  width: 400px;
+  height: 650px;
+  max-height: 650px;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
