@@ -56,7 +56,7 @@ body {
     filter: brightness(0) saturate(100%) invert(18%) sepia(22%) saturate(1010%) hue-rotate(152deg) brightness(93%) contrast(94%);
 }
 
-.dropdown {
+.dropdown-brgyside {
     position: absolute;
     top: 39px; /* Adjust as needed */
     left: -160px; /* Moves it to the leftmost part of the screen */
@@ -69,7 +69,7 @@ body {
     height: 100px
 }
 
-.dropdown.show {
+.dropdown-brgyside.show {
     display: block; /* Show dropdown when toggled */
 }
 
@@ -78,19 +78,19 @@ body {
     padding-left: 20px;
 }
 
-.dropdown ul {
+.dropdown-brgyside ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-.dropdown li {
+.dropdown-brgyside li {
     padding: 8px 16px;
     cursor: pointer;
     font-size: 15px;
 }
 
-.dropdown li:hover {
+.dropdown-brgyside li:hover {
   background-color: #24354C;
   color: rgb(255, 255, 255);
 }
