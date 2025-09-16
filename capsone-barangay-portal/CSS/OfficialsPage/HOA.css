@@ -237,6 +237,14 @@
 }
 
 
+.official-cluster-officials {
+  font-weight:bold;
+  font-size: 0.9rem;
+  color: #363738; 
+  text-transform: uppercase;
+}
+
+
 .official-name-officials{
   font-weight: bold;
   font-size: 1.5rem;
