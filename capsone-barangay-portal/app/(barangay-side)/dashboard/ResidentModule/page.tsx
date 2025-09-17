@@ -883,7 +883,7 @@ export default function ResidentModule() {
                             {/* Extra PWD details below the image, still inside the same card */}
                             <div style={{ marginTop: 10, textAlign: "center" }}>
                               <div>
-                                <strong>Type:</strong> {selectedUser.pwdType || "N/A"}
+                                <strong>Type:</strong> {selectedUser.pwdType || "N/A"} ({selectedUser.typeOfDisability})
                               </div>
                               {selectedUser.pwdType === "Temporary" && (
                                 <div>
@@ -1175,10 +1175,3 @@ export default function ResidentModule() {
     </main>
   );
 }
-
-/*
-Notes:
-- Files are stored under: ResidentEditJustifications/{residentId}/{timestamp}_{originalFilename}
-- Metadata saved in subcollection: Residents/{residentId}/EditJustifications (url, originalFilename, uploadedBy, uploadedByPosition, createdAt, etc.)
-- Ensure your Firebase rules restrict writing to this subcollection to roles "Secretary" / "Assistant Secretary".
-*/

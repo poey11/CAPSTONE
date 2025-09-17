@@ -38,6 +38,7 @@ export default function EditResident() {
     pwdType: "",
     pwdTemporaryUntil: "",
     pwdIdFileURL: "",
+    typeOfDisability: "",
     isSeniorCitizen: false,
     isSoloParent: false,
     verificationFilesURLs: [] as string[],
@@ -62,6 +63,21 @@ export default function EditResident() {
     "South Fairview": ["AKAP", "ARNAI", "F.L.N.A", "FEWRANO", "UPPER CORVETTE HOA"],
   };
 
+  // DOH-recognized disability categories (PRPWD/DOH-aligned + common LGU reporting)
+  const DOH_DISABILITY_OPTIONS = [
+    "Deaf or Hard of Hearing",
+    "Intellectual Disability",
+    "Learning Disability",
+    "Mental Disability",
+    "Physical Disability",
+    "Psychosocial Disability",
+    "Speech and Language Impairment",
+    "Visual Disability",
+    "Cancer",
+    "Rare Disease",
+    "Others",
+  ];
+
   const fieldSectionMap: { [key: string]: "basic" | "full" | "others" } = {
     lastName: "basic",
     firstName: "basic",
@@ -80,6 +96,7 @@ export default function EditResident() {
     emailAddress: "full",
     precinctNumber: "full",
     verificationFiles: "others",
+    typeOfDisability: "others", // NEW
   };
 
   //const [file, setFile] = useState<File | null>(null);
@@ -123,6 +140,8 @@ export default function EditResident() {
     setIdentificationFile(null); // Reset file selection
     setVerificationPreviews(originalData.verificationFilesURLs || []);
     setVerificationFiles([]); // Reset file selection
+    setPwdIdPreview(originalData.pwdIdFileURL || null);
+    setPwdIdFile(null);
 
     setPopupMessage("Changes discarded successfully!");
     setShowPopup(true);
@@ -168,6 +187,7 @@ export default function EditResident() {
             pwdType: docSnap.data().pwdType || "",
             pwdTemporaryUntil: docSnap.data().pwdTemporaryUntil || "",
             pwdIdFileURL: docSnap.data().pwdIdFileURL || "",
+            typeOfDisability: docSnap.data().typeOfDisability || "",
           };
 
           setFormData(data);
@@ -281,7 +301,7 @@ export default function EditResident() {
       setFormData((prev) => ({
         ...prev,
         isPWD: checked,
-        ...(checked ? {} : { pwdType: "", pwdTemporaryUntil: "" }),
+        ...(checked ? {} : { pwdType: "", pwdTemporaryUntil: "", typeOfDisability: "" }),
       }));
       if (!checked) {
         setPwdIdFile(null);
@@ -336,6 +356,32 @@ export default function EditResident() {
     if (!civilStatus) invalidFields.push("civilStatus");
     if (!contactNumber) invalidFields.push("contactNumber");
 
+    // extra PWD validation
+    if (formData.isPWD) {
+      if (!formData.pwdType) invalidFields.push("pwdType");
+      // require disability type (and manual text if Others)
+      if (!formData.typeOfDisability) {
+        invalidFields.push("typeOfDisability");
+      } else if (
+        formData.typeOfDisability === "Others" ||
+        (formData.typeOfDisability.startsWith("Others") && !/\(.*\)/.test(formData.typeOfDisability))
+      ) {
+        invalidFields.push("typeOfDisability");
+        setPopupErrorMessage("Please specify the type of disability.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+      }
+
+      if (formData.pwdType === "Temporary") {
+        if (!formData.pwdTemporaryUntil) invalidFields.push("pwdTemporaryUntil");
+        else {
+          const until = new Date(formData.pwdTemporaryUntil);
+          const today = new Date(new Date().toISOString().split("T")[0]);
+          if (until < today) invalidFields.push("pwdTemporaryUntil");
+        }
+      }
+    }
+
     if (invalidFields.length > 0) {
       const firstInvalidField = invalidFields[0];
       const section = fieldSectionMap[firstInvalidField];
@@ -372,20 +418,6 @@ export default function EditResident() {
     }
 
     setInvalidFields([]);
-
-    // extra PWD validation
-    if (formData.isPWD) {
-      if (!formData.pwdType) invalidFields.push("pwdType");
-      if (formData.pwdType === "Temporary") {
-        if (!formData.pwdTemporaryUntil) invalidFields.push("pwdTemporaryUntil");
-        else {
-          const until = new Date(formData.pwdTemporaryUntil);
-          const today = new Date(new Date().toISOString().split("T")[0]);
-          if (until < today) invalidFields.push("pwdTemporaryUntil");
-        }
-      }
-    }
-
     setShowSavePopup(true);
   };
 
@@ -413,23 +445,6 @@ export default function EditResident() {
     setError("");
 
     try {
-      /*
-      let verificationFilesURLs: string[] = [];
-      if (verificationFiles.length > 0) {
-        for (const file of verificationFiles) {
-          const storageRef = ref(storage, `ResidentsFiles/${file.name}`);
-          await uploadBytes(storageRef, file);
-          const url = await getDownloadURL(storageRef);
-          verificationFilesURLs.push(url);
-        }
-      }
-
-      let identificationFileURL = "";
-      if (identificationFile) {
-        const storageRef = ref(storage, `ResidentsFiles/${identificationFile.name}`);
-        await uploadBytes(storageRef, identificationFile);
-        identificationFileURL = await getDownloadURL(storageRef);
-      }*/
       let uploadedVerificationURLs: string[] = [];
 
       for (const file of verificationFiles) {
@@ -733,7 +748,7 @@ export default function EditResident() {
             <h1> Edit Resident </h1>
           </div>
 
-          <div className="action-btn-section">
+        <div className="action-btn-section">
             <button className="action-discard" onClick={handleDiscardClick}>
               Discard
             </button>
@@ -1236,6 +1251,65 @@ export default function EditResident() {
                                   min={new Date().toISOString().split("T")[0]}
                                   required
                                 />
+                              </div>
+
+                              {/* Type of Disability (DOH) — placed at the bottom of PWD Type Selection */}
+                              <div className="pwd-fields-section" style={{ marginTop: 12 }}>
+                                <p className="pwd-label">
+                                  Type of Disability (DOH) <span className="required">*</span>
+                                </p>
+
+                                <select
+                                  name="typeOfDisability"
+                                  className={`pwd-input ${invalidFields.includes("typeOfDisability") ? "input-error" : ""}`}
+                                  value={
+                                    DOH_DISABILITY_OPTIONS.includes(formData.typeOfDisability.split("(")[0])
+                                      ? formData.typeOfDisability.split("(")[0]
+                                      : ""
+                                  }
+                                  onChange={(e) => {
+                                    const selected = e.target.value;
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      typeOfDisability: selected, // if "Others", manual input appears
+                                    }));
+                                  }}
+                                  required={formData.isPWD}
+                                >
+                                  <option value="" disabled>
+                                    Select Type of Disability
+                                  </option>
+                                  {DOH_DISABILITY_OPTIONS.map((opt) => (
+                                    <option key={opt} value={opt}>
+                                      {opt}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                {/* Manual entry when "Others" is chosen */}
+                                {formData.typeOfDisability.startsWith("Others") && (
+                                  <input
+                                    type="text"
+                                    className={`pwd-input ${invalidFields.includes("typeOfDisability") ? "input-error" : ""}`}
+                                    placeholder="Please specify the disability"
+                                    value={
+                                      formData.typeOfDisability.includes("(")
+                                        ? formData.typeOfDisability.slice(
+                                            formData.typeOfDisability.indexOf("(") + 1,
+                                            formData.typeOfDisability.indexOf(")")
+                                          )
+                                        : ""
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value.trim();
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        typeOfDisability: val ? `Others (${val})` : "Others",
+                                      }));
+                                    }}
+                                    required
+                                  />
+                                )}
                               </div>
                             </div>
                           </div>
