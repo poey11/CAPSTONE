@@ -1526,7 +1526,7 @@ const uploadForms = async (url: string): Promise<void> => {
       }
   
       // Load Excel template
-      const templateRef = ref(storage, "ReportsModule/AdminStaff/INHABITANT RECORD TEMPLATE.xlsx");
+      const templateRef = ref(storage, "ReportsModule/AdminStaff/INHABITANT RECORD TEMPLATE FOR PWD.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -1577,6 +1577,8 @@ const uploadForms = async (url: string): Promise<void> => {
           resident.civilStatus || "",
           resident.occupation || "",
           resident.contactNumber || "",
+          resident.pwdType || "",
+          resident.typeOfDisability || "",
           resident.emailAddress || "",
           resident.precinctNumber || "",
         ];
