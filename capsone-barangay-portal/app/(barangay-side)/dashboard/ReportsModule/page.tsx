@@ -4798,7 +4798,6 @@ const generateDepartmentalReport = async (
         row.getCell(6).value = item.cfa;
         row.getCell(7).value = item.refer;
         row.getCell(8).value = item.dismissed;
-        row.getCell(9).value = item.acknowledged;
   
         // Style
         for (let col = 1; col <= 6; col++) {
