@@ -3942,7 +3942,7 @@ const generateDepartmentalReport = async (
       const respondentAddress = respondent.address ?? "";
 
       let remarks = "";
-      if (["CFA", "Settled", "settled", "archived", "pending", "Refer to Government Agency", "Dismissed", "dismissed"].includes(report.status || "")) {
+      if (["CFA", "Settled", "settled", "pending", "Refer to Government Agency", "Dismissed", "dismissed"].includes(report.status || "")) {
         const numHearings = report.hearing ?? 0;
         let foundRemark = false;
 
@@ -4228,7 +4228,6 @@ const generateDepartmentalReport = async (
         if (report.status === "CFA" || 
         report.status === "Settled" || 
         report.status === "settled" || 
-        report.status === "archived" ||
         report.status === "pending" ||
         report.status === "Refer to Government Agency" ||
         report.status === "dismissed" ||
@@ -4455,7 +4454,7 @@ const generateDepartmentalReport = async (
       const q = query(
         reportsRef,
         where("department", "==", "Lupon"),
-        where("status", "in", ["Pending", "pending"])
+        where("status", "in", ["Pending", "pending","dismissed","Dismissed"])
       );
       const querySnapshot = await getDocs(q);
       const luponPendingReports = querySnapshot.docs.map(
@@ -4510,7 +4509,6 @@ const generateDepartmentalReport = async (
         if (report.status === "CFA" || 
         report.status === "Settled" || 
         report.status === "settled" || 
-        report.status === "archived" ||
         report.status === "pending" ||
         report.status === "Refer to Government Agency" ||
         report.status === "dismissed" ||
@@ -4572,7 +4570,7 @@ const generateDepartmentalReport = async (
           !["Civil", "Criminal"].includes(report.nature ?? "") ? report.nature : "",
           report.isRepudiated ? "*" : "",
           (report.status ?? "").toLowerCase() === "pending" ? "*" : "",
-          report.status === "archived" ? "*" : "",
+          (report.status ?? "").toLowerCase() === "dismissed" ? "*" : "",
           report.status === "CFA" ? "*" : "",
           report.status,
           remarks,
@@ -4765,7 +4763,6 @@ const generateDepartmentalReport = async (
               ? i.status === "Settled"
               : i.status === "settled" || i.status === "Settled"
           ).length,
-          archived: filtered.filter((i) => i.status === "archived").length,
           cfa: filtered.filter((i) => i.status === "CFA").length,
           acknowledged: filtered.filter((i) => i.status === "acknowledged").length,
         };
@@ -4794,10 +4791,9 @@ const generateDepartmentalReport = async (
         row.getCell(2).value = item.pending;
         row.getCell(3).value = item.inprogress;
         row.getCell(4).value = item.settled;
-        row.getCell(5).value = item.archived;
-        row.getCell(6).value = item.cfa;
+        row.getCell(5).value = item.cfa;
         row.getCell(7).value = item.refer;
-        row.getCell(8).value = item.dismissed;
+        row.getCell(7).value = item.dismissed;
   
         // Style
         for (let col = 1; col <= 6; col++) {
