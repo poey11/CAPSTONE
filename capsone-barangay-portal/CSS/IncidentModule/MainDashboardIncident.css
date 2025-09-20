@@ -338,9 +338,14 @@ SCROLL FOR CHROME ETC
   }
 
   .dismissed {
-      background-color: rgb(5, 72, 78);
+      background-color: rgb(242, 55, 8);
     font-size: 15px;
   }
+
+.rga {
+  background-color: rgb(34, 85, 97);
+  font-size: 15px;
+}
 
 
 
