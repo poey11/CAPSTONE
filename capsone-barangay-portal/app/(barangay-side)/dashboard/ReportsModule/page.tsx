@@ -3510,7 +3510,7 @@ const addressGroups = {
       //     department: ["Lupon", "VAWC", "BCPC", "GAD", "Online"][idx % 5],
       //     nature: idx % 2 === 0 ? "Criminal" : "Civil",
       //     concerns: idx % 3 === 0 ? "Noise Complaint" : "Dispute",
-      //     status: ["In - Progress", "Settled", "Archived"][idx % 3],
+      //     status: ["In - Progress", "Settled", "Refer to Government Agency", "Dismissed", "Pending"][idx % 3],
       //     dateFiled: new Date().toLocaleDateString("en-US"),
       //     timeFiled: new Date().toLocaleTimeString("en-US"),
       //     createdAt: new Date()
@@ -4469,7 +4469,7 @@ const generateDepartmentalReport = async (
       //     respondent: { fname: "Dummy", lname: `Person${index}` },
       //     nature: index % 2 === 0 ? "Criminal" : "Civil",
       //     isRepudiated: index % 4 === 0,
-      //     status: "Pending",
+      //     status: ["In - Progress", "Settled", "Refer to Government Agency", "Dismissed", "Pending"][idx % 3],
       //     remarks: "Simulated pending entry"
       //   });
       // }
