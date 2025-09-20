@@ -167,12 +167,12 @@ export default function OfficialsModule() {
     <main className="brgy-officials-main-container">
 
       <div className="brgy-officials-section-1"> 
-        {/* <button 
+         <button 
           className="add-brgy-official-btn add-brgy-official-animated"
           onClick={() => setShowAddOfficialPopup(true)}
         >
           Add New Official
-        </button> */}
+        </button>
       </div>
       
       <div className={`brgy-officials-section-2 ${filtersLoaded ? "filters-animated" : ""}`}>
@@ -191,10 +191,26 @@ export default function OfficialsModule() {
                 >
                     <option value="">Position</option>
                     <option value="Punong Barangay">Punong Barangay</option>
-                    <option value="Secretary">Secretary</option>
-                    <option value="Assistant Secretary">Asst Secretary</option>
-                    <option value="Admin Staff">Admin Staff</option>
-                    <option value="LF Staff">LF Staff</option>
+                    <option value="Secretary">Secretary</option> 
+                  <option value="Assistant Secretary">Asst Secretary</option> 
+                    <option value="Barangay Treasurer">Barangay Treasurer</option>
+                    <option value="Barangay Administrator">Barangay Administrator</option>
+                    <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
+                    <option value="Solo Parent Desk">Solo Parent Desk</option>
+                    <option value="BDRRMO">BDRRMO</option>
+                    <option value="BADAC Focal Person">BADAC Focal Person</option>
+                    <option value="GAD Focal Person">GAD Focal Person</option>
+                    <option value="VAWC Focal Person">VAWC Focal Person</option>
+                    <option value="BCPC Focal Person">BCPC Focal Person</option>
+                    <option value="Medical Assistance">Medical Assistance</option>
+                    <option value="ASH Desk">ASH Desk </option>
+                    <option value="ASH Desk">PWD Massage & Therapeutic Center</option>
+                    <option value="BHERT">BHERT</option>
+                    <option value="BSPO, EX-O">BSPO, EX-O</option>
+                    <option value="Clean & Green Department">Clean & Green Department</option>
+                    <option value="Land & Housing Department">Land & Housing Department</option>
+                    <option value="Sports & Cultural Development">Sports & Cultural Development</option>
+                    <option value="OFW Assistance Desk">OFW Assistance Desk</option>
                 </select>
       </div>
       
@@ -366,11 +382,24 @@ export default function OfficialsModule() {
                               required
                             >
                               <option value="" disabled>Select a Position</option>
-                              <option value="Punong Barangay">Punong Barangay</option>
-                              <option value="Secretary">Secretary</option>
-                              <option value="Assistant Secretary">Asst Secretary</option>
-                              <option value="Admin Staff">Admin Staff</option>
-                              <option value="LF Staff">LF Staff</option>
+                              <option value="Barangay Treasurer">Barangay Treasurer</option>
+                              <option value="Barangay Administrator">Barangay Administrator</option>
+                              <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
+                              <option value="Solo Parent Desk">Solo Parent Desk</option>
+                              <option value="BDRRMO">BDRRMO</option>
+                              <option value="BADAC Focal Person">BADAC Focal Person</option>
+                              <option value="GAD Focal Person">GAD Focal Person</option>
+                              <option value="VAWC Focal Person">VAWC Focal Person</option>
+                              <option value="BCPC Focal Person">BCPC Focal Person</option>
+                              <option value="Medical Assistance">Medical Assistance</option>
+                              <option value="ASH Desk">ASH Desk </option>
+                              <option value="ASH Desk">PWD Massage & Therapeutic Center</option>
+                              <option value="BHERT">BHERT</option>
+                              <option value="BSPO, EX-O">BSPO, EX-O</option>
+                              <option value="Clean & Green Department">Clean & Green Department</option>
+                              <option value="Land & Housing Department">Land & Housing Department</option>
+                              <option value="Sports & Cultural Development">Sports & Cultural Development</option>
+                              <option value="OFW Assistance Desk">OFW Assistance Desk</option>
                             </select>
                           </div>
 
