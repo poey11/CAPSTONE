@@ -1198,12 +1198,21 @@ const formatStatus = (status: string) => {
                         <div className="incident-main-details-statussection">
                           <h1> Status</h1>
 
-                          <div className="view-incident-status-section-view">
-                              <p className={`view-incident-status-badge-view ${selectedIncident?.status?.toLowerCase().replace(" ", "-")}`}>
-                                {selectedIncident?.status}
-                              </p>
-                          </div>
+                      <div className="view-incident-status-section-view">
+                        <p
+                          className={`view-incident-status-badge-view ${formatStatus(
+                            selectedIncident?.status || ""
+                          )
+                            .toLowerCase()
+                           .replace(" ", "-")}`}
+                        >
+                          {formatStatus(selectedIncident?.status || "")}
+                        </p>
+                      </div>
+
                         </div>
+
+      
                         <div className="incident-maindetails-bottom-section">
                           <div className="incident-main-details-description">
                             <div className="incident-date-section">

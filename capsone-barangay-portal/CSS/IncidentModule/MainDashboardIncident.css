@@ -909,8 +909,17 @@ SCROLL FOR CHROME ETC
   .archived {
     background-color: #5d74e8ee;
     color: white;
- 
   }
+
+  .rga {
+    background-color: rgb(34, 85, 97);
+    font-size: 15px;
+  }
+    .dismissed {
+      background-color: rgb(242, 55, 8);
+    font-size: 15px;
+  }
+
 
   .incident-main-details-description {
   display: flex;
