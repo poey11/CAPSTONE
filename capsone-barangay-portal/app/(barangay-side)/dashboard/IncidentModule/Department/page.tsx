@@ -911,6 +911,15 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
   }
 };
 
+
+// Add this helper function somewhere in your component file
+const formatStatus = (status: string) => {
+  if (!status) return "";
+  return status.trim() === "Refer to Government Agency" ? "RGA" : status;
+};
+
+
+
   return (
     <main className="main-container-departments"  /* edited this class*/>
       
@@ -1039,11 +1048,16 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                   <td>{incident.dateFiled} {incident.timeFiled}</td>
                   <td>{incident.areaOfIncident}</td>
                   {incident.nature === "Others" ? (<td>{incident.specifyNature}</td>):(<td>{incident.nature}</td>)}
-                  <td>
-                    <span className={`status-badge-departments ${incident.status.toLowerCase().replace(" ", "-")}`}>
-                      <p>{incident.status}</p>
-                    </span>
-                  </td>
+                      <td>
+                        <span
+                          className={`status-badge-departments ${formatStatus(incident.status)
+                            .toLowerCase()
+                           .replace(" ", "-")}`}
+                        >
+                          <p>{formatStatus(incident.status)}</p>
+                        </span>
+                      </td>
+
                   <td>
                     <div className="actions-departments-main">
                       <button className="action-view-departments-main" onClick={() => openPopup(incident)}>
@@ -1184,12 +1198,21 @@ const handleGenerateIncidentCasePDF = async (incidentId: string, caseNumber?: st
                         <div className="incident-main-details-statussection">
                           <h1> Status</h1>
 
-                          <div className="view-incident-status-section-view">
-                              <p className={`view-incident-status-badge-view ${selectedIncident?.status?.toLowerCase().replace(" ", "-")}`}>
-                                {selectedIncident?.status}
-                              </p>
-                          </div>
+                      <div className="view-incident-status-section-view">
+                        <p
+                          className={`view-incident-status-badge-view ${formatStatus(
+                            selectedIncident?.status || ""
+                          )
+                            .toLowerCase()
+                           .replace(" ", "-")}`}
+                        >
+                          {formatStatus(selectedIncident?.status || "")}
+                        </p>
+                      </div>
+
                         </div>
+
+      
                         <div className="incident-maindetails-bottom-section">
                           <div className="incident-main-details-description">
                             <div className="incident-date-section">
