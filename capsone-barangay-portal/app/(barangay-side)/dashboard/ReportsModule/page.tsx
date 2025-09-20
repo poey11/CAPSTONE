@@ -1602,7 +1602,7 @@ const uploadForms = async (url: string): Promise<void> => {
       // Total row (fixed label)
       const totalRowIndex = dataStartRow + residents.length;
       const totalRow = worksheet.getRow(totalRowIndex);
-      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      worksheet.mergeCells(`A${totalRowIndex}:N${totalRowIndex}`);
       totalRow.getCell(1).value = `TOTAL PWD: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
