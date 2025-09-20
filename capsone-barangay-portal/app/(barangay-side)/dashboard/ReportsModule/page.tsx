@@ -1602,7 +1602,7 @@ const uploadForms = async (url: string): Promise<void> => {
       // Total row (fixed label)
       const totalRowIndex = dataStartRow + residents.length;
       const totalRow = worksheet.getRow(totalRowIndex);
-      worksheet.mergeCells(`A${totalRowIndex}:L${totalRowIndex}`);
+      worksheet.mergeCells(`A${totalRowIndex}:N${totalRowIndex}`);
       totalRow.getCell(1).value = `TOTAL PWD: ${residents.length}`;
       totalRow.getCell(1).alignment = { horizontal: "center", vertical: "middle" };
       totalRow.getCell(1).font = { name: "Times New Roman", size: 10, bold: true };
@@ -3510,7 +3510,7 @@ const addressGroups = {
       //     department: ["Lupon", "VAWC", "BCPC", "GAD", "Online"][idx % 5],
       //     nature: idx % 2 === 0 ? "Criminal" : "Civil",
       //     concerns: idx % 3 === 0 ? "Noise Complaint" : "Dispute",
-      //     status: ["In - Progress", "Settled", "Archived"][idx % 3],
+      //     status: ["In - Progress", "Settled", "Refer to Government Agency", "Dismissed", "Pending"][idx % 3],
       //     dateFiled: new Date().toLocaleDateString("en-US"),
       //     timeFiled: new Date().toLocaleTimeString("en-US"),
       //     createdAt: new Date()
@@ -3942,7 +3942,7 @@ const generateDepartmentalReport = async (
       const respondentAddress = respondent.address ?? "";
 
       let remarks = "";
-      if (["CFA", "Settled", "settled", "archived", "pending", "Refer to Government Agency", "Dismissed", "dismissed"].includes(report.status || "")) {
+      if (["CFA", "Settled", "settled", "pending", "Refer to Government Agency", "Dismissed", "dismissed"].includes(report.status || "")) {
         const numHearings = report.hearing ?? 0;
         let foundRemark = false;
 
@@ -4228,7 +4228,6 @@ const generateDepartmentalReport = async (
         if (report.status === "CFA" || 
         report.status === "Settled" || 
         report.status === "settled" || 
-        report.status === "archived" ||
         report.status === "pending" ||
         report.status === "Refer to Government Agency" ||
         report.status === "dismissed" ||
@@ -4455,7 +4454,7 @@ const generateDepartmentalReport = async (
       const q = query(
         reportsRef,
         where("department", "==", "Lupon"),
-        where("status", "in", ["Pending", "pending"])
+        where("status", "in", ["Pending", "pending","dismissed","Dismissed"])
       );
       const querySnapshot = await getDocs(q);
       const luponPendingReports = querySnapshot.docs.map(
@@ -4470,7 +4469,7 @@ const generateDepartmentalReport = async (
       //     respondent: { fname: "Dummy", lname: `Person${index}` },
       //     nature: index % 2 === 0 ? "Criminal" : "Civil",
       //     isRepudiated: index % 4 === 0,
-      //     status: "Pending",
+      //     status: ["In - Progress", "Settled", "Refer to Government Agency", "Dismissed", "Pending"][idx % 3],
       //     remarks: "Simulated pending entry"
       //   });
       // }
@@ -4510,7 +4509,6 @@ const generateDepartmentalReport = async (
         if (report.status === "CFA" || 
         report.status === "Settled" || 
         report.status === "settled" || 
-        report.status === "archived" ||
         report.status === "pending" ||
         report.status === "Refer to Government Agency" ||
         report.status === "dismissed" ||
@@ -4572,7 +4570,7 @@ const generateDepartmentalReport = async (
           !["Civil", "Criminal"].includes(report.nature ?? "") ? report.nature : "",
           report.isRepudiated ? "*" : "",
           (report.status ?? "").toLowerCase() === "pending" ? "*" : "",
-          report.status === "archived" ? "*" : "",
+          (report.status ?? "").toLowerCase() === "dismissed" ? "*" : "",
           report.status === "CFA" ? "*" : "",
           report.status,
           remarks,
@@ -4765,7 +4763,6 @@ const generateDepartmentalReport = async (
               ? i.status === "Settled"
               : i.status === "settled" || i.status === "Settled"
           ).length,
-          archived: filtered.filter((i) => i.status === "archived").length,
           cfa: filtered.filter((i) => i.status === "CFA").length,
           acknowledged: filtered.filter((i) => i.status === "acknowledged").length,
         };
@@ -4794,10 +4791,9 @@ const generateDepartmentalReport = async (
         row.getCell(2).value = item.pending;
         row.getCell(3).value = item.inprogress;
         row.getCell(4).value = item.settled;
-        row.getCell(5).value = item.archived;
-        row.getCell(6).value = item.cfa;
+        row.getCell(5).value = item.cfa;
         row.getCell(7).value = item.refer;
-        row.getCell(8).value = item.dismissed;
+        row.getCell(7).value = item.dismissed;
   
         // Style
         for (let col = 1; col <= 6; col++) {
