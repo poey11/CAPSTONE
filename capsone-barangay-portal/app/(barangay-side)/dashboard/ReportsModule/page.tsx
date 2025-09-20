@@ -1526,7 +1526,7 @@ const uploadForms = async (url: string): Promise<void> => {
       }
   
       // Load Excel template
-      const templateRef = ref(storage, "ReportsModule/AdminStaff/INHABITANT RECORD TEMPLATE.xlsx");
+      const templateRef = ref(storage, "ReportsModule/AdminStaff/INHABITANT RECORD TEMPLATE FOR PWD.xlsx");
       const url = await getDownloadURL(templateRef);
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -1577,6 +1577,8 @@ const uploadForms = async (url: string): Promise<void> => {
           resident.civilStatus || "",
           resident.occupation || "",
           resident.contactNumber || "",
+          resident.pwdType || "",
+          resident.typeOfDisability || "",
           resident.emailAddress || "",
           resident.precinctNumber || "",
         ];
@@ -3940,7 +3942,7 @@ const generateDepartmentalReport = async (
       const respondentAddress = respondent.address ?? "";
 
       let remarks = "";
-      if (["CFA", "Settled", "settled", "archived", "pending"].includes(report.status || "")) {
+      if (["CFA", "Settled", "settled", "archived", "pending", "Refer to Government Agency", "Dismissed", "dismissed"].includes(report.status || "")) {
         const numHearings = report.hearing ?? 0;
         let foundRemark = false;
 
@@ -4227,7 +4229,10 @@ const generateDepartmentalReport = async (
         report.status === "Settled" || 
         report.status === "settled" || 
         report.status === "archived" ||
-        report.status === "pending") {
+        report.status === "pending" ||
+        report.status === "Refer to Government Agency" ||
+        report.status === "dismissed" ||
+        report.status === "Dismissed") {
     
       const numHearings = report.hearing ?? 0;
     
@@ -4506,7 +4511,10 @@ const generateDepartmentalReport = async (
         report.status === "Settled" || 
         report.status === "settled" || 
         report.status === "archived" ||
-        report.status === "pending") {
+        report.status === "pending" ||
+        report.status === "Refer to Government Agency" ||
+        report.status === "dismissed" ||
+        report.status === "Dismissed")  {
     
       const numHearings = report.hearing ?? 0;
     
@@ -4748,6 +4756,10 @@ const generateDepartmentalReport = async (
           department: dept,
           pending: filtered.filter((i) => i.status === "pending").length,
           inprogress: filtered.filter((i) => i.status === "In - Progress").length,
+          refer: filtered.filter((i) => i.status === "Refer to Government Agency").length,
+          dismissed: filtered.filter((i) =>
+            i.status === "dismissed" || i.status === "Dismissed"
+          ).length,
           settled: filtered.filter((i) =>
             dept === "Online"
               ? i.status === "Settled"
@@ -4784,6 +4796,8 @@ const generateDepartmentalReport = async (
         row.getCell(4).value = item.settled;
         row.getCell(5).value = item.archived;
         row.getCell(6).value = item.cfa;
+        row.getCell(7).value = item.refer;
+        row.getCell(8).value = item.dismissed;
   
         // Style
         for (let col = 1; col <= 6; col++) {

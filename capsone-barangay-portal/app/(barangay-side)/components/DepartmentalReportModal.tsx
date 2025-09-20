@@ -103,6 +103,8 @@ export const DepartmentalReportModal: React.FC<DepartmentalReportModalProps> = (
           <option value="archived">Archived</option>
           <option value="In - Progress">In - Progress</option>
           <option value="CFA">CFA</option>
+          <option value="Refer to Government Agency">Refer to Government Agency</option>
+          <option value="Dismissed">Dismissed</option>
         </select>
 
         <div className="modal-actions">
