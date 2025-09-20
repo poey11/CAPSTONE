@@ -427,7 +427,10 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
           programsJoined.length === 0
             ? "You have no enrolled programs yet."
             : programsJoined
-                .map((r) => `• ${r.programName}: Role: ${r.role} - ${r.progressStatus}`)
+          .map(
+              (r) =>
+                `- 📌 **${r.programName}**  \n   Role: _${r.role}_  \n   Status: _${r.progressStatus}_`
+            )
                 .join("\n");
         window.setTimeout(() => pushMsg("bot", `**Your Programs**\n\n${body}`), PUSH_DELAY_MS);
       },
@@ -443,7 +446,10 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
                 .map((r) => {
                   const label = `${r.docType ?? ""} ${r.purpose ?? ""}`.trim() || "Request";
                   const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=ServiceRequest`;
-                  return `• ${label}: ${r.status ?? "—"}\n  [See Service Transaction](${url})`;
+               /*    return `• ${label}: ${r.status ?? "—"}\n  [See Service Transaction](${url})`; */
+                  return `- 📝 **${label}**  
+                  Status: _${r.status ?? "—"}_  
+                  [📄 View Transaction](${url})`;
                 })
                 .join("\n");
         window.setTimeout(() => pushMsg("bot", `**Your Document Requests**\n\n${body}`), PUSH_DELAY_MS);
@@ -460,7 +466,10 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
                 .map((r) => {
                   const label = `${r.caseNumber ?? r.id}: ${r.nature ?? "Incident"} - ${r.status ?? "—"}`;
                   const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=IncidentReport`;
-                  return `• ${label}\n  [See Incident Report](${url})`;
+                /*   return `• ${label}\n  [See Incident Report](${url})`;  OLD JERICO*/ 
+                    return `1. **${r.caseNumber ?? r.id}**  
+                    _${r.nature ?? "Incident"} – ${r.status ?? "—"}_  
+                    [🔎 View Report](${url})`;
                 })
                 .join("\n");
         window.setTimeout(() => pushMsg("bot", `**Your Minor Incidents**\n\n${body}`), PUSH_DELAY_MS);
