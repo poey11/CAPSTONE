@@ -404,18 +404,6 @@ const confirmAccept = async () => {
         <div className={`residentusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
           <input type="text" className="residentusers-page-filter" placeholder="Search by Name"
             value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          {/* <select className="residentusers-page-filter" value={sexFilter}
-            onChange={(e) => setSexFilter(e.target.value)}>
-            <option value="">Sex</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select> */}
-          {/* <select className="residentusers-page-filter" value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">Status</option>
-            <option value="Unverified">Unverified</option>
-            <option value="Resubmission">Resubmission</option>
-          </select> */}
           <select className="residentusers-page-filter" value={showCount}
             onChange={(e) => setShowCount(Number(e.target.value))}>
             <option value="0">Show All</option>
@@ -430,12 +418,6 @@ const confirmAccept = async () => {
         <div className={`residentusers-page-section-2 ${filtersLoaded ? "filters-animated" : ""}`} /* edited this class*/> 
           <input type="text" className="residentusers-page-filter" placeholder="Search by Name"
             value={pendingSearchTerm} onChange={(e) => setPendingSearchTerm(e.target.value)} />
-          {/* <select className="residentusers-page-filter" value={pendingSexFilter}
-            onChange={(e) => setPendingSexFilter(e.target.value)}>
-            <option value="">Sex</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select> */}
           <select className="residentusers-page-filter" value={pendingStatusFilter}
             onChange={(e) => setPendingStatusFilter(e.target.value)}>
             <option value="">Status</option>
@@ -732,22 +714,22 @@ const confirmAccept = async () => {
                                 type="text"
                                 className="view-user-input-field"
                                 value={
-  selectedUser.createdAt
-    ? typeof selectedUser.createdAt === "string"
-      ? /^\d{4}-\d{2}-\d{2}$/.test(selectedUser.createdAt)
-        ? selectedUser.createdAt
-        : new Date(
-            selectedUser.createdAt
-              .replace(" at", "")
-              .replace("UTC+8", "GMT+0800")
-          )
-            .toISOString()
-            .split("T")[0]
-      : (selectedUser.createdAt as any).toDate
-        ? (selectedUser.createdAt as any).toDate().toISOString().split("T")[0]
-        : "N/A"
-    : "N/A"
-}
+                                  selectedUser.createdAt
+                                    ? typeof selectedUser.createdAt === "string"
+                                      ? /^\d{4}-\d{2}-\d{2}$/.test(selectedUser.createdAt)
+                                        ? selectedUser.createdAt
+                                        : new Date(
+                                            selectedUser.createdAt
+                                              .replace(" at", "")
+                                              .replace("UTC+8", "GMT+0800")
+                                          )
+                                            .toISOString()
+                                            .split("T")[0]
+                                      : (selectedUser.createdAt as any).toDate
+                                        ? (selectedUser.createdAt as any).toDate().toISOString().split("T")[0]
+                                        : "N/A"
+                                    : "N/A"
+                                }
                                 readOnly
                               />
                             </div>
@@ -859,9 +841,9 @@ const confirmAccept = async () => {
                         <h1>
                         {
                             residents.filter(resident =>
-                            `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-                                .toLowerCase()
-                                .includes(searchTerm.toLowerCase())
+                              resident.firstName?.toLowerCase().trim() === selectedUser?.first_name?.toLowerCase().trim() &&
+                              resident.lastName?.toLowerCase().trim() === selectedUser?.last_name?.toLowerCase().trim() &&
+                              resident.dateOfBirth?.trim() === selectedUser?.dateOfBirth?.trim()
                             ).length > 0
                             ? `* ${residents.filter(resident =>
                                 `${resident.firstName} ${resident.middleName} ${resident.lastName}`
@@ -886,11 +868,11 @@ const confirmAccept = async () => {
                             </thead>
                             <tbody>
                                 {residents
-                                .filter(resident =>
-                                    `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-                                    .toLowerCase()
-                                    .includes(searchTerm.toLowerCase())
-                                )
+                                  .filter(resident =>
+                                    resident.firstName?.toLowerCase().trim() === selectedUser?.first_name?.toLowerCase().trim() &&
+                                    resident.lastName?.toLowerCase().trim() === selectedUser?.last_name?.toLowerCase().trim() &&
+                                    resident.dateOfBirth?.trim() === selectedUser?.dateOfBirth?.trim()
+                                  )
                                 .map(resident => (
                                     <tr
                                     key={resident.id}
@@ -919,11 +901,11 @@ const confirmAccept = async () => {
                             {/* Resident Database */}
                             <div className="resident-table-container">
                             {residents
-                                .filter(resident =>
-                                `${resident.firstName} ${resident.middleName} ${resident.lastName}`
-                                    .toLowerCase()
-                                    .includes(searchTerm.toLowerCase())
-                                )
+                              .filter(resident =>
+                                resident.firstName?.toLowerCase().trim() === selectedUser?.first_name?.toLowerCase().trim() &&
+                                resident.lastName?.toLowerCase().trim() === selectedUser?.last_name?.toLowerCase().trim() &&
+                                resident.dateOfBirth?.trim() === selectedUser?.dateOfBirth?.trim()
+                              )
                                 .map(resident => (
                                 <table
                                     key={resident.id}
@@ -1099,10 +1081,12 @@ const confirmAccept = async () => {
                     {(() => {
                         const selectedName = `${selectedUser?.first_name || ""} ${selectedUser?.middle_name || ""} ${selectedUser?.last_name || ""}`.toLowerCase().trim();
 
-                        const matchingResidents = residents.filter(resident => {
-                        const residentName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`.toLowerCase().trim();
-                        return residentName === selectedName;
-                        });
+                        const matchingResidents = residents.filter(resident =>
+                          resident.firstName?.toLowerCase().trim() === selectedUser?.first_name?.toLowerCase().trim() &&
+                          resident.lastName?.toLowerCase().trim() === selectedUser?.last_name?.toLowerCase().trim() &&
+                          resident.dateOfBirth?.trim() === selectedUser?.dateOfBirth?.trim()
+                        );
+
 
                         return (
                         <>
@@ -1116,12 +1100,13 @@ const confirmAccept = async () => {
                                     <th className="verification-table-firsttitle">First Name</th>
                                     <th className="verification-table-firsttitle">Middle Name</th>
                                     <th className="verification-table-firsttitle">Last Name</th>
+                                    <th className="verification-table-firsttitle">Date of Birth</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {matchingResidents.length === 0 ? (
                                     <tr>
-                                    <td colSpan={3} className="no-matches">No matches found</td>
+                                    <td colSpan={4} className="no-matches">No matches found</td>
                                     </tr>
                                 ) : (
                                     matchingResidents.map(resident => (
