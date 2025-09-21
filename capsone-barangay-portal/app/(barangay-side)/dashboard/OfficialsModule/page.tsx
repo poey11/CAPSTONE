@@ -189,10 +189,10 @@ export default function OfficialsModule() {
                     value={positionDropdown}
                     onChange={(e) => setPositionDropdown(e.target.value)}
                 >
-                    <option value="">Position</option>
+                    <option value="" disabled>Position</option>
                     <option value="Punong Barangay">Punong Barangay</option>
                     <option value="Secretary">Secretary</option> 
-                  <option value="Assistant Secretary">Asst Secretary</option> 
+                    <option value="Assistant Secretary">Assistant Secretary</option> 
                     <option value="Barangay Treasurer">Barangay Treasurer</option>
                     <option value="Barangay Administrator">Barangay Administrator</option>
                     <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
@@ -263,7 +263,7 @@ export default function OfficialsModule() {
                       >
                         <img src="/Images/view.png" alt="View"/>
                       </button>
-                      {user === "Admin Staff" && (
+                      {(user === "Admin Staff" || user === "Assistant Secretary" || user === "Secretary" )&& (
                         <>
                           <button 
                             className="brgy-official-action-edit"

@@ -276,7 +276,7 @@ export default function SitioHoaOfficersModule() {
 
     <main className="officiers-main-container">
       <div className="officers-section-1"> 
-        {user?.position === "Admin Staff" && (
+        {(user?.position === "Admin Staff" || user?.position === "Assistant Secretary" || user?.position === "Secretary" ) && (
           <button 
           className="add-officers-btn add-officers-animated"
           onClick={() => setShowAddOOfficerPopup(true)}
@@ -377,7 +377,7 @@ export default function SitioHoaOfficersModule() {
                         <img src="/Images/view.png" alt="View"/>
                       </button>
 
-                      {user?.position === "Admin Staff" && (
+                      {(user?.position === "Admin Staff" || user?.position === "Assistant Secretary" || user?.position === "Secretary" ) && (
                         <>
                           <button 
                           className="brgy-official-action-edit"
