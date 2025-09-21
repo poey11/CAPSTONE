@@ -304,6 +304,12 @@ export default function Header() {
       },
 
 
+      //Account Setup
+
+         "/dashboard/accountSetup": {
+        title: "Account Setup",
+        breadcrumb: ["Account Setup"],
+      },
       
 
 
