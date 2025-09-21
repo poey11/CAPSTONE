@@ -1083,31 +1083,31 @@ export default function ResidentModule() {
 
       {/* 🔽 NEW: Edit Justification Upload Popup */}
       {showEditJustificationPopup && editResident && (
-        <div className="confirmation-popup-overlay-module-main-res">
-          <div className="confirmation-popup-module-main-res">
-            <img src="/Images/upload.png" alt="upload icon" className="successful-icon-popup" />
-            <h3 style={{ marginTop: 8 }}>Upload Justification Letter</h3>
-            <p style={{ marginTop: 4, textAlign: "center" }}>
+        <div className="confirmation-popup-overlay-module-main-justifiation-letter">
+          <div className="confirmation-popup-module-justification-letter">
+            <img src="/Images/letter.png" alt="upload icon" className="letter-icon-popup" />
+            <h2>Upload Justification Letter</h2>
+            <p>
               A signed justification letter from the Barangay Chairman/Punong Barangay is required before editing this resident.
             </p>
-            <h4 style={{ marginTop: 8 }}>
+            <h4>
               Resident: {editResident?.lastName || ""}, {editResident?.firstName || ""}
             </h4>
 
-            <div style={{ marginTop: 12 }}>
+            <div>
               <input
                 type="file"
                 accept=".pdf,image/*"
                 onChange={(e) => setJustificationFile(e.target.files?.[0] || null)}
               />
               {uploading && (
-                <p style={{ marginTop: 8 }}>
+                <p>
                   Uploading… {uploadProgress}%
                 </p>
               )}
             </div>
 
-            <div className="yesno-container-module" style={{ marginTop: 16 }}>
+            <div className="yesno-container-module-justification-letter">
               <button
                 onClick={() => {
                   if (!uploading) {
@@ -1115,18 +1115,18 @@ export default function ResidentModule() {
                     setJustificationFile(null);
                   }
                 }}
-                className="no-button-module"
+                className="no-button-module-justification-letter"
                 disabled={uploading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUploadAndContinue}
-                className="yes-button-module"
+                className="yes-button-module-justification-letter"
                 disabled={!justificationFile || uploading}
                 title={!justificationFile ? "Select a file first" : "Upload & continue"}
               >
-                {uploading ? `Uploading ${uploadProgress}%` : "Upload & Continue"}
+                {uploading ? `Uploading ${uploadProgress}%` : "Submit"}
               </button>
             </div>
           </div>

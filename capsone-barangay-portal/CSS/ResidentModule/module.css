@@ -1433,3 +1433,132 @@ color: #FFFFFF;
 .resident-module-main-section tbody tr:nth-child(odd) {
   background-color: #ffffff; /* Crisp white */
 }
+
+
+
+
+/*
+EDIT CSS
+*/
+
+  .confirmation-popup-overlay-module-main-justifiation-letter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+  backdrop-filter: blur(4px); /* modern frosted effect */
+}
+
+.confirmation-popup-module-justification-letter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 420px;
+  width: 520px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 24px 28px;
+  text-align: center;
+  font-size: 16px;
+  animation: popupFadeIn 0.25s ease-out;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.confirmation-popup-module-justification-letter h2 {
+  margin-top: 8px;
+  margin-bottom: 6px;
+  color: #e53935;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.confirmation-popup-module-justification-letter h4 {
+  margin: 6px 0 14px;
+  font-size: 16px;
+  color: #014e21;
+  font-weight: 500;
+}
+
+.confirmation-popup-module-justification-letter p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.letter-icon-popup {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+}
+
+/* File input modern look */
+.confirmation-popup-module-justification-letter input[type="file"] {
+  margin-top: 10px;
+  padding: 8px;
+  border: 1px dashed #bbb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+.confirmation-popup-module-justification-letter input[type="file"]:hover {
+  border-color: #666;
+}
+
+.yesno-container-module-justification-letter {
+  display: flex;
+  gap: 16px;
+  margin-top: 20px;
+  width: 100%;
+  justify-content: center;
+}
+
+.yes-button-module-justification-letter,
+.no-button-module-justification-letter {
+  padding: 10px 20px;
+  font-size: 15px;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer; 
+  flex: 1;
+  max-width: 180px;
+  box-shadow: 0 3px 6px rgba(0, 0, 10, 0.25);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.yes-button-module-justification-letter {
+  background-color: #4caf50; 
+}
+.yes-button-module-justification-letter:hover {
+  background-color: #3d8c40;
+  transform: translateY(-2px);
+} 
+
+.no-button-module-justification-letter {
+  background-color: #f44336;
+}
+.no-button-module-justification-letter:hover {
+  background-color: #c2352b; 
+  transform: translateY(-2px);
+}
