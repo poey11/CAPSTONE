@@ -133,38 +133,53 @@ const RESTRICTED_DOCS = new Set([
   "Barangay Clearance",
 ]);
 
+// Assuming your auth context can expose a loading flag.
+// If it doesn't yet, add one there.
+const { user: authUser, loading } = useAuth();
+
 useEffect(() => {
-  // if no docB yet, don't block
+  // 1) No docB? Don't block.
   if (!docB) {
     setCheckingAccess(false);
     return;
   }
 
-  const isRestricted = RESTRICTED_DOCS.has(docB);
-
-  // if not restricted, allow
-  if (!isRestricted) {
+  // 2) Not a restricted doc? Don't block.
+  if (!RESTRICTED_DOCS.has(docB)) {
     setCheckingAccess(false);
     return;
   }
 
-  // logged-in but still loading userData? keep blocking UI
-  if (user && userData === null) {
+  // 3) While auth is initializing, keep UI blocked but DON'T redirect.
+  if (loading) {
     setCheckingAccess(true);
     return;
   }
 
-  // when userData is ready, allow only if Verified
-  const isVerified = userData?.status === "Verified";
-  if (!isVerified) {
+  // 4) After auth resolves and there's still no user → redirect.
+  if (!user) {
     alert("You must be a verified resident to request this document.");
     router.replace("/services");
     return;
   }
 
-  // verified & allowed
+  // 5) If we have a user but resident data hasn't loaded yet, keep blocking.
+  if (userData === null) {
+    setCheckingAccess(true);
+    return;
+  }
+
+  // 6) Now it's safe to check verification.
+  if (userData.status !== "Verified") {
+    alert("You must be a verified resident to request this document.");
+    router.replace("/services");
+    return;
+  }
+
+  // 7) Verified user → allow.
   setCheckingAccess(false);
-}, [docB, user, userData]);
+}, [docB, loading, user, userData, router]);
+
 
   const [nos, setNos] = useState(0);
   const [otherDocPurposes, setOtherDocPurposes] = useState<{ [key: string]: string[] }>({});
@@ -3866,7 +3881,7 @@ const handleFileChange = (
                       
                       {(clearanceInput.purpose ==="Barangay ID") &&(
                         <>
-                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew<span className="required">*</span></label>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairview<span className="required">*</span></label>
                           <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
                         </>
                       )}
