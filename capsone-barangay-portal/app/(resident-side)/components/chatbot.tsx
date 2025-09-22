@@ -273,31 +273,20 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
 
     // Summary line
     const bits = [];
-    bits.push(`**Programs:** ${pCount}`);
-    bits.push(`**Requests:** ${sCount}`);
-    bits.push(`**Minor Incidents:** ${iCount}`);
-    lines.push(bits.join(" • "));
+    bits.push(`• **Your Programs:** ${pCount}`);
+    bits.push(`• **Your Service Requests:** ${sCount}`);
+    bits.push(`• **Your Minor Incident Reports:** ${iCount}`);
+    lines.push(bits.join("\n"));
 
     // Short previews (up to 3)
     if (pCount > 0) {
-      const top = programsJoined.slice(0, 3).map((r) => `- ${r.programName}: Role: ${r.role} - ${r.progressStatus}`);
-      lines.push(`\n**Your Programs**\n${top.join("\n")}`);
+      lines.push(`You can check your programs by clicking the **"My Programs"** quick button below`);
     }
     if (sCount > 0) {
-      const top = serviceRequests.slice(0, 3).map((r) => {
-        const label = `${r.docType ?? ""} ${r.purpose ?? ""}`.trim() || "Request";
-        const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=ServiceRequest`;
-        return `- ${label}: ${r.status ?? "—"}  \n  [See Service Transaction](${url})`;
-      });
-      lines.push(`\n**Your Document Requests**\n${top.join("\n")}`);
+      lines.push(`You can check your service requests by clicking the **"My Requests"** quick button below`);
     }
     if (iCount > 0) {
-      const top = minorIncidents.slice(0, 3).map((r) => {
-        const label = `${r.caseNumber ?? r.id}: ${r.nature ?? "Incident"} - ${r.status ?? "—"}`;
-        const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=IncidentReport`;
-        return `- ${label}  \n  [See Incident Report](${url})`;
-      });
-      lines.push(`\n**Your Minor Incidents**\n${top.join("\n")}`);
+      lines.push(`You can check your minor incident reports by clicking the **"My Incidents"** quick button below`);
     }
 
     // Helpful nav links
@@ -429,7 +418,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
             : programsJoined
           .map(
               (r) =>
-                `- 📌 **${r.programName}**  \n   Role: _${r.role}_  \n   Status: _${r.progressStatus}_`
+                `- 📌 **${r.programName}:**  \n   Role: _${r.role}_  \n   Status: _${r.progressStatus}_`
             )
                 .join("\n");
         window.setTimeout(() => pushMsg("bot", `**Your Programs**\n\n${body}`), PUSH_DELAY_MS);
@@ -444,7 +433,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
             ? "You have no document/service requests yet."
             : serviceRequests
                 .map((r) => {
-                  const label = `${r.docType ?? ""} ${r.purpose ?? ""}`.trim() || "Request";
+                  const label = `${r.docType ?? ""}: ${r.purpose ?? ""}`.trim() || "Request";
                   const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=ServiceRequest`;
                /*    return `• ${label}: ${r.status ?? "—"}\n  [See Service Transaction](${url})`; */
                   return `- 📝 **${label}**  
@@ -466,7 +455,6 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
                 .map((r) => {
                   const label = `${r.caseNumber ?? r.id}: ${r.nature ?? "Incident"} - ${r.status ?? "—"}`;
                   const url = `/ResidentAccount/Transactions/TransactionRouter?id=${r.id}&type=IncidentReport`;
-                /*   return `• ${label}\n  [See Incident Report](${url})`;  OLD JERICO*/ 
                     return `1. **${r.caseNumber ?? r.id}**  
                     _${r.nature ?? "Incident"} – ${r.status ?? "—"}_  
                     [🔎 View Report](${url})`;
@@ -491,7 +479,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
             <div className="chat-header">
               <div>
                 Barangay Assistant
-                <div className="sublabel">Dialogflow CX</div>
+                <div className="sublabel">Powered by Dialogflow CX</div>
               </div>
               <div className="mini-btn-container">
                 <button className="mini-btn" onClick={() => setBotOpen(false)} aria-label="Close chat">

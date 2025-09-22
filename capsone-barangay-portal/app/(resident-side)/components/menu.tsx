@@ -306,7 +306,7 @@ const handleNotificationClick = async (notification: Notification) => {
   //   console.log("No navigation triggered for this notification type.");
   // }
   if(notification.requestID){
-    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=${notification.transactionType}`);
+    router.push(`/ResidentAccount/Transactions/TransactionRouter?id=${notification.requestID}&type=ServiceRequest`);
   }
   else if (type === "Verification") {
     router.push(`/ResidentAccount/Profile?id=${user?.uid}`);
