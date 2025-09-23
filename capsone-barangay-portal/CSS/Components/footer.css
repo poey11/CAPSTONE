@@ -161,3 +161,140 @@
 
 
 
+
+
+/* Landscape Mode Mobile  Fix */
+@media (max-width: 900px) and (orientation: landscape) {
+  .footer-container {
+    height: auto; /* prevent fixed height */
+    padding: 10px 15px;
+  }
+
+  .footer-top {
+    flex-direction: row;  /* allow side-by-side */
+    flex-wrap: wrap;      /* wrap if too tight */
+    gap: 15px;
+  }
+
+  .footer-section1,
+  .footer-section2 {
+    width: 48%;  /* split evenly */
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .footer-section1 {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .footer-section1 p {
+    font-size: 12px;
+  }
+
+  .footer-logo {
+    width: 40px;
+  }
+
+  .footer-section2 h1 {
+    font-size: 13px;
+  }
+
+  .contactinfo-email,
+  .contactinfo-phone,
+  .contactinfo-loc {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding-left: 0;
+  }
+
+  .footer-bottom {
+    margin-top: 10px;
+    text-align: center;
+  }
+}
+
+
+
+
+
+/* 📲 Tablet (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .footer-container {
+    padding: 25px 40px;
+    height: auto;
+    font-size: 15px;
+  }
+
+  .footer-top {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+  }
+
+  .footer-section1 {
+    width: 45%;
+    display: flex;
+    flex-direction: column; /* stack logo + text */
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-left: 0;
+    padding-right: 0;
+  }
+
+  .footer-logo {
+    width: 80px; /* bigger logo for visibility */
+    margin-bottom: 10px;
+  }
+
+  .footer-section1 p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-left: 0;
+  }
+
+  .footer-section2 {
+    width: 50%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .footer-section2 h1 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .contactinfo-email,
+  .contactinfo-phone,
+  .contactinfo-loc {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .contactinfo-email p,
+  .contactinfo-phone p,
+  .contactinfo-loc p {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .contacticon {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+  }
+
+  .footer-bottom {
+    margin-top: 20px;
+    font-size: 13px;
+    text-align: center;
+  }
+}
