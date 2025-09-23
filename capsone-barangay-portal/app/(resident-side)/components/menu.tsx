@@ -439,7 +439,7 @@ const handleDeleteNotification = async (notificationId: string) => {
       </Link>
 
       {/* ====== DESKTOP NAV LINKS ====== */}
-      <div className="navbar-links hidden md:flex">
+      <div className="navbar-links hidden lg:flex">
         <div className="navbar-indiv-container">
           <div className="dropdown-Container">
             <Link href="/">
@@ -635,7 +635,7 @@ const handleDeleteNotification = async (notificationId: string) => {
 
          {/* ====== HAMBURGER BUTTON (only small screens) ====== */}
       
-        <div ref={menuRef} className="md:hidden ml-auto">
+        <div ref={menuRef} className="hamburger-wrapper lg:hidden ml-auto">
           {mobileOpen ? (
             <button
               onClick={() => setMobileOpen(false)}
@@ -668,7 +668,7 @@ const handleDeleteNotification = async (notificationId: string) => {
     </div>
 
     {mobileOpen && (
-      <div ref={mobileMenuRef} className="md:hidden mobile-menu-container">
+      <div ref={mobileMenuRef} className="mobile-menu-container">
         {/* Home & About */}
         <Link href="/" onClick={() => setMobileOpen(false)}>
           <p className="dropdown-item-resident">Home</p>
