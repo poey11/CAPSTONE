@@ -434,7 +434,9 @@ const handleDeleteNotification = async (notificationId: string) => {
   {/* Add new links as we go */}
   <div className="navbar-container">
     <div className="navbar-card">
-      <img src="/Images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
+      <Link href="/">
+        <img src="/Images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
+      </Link>
 
       {/* ====== DESKTOP NAV LINKS ====== */}
       <div className="navbar-links hidden md:flex">
