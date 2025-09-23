@@ -283,3 +283,116 @@
 .bubble a.chat-link:active {
   color: #1e40af;            /* blue-800 */
 }
+
+
+
+
+
+
+
+/*Mobile Portrait */
+@media (max-width: 768px) and (orientation: portrait) {
+  .bot-messenger {
+    width: 65vw;        /* smaller width */
+    height: 60vh;       /* much shorter */
+    bottom: 15px;
+    right: 15px;
+    border-radius: 12px;
+  }
+
+  .chat-header {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .chat-header .sublabel {
+    font-size: 10px;
+  }
+
+  .chat-body {
+    padding: 6px;
+  }
+
+  .bubble {
+    font-size: 12px;
+    max-width: 65vw;    
+  }
+
+  .quick-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+
+  .chat-input {
+    font-size: 12px;
+  }
+
+  .chat-send {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+}
+
+/* Mobile Landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+  .bot-messenger {
+    width: 70vw;
+    height: 65vh;       
+    bottom: 15px;
+    right: 15px;
+    border-radius: 12px;
+  }
+
+  .bubble {
+    max-width: 55vw;
+    font-size: 12px;
+  }
+
+  .quick-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+
+
+
+
+
+
+/* Tablet View */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .bot-messenger {
+    width: 55vw;       /* narrower than desktop */
+    height: 65vh;      /* slightly shorter */
+    bottom: 18px;
+    right: 18px;
+    border-radius: 12px;
+  }
+
+  .chat-header {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .chat-body {
+    padding: 8px;
+  }
+
+  .bubble {
+    font-size: 13px;
+    max-width: 50vw;
+  }
+
+  .chat-input {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  .chat-send {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+
+
