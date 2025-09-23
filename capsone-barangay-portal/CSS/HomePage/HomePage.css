@@ -99,7 +99,8 @@
 
 
 .second-section-home,
-.fourth-section-home {
+.fourth-section-home,
+.fifth-section-home {
   height: 100vh;
 /*background: linear-gradient(135deg, #e0e7ff 0%, #fef9ff 100%);*/
   background-image: url('/Images/bghome.jpg');
@@ -117,7 +118,8 @@
 
 
 .second-section-home-upper,
-.fourth-section-home-upper{
+.fourth-section-home-upper,
+.fifth-section-home-upper{
   width: 100%;
     position: relative;
   z-index: 1;
@@ -456,26 +458,19 @@ position: relative;
   padding-top: 150px;
 }
 
-.news-cards-container {
-  display: flex;
-  gap: 32px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 60px;
-  max-width: 1200px;
-}
-
 .news-card {
-  width: 320px;
-  height: 380px;
-  background: #fff;
+  width: 400px;
+  background-color: #fff;
   border-radius: 16px;
-  overflow: hidden; /* makes the image corners rounded */
-  padding-bottom: 1rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
+
 
 .news-card:hover {
   transform: translateY(-8px);
@@ -524,9 +519,20 @@ position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 24px;
+  width: 100%;
+  margin-top: 80px;
 }
 
+
+.news-cards-container-wrapper {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    max-width: 1000px; /* Controls overall row width */
+}
 
 
 /* Mobile view: stack services cards vertically */
@@ -553,14 +559,15 @@ position: relative;
   }
 
   .fifth-section-home-upper .section-content-home h2 {
-    font-size: 2.9rem;
+    font-size: 2.5rem;
   }
   .fifth-section-home-upper .section-content-home p {
     padding: 0 1rem;
   }
 
   .news-card {
-    width: 280px;
+    flex: 0 0 90%; /* single card view like facilities */
+    max-width: 500px;
   }
   .icon-image {
     width: 60px;
@@ -574,7 +581,8 @@ position: relative;
 @media (max-width: 1024px) {
   .second-section-home,
   .third-section-home,
-  .fourth-section-home {
+  .fourth-section-home,
+  .fifth-section-home {
     height: auto;        /* let section grow naturally */
     padding: 80px 20px;  /* add breathing room */
   }
