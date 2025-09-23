@@ -63,7 +63,6 @@ function buildDateLabel(p: Program): string {
 
 export default function Programs() {
   const [programs, setPrograms] = useState<Program[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -101,17 +100,12 @@ export default function Programs() {
         setPrograms(data);
       } catch (err) {
         console.error("Error fetching programs:", err);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchPrograms();
   }, []);
 
-  if (loading) {
-    return <p className="loading-text">Loading programs...</p>;
-  }
 
   return (
     <main className="main-container-programs">
@@ -125,10 +119,7 @@ export default function Programs() {
       </div>
 
       <section className="programs-section-programs">
-        {programs.length === 0 ? (
-          <p className="no-programs-text">No available programs right now.</p>
-        ) : (
-          programs.map((program) => {
+        {programs.map((program) => {
             const dateLabel = buildDateLabel(program);
             const cover = program.photoURL || (program.photoURLs?.[0] ?? undefined);
             return (
@@ -158,8 +149,7 @@ export default function Programs() {
                 </div>
               </Link>
             );
-          })
-        )}
+          })}
       </section>
     </main>
   );

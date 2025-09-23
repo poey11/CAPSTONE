@@ -510,7 +510,7 @@ const participantAgeLimitText = useMemo(() => {
 
   // submit (role-aware)
   const checkEligibilityForRole = (role: Role): { ok: boolean; msg?: string } => {
-    if (!program) return { ok: false, msg: "Program not found." };
+    if (!program) return { ok: false };
 
     if (
       program.progressStatus === "Rejected" ||

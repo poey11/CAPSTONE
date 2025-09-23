@@ -85,15 +85,11 @@ const homePage:React.FC = () => {
     const [newsSlide, setNewsSlide] = useState(0);
 
     const nextNews = () => {
-      setNewsSlide((prev) =>
-        prev + cardsPerPage >= news.length ? 0 : prev + cardsPerPage
-      );
+      setNewsSlide((prev) => (prev + 1) % news.length);
     };
 
     const prevNews = () => {
-      setNewsSlide((prev) =>
-        prev === 0 ? Math.max(news.length - cardsPerPage, 0) : prev - cardsPerPage
-      );
+      setNewsSlide((prev) => (prev - 1 + news.length) % news.length);
     };
 
     // Fetch the site visit count from Firestore
@@ -216,6 +212,16 @@ useEffect(() => {
 
   return () => window.removeEventListener("resize", handleResize);
 }, []);
+
+
+
+const getVisibleNews = () => {
+  const visible = [];
+  for (let i = 0; i < cardsPerPage; i++) {
+    visible.push(news[(newsSlide + i) % news.length]);
+  }
+  return visible;
+};
 
 
 
@@ -349,17 +355,17 @@ useEffect(() => {
   <div className="news-content-wrapper fade-slide-up" ref={newsRef}>
     <button className="slide-button" onClick={prevNews}>&lt;</button>
 
-    <div className="news-cards-container">
-      {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
-        <div className="news-card" key={index}>
-          <img src={item.image} alt={item.title} className="news-image" />
-          <div className="news-info">
-            <h3>{item.title}</h3>
-            <p>{item.description}</p>
-            <span className="news-date">{item.date}</span>
+    <div className="news-cards-container-wrapper">
+        {getVisibleNews().map((item, index) => (
+          <div className="news-card" key={index}>
+            <img src={item.image} alt={item.title} className="news-image" />
+            <div className="news-info">
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+              <span className="news-date">{item.date}</span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
 
     <button className="slide-button" onClick={nextNews}>&gt;</button>
