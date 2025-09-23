@@ -1562,3 +1562,27 @@ EDIT CSS
   background-color: #c2352b; 
   transform: translateY(-2px);
 }
+
+
+/*
+FOR CHANGES INN INCIDENT HISTORY
+*/
+
+.view-mainresident-main-section-history {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1rem;
+}
+
+.view-mainresident-upper-section {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.view-mainresident-lower-section {
+  display: flex;
+  width: 100%;
+  padding: 20px;
+}
