@@ -520,19 +520,16 @@ export default function SitioHoaOfficersModule() {
                                 <>
                                   
                                   <option value="Sitio President">Sitio President</option>
-                                  <option value="Sitio Officer">Sitio Officer</option>
                                 </>
                               ):(
                                 <>
                                   <option value="Association President">Association President</option>
-                                  <option value="Association Officer">Association Officer</option>
                                 </>
                               )}
-                              <option value="Others">Others</option>
-                              {/* not sure if pwede may ibang position*/}
+                              {/* <option value="Others">Others</option> */}
                             </select>
                           </div>
-                          {newOfficerDetails.position === "Others" && (
+                          {/* {newOfficerDetails.position === "Others" && (
                             <div className="fields-section">
                               <p>Please Specify Position<span className="required">*</span></p>
                               <input
@@ -545,7 +542,7 @@ export default function SitioHoaOfficersModule() {
                                 required
                               />
                             </div>
-                          )}
+                          )} */}
                         <div className="fields-section">
                             <p>Location<span className="required">*</span></p>
                             <select
