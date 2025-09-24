@@ -1001,18 +1001,16 @@ FOR ADDITION OF NEW MAIN RESIDENTS
   width: 100%;
 }
 
-/*
-.pwd-fields-section-valid{
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  padding-top: 10px;
-}*/
 .pwd-fields-section-valid {
   margin-top: 15px;
   display: none;
   flex-direction: column;
 }
+
+.pwd-fields-section-valid.hidden {
+  display: none; /* explicitly hide when Permanent */
+}
+
 
 .pwd-fields-section-valid.show {
   display: flex;
@@ -1364,13 +1362,15 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 .box-container-pwdpic {
   position: relative;
   width: 370px;
+  height: auto;
+  overflow: visible;
   border: 1px solid #5a6b7c;
   border-radius: 10px;
   background-color: #ffffff;
   padding-left: 20px;
   padding-right: 20px;
   padding-top: 40px;
-  padding-bottom: 90px;
+  padding-bottom: 25px;
   margin-top: 20px;
 
   display: flex;
@@ -1398,6 +1398,8 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 .box-container-outer-pwdpic {
   position: relative; 
   margin-bottom: 20px;
+  height: auto;
+  overflow: visible;
 }
 
 .box-container-resindentificationpic:hover {
@@ -1406,7 +1408,7 @@ FOR ADDITION OF NEW MAIN RESIDENTS
 
 .pwd-type-container{
   width: 100%;
-  height: 100px;
+  height: auto;
   border-top: #dedcdc 1px solid;
   padding-top: 15px;
 }
