@@ -360,7 +360,20 @@ const getVisibleNews = () => {
 
   <div className="news-content-wrapper fade-slide-up" ref={newsRef}>
     <button className="slide-button" onClick={prevNews}>&lt;</button>
-      <div className="news-cards-container">
+    <div className="news-cards-container-wrapper">
+      {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
+        <div className="news-card" key={item.id || index}>
+          <img src={item.image} alt={item.title} className="news-image" />
+          <div className="news-info">
+            <h3>{item.title}</h3>
+            <p>{item.description}</p>
+            <span className="news-date">{item.date}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+      {/* <div className="news-cards-container">
         {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
           <Link
             key={item.id || index} // ✅ Use a unique id if available
@@ -397,7 +410,7 @@ const getVisibleNews = () => {
             </div>
           </div>
         ))}
-    </div>
+    </div> */}
 
     <button className="slide-button" onClick={nextNews}>&gt;</button>
   </div>
