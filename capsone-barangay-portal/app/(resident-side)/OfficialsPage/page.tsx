@@ -47,15 +47,17 @@ export default function Official() {
 };
 
   useEffect(() => {
-    const docRef = collection(db, "DisplayedOfficials");
+    const docRef = collection(db, "BarangayUsers");
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
           
       const data: Official[] = snapshot.docs.map((doc) => ({
         id: doc.id,
-        name: doc.data().name,
+        name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
+          .filter(Boolean) // removes null, undefined, and empty strings
+          .join(" "),
         position: getPositionLabel(doc.data().position, doc.data().department),
         term: doc.data().term || "N/A",
-        contact: doc.data().contact || "N/A",
+        contact: doc.data().phone,
         image: doc.data().image || "/images/default-profile.png",
         email: doc.data().email || "N/A",
         createdBy: doc.data().createdBy || "N/A",

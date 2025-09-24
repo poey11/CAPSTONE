@@ -276,7 +276,7 @@ export default function SitioHoaOfficersModule() {
 
     <main className="officiers-main-container">
       <div className="officers-section-1"> 
-        {(user?.position === "Admin Staff" || user?.position === "Assistant Secretary" || user?.position === "Secretary" ) && (
+        {user?.position === "Admin Staff" && (
           <button 
           className="add-officers-btn add-officers-animated"
           onClick={() => setShowAddOOfficerPopup(true)}
@@ -377,7 +377,7 @@ export default function SitioHoaOfficersModule() {
                         <img src="/Images/view.png" alt="View"/>
                       </button>
 
-                      {(user?.position === "Admin Staff" || user?.position === "Assistant Secretary" || user?.position === "Secretary" ) && (
+                      {user?.position === "Admin Staff" && (
                         <>
                           <button 
                           className="brgy-official-action-edit"
@@ -520,16 +520,19 @@ export default function SitioHoaOfficersModule() {
                                 <>
                                   
                                   <option value="Sitio President">Sitio President</option>
+                                  <option value="Sitio Officer">Sitio Officer</option>
                                 </>
                               ):(
                                 <>
                                   <option value="Association President">Association President</option>
+                                  <option value="Association Officer">Association Officer</option>
                                 </>
                               )}
-                              {/* <option value="Others">Others</option> */}
+                              <option value="Others">Others</option>
+                              {/* not sure if pwede may ibang position*/}
                             </select>
                           </div>
-                          {/* {newOfficerDetails.position === "Others" && (
+                          {newOfficerDetails.position === "Others" && (
                             <div className="fields-section">
                               <p>Please Specify Position<span className="required">*</span></p>
                               <input
@@ -542,7 +545,7 @@ export default function SitioHoaOfficersModule() {
                                 required
                               />
                             </div>
-                          )} */}
+                          )}
                         <div className="fields-section">
                             <p>Location<span className="required">*</span></p>
                             <select

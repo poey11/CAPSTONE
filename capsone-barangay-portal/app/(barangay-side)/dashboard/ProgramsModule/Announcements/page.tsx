@@ -337,7 +337,7 @@ useEffect(() => {
 
                       */}
                       
-                      {(user?.position === "Admin Staff" || user?.position === "Assistant Secretary" || user?.position === "Secretary" )  && (
+                      {user?.position === "Admin Staff" && (
                         <>
                           <button
                             type="button"

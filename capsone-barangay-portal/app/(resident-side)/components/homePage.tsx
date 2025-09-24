@@ -2,25 +2,50 @@
 import "@/CSS/HomePage/HomePage.css";
 import { useState, useEffect, useRef } from "react";
 import Link from 'next/link';
+import { db } from '@/app/db/firebase'  ;
 import {doc, setDoc, getDoc, updateDoc, increment} from "firebase/firestore";
 import { useRouter } from 'next/navigation';
-import { collection, onSnapshot,query,where} from "firebase/firestore";
-import { db } from "@/app/db/firebase";
 // @ts-ignore
 import Cookies from 'js-cookie';
 
-interface AnnouncementFormProps {
-    id?: string;
-    title?: string;
-    description?: string;
-    date?: string;
-    image?:string;
-    createdAt?: string;
-}
 const homePage:React.FC = () => {    
-    const [news, setNews] = useState<any[]>([]);
 
-    
+    const news = [
+      {
+        title: "Community Clean-Up Drive",
+        description:
+          "Join us this Saturday for our barangay-wide clean-up drive. Volunteers are welcome! Volunteers are welcome! Volunteers are welcome! Volunteers are welcome!",
+        date: "Sept 10, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Health Mission",
+        description:
+          "Free medical check-ups and dental services will be held at the barangay hall.",
+        date: "Sept 12, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Youth Sports Festival",
+        description:
+          "Celebrate with us as we kick off the annual sports festival at Sapamanai Covered Court.",
+        date: "Sept 20, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Tree Planting Activity",
+        description: "Help us green Barangay Fairview by joining our tree planting event!",
+        date: "Sept 25, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+      {
+        title: "Job Fair",
+        description:
+          "Barangay Fairview will host a local job fair. Don’t miss out on career opportunities!",
+        date: "Oct 1, 2025",
+        image: "/Images/barangayhall.jpg",
+      },
+    ];
 
     const facilities = [
         {
@@ -67,33 +92,7 @@ const homePage:React.FC = () => {
       setNewsSlide((prev) => (prev - 1 + news.length) % news.length);
     };
 
-    useEffect(() => {
-      
-          const docRef = query(collection(db, "announcements"), where("isInFeatured", "==", "Active"));
-          const unsubscribe = onSnapshot(docRef, (snapshot) => {
-            const data: AnnouncementFormProps[] = snapshot.docs.map((doc) => {
-              return {
-                id: doc.id,
-                title: doc.data().announcementHeadline,
-                description: doc.data().content,
-                date: doc.data().createdAt,
-                image: doc.data().image,
-                createdAt: doc.data().createdAt
-              };
-            });
-            data.sort((a, b) => {
-              const dateA = new Date(a.createdAt || "").getTime();
-              const dateB = new Date(b.createdAt || "").getTime();
-              return dateB - dateA; // Descending order
-            });
-            setNews(data);
-          });
-          return () => unsubscribe();
-
-    },[])
     // Fetch the site visit count from Firestore
-
-
     const fetchSiteVisitCount = async () => {
         const docRef = doc(db, 'SiteVisits', 'homepageVisit');
         const docSnap = await getDoc(docRef);
@@ -196,11 +195,6 @@ useEffect(() => {
 
 
 const router = useRouter();
-
-  const handleNewsClick = (id:string) => {
-    router.push(`/Announcements/${id}`);
-  }
-
 
 const [cardsPerPage, setCardsPerPage] = useState(3);
 
@@ -360,31 +354,6 @@ const getVisibleNews = () => {
 
   <div className="news-content-wrapper fade-slide-up" ref={newsRef}>
     <button className="slide-button" onClick={prevNews}>&lt;</button>
-      <div className="news-cards-container">
-        {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
-          <Link
-            key={item.id || index} // ✅ Use a unique id if available
-            href={{
-              pathname: `/Announcements/${item.id || index}`,
-              query: {
-                title: item.title,
-                description: item.description,
-                date: item.date,
-                image: item.image,
-              },
-            }}
-          >
-            <div className="news-card">
-              <img src={item.image} alt={item.title} className="news-image" />
-              <div className="news-info">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                <span className="news-date">{item.date}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
 
     <div className="news-cards-container-wrapper">
         {getVisibleNews().map((item, index) => (
