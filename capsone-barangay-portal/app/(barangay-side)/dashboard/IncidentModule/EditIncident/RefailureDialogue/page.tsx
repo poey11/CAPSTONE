@@ -357,7 +357,7 @@ export default function Page() {
                         <div className="text-lg font-semibold text-gray-800 mb-4 flex justify-center">
                           Refailure Meeting (Dialogue)
                         </div>
-                        {/* <div className="flex items-center space-x-2 mb-4">
+                        <div className="flex items-center space-x-2 mb-4">
                            <input
                               type="checkbox"
                               id="refailuredialoguepresent"
@@ -384,7 +384,7 @@ export default function Page() {
                             >
                               Respondent Present
                             </label>
-                        </div> */}
+                        </div>
                             
                           {/* Textarea */}
                         <div className="mb-4">
@@ -447,7 +447,7 @@ export default function Page() {
                               if(!docId) return;
                               const docRef = doc(db, "IncidentReports", docId );
                                updateDoc(docRef, {
-                                //refailureDialogueStatus: toUpdate.refailureDialogueStatus || "Absent",
+                                refailureDialogueStatus: toUpdate.refailureDialogueStatus || "Absent",
                                 reasonForFailureToAppearDialogue: toUpdate.reasonForFailureToAppearDialogue || reportData?.reasonForFailureToAppearDialogue || "",
                               })
 

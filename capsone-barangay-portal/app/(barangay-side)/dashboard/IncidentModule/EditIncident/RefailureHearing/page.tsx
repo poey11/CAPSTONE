@@ -362,7 +362,7 @@ export default function Page() {
                       <div className="text-lg font-semibold text-gray-800 mb-4 flex justify-center">
                         Refailure Meeting ({Number(key) === 0 ? (<>First</>) : Number(key) === 1 ? (<>Second</>) : Number(key) === 2 && (<>Third</>)} Hearing)
                       </div>
-                      {/* <div className="flex items-center space-x-2 mb-4">
+                      <div className="flex items-center space-x-2 mb-4">
                        <input
                           type="checkbox"
                           id={`refailureHearingStatus${key}`}
@@ -393,7 +393,7 @@ export default function Page() {
                         </label>
                         
                         
-                      </div> */}
+                      </div>
                         
                       {/* Textarea */}
                       <div className="mb-4">
@@ -459,7 +459,7 @@ export default function Page() {
                           const docRef = doc(db, "IncidentReports", docId );
                           updateDoc(docRef, {
                             [`refailureHearingDetails.${key}`]: {
-                              //resStatus: toUpdate[`refailureHearingStatus${key}`] || "Absent",
+                              resStatus: toUpdate[`refailureHearingStatus${key}`] || "Absent",
                               reason: toUpdate[`reasonForFailureToAppearHearing${key}`] 
                                     || reportData?.[`reasonForFailureToAppearHearing${key}`] 
                             }
