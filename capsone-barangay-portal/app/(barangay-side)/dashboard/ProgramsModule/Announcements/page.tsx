@@ -229,7 +229,7 @@ useEffect(() => {
   return (
     <main className="announcement-main-container">
     <div className="announcement-module-section-1">
-      {user?.position === "Admin Staff" &&(
+      {(user?.position === "Admin Staff" || user?.position === "Punong Barangay"|| user?.position === "Secretary"|| user?.position === "Assistant Secretary") &&(
         <button 
           className="add-announcement-btn"
           onClick={() => setShowAddAnnouncementPopup(true)}
