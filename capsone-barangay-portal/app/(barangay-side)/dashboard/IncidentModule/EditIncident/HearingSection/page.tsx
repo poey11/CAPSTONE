@@ -261,12 +261,12 @@ export default function HearingSection() {
                             return;
                           }
                         }
-                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
+                        if(!reportData?.reasonForFailureToAppearDialogue){
                             setErrorPopup({ show: true, message: `Fill out Refailure Meeting (Dialogue) first.` });
                             setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;
                         }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                         if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
                           setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
                           setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;
@@ -281,13 +281,13 @@ export default function HearingSection() {
                     {hasSummonLetter ? (
                         <button className="submenu-button" name="section" 
                         onClick={(e)=>{
-                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
+                          if(!reportData?.reasonForFailureToAppearDialogue){
                           setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Dialogue) first." });
                           setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
                           
                           return
                         }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                         if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
                           setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
                           setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
                           return;
@@ -312,22 +312,6 @@ export default function HearingSection() {
                     )}
                     </div>
                 </div>
-                {(reportData?.sentLetterOfFailureToAppearDialogue) && (
-                  <button className="edit-incident-redirection-buttons" type ="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureDialogue?id=${docId}&department=${department}`)}}>
-                      <div className="edit-incident-redirection-icons-section">
-                        <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                      </div>
-                      <h1>Refailure Meeting (Dialogue)</h1>
-                  </button>
-                )}  
-                {(reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length > 0 ) && (
-                  <button className="edit-incident-redirection-buttons" type="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&department=${department}`)}}>
-                    <div className="edit-incident-redirection-icons-section">
-                      <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                    </div>
-                    <h1>Refailure Meeting (Hearing)</h1>
-                  </button>
-                )}
             </div>
 
             <div className="edit-incident-main-content">

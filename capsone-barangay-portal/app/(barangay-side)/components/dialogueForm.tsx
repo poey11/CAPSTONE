@@ -2,7 +2,7 @@
 import { db } from "@/app/db/firebase";
 import {getLocalDateTimeString} from "@/app/helpers/helpers";
 import { doc, onSnapshot,collection, setDoc, query, where, updateDoc } from "firebase/firestore";
-import { useState,useEffect, use } from "react";
+import { useState,useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {handleLetterOfFailure} from "@/app/helpers/pdfhelper";
@@ -54,23 +54,6 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
         Rstatus: "Present",
     });
 
-    const [barangayList, setBarangayList] = useState<any[]>([]);
-
-   useEffect(() => {
-        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
-        const unsubscribe = onSnapshot(staffquery, (snapshot) => {
-            const staffList: any[] = [];
-            snapshot.forEach((doc) => {
-                staffList.push({ ...doc.data(), id: doc.id });
-            });
-            console.log("Staff List:", staffList);
-            setBarangayList(staffList);
-        });                     
-
-            
-        return () => { unsubscribe();  // Clean up the listener on unmount}
-            }
-        },[]);
     useEffect(() => {
         setDetails(prevDetails => ({
             ...prevDetails,
@@ -242,8 +225,6 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
     const [showSetRefailureMeetingPopup, setShowSetRefailureMeetingPopup] = useState(false);
     const [resheduleDateTime, setResheduleDateTime] = useState("");
-    const [deliveryDate, setDeliveryDate] = useState("");
-    const [deliverby, setDeliveryBy] = useState("");
 
     const saveDialogue = async () => {
         try {
@@ -291,16 +272,11 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       };
     
       const handleRescheduleMeeting = async (date: string) => {
-          const deliver = barangayList.find(user => user.id === deliverby);
           const mainDocRef = doc(db, "IncidentReports", id);
           await updateDoc(mainDocRef, {
-            refailureExplainationMeetingDialogue: date,
-            refailureLetterDialogueDeliverBy: `${deliver?.firstName} ${deliver?.lastName}`,
-            refailureLetterDialogueDeliverDate: deliveryDate,
-            refailureLetterDialogueDateFiled: new Date().toLocaleString(),
+            refailureExplainationMeetingDialogue: date
           })
       }
-      /* add the notification */
 
     const confirmSubmit = async () => {
         setShowSubmitPopup(false);
@@ -990,7 +966,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
               <p>Set meeting to explain failure to appear</p>
               <div className="yesno-container-add">
                 <input
-                  className="border p-2 rounded w-full"
+                  className=""
                   name="resheduleDateTime"
                   id="resheduleDateTime"
                   value={resheduleDateTime}
@@ -1008,58 +984,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                   })()}
                   required
                 />
-              </div>
-              <p>When to deliver?</p>
-              <div className="yesno-container-add">
-                <input
-                  className="border p-2 rounded w-full"
-                  name="deliveryDate"
-                  id="deliveryDate"
-                  value={deliveryDate}
-                  onChange={(e) => setDeliveryDate(e.target.value)}
-                  type="date"
-                  min={(() => {
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate());
-                    // Format as yyyy-MM-dd for date input
-                    const pad = (n: number) => n.toString().padStart(2, "0");
-                    const yyyy = tomorrow.getFullYear();
-                    const mm = pad(tomorrow.getMonth() + 1);
-                    const dd = pad(tomorrow.getDate());
-                    return `${yyyy}-${mm}-${dd}`;
-                  })()}
-                  required
-                />
-              </div>
-              <p>Deliver by?</p>
-              <div className="yesno-container-add">
-                <select
-                  className="border p-2 rounded w-full "
-                  name="deliverBy"
-                  id="deliverBy"
-                  value={deliverby}
-                  onChange={(e) => setDeliveryBy(e.target.value)}
-                  required
-                >
-                  <option value="" disabled selected>Select Deliver By</option>
-                  {barangayList.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.firstName} {user.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p>Date Filed</p>
-              <div className="yesno-container-add">
-                <input
-                  className="border p-2 rounded w-full"
-                  name="dateFiled"
-                  id="dateFiled"
-                  value={new Date().toLocaleString()}
-                  type="date"
-                />
-              </div>
-              <button
+                <button
                   onClick={() => {
                     if (!resheduleDateTime) {
                       alert("Please select a date before submitting.");
@@ -1080,6 +1005,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 >
                   Submit
                 </button>
+              </div>
             </div>  
           </div>
         )}
