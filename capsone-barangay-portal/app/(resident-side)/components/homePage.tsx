@@ -412,8 +412,8 @@ const getVisibleNews = () => {
             </div>
           </div>
         ))}
-    </div> */}
-
+    </div>
+      */}
     <button className="slide-button" onClick={nextNews}>&gt;</button>
   </div>
 </div>
