@@ -38,29 +38,29 @@ export default function OfficialsModule() {
   const [position, setPosition] = useState("");
   const [identificationFile, setIdentificationFile] = useState<File | null>(null);
   const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
-const positionsList = [
-  "Punong Barangay",
-  "Secretary",
-  "Assistant Secretary",
-  "Barangay Administrator",
-  "Barangay Treasurer",
-  "Kasamabahay Assistance Desk",
-  "Solo Parent Desk",
-  "BDRRMO",
-  "BADAC Focal Person",
-  "GAD Focal Person",
-  "VAWC Focal Person",
-  "BCPC Focal Person",
-  "Medical Assistance",
-  "ASH Desk",
-  "PWD Massage & Therapeutic Center",
-  "BHERT",
-  "BSPO, EX-O",
-  "Clean & Green Department",
-  "Land & Housing Department",
-  "Sports & Cultural Development",
-  "OFW Assistance Desk"
-];
+  const positionsList = [
+    "Punong Barangay",
+    "Secretary",
+    "Assistant Secretary",
+    "Barangay Administrator",
+    "Barangay Treasurer",
+    "Kasamabahay Assistance Desk",
+    "Solo Parent Desk",
+    "BDRRMO",
+    "BADAC Focal Person",
+    "GAD Focal Person",
+    "VAWC Focal Person",
+    "BCPC Focal Person",
+    "Medical Assistance",
+    "ASH Desk",
+    "PWD Massage & Therapeutic Center",
+    "BHERT",
+    "BSPO, EX-O",
+    "Clean & Green Department",
+    "Land & Housing Department",
+    "Sports & Cultural Development",
+    "OFW Assistance Desk"
+  ];
 
   const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

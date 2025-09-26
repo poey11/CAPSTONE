@@ -78,13 +78,27 @@ export default function Official() {
     );
 
     const order = [
-    "Secretary",
-    "Assistant Secretary",
-    "Admin Staff",
-    "Lupon Tagapamayapa Staff",
-    "BCPC Staff",
-    "VAWC Staff",
-    "GAD Staff",
+      "Punong Barangay",
+      "Secretary",
+      "Assistant Secretary",
+      "Barangay Administrator",
+      "Barangay Treasurer",
+      "Kasamabahay Assistance Desk",
+      "Solo Parent Desk",
+      "BDRRMO",
+      "BADAC Focal Person",
+      "GAD Focal Person",
+      "VAWC Focal Person",
+      "BCPC Focal Person",
+      "Medical Assistance",
+      "ASH Desk",
+      "PWD Massage & Therapeutic Center",
+      "BHERT",
+      "BSPO, EX-O",
+      "Clean & Green Department",
+      "Land & Housing Department",
+      "Sports & Cultural Development",
+      "OFW Assistance Desk"
     ];
 
   const sortedOfficials = otherOfficials.sort((a, b) => {
