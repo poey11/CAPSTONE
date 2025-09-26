@@ -276,12 +276,12 @@ export default function Page() {
                             return;
                           }
                         }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
                             setErrorPopup({ show: true, message: `Fill out Refailure Meeting (Dialogue) first.` });
                             setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;
                         }
-                        if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
+                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
                           setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
                           setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                           return;
