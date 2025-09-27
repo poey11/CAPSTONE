@@ -3,7 +3,7 @@ import "@/CSS/ResidentModule/addresident.css";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { db } from "../../../../../db/firebase";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, writeBatch} from "firebase/firestore";
 import Link from "next/link";
 
 interface VoterFormData {
@@ -181,33 +181,54 @@ export default function EditVoter() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!voterId) return;
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  if (!voterId) return;
 
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      const docRef = doc(db, "VotersList", voterId);
-      await updateDoc(docRef, {
-        voterNumber: formData.voterNumber,
-        lastName: formData.lastName,
-        firstName: formData.firstName,
-        middleName: formData.middleName,
-        homeAddress: formData.homeAddress,
-        precinctNumber: formData.precinctNumber,
-      });
+  try {
+    const batch = writeBatch(db);
 
-      return docRef.id; // return ID
-      
-    } catch (err) {
-      console.error("Update failed:", err);
-      setError("Failed to update record.");
-    } finally {
-      setLoading(false);
+    // 1) Update the VotersList/{voterId} document
+    const voterRef = doc(db, "VotersList", voterId);
+    batch.update(voterRef, {
+      voterNumber: formData.voterNumber,
+      lastName: formData.lastName,
+      firstName: formData.firstName,
+      middleName: formData.middleName,
+      homeAddress: formData.homeAddress,
+      precinctNumber: formData.precinctNumber,
+    });
+
+    // 2) If residentId is present AND the resident doc exists, update its address/precinct too
+    if (formData.residentId) {
+      const residentRef = doc(db, "Residents", formData.residentId);
+      const residentSnap = await getDoc(residentRef);
+
+      if (residentSnap.exists()) {
+        batch.update(residentRef, {
+          address: formData.homeAddress,
+          precinctNumber: formData.precinctNumber,
+        });
+      } else {
+        console.warn(
+          `Residents/${formData.residentId} not found; skipping resident update.`
+        );
+      }
     }
-  };
+
+    await batch.commit();
+    return voterRef.id; // return ID for redirect
+
+  } catch (err) {
+    console.error("Update failed:", err);
+    setError("Failed to update record.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBack = () => {
     window.location.href = "/dashboard/ResidentModule/registeredVoters";
