@@ -29,7 +29,7 @@ interface KasambahayFormData {
   sssMember: boolean;
   philhealthMember: boolean;
   pagibigMember: boolean;
-  verificationFilesURLs: any[]; // keeping user’s original typing style
+  verificationFilesURLs: any[];
   identificationFileURL: string | null;
   updatedBy: string;
   residentId: string;
@@ -68,7 +68,7 @@ export default function EditKasambahay() {
     residentId: "",
   });
 
-  // 🔐 Only-when-linked editable set
+  // Editable fields when linked to a Resident
   const editableWhenLinked = new Set([
     "natureOfWork",
     "employmentArrangement",
@@ -79,7 +79,7 @@ export default function EditKasambahay() {
   ]);
   const isLinkedResident = !!formData.residentId;
   const canEditField = (name: string) => {
-    if (!isLinkedResident) return true; // all fields editable if NOT linked
+    if (!isLinkedResident) return true;
     return editableWhenLinked.has(name);
   };
 
@@ -139,11 +139,11 @@ export default function EditKasambahay() {
   const confirmDiscard = async () => {
     setShowDiscardPopup(false);
 
-    setFormData(originalData); // Reset to original data
+    setFormData(originalData);
     setIdentificationPreview(originalData.identificationFileURL || null);
-    setIdentificationFile(null); // Reset file selection
+    setIdentificationFile(null);
     setVerificationPreviews((originalData.verificationFilesURLs as string[]) || []);
-    setVerificationFiles([]); // Reset file selection
+    setVerificationFiles([]);
 
     setPopupMessage("Changes discarded successfully!");
     setShowPopup(true);
@@ -190,7 +190,7 @@ export default function EditKasambahay() {
           };
 
           setFormData(data);
-          setOriginalData(data); // Store original data
+          setOriginalData(data);
           setVerificationPreviews(docSnap.data().verificationFilesURLs || []);
           setIdentificationPreview(docSnap.data().identificationFileURL || null);
         } else {
@@ -249,10 +249,8 @@ export default function EditKasambahay() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
 
-    // Prevent changes to disabled fields (extra safeguard)
     if (!canEditField(name)) return;
 
-    // Convert specific fields to numbers
     const numericFields = ["educationalAttainment", "natureOfWork", "employmentArrangement", "salary"];
     
     setFormData((prev) => ({
@@ -336,12 +334,9 @@ export default function EditKasambahay() {
     setError("");
 
     try {
-      // Initialize with existing URLs or empty array
       let uploadedVerificationURLs: string[] = [...(formData.verificationFilesURLs || [])];
 
-      // If linked resident, verification/identification files are not editable; skip uploads/removals
       if (!isLinkedResident) {
-        // Upload new verification files and get their URLs
         for (const vf of verificationFiles) {
           const fileRef = ref(storage, `KasambahayFiles/VerificationFile/${vf.name}`);
           await uploadBytes(fileRef, vf);
@@ -371,9 +366,7 @@ export default function EditKasambahay() {
 
       const docRef = doc(db, "KasambahayList", kasambahayId);
 
-      // Build update payload, respecting linked-resident editability
       const baseUpdate: any = {
-        // Always update these (they might be required and/or allowed)
         natureOfWork: formData.natureOfWork,
         employmentArrangement: formData.employmentArrangement,
         salary: formData.salary,
@@ -384,7 +377,6 @@ export default function EditKasambahay() {
       };
 
       if (!isLinkedResident) {
-        // When not linked, allow full update
         Object.assign(baseUpdate, {
           registrationControlNumber: formData.registrationControlNumber,
           firstName: formData.firstName,
@@ -407,7 +399,24 @@ export default function EditKasambahay() {
 
       await updateDoc(docRef, baseUpdate);
 
-      return docRef.id; // return ID
+      // 🔁 ALSO update the resident's occupation if linked
+      if (formData.residentId) {
+        const natureOfWorkMap: Record<string, string> = {
+          "1": "Kasambahay (Gen. House Help)",
+          "2": "Kasambahay (Yaya)",
+          "3": "Kasambahay (Cook)",
+          "4": "Kasambahay (Gardener)",
+          "5": "Kasambahay (Laundry Person)",
+          "6": "Kasambahay (Others)",
+        };
+        const key = String(formData.natureOfWork ?? "");
+        const occupation = natureOfWorkMap[key] || "Kasambahay";
+
+        const residentDocRef = doc(db, "Residents", formData.residentId);
+        await updateDoc(residentDocRef, { occupation });
+      }
+
+      return docRef.id;
     } catch (err) {
       console.error("Update failed:", err);
       setError("Failed to update record.");
@@ -421,7 +430,7 @@ export default function EditKasambahay() {
   };
 
   const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isLinkedResident) return; // not editable
+    if (isLinkedResident) return;
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
       setIdentificationFile(selectedFile);
@@ -431,7 +440,7 @@ export default function EditKasambahay() {
   };
 
   const handleVerificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isLinkedResident) return; // not editable
+    if (isLinkedResident) return;
     if (e.target.files && e.target.files.length > 0) {
       const selectedFiles = Array.from(e.target.files);
       const newPreviews = selectedFiles.map((file) => URL.createObjectURL(file));
@@ -442,7 +451,7 @@ export default function EditKasambahay() {
   };
 
   const handleIdentificationFileDelete = () => {
-    if (isLinkedResident) return; // not editable
+    if (isLinkedResident) return;
     setIdentificationFile(null);
     setIdentificationPreview(null);
     setFormData((prev) => ({
@@ -453,7 +462,7 @@ export default function EditKasambahay() {
   };
 
   const handleVerificationFileDelete = (index: number) => {
-    if (isLinkedResident) return; // not editable
+    if (isLinkedResident) return;
     setVerificationFiles((prev) => prev.filter((_, i) => i !== index));
     setVerificationPreviews((prev) => prev.filter((_, i) => i !== index));
   };
@@ -907,7 +916,6 @@ export default function EditKasambahay() {
                           <span className="required-asterisk">*</span>
 
                           <div className="file-upload-container" style={disabledStyle("verificationFiles")}>
-                            {/* Previews (existing + newly added) */}
                             {(verificationFiles.length > 0 || verificationPreviews.length > 0) && (
                               <div className="file-name-image-display">
                                 {verificationPreviews.map((preview, index) => (
@@ -930,8 +938,6 @@ export default function EditKasambahay() {
                                 ))}
                               </div>
                             )}
-                            {/* (Upload button intentionally omitted in this snippet since your original UI didn't show it here.
-                                If you have an input elsewhere to add files, make sure it's disabled when isLinkedResident is true.) */}
                           </div>
                         </div>
                       </div>
