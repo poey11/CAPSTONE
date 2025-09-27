@@ -579,17 +579,64 @@ export default function ProgramsModule() {
     }
   };
 
+  const sendApprovedSMS = async (contactNumber: string, fullName: string, programName: string, role: string) => {
+    try {
+      const response = await fetch("/api/clickSendApi", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            to: contactNumber,
+            message: `Hello ${fullName}, your registration for the program "${programName}" as "${role}" has been approved. Thank you!`,
+        })
+      });   
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      } 
+
+      } catch (error) {
+        console.error("Error sending SMS:", error);
+
+    }
+  }
+
   // Participant approve
   const handleParticipantApprove = async (id: string) => {
+    
     try {
       await updateDoc(doc(db, "ProgramsParticipants", id), {
         approvalStatus: "Approved",
       });
       showToast("success", "Participant approved.");
+      const participant = participantsListsData.find((p) => p.id === id);
+      if (participant) {
+        //sendApprovedSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", participant.role||""); // send approval SMS
+      }
     } catch {
       showToast("error", "Failed to approve participant.");
     }
   };
+
+  const sendRejectionSMS = async (contactNumber: string, fullName: string, programName: string, reason: string, role:string ) => {
+    try {
+      const response = await fetch("/api/clickSendApi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: contactNumber,
+          message: `Hello ${fullName}, we regret to inform you that your registration for the program "${programName}" as "${role}" has been rejected. Reason: ${reason}. Thank you!`,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    } catch (error) {
+      
+    }
+  }
 
   // Participant reject
   const handleParticipantReject = async (id: string, reason: string) => {
@@ -599,6 +646,10 @@ export default function ProgramsModule() {
         rejectionReason: reason,
       });
       showToast("success", "Participant rejected.");
+      const participant = participantsListsData.find((p) => p.id === id);
+      if (participant) {
+        //sendRejectionSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", reason, participant.role||""); // send rejection SMS
+      }
     } catch {
       showToast("error", "Failed to reject participant.");
     }

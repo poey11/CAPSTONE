@@ -47,14 +47,12 @@ export default function Official() {
 };
 
   useEffect(() => {
-    const docRef = collection(db, "BarangayUsers");
+    const docRef = collection(db, "DisplayedOfficials");
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
           
       const data: Official[] = snapshot.docs.map((doc) => ({
         id: doc.id,
-        name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
-          .filter(Boolean) // removes null, undefined, and empty strings
-          .join(" "),
+        name: doc.data().name,
         position: getPositionLabel(doc.data().position, doc.data().department),
         term: doc.data().term || "N/A",
         contact: doc.data().phone,
@@ -80,13 +78,27 @@ export default function Official() {
     );
 
     const order = [
-    "Secretary",
-    "Assistant Secretary",
-    "Admin Staff",
-    "Lupon Tagapamayapa Staff",
-    "BCPC Staff",
-    "VAWC Staff",
-    "GAD Staff",
+      "Punong Barangay",
+      "Secretary",
+      "Assistant Secretary",
+      "Barangay Administrator",
+      "Barangay Treasurer",
+      "Kasamabahay Assistance Desk",
+      "Solo Parent Desk",
+      "BDRRMO",
+      "BADAC Focal Person",
+      "GAD Focal Person",
+      "VAWC Focal Person",
+      "BCPC Focal Person",
+      "Medical Assistance",
+      "ASH Desk",
+      "PWD Massage & Therapeutic Center",
+      "BHERT",
+      "BSPO, EX-O",
+      "Clean & Green Department",
+      "Land & Housing Department",
+      "Sports & Cultural Development",
+      "OFW Assistance Desk"
     ];
 
   const sortedOfficials = otherOfficials.sort((a, b) => {

@@ -898,7 +898,12 @@ export default function ResidentModule() {
                   )}
                   {viewActiveSection === "history" && (
                     <>
-                      <div className="view-mainresident-content-left-side">
+
+                  <div className="view-mainresident-main-section-history">
+
+                   <div className="view-mainresident-upper-section">
+
+                    <div className="view-mainresident-content-left-side">
                         <div className="view-user-fields-section">
                           <p>Created By</p>
                           <input type="text" className="view-user-input-field" value={selectedUser.createdBy || "N/A"} readOnly />
@@ -908,17 +913,19 @@ export default function ResidentModule() {
                           <input type="text" className="view-user-input-field" value={selectedUser.createdAt || "N/A"} readOnly />
                         </div>
                       </div>
-                      <div className="view-mainresident-content-left-side">
+                      <div className="view-mainresident-content-right-side">
                         <div className="view-user-fields-section">
                           <p>Updated By</p>
                           <input type="text" className="view-user-input-field" value={selectedUser.updatedBy || "N/A"} readOnly />
                         </div>
                       </div>
 
-                      {/* 🔽 NEW: List of justification letters uploaded for edits */}
-                      <div className="view-mainresident-content-left-side" style={{ marginTop: 16 }}>
-                        <div className="view-user-fields-section" style={{ width: "100%" }}>
-                          <p>Edit Justification Letters</p>
+                    </div>
+
+                    <div className="view-mainresident-lower-section">
+                  
+                  
+                        <div className="view-user-fields-section">
                           {editJustifications.length === 0 ? (
                             <div className="no-verification-files-text">
                               <p>None uploaded yet.</p>
@@ -952,7 +959,14 @@ export default function ResidentModule() {
                             </div>
                           )}
                         </div>
-                      </div>
+               
+
+                    </div>
+
+                  </div>
+
+
+
                     </>
                   )}
 
@@ -1030,7 +1044,7 @@ export default function ResidentModule() {
 
                   {viewActiveSection === "services" && (
                     <>
-                      <div className="records-table-wrapper ">
+                      <div className="records-table-wrapper">
                         {serviceRequests.length === 0 ? (
                           <div className="records-message">
                             <p>No service requests found for this resident.</p>
@@ -1083,31 +1097,31 @@ export default function ResidentModule() {
 
       {/* 🔽 NEW: Edit Justification Upload Popup */}
       {showEditJustificationPopup && editResident && (
-        <div className="confirmation-popup-overlay-module-main-res">
-          <div className="confirmation-popup-module-main-res">
-            <img src="/Images/upload.png" alt="upload icon" className="successful-icon-popup" />
-            <h3 style={{ marginTop: 8 }}>Upload Justification Letter</h3>
-            <p style={{ marginTop: 4, textAlign: "center" }}>
+        <div className="confirmation-popup-overlay-module-main-justifiation-letter">
+          <div className="confirmation-popup-module-justification-letter">
+            <img src="/Images/letter.png" alt="upload icon" className="letter-icon-popup" />
+            <h2>Upload Justification Letter</h2>
+            <p>
               A signed justification letter from the Barangay Chairman/Punong Barangay is required before editing this resident.
             </p>
-            <h4 style={{ marginTop: 8 }}>
+            <h4>
               Resident: {editResident?.lastName || ""}, {editResident?.firstName || ""}
             </h4>
 
-            <div style={{ marginTop: 12 }}>
+            <div>
               <input
                 type="file"
                 accept=".pdf,image/*"
                 onChange={(e) => setJustificationFile(e.target.files?.[0] || null)}
               />
               {uploading && (
-                <p style={{ marginTop: 8 }}>
+                <p>
                   Uploading… {uploadProgress}%
                 </p>
               )}
             </div>
 
-            <div className="yesno-container-module" style={{ marginTop: 16 }}>
+            <div className="yesno-container-module-justification-letter">
               <button
                 onClick={() => {
                   if (!uploading) {
@@ -1115,18 +1129,18 @@ export default function ResidentModule() {
                     setJustificationFile(null);
                   }
                 }}
-                className="no-button-module"
+                className="no-button-module-justification-letter"
                 disabled={uploading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUploadAndContinue}
-                className="yes-button-module"
+                className="yes-button-module-justification-letter"
                 disabled={!justificationFile || uploading}
                 title={!justificationFile ? "Select a file first" : "Upload & continue"}
               >
-                {uploading ? `Uploading ${uploadProgress}%` : "Upload & Continue"}
+                {uploading ? `Uploading ${uploadProgress}%` : "Submit"}
               </button>
             </div>
           </div>

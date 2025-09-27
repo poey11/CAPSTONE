@@ -247,15 +247,37 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           setInvalidFields([]);
         setShowSubmitPopup(true);
     };
-    
+    const [barangayList, setBarangayList] = useState<any[]>([]);
+
+   useEffect(() => {
+        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+        const unsubscribe = onSnapshot(staffquery, (snapshot) => {
+            const staffList: any[] = [];
+            snapshot.forEach((doc) => {
+                staffList.push({ ...doc.data(), id: doc.id });
+            });
+            console.log("Staff List:", staffList);
+            setBarangayList(staffList);
+        });                     
+
+            
+        return () => { unsubscribe();}
+    },[]);
     const [showSetRefailureMeetingPopup, setShowSetRefailureMeetingPopup] = useState(false);
     const [resheduleDateTime, setResheduleDateTime] = useState("");
+     const [deliveryDate, setDeliveryDate] = useState("");
+    const [deliverby, setDeliveryBy] = useState("");
+
     const handleRescheduleMeeting = async (date: string) => {
-          const mainDocRef = doc(db, "IncidentReports", id);
-          await updateDoc(mainDocRef, {
-            [`refailureExplainationMeetingHearing${index}`]: date
-          })
-      }
+      const deliver = barangayList.find(user => user.id === deliverby);
+      const mainDocRef = doc(db, "IncidentReports", id);
+      await updateDoc(mainDocRef, {
+        [`refailureExplainationMeetingHearing${index}`]: date,
+        [`refailureLetterHearingDeliverBy${index}`]: `${deliver?.firstName} ${deliver?.lastName}`,
+        [`refailureLetterHearingDeliverDate${index}`]: deliveryDate,
+        [`refailureLetterHearingDateFiled${index}`]: new Date().toLocaleString(),
+      })
+    }
 
     const saveSummon = async () => {
         try {
@@ -1065,7 +1087,58 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                   })()}
                   required
                 />
-                <button
+              </div>
+              <p>When to Deliver?</p>
+              <div className="yesno-container-add">
+                <input
+                  className="border p-2 rounded w-full"
+                  name="deliveryDate"
+                  id="deliveryDate"
+                  value={deliveryDate}
+                  onChange={(e) => setDeliveryDate(e.target.value)}
+                  type="date"
+                  min={(() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate());
+                    // Format as yyyy-MM-dd for date input
+                    const pad = (n: number) => n.toString().padStart(2, "0");
+                    const yyyy = tomorrow.getFullYear();
+                    const mm = pad(tomorrow.getMonth() + 1);
+                    const dd = pad(tomorrow.getDate());
+                    return `${yyyy}-${mm}-${dd}`;
+                  })()}
+                  required
+                />
+              </div>
+              <p>Deliver By?</p>
+              <div className="yesno-container-add">
+                <select
+                  className="border p-2 rounded w-full "
+                  name="deliverBy"
+                  id="deliverBy"
+                  value={deliverby}
+                  onChange={(e) => setDeliveryBy(e.target.value)}
+                  required
+                >
+                  <option value="" disabled >Select Deliver By</option>
+                  {barangayList.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p>Date Filed</p>
+              <div className="yesno-container-add">
+                <input
+                  className="border p-2 rounded w-full"
+                  name="dateFiled"
+                  id="dateFiled"
+                  value={new Date().toLocaleString()}
+                  type="date"
+                />
+              </div>
+              <button
                   onClick={() => {
                     if (!resheduleDateTime) {
                       alert("Please select a date before submitting.");
@@ -1086,7 +1159,6 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 >
                   Submit
                 </button>
-              </div>
             </div>  
           </div>
         )}

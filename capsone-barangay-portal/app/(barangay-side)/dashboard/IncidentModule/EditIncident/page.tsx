@@ -6,6 +6,7 @@ import { generateDownloadLink } from "../../../../helpers/firestorehelper";
 import { doc, updateDoc, collection, where, getDocs, query, onSnapshot, deleteDoc, orderBy} from "firebase/firestore";
 import { db } from "../../../../db/firebase";
 import React from "react";
+import { report } from "process";
 
 
 export default function EditLuponIncident() {
@@ -557,7 +558,15 @@ useEffect(() => {
     }
 
   }
+    console.log(
+  "refailureHearingDetails Length:",
+  Object.keys(reportData?.refailureHearingDetails || {}).length
+);
 
+console.log(
+  "sentLetterOfFailureToAppearHearing Length:",
+  Object.keys(reportData?.sentLetterOfFailureToAppearHearing || {}).length
+); 
   return (
     <>
       {loading ? (       <p></p> ) : (
@@ -658,14 +667,14 @@ useEffect(() => {
                           }
                         }
                       
-                        if(!reportData?.reasonForFailureToAppearDialogue){
+                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
                           setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
                           return;
                         }
 
-                        if(reportData?.refailureHearingDetails?.length !== reportData?.sentLetterOfFailureToAppearHearing?.length){
+                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
@@ -683,13 +692,13 @@ useEffect(() => {
 
                     {hasSummonLetter ? (
                       <button className="submenu-button" name="section" onClick={(e)=>{
-                        if(!reportData?.reasonForFailureToAppearDialogue){
+                        if(reportData?.sentLetterOfFailureToAppearDialogue && !reportData?.reasonForFailureToAppearDialogue){
                           setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
                           return
                         }
-                        if(reportData?.refailureHearingDetails.length !== reportData?.sentLetterOfFailureToAppearHearing.length){
+                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
@@ -717,8 +726,27 @@ useEffect(() => {
                     )}
                   </div>
 
+                  
+                  
+
                 </div>
-              
+                
+                {(reportData?.sentLetterOfFailureToAppearDialogue) && (
+                  <button className="edit-incident-redirection-buttons" type ="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureDialogue?id=${docId}&department=${department}`)}}>
+                      <div className="edit-incident-redirection-icons-section">
+                        <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                      </div>
+                      <h1>Refailure Meeting (Dialogue)</h1>
+                  </button>
+                )}  
+                {(reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length > 0 ) && (
+                  <button className="edit-incident-redirection-buttons" type="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&department=${department}`)}}>
+                    <div className="edit-incident-redirection-icons-section">
+                      <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
+                    </div>
+                    <h1>Refailure Meeting (Hearing)</h1>
+                  </button>
+                )}
               </>
             )}
 
@@ -748,11 +776,11 @@ useEffect(() => {
              <div className="edit-incident-header-body-top-section">
                 <div className="edit-incident-info-toggle-wrapper">
                     {["complainant", "respondent", "incident",
-                    ...(reportData?.sentLetterOfFailureToAppearDialogue ? ["refailure dialgoue"] : []),
-                    ...(reportData?.sentLetterOfFailureToAppearHearing &&
-                     Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0
-                       ? ["refailure hearing"]
-                       : []),
+                    // ...(reportData?.sentLetterOfFailureToAppearDialogue ? ["refailure dialgoue"] : []),
+                    // ...(reportData?.sentLetterOfFailureToAppearHearing &&
+                    //  Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length > 0
+                    //    ? ["refailure hearing"]
+                    //    : []),
                     "barangay desk"
                     ].map((section) => (
                     <button
@@ -1287,7 +1315,7 @@ useEffect(() => {
                                             }))
                                           }
                                           disabled={
-                                              !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                              !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
                                           }
                                         />
                                         <label
@@ -1318,7 +1346,7 @@ useEffect(() => {
                                           }
                                           disabled={
                                             toUpdate[`refailureHearingStatus${key}`] === "Absent" ||
-                                              !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                              !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
                                           
                                           }
                                           onChange={(e) => {
@@ -1343,7 +1371,7 @@ useEffect(() => {
                                         // onClick={handleSubmitRefailureDialogue}
                                         disabled={
                                           
-                                          !!(typeof reportData?.refailureHearingDetails[key]?.reason === "string" && reportData?.refailureHearingDetails[key]?.reason.trim())
+                                          !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
                                           
                                         }
                                       

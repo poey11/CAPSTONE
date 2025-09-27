@@ -37,6 +37,7 @@ export default function AddNewProgramModal({
   // Details
   const [programName, setProgramName] = useState("");
   const [participants, setParticipants] = useState<string>("");
+  const [noParticipantLimit, setNoParticipantLimit] = useState<boolean>(false);
   const [volunteers, setVolunteers] = useState<string>("");
   const [eligibleParticipants, setEligibleParticipants] = useState("");
   const [location, setLocation] = useState("");
@@ -196,12 +197,15 @@ export default function AddNewProgramModal({
         triggerShake(key);
       }
     };
-
-    const participantsNum = Number(participants);
-    const validParticipants =
-      participants.trim().length > 0 &&
-      Number.isFinite(participantsNum) &&
-      participantsNum > 0;
+    if(noParticipantLimit === false && eventType === "single"){
+      const participantsNum = Number(participants);
+      const validParticipants =
+        participants.trim().length > 0 &&
+        Number.isFinite(participantsNum) &&
+        participantsNum > 0;
+      
+      need("participants", validParticipants);
+    }
 
     const volunteersNum = Number(volunteers);
     const validVolunteers =
@@ -210,7 +214,6 @@ export default function AddNewProgramModal({
       volunteersNum >= 0;
 
     need("programName", !!programName.trim());
-    need("participants", validParticipants);
     need("volunteers", validVolunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
@@ -422,11 +425,20 @@ export default function AddNewProgramModal({
 
       const payload: any = {
         programName: programName.trim(),
-        participants: Number(participants),
         volunteers: Number(volunteers),
         eligibleParticipants,
         location: location.trim(),
         eventType,
+        ...(eventType === "multiple" ? { 
+          particapantDays: particapantDays, 
+          noParticipantLimitList: noParticipantLimitList,
+        } : {
+          ...(noParticipantLimit === false ?{
+            participants: Number(participants),
+          }:{
+            noParticipantLimit: noParticipantLimit,
+          })
+        }),
         startDate: normalizedStart,
         endDate: normalizedEnd,
         timeStart,
@@ -453,7 +465,6 @@ export default function AddNewProgramModal({
           fileFields: [...PREDEFINED_REQ_FILES, ...reqFileFields],
         },
       };
-
       const programRef = await addDoc(collection(db, "Programs"), payload);
 
       if (photoFiles.length > 0) {
@@ -526,7 +537,7 @@ export default function AddNewProgramModal({
       setShowConfirmation(false);
     }
   };
-
+  
   {/* 
   const handleSave = async () => {
     if (saving) return;
@@ -654,8 +665,51 @@ export default function AddNewProgramModal({
 
   */}
 
-  if (!isOpen) return null;
+  const [particapantDays, setParticipantDays] = useState<number[]>([]);
+  const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>(
+    Array(particapantDays.length).fill(false)
+  );
+  const [numberOfDays, setNumberOfDays] = useState<number>(0);
 
+  useEffect(() => {
+    let days = 0;
+
+    if (eventType === "single") {
+      days = 1;
+    } else if (startDate && endDate) {
+      const s = new Date(startDate + "T00:00:00");
+      const e = new Date(endDate + "T00:00:00");
+
+      const diffTime = e.getTime() - s.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+      days = Math.min(Math.max(diffDays, 0), 5); // clamp to 0–5
+    }
+
+    setNumberOfDays(days);
+  }, [eventType, startDate, endDate]);
+
+  useEffect(() => {
+    setParticipantDays(prev => {
+      const updated = [...prev];
+      if (numberOfDays > prev.length) {
+        // Add new days initialized to empty or 0
+        return [...updated, ...Array(numberOfDays - prev.length).fill(0)];
+      } else {
+        // Trim extra days if numberOfDays shrinks
+        return updated.slice(0, numberOfDays);
+      }
+    });
+  }, [numberOfDays]);
+
+  useEffect(() => {
+    setNoParticipantLimitList((prev) =>
+      Array.from({ length: particapantDays.length }, (_, i) => prev[i] ?? false)
+    );
+  }, [particapantDays.length]);
+
+
+  if (!isOpen) return null;
   const hasPreviews = previewURLs.length > 0;
 
   const togglePredefinedOpen = () => {
@@ -674,6 +728,13 @@ export default function AddNewProgramModal({
     d.setDate(d.getDate() + 1);
     return formatYMD(d);
   };
+  const addDays = (dateStr:any, n:any) => {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + n);
+    return d.toISOString().split("T")[0];
+  };
+ 
+
 
   return (
     <div className="add-programs-popup-overlay">
@@ -810,26 +871,87 @@ export default function AddNewProgramModal({
                         onChange={(e) => setLocation(e.target.value)}
                       />
                     </div>
+                    {eventType === "multiple" ? (
+                      <>
+                          {Array.from({ length: numberOfDays }, (_, i) => (
+                            <div className="fields-section-add-programs" key={i}>
+                              <p>
+                                Number of Participants for Day {i + 1} <span className="required">*</span>
+                              </p>
+                              <input
+                                type="number"
+                                className={[
+                                  "add-programs-input-field",
+                                  errors.otherAgency ? "input-error" : "",
+                                  shake.otherAgency ? "shake" : "",
+                                ].join(" ").trim()}
+                                min={1} // TODO: replace with state if you want it editable
+                                placeholder="E.g. 50"
+                                value={particapantDays[i] || "0"}
+                                //style={{width: '30%'}}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  setParticipantDays((prev) => {
+                                    const updated = [...prev];
+                                    updated[i] = Number(v);
+                                    return updated;
+                                  });
+                                }}
+                                disabled = {noParticipantLimitList[i]}
 
-                    <div className="fields-section-add-programs">
-                      <p>
-                        Number of Participants<span className="required">*</span>
-                      </p>
-                      <input
-                        type="number"
-                        min={1}
-                        className={[
-                          "add-programs-input-field",
-                          errors.participants ? "input-error" : "",
-                          shake.participants ? "shake" : "",
-                        ]
-                          .join(" ")
-                          .trim()}
-                        placeholder="E.g. 50"
-                        value={participants}
-                        onChange={(e) => setParticipants(e.target.value)}
-                      />
-                    </div>
+                              />
+                              <label className="flex-center-gap-addprogram">
+                               <input
+                                  type="checkbox"
+                                  id={`NoLimit-${i}`}
+                                  checked={!!noParticipantLimitList[i]}
+                                  onChange={(e) => {
+                                    const isChecked = e.target.checked;
+
+                                    setParticipantDays((prev) => {
+                                      const updated = [...prev];
+                                      updated[i] = isChecked ? 0 : prev[i]; // keep previous if unchecked
+                                      return updated;
+                                    });
+
+                                    setNoParticipantLimitList((prev) => {
+                                      const updated = [...prev];
+                                      updated[i] = isChecked; // always true/false
+                                      return updated;
+                                    });
+                                  }}
+                                />
+
+                                No Participant Limit
+                              </label>
+                            </div>
+                          ))}
+                      </>
+                    ):(
+                      <>
+                        <div className="fields-section-add-programs">
+                          <p>
+                            Number of Participants<span className="required">*</span>
+                          </p>
+                          <input
+                            type="number"
+                            min={1}
+                            className={[
+                              "add-programs-input-field",
+                              errors.participants ? "input-error" : "",
+                              shake.participants ? "shake" : "",
+                            ]
+                              .join(" ")
+                              .trim()}
+                            placeholder="E.g. 50"
+                            value={participants}
+                            onChange={(e) => setParticipants(e.target.value)}
+                            disabled = {noParticipantLimit}
+                          />
+                        </div>
+                      </>
+                    )}
+                    
 
                     <div className="fields-section-add-programs">
                       <p>
@@ -929,6 +1051,7 @@ export default function AddNewProgramModal({
                           disabled={noAgeLimit}
                         />
                       </div>
+                      
 
                       {!noAgeLimit && (errors.ageMin || errors.ageMax) && (
                         <div style={{ marginTop: 6, fontSize: 12, color: "#b91c1c" }}>
@@ -1048,18 +1171,10 @@ export default function AddNewProgramModal({
                               .trim()}
                             min={minStartDate}
                             value={startDate}
-                            onChange={(e) => {
-                              const newStart = e.target.value;
-                              setStartDate(newStart);
-                              // Enforce: end date must be at least the next day of start date
-                              const minEnd = nextDayOf(newStart);
-                              if (!endDate || new Date(endDate) <= new Date(newStart)) {
-                                setEndDate(minEnd);
-                              }
-                              // If previously same-day, any timeEnd constraints are irrelevant now
-                            }}
+                            onChange={(e) => { const newStart = e.target.value; setStartDate(newStart);}}
                           />
                         </div>
+
                         <div className="fields-section-add-programs">
                           <p>
                             Program End Date<span className="required">*</span>
@@ -1073,23 +1188,29 @@ export default function AddNewProgramModal({
                             ]
                               .join(" ")
                               .trim()}
-                            // Enforce in the picker: cannot choose same day; must be start + 1
                             min={startDate ? nextDayOf(startDate) : minStartDate}
+                            max={startDate ? addDays(startDate, 4) : undefined} // ✅ 5 days limit
                             value={endDate}
                             onChange={(e) => {
                               const newEnd = e.target.value;
+                              const maxEnd = startDate ? addDays(startDate, 4) : null;
+
                               if (startDate && new Date(newEnd) <= new Date(startDate)) {
-                                // Auto-correct to the earliest valid value
                                 setEndDate(nextDayOf(startDate));
+                                return;
+                              }
+                              if (maxEnd && new Date(newEnd) > new Date(maxEnd)) {
+                                setEndDate(maxEnd); // auto-correct if user picks beyond 5 days
                                 return;
                               }
                               setEndDate(newEnd);
                             }}
                           />
                         </div>
+
                       </>
                     )}
-
+                    
                     <div className="fields-section-add-programs">
                       <p>
                         Time Start<span className="required">*</span>
@@ -1107,7 +1228,7 @@ export default function AddNewProgramModal({
                         onChange={(e) => {
                           const newStart = e.target.value;
                           setTimeStart(newStart);
-
+                          setTimeEnd(""); // reset end time to force re-selection
                           if (isSameDay() && newStart && timeEnd) {
                             const minAllowed = addMinutes(newStart, 180);
                             if (toMinutes(timeEnd) < toMinutes(minAllowed)) {
@@ -1147,9 +1268,38 @@ export default function AddNewProgramModal({
                         }}
                       />
                     </div>
+
+                    {eventType === "single" && (
+                        <>
+                          <div className="fields-section-add-programs">
+                            <p>
+                            Participant Limit<span className="required">*</span>
+                            </p>
+
+                            <label className="flex-center-gap-addprogram">
+                              <input
+                                type="checkbox"
+                                checked={noParticipantLimit}
+                                onChange={(e) => {
+                                  setNoParticipantLimit(e.target.checked);
+                                  if (e.target.checked) {
+                                    setParticipants("");
+                                    setErrors((prev) => {
+                                      const { participants, ...rest } = prev;
+                                      return rest;
+                                    });
+                                  }
+                                }}
+                                id="noParticipantLimit"
+                              />
+                              No Participant Limit
+                            </label>
+                          </div>
+                        </>
+                      )}
+
                   </div>
                 </div>
-
                 <div className="add-programs-lower-section">
                   <div className="programs-description-container">
                     <div className="box-container-outer-description">

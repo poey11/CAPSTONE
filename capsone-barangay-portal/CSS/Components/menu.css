@@ -584,6 +584,9 @@ padding: 20px;
   flex-direction: column;
   gap: 0.5rem;
   box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+
+  max-height: 45vh;   /* Limit menu height */
+  overflow-y: auto;   /* Scroll if content exceeds height */
 }
 
 .mobile-dropdown-btn {
@@ -677,5 +680,80 @@ padding: 20px;
   }
 }
 
+/* Mobile landscape menu for screens <= 900px */
+@media (max-width: 900px) and (orientation: landscape) {
+  /* Hide desktop links */
+  .navbar-links {
+    display: none !important;
+  }
 
+  /* Show hamburger button */
+  .hamburger-wrapper {
+    display: block !important;
+  }
+
+  /* Mobile menu container styling */
+  .mobile-menu-container {
+    position: absolute;   /* overlay menu */
+    top: 90px;            /* below navbar */
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: linear-gradient(to right, #1b3840, #214666, #2c5e73);
+    z-index: 9999;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+  }
+
+  /* Mobile dropdown buttons (Services, Officials) */
+  .mobile-dropdown-btn {
+    display: flex;
+    justify-content: space-between;  /* text left, arrow right */
+    align-items: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 16px;
+    color: #fff;
+    background: none;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .mobile-dropdown-btn:hover {
+    color: #fff;
+    background: linear-gradient(to right, #294c6b, #356f86, #3a849e);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Submenu links */
+  .mobile-submenu {
+    display: flex;
+    flex-direction: column;
+    margin-left: 1rem;
+    margin-top: 0.25rem;
+    border-radius: 8px;
+    z-index: 10000;
+  }
+
+  .mobile-submenu p {
+    font-size: 15px;
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+  }
+
+  .mobile-submenu p:hover {
+    background: linear-gradient(to right, #3a7ca5, #529dc2, #7bbfe4);
+    color: #fff;
+  }
+
+  /* Rotate arrow when open */
+  .dropdown-icon-burgermenu.rotate {
+    transform: rotate(180deg);
+  }
+}
 

@@ -6,6 +6,7 @@ import { collection, doc, getDoc, updateDoc, addDoc } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
+import { set } from "date-fns";
 
 type SimpleField = { name: string; description?: string };
 
@@ -179,7 +180,9 @@ export default function ProgramDetails() {
   const showActiveToggle =
   isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" &&progressStatus !== "Completed";
 
-
+  const [noParticipantLimit, setNoParticipantLimit] = useState(false);
+  const [particapantDays, setParticipantDays] = useState<number[]>([]);
+  const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   // Load program
   useEffect(() => {
     const load = async () => {
@@ -193,7 +196,9 @@ export default function ProgramDetails() {
           return;
         }
         const data: any = snap.data() || {};
-
+        setNoParticipantLimit(data.noParticipantLimit || false);
+        setParticipantDays(data.particapantDays || []);
+        setNoParticipantLimitList(data.noParticipantLimitList || []);
         setProgramName(data.programName ?? "");
         setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
         setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
@@ -275,6 +280,7 @@ export default function ProgramDetails() {
     };
     load();
   }, [programId]);
+  console.log(particapantDays);
 
   const handleBack = () => {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
@@ -374,6 +380,9 @@ export default function ProgramDetails() {
       eligibleParticipants,
       location: location.trim(),
       eventType,
+      noParticipantLimit,
+      particapantDays,
+      noParticipantLimitList,
       startDate: normalizedStart,
       endDate: normalizedEnd,
       timeStart,
@@ -503,9 +512,11 @@ export default function ProgramDetails() {
         triggerShake(k);
       }
     };
-
+    let noOfParticipantsNum = Number(participants);
+    if(noParticipantLimit === false && noOfParticipantsNum <= 0 && eventType === "single"){
+      need("participants", false);
+    }
     need("programName", !!programName.trim());
-    need("participants", !!participants);
     need("volunteers", !!volunteers);
     need("eligibleParticipants", !!eligibleParticipants);
     need("location", !!location.trim());
@@ -937,26 +948,103 @@ export default function ProgramDetails() {
                           disabled={isReadOnly}
                         />
                       </div>
+                      {eventType === "multiple" ? (
+                        <>
+                          { particapantDays.map((day, index) => (
+                            <div key={index} className="fields-section-edit-programs">
+                              <p>
+                                Number of Participants for Day {index + 1}
+                                <span className="required">*</span>
+                              </p>
 
-                      <div className="fields-section-edit-programs">
-                        <p>
-                          Number of Participants<span className="required">*</span>
-                        </p>
-                        <input
-                          type="number"
-                          min="1"
-                          className={[
-                            "edit-programs-input-field",
-                            errors.participants ? "input-error" : "",
-                            shake.participants ? "shake" : "",
-                          ].join(" ").trim()}
-                          placeholder="E.g. 50"
-                          value={participants}
-                          onChange={(e) => setParticipants(e.target.value)}
-                          disabled={isReadOnly}
-                        />
-                      </div>
+                              <input
+                                type="number"
+                                min="1"
+                                className={[
+                                  "edit-programs-input-field",
+                                  errors.participants ? "input-error" : "",
+                                  shake.participants ? "shake" : "",
+                                ].join(" ").trim()}
+                                placeholder="E.g. 50"
+                                value={day > 0 ? String(day) : ""}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setParticipantDays((prev) => {
+                                    const updated = [...prev];
+                                    updated[index] = val === "" ? 0 : Number(val);
+                                    return updated;
+                                  });
 
+                                  // Reset "no limit" when user types a number
+                                  setNoParticipantLimitList((prev) => {
+                                    const updated = [...prev];
+                                    updated[index] = false;
+                                    return updated;
+                                  });
+                                }}
+                                disabled={isReadOnly || noParticipantLimitList[index]}
+                              />
+
+                              <label className="flex-center-gap" style={{ marginTop: 6 }}>
+                                <input
+                                  type="checkbox"
+                                  checked={noParticipantLimitList[index] || false}
+                                  onChange={(e) => {
+                                    const checked = e.target.checked;
+
+                                    setNoParticipantLimitList((prev) => {
+                                      const updated = [...prev];
+                                      updated[index] = checked;
+                                      return updated;
+                                    });
+
+                                    if (checked) {
+                                      // If "no limit", reset participant value to 0
+                                      setParticipantDays((prev) => {
+                                        const updated = [...prev];
+                                        updated[index] = 0;
+                                        return updated;
+                                      });
+
+                                      // Remove participant error if exists
+                                      setErrors((prev) => {
+                                        const { participants, ...rest } = prev;
+                                        return rest;
+                                      });
+                                    }
+                                  }}
+                                  disabled={isReadOnly}
+                                />
+                                <span>No participant limit for Day {index + 1}</span>
+                              </label>
+                            </div>
+                          ))}
+                        </>
+
+                      ) : (
+                        <>
+                          <div className="fields-section-edit-programs">
+                            <p>
+                              Number of Participants<span className="required">*</span>
+                            </p>
+                            <input
+                              type="number"
+                              min="1"
+                              className={[
+                                "edit-programs-input-field",
+                                errors.participants ? "input-error" : "",
+                                shake.participants ? "shake" : "",
+                              ].join(" ").trim()}
+                              placeholder="E.g. 50"
+                              value={participants}
+                              onChange={(e) => setParticipants(e.target.value)}
+                              disabled={isReadOnly || noParticipantLimit}
+                            />
+                          </div>
+
+                        </>
+                      )}
+                      
                       <div className="fields-section-edit-programs">
                         <p>
                           Number of Volunteers<span className="required">*</span>
@@ -1002,6 +1090,7 @@ export default function ProgramDetails() {
                         <p>
                           Age Restriction<span className="required">*</span>
                         </p>
+                        
                         <label className="flex-center-gap">
                           <input
                             type="checkbox"
@@ -1020,7 +1109,9 @@ export default function ProgramDetails() {
                             }}
                             disabled={isReadOnly}
                           />
+                          
                           <span>No age limit</span>
+                          
                         </label>
 
                         <div className="grid-2col-gap">
@@ -1050,6 +1141,7 @@ export default function ProgramDetails() {
                             onChange={(e) => setAgeMax(e.target.value)}
                             disabled={isReadOnly || noAgeLimit}
                           />
+                          
                         </div>
 
                         {!noAgeLimit && (errors.ageMin || errors.ageMax) && (
@@ -1225,6 +1317,35 @@ export default function ProgramDetails() {
                           disabled={isReadOnly}
                         />
                       </div>
+                      {eventType === "single" && (
+                        <div className="fields-section-edit-programs">
+                          <p>
+                            Participant Limit<span className="required">*</span>
+                          </p>
+                          <label className="flex-center-gap">
+                            <input
+                              type="checkbox"
+                              checked={noParticipantLimit} // ✅ just the boolean state
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                setNoParticipantLimit(isChecked);
+
+                                if (isChecked) {
+                                  setParticipants(""); // ⚠️ careful: if participants is supposed to be an array or number, don’t use ""
+                                  setErrors((prev) => {
+                                    const { participants, ...rest } = prev;
+                                    return rest;
+                                  });
+                                }
+                              }}
+                              disabled={isReadOnly}
+                            />
+
+                            <span>No participant limit</span>
+
+                          </label>
+                        </div>
+                      )}
 
                       
                     </div>

@@ -229,40 +229,66 @@
   }
 }
 
-/* Mobile view */
+
+
+/* Mobile Fix */
 @media (max-width: 768px) {
-  
-  
-    .officials-header-main {
-    margin: 1.5rem auto 1rem auto;
-    padding: 15 1rem;
+  /* Header */
+  .officials-header-main {
+    margin: 1rem auto;
+    padding: 0 1rem;
+    width: 100%;
+    text-align: center;
   }
 
   .officials-title {
-    font-size: 1.6rem;
-    flex-direction: column; /* stack title + underline */
-    gap: 0.3rem;
+    font-size: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
   }
 
   .officials-title::before,
   .officials-title::after {
-    display: none; /* hide side lines on mobile */
+    display: none;
   }
-  
-  
+
+  /* Punong Barangay Card */
+  .officials-punong-brgy-section {
+    height: auto; /* remove fixed height */
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+  }
+
   .officials-punong-brgy-card {
     flex-direction: column;
+    width: 100%;
+    max-width: 90%;
+    padding: 1rem;
+    gap: 1rem;
     text-align: center;
-    max-width: 90%;     /* even narrower */
-    padding: 15px;      /* tighter padding */
-    gap: 10px;
   }
 
   .Captain-image-officials {
-    width: 140px;
-    height: 140px;      /* smaller image */
+    width: 120px;
+    height: 120px;
   }
 
+  /* Other Officials */
+  .other-officials-section {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 1rem;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  .official-card-officials {
+    width: 100%;
+    max-width: 350px;
+  }
+
+
+/* Pwede tangalin if ever.*/
   .official-name-punong-brgy {
     font-size: 1.3rem;
   }
@@ -274,9 +300,8 @@
   .official-phonenumber-punong-brgy {
     font-size: 0.85rem;
   }
+
 }
-
-
 
 
 

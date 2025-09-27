@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 import React,{useState, useEffect, useRef} from "react";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
-import Link from 'next/link';
-import { collection, onSnapshot} from "firebase/firestore";
-import { db } from "@/app/db/firebase";
+import { collection, onSnapshot, addDoc, deleteDoc, doc} from "firebase/firestore";
+import { db, storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
+import { getDownloadURL, ref, uploadBytes, deleteObject } from "@firebase/storage";
+import { off } from "process";
 
 interface Official {
   id: string;
@@ -21,13 +22,54 @@ interface Official {
   createdBy?: string;
   createdAt?: string;
   updatedBy?: string;
+  department?: string;
 }
 
 
 export default function OfficialsModule() {
   const [officialsData, setOfficialsData] = useState<Official[]>([]);
+  const [filteredOfficials, setFilteredOfficials] = useState<Official[]>([]);
+  const [displayedOfficials, setDisplayedOfficials] = useState<Official[]>([]);
+  const [selectedNewOfficial, setSelectedNewOfficial] = useState<Official|null>();
+  const [manualNewOfficial, setManualNewOfficial] = useState<Official|null>();
+  const [takenPositions, setTakenPositions] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
   const user = session?.user?.position;
+  const [position, setPosition] = useState("");
+  const [identificationFile, setIdentificationFile] = useState<File | null>(null);
+  const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
+  const positionsList = [
+    "Punong Barangay",
+    "Secretary",
+    "Assistant Secretary",
+    "Barangay Administrator",
+    "Barangay Treasurer",
+    "Kasamabahay Assistance Desk",
+    "Solo Parent Desk",
+    "BDRRMO",
+    "BADAC Focal Person",
+    "GAD Focal Person",
+    "VAWC Focal Person",
+    "BCPC Focal Person",
+    "Medical Assistance",
+    "ASH Desk",
+    "PWD Massage & Therapeutic Center",
+    "BHERT",
+    "BSPO, EX-O",
+    "Clean & Green Department",
+    "Land & Housing Department",
+    "Sports & Cultural Development",
+    "OFW Assistance Desk"
+  ];
+
+  const handleIdentificationFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIdentificationFile(file);
+      setIdentificationPreview(URL.createObjectURL(file)); // temporary preview
+    }
+  };
+
   const router = useRouter();
   const handleEditClick = (id:string) => {
     router.push("/dashboard/OfficialsModule/EditOfficial"+`?id=${id}`);
@@ -51,18 +93,22 @@ export default function OfficialsModule() {
       }
     }, []);
 
+    
     useEffect(() => {
       const docRef = collection(db, "BarangayUsers");
       const unsubscribe = onSnapshot(docRef, (snapshot) => {
       
         const data: Official[] = snapshot.docs.map((doc) => ({
+          
           id: doc.id,
           name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
             .filter(Boolean) // removes null, undefined, and empty strings
             .join(" "),
-            position: doc.data().position === "LF Staff"
+          position: doc.data().position === "LF Staff"
               ? `${doc.data().position} (${doc.data().department || "N/A"})`
               : doc.data().position || "N/A",          
+          
+          ...(doc.data().position === "LF Staff" && { department: doc.data().department || "N/A" }),
           term: doc.data().term || "N/A",
           contact: doc.data().phone,
           image: doc.data().image || "/images/default-profile.png",
@@ -75,20 +121,182 @@ export default function OfficialsModule() {
         setOfficialsData(data);
       });
       return () => unsubscribe();
-
     },[])
 
+    useEffect(() => {
+      if( position === "GAD Focal Person" || position === "VAWC Focal Person"|| position === "BCPC Focal Person" ){
+        let temp = ""
+        if(position === "GAD Focal Person" ) temp = "GAD";
+        else if(position === "VAWC Focal Person" ) temp = "VAWC";
+        else if(position === "BCPC Focal Person" ) temp = "BCPC";
+        let data = [...officialsData];
+        data = data.filter((official) => official.position.includes("LF Staff") && official.department === temp );
+        
+        setFilteredOfficials(data);
+        return;
+      }
+      else{
+        if(position === "Barangay Administrator" ){
+          let data = [...officialsData];
+          data = data.filter((official) => official.position ===  "Admin Staff" );
+          setFilteredOfficials(data);
+          return;
+        }
+        
+        let data = [...officialsData];
+        data = data.filter((official) => official.position === position);
+        setFilteredOfficials(data);
+      }
+
+    },[position,officialsData ])
+
+  
+
+useEffect(() => {
+  const docRef = collection(db, "DisplayedOfficials");
+  const unsubscribe = onSnapshot(docRef, (snapshot) => {
+    const data: Official[] = snapshot.docs.map((doc) => {
+      const rawPosition = doc.data().position || "N/A";
+      return {
+        id: doc.id,
+        name: doc.data().name,
+        position: rawPosition === "LF Staff"
+          ? `${rawPosition} (${doc.data().department || "N/A"})`
+          : rawPosition,
+        term: doc.data().term || "N/A",
+        contact: doc.data().contact,
+        image: doc.data().image || "/images/default-profile.png",
+        email: doc.data().email || "N/A",
+        createdBy: doc.data().createdBy || "N/A",
+        createdAt: doc.data().createdAt,
+        updatedBy: doc.data().updatedBy || "N/A",
+        facebook: doc.data().facebook || "N/A",
+      };
+    });
+    setDisplayedOfficials(data);
+  });
+  return () => unsubscribe();
+}, []);
+
+useEffect(() => {
+  // Normalize LF Staff back to just "LF Staff" for taken positions
+  const positions = new Set(
+    displayedOfficials.map((official) => {
+      if (official.position.startsWith("LF Staff")) {
+        return "LF Staff";
+      }
+      return official.position;
+    })
+  );
+  setTakenPositions(positions);
+}, [displayedOfficials]);
+
+useEffect(() => {
+  if (!takenPositions.size) return;
+
+  const nextAvailable = positionsList.find(
+    (pos) => !takenPositions.has(pos)
+  );
+
+  // Case 1: No position yet → pick the highest available
+  if (!position && nextAvailable) {
+    setPosition(nextAvailable);
+    return;
+  }
+
+  // Case 2: Current position got taken/deleted → reassign
+  if (position && takenPositions.has(position) && nextAvailable) {
+    setPosition(nextAvailable);
+  }
+}, [takenPositions, position]);
+
+
+
     console.log(officialsData);
+    const addNewOfficer = async () => {
+      if (!selectedNewOfficial && !manualNewOfficial) {
+        alert("Please select or enter an official to add.");
+        return;
+      }
+      if (!identificationFile) {
+        alert("Please upload an identification picture.");
+        return;
+      }
+      let  officialToAdd = null;
+      if( selectedNewOfficial) officialToAdd = selectedNewOfficial;
+      else if( manualNewOfficial) officialToAdd = manualNewOfficial;
       
+      if (!officialToAdd) {
+        alert("Official details are incomplete.");
+        return;
+      }
+      if (!officialToAdd.name || !officialToAdd.contact || !officialToAdd.term || !officialToAdd.email) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+      try{
+      const storageRef = ref(storage, `DisplayedOfficials/${Date.now()}_${identificationFile.name}`);
+      await uploadBytes(storageRef, identificationFile);
+      const imageUrl = await getDownloadURL(storageRef);
+      
+
+      // Format the term into "YYYY - YYYY+3"
+      let termFormatted = "N/A";
+      if (officialToAdd.term) {
+        const startYear = new Date(officialToAdd.term).getFullYear();
+        const endYear = startYear + 3;
+        termFormatted = `${startYear} - ${endYear}`;
+      }
+
+      const newOfficialData = {
+        name: officialToAdd.name,
+        contact: officialToAdd.contact,
+        term: termFormatted, // use formatted value
+        email: officialToAdd.email,
+        facebook: officialToAdd.facebook || "N/A",
+        position: position,
+        image: imageUrl || "/images/default-profile.png",
+        createdBy: session?.user.fullName || "Unknown",
+        createdAt: new Date().toLocaleString(),
+      };
+
+      console.log("selectedNewOfficial", selectedNewOfficial);
+      console.log("manualNewOfficial", manualNewOfficial);
+      console.log("official to add", officialToAdd);
+      console.log("New Official Data:", newOfficialData);
+        const docRef = collection(db, "DisplayedOfficials");
+        addDoc(docRef, newOfficialData);
+        alert("New official added successfully!");
+        setShowAddOfficialPopup(false)
+        setIdentificationFile(null);
+        setIdentificationPreview(null);
+        setSelectedNewOfficial(null);
+        setManualNewOfficial(null);
+      } catch (error) {
+        console.error("Error adding document: ", error);
+      }
+    }
+    const deleteOfficer = async (id: string) => {
+      try {
+        const officerToDelete = displayedOfficials.find((officer) => officer.id === id);
+        if (officerToDelete && officerToDelete.image) {
+          const imageRef = ref(storage, officerToDelete.image);
+          await deleteObject(imageRef);
+        }
+        await deleteDoc(doc(db, "DisplayedOfficials", id));
+      } catch (error) {
+        console.error("Error deleting document: ", error);
+      }
+    }
+
     const [showAddOfficialPopup, setShowAddOfficialPopup] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [nameSearch, setNameSearch] = useState("");
     const [positionDropdown, setPositionDropdown] = useState("");
     const searchParams = useSearchParams();
-    const [position, setPosition] = useState("");
     const [viewActiveSection, setViewActiveSection] = useState("details");
     const highlightUserId = searchParams.get("highlight");
-    
+      
 
     const [filteredUser, setFilteredUser] = useState<any[]>([]); 
     const [currentPage, setCurrentPage] = useState(1);
@@ -108,13 +316,13 @@ export default function OfficialsModule() {
 
       // Load dummy data on first render
       useEffect(() => {
-        setFilteredUser(officialsData);
-      }, [officialsData]);
+        setFilteredUser(displayedOfficials);
+      }, [displayedOfficials]);
 
    
   // Apply filter by name & position
   useEffect(() => {
-    let filtered = [...officialsData];
+    let filtered = [...displayedOfficials];
 
     // Filter by name
     if (nameSearch.trim()) {
@@ -133,7 +341,7 @@ export default function OfficialsModule() {
 
     setFilteredUser(filtered);
     setCurrentPage(1); // reset to first page on filter change
-  }, [nameSearch, positionDropdown, officialsData]);
+  }, [nameSearch, positionDropdown, displayedOfficials]);
 
 
     // Pagination logic
@@ -163,17 +371,21 @@ export default function OfficialsModule() {
 
   console.log("Filtered Officials:", filteredUser); 
   console.log("Current Page Officials:", currentUser);
+
+
+
   return (
     <main className="brgy-officials-main-container">
-
-      <div className="brgy-officials-section-1"> 
-         <button 
-          className="add-brgy-official-btn add-brgy-official-animated"
-          onClick={() => setShowAddOfficialPopup(true)}
-        >
-          Add New Official
-        </button>
-      </div>
+      {(user === "Admin Staff" || user === "Assistant Secretary" || user === "Secretary" )&& (
+        <div className="brgy-officials-section-1"> 
+          <button 
+            className="add-brgy-official-btn add-brgy-official-animated"
+            onClick={() => setShowAddOfficialPopup(true)}
+          >
+            Add New Official
+          </button>
+        </div>
+      )}
       
       <div className={`brgy-officials-section-2 ${filtersLoaded ? "filters-animated" : ""}`}>
           <input 
@@ -192,7 +404,7 @@ export default function OfficialsModule() {
                     <option value="">Position</option>
                     <option value="Punong Barangay">Punong Barangay</option>
                     <option value="Secretary">Secretary</option> 
-                  <option value="Assistant Secretary">Asst Secretary</option> 
+                    <option value="Assistant Secretary">Assistant Secretary</option> 
                     <option value="Barangay Treasurer">Barangay Treasurer</option>
                     <option value="Barangay Administrator">Barangay Administrator</option>
                     <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
@@ -263,21 +475,21 @@ export default function OfficialsModule() {
                       >
                         <img src="/Images/view.png" alt="View"/>
                       </button>
-                      {user === "Admin Staff" && (
+                      {(user === "Admin Staff" || user === "Assistant Secretary" || user === "Secretary" )&& (
                         <>
                           <button 
                             className="brgy-official-action-edit"
-                            onClick={()=>handleEditClick(official.id.toString())}
+                            onClick={()=>handleEditClick(official.id)}
                            >
                             <img src="/Images/edit.png" alt="Edit"/>
+                          </button>
+                          <button type="button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
+                             <img src="/Images/delete.png" alt="Delete" />
                           </button>
                         </>
                       )}
                     
 
-                      {/* <button className="brgy-official-action-delete">
-                         <img src="/Images/delete.png" alt="Delete" />
-                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -319,91 +531,144 @@ export default function OfficialsModule() {
                         <span className="add-official-details-label">Identification Picture</span>
                         <div className="add-official-profile-container">
                           <img
-                            src={"/Images/default-identificationpic.jpg"}
+                            src={identificationPreview || "/Images/default-identificationpic.jpg"}
                             alt="Identification"
                             className="add-official-id-photo"
                           />
                         </div>
                         <label htmlFor="identification-file-upload" className="add-official-upload-link">Click to Upload File</label>
+                        <input
+                          className="hidden"
+                          type="file"
+                          id="identification-file-upload"
+                          accept="image/*"
+                          //style={{ display: "none" }}
+                          onChange={handleIdentificationFileChange}
+                        />
                       </div>
-
+                     
                       <div className="add-official-info-main-container">
                         <div className="add-official-content-left-side">
-                            <div className="fields-section">
-                                <p>Last Name<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-official-input-field"
-                                  placeholder="Enter Last Name"
-                                  name="lastName"
-                                  required
-                                />
-                             </div>
-                             <div className="fields-section">
-                                <p>First Name<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-official-input-field"
-                                  placeholder="Enter First Name"
-                                  name="firstName"
-                                  required
-                                />
-                             </div>
-                             <div className="fields-section">
-                                <p>Middle Name</p>
-                                <input
-                                  type="text"
-                                  className="add-official-input-field"
-                                  placeholder="Enter Middle Name"
-                                  name="middleName"
-                                  required
-                                />
-                             </div>
-                             <div className="fields-section">
-                                      <p>Contact Number<span className="required">*</span></p>
-                                      <input 
-                                        type="tel" 
-                                        className="add-official-input-field"
-                                        name="contactNumber"
-                                        pattern="^[0-9]{11}$" 
-                                        placeholder="Enter 11-digit phone number" 
-                                      />
-                             </div>
-                        </div>
+                          {(position === "Punong Barangay" || position === "Secretary"
+                        || position === "Assistant Secretary" || position === "Barangay Administrator"
+                        || position === "GAD Focal Person" || position === "VAWC Focal Person"
+                        || position === "BCPC Focal Person" 
+                      ) && (
+                        <>
+                          <div className="fields-section">
+                            <p>Select an Official <span className="required">*</span></p>
+                            <select 
+                              className="add-official-input-field"
+                              name="officialId"
+                              value={selectedNewOfficial ? selectedNewOfficial.id : ""}
+                              onChange={(e) => {
+                                const official = filteredOfficials.find(o => o.id === e.target.value);
+                                setSelectedNewOfficial(
+                                  official
+                                );
+                              }}
+                              required
+                            >
+                              <option value="" disabled>Select an Official</option>
+                              {filteredOfficials.map((official, index) => (
+                                <option key={official.id} value={official.id}>
+                                  {official.name}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </>
+                      )}
+                      <div className="fields-section">
+                          <p>Full Name<span className="required">*</span></p>
+                          <input
+                            type="text"
+                            className="add-official-input-field"
+                            placeholder="Enter Last Name"
+                            name="name"
+                            required
+                            value={selectedNewOfficial?.name || manualNewOfficial?.name  || ""}
+                            readOnly = { !!selectedNewOfficial}
+                            onChange={(e) => {
+                              if (selectedNewOfficial) {
+                                setSelectedNewOfficial({ ...selectedNewOfficial, name: e.target.value });
+                              } else {
+                                setManualNewOfficial({ ...manualNewOfficial, name: e.target.value } as Official);
+                              }
+                            }}
+                            />
+                      </div>
+                      
+                      <div className="fields-section">
+                          <p>Facebook<span className="required">*</span></p>
+                          <input
+                            type="text"
+                            className="add-official-input-field"
+                            placeholder="Enter Facebook Link"
+                            name="facebook"
+                            required
+                            value={selectedNewOfficial?.facebook || manualNewOfficial?.facebook  || ""}
+                            readOnly = { !!selectedNewOfficial}
+                            onChange={(e) => {
+                              if (selectedNewOfficial) {
+                                setSelectedNewOfficial({ ...selectedNewOfficial, facebook: e.target.value });
+                              } else {
+                                setManualNewOfficial({ ...manualNewOfficial, facebook: e.target.value } as Official);
+                              }
+                            }}
+                            />
+                      </div>
+                      <div className="fields-section">
+                        <p>Contact Number<span className="required">*</span></p>
+                        <input 
+                          type="tel" 
+                          className="add-official-input-field"
+                          name="contact"
+                          pattern="^[0-9]{11}$" 
+                          placeholder="Enter 11-digit phone number" 
+                          required
+                          value={selectedNewOfficial?.contact||manualNewOfficial?.contact ||""}
+                          readOnly = { !!selectedNewOfficial }
+                          onChange={(e) => {
+                            if (selectedNewOfficial) {
+                              setSelectedNewOfficial({ ...selectedNewOfficial, contact: e.target.value });
+                            } else {
+                              setManualNewOfficial({ ...manualNewOfficial, contact: e.target.value } as Official);
+                            }
+                          }}
+                    
+                        />
+                      </div>
+                    </div>
+                        
 
                         <div className="add-official-content-right-side">
                           <div className="fields-section">
                             <p>Position<span className="required">*</span></p>
                             <select
-                              className="add-official-input-field"
-                              name="position"
-                              value={position}
-                              onChange={(e) => setPosition(e.target.value)}
-                              required
-                            >
-                              <option value="" disabled>Select a Position</option>
-                              <option value="Barangay Treasurer">Barangay Treasurer</option>
-                              <option value="Barangay Administrator">Barangay Administrator</option>
-                              <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
-                              <option value="Solo Parent Desk">Solo Parent Desk</option>
-                              <option value="BDRRMO">BDRRMO</option>
-                              <option value="BADAC Focal Person">BADAC Focal Person</option>
-                              <option value="GAD Focal Person">GAD Focal Person</option>
-                              <option value="VAWC Focal Person">VAWC Focal Person</option>
-                              <option value="BCPC Focal Person">BCPC Focal Person</option>
-                              <option value="Medical Assistance">Medical Assistance</option>
-                              <option value="ASH Desk">ASH Desk </option>
-                              <option value="ASH Desk">PWD Massage & Therapeutic Center</option>
-                              <option value="BHERT">BHERT</option>
-                              <option value="BSPO, EX-O">BSPO, EX-O</option>
-                              <option value="Clean & Green Department">Clean & Green Department</option>
-                              <option value="Land & Housing Department">Land & Housing Department</option>
-                              <option value="Sports & Cultural Development">Sports & Cultural Development</option>
-                              <option value="OFW Assistance Desk">OFW Assistance Desk</option>
-                            </select>
+                                className="add-official-input-field"
+                                name="position"
+                                value={position}
+                                onChange={(e) => {
+                                  setPosition(e.target.value);
+                                  setSelectedNewOfficial(null);
+                                  setManualNewOfficial(null);
+                                }}
+                                required
+                              >
+                                <option value="" disabled>Select a Position</option>
+
+                                {positionsList.map((pos) => (
+                                  <option key={pos} value={pos} disabled={takenPositions.has(pos)}>
+                                    {pos}
+                                  </option>
+                                ))}
+                              </select>
+
+
                           </div>
 
-                          {position === "LF Staff" && (
+                          {/* {position === "LF Staff" && (
                             <div className="fields-section">
                               <p>
                                 Department<span className="required">*</span>
@@ -413,22 +678,32 @@ export default function OfficialsModule() {
                                 name="department"
                                 required
                               >
-                                <option value="">Select a Department</option>
+                                <option value="" disabled>Select a Department</option>
                                 <option value="Lupon">Lupon</option>
                                 <option value="GAD">GAD</option>
                                 <option value="VAWC">VAWC</option>
                                 <option value="BCPC">BCPC</option>
                               </select>
                             </div>
-                          )}
+                          )} */}
                            <div className="fields-section">
                               <p>Term Duration<span className="required">*</span></p>
                               <input
                                 type="date"
                                 className="add-official-input-field"
-                                name="termDuration"
+                                name="term"
                                 required
                                 min={new Date().toISOString().split("T")[0]}
+                                value={ selectedNewOfficial?.term || manualNewOfficial?.term ||""}
+                                readOnly = { !!selectedNewOfficial }
+                                onChange={(e) => {
+                                  if (selectedNewOfficial) {
+                                    setSelectedNewOfficial({ ...selectedNewOfficial, term: e.target.value });
+                                  } else {
+                                    setManualNewOfficial({ ...manualNewOfficial, term: e.target.value } as Official);
+                                  }
+                                }}
+                                    
                               />
                             </div>
                              <div className="fields-section">
@@ -439,6 +714,16 @@ export default function OfficialsModule() {
                                   placeholder="Enter Email Address"
                                   name="emailAddress"
                                   required
+                                  value={ selectedNewOfficial?.email|| manualNewOfficial?.email || ""}
+                                  readOnly = { !!selectedNewOfficial }
+                                  onChange={(e) => {
+                                    if (selectedNewOfficial) {
+                                      setSelectedNewOfficial({ ...selectedNewOfficial, email: e.target.value });
+                                    } else {
+                                      setManualNewOfficial({ ...manualNewOfficial, email: e.target.value } as Official);
+                                    }
+                                  }}
+                                    
                                 />
                              </div>
                         </div>
@@ -450,8 +735,20 @@ export default function OfficialsModule() {
                 
                     {/* Buttons */}
                     <div className="official-yesno-container">
-                        <button onClick={() => setShowAddOfficialPopup(false)} className="official-no-button">Cancel</button>
-                        <button className="official-yes-button">
+                        <button type="button" onClick={() => {
+                          setShowAddOfficialPopup(false)
+                           setIdentificationFile(null);
+                          setIdentificationPreview(null);
+                          setSelectedNewOfficial(null);
+                          setManualNewOfficial(null);
+                        }
+
+                        } className="official-no-button">Cancel</button>
+                        <button type= "button" onClick={()=>{
+                          addNewOfficer()
+                         
+
+                        }} className="official-yes-button">
                             Save
                         </button>
                     </div>
