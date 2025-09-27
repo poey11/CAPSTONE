@@ -289,21 +289,53 @@ export default function EditVoter() {
                           <div className="add-main-resident-section-2-left-side">
                             <div className="fields-section">
                               <p>Last Name<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} placeholder="Enter Last Name" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                              <input 
+                              type="text"  
+                              className={`add-resident-input-field ${invalidFields.includes("lastName") ? "input-error" : ""}`} 
+                              placeholder="Enter Last Name" 
+                              name="lastName" 
+                              value={formData.lastName} onChange={handleChange} 
+                              required 
+                              disabled />
                             </div>
                             <div className="fields-section">
                               <p>First Name<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} placeholder="Enter First Name" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                              <input 
+                              type="text"  
+                              className={`add-resident-input-field ${invalidFields.includes("firstName") ? "input-error" : ""}`} 
+                              placeholder="Enter First Name" 
+                              name="firstName" 
+                              value={formData.firstName} 
+                              onChange={handleChange} 
+                              required
+                              disabled
+                              />
                             </div>
                           </div>
                           <div className="add-main-resident-section-2-right-side">
                             <div className="fields-section">
                               <p>Middle Name</p>
-                              <input type="text"  className="add-resident-input-field" placeholder="Enter Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
+                              <input 
+                              type="text"  
+                              className="add-resident-input-field" 
+                              placeholder="Enter Middle Name" 
+                              name="middleName" 
+                              value={formData.middleName} 
+                              onChange={handleChange} 
+                              disabled
+                              />
                             </div>
                             <div className="fields-section">
                               <p>Home Address<span className="required">*</span></p>
-                              <input type="text"  className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} placeholder="Enter Address" name="homeAddress" value={formData.homeAddress} onChange={handleChange} required />
+                              <input 
+                              type="text"  
+                              className={`add-resident-input-field ${invalidFields.includes("homeAddress") ? "input-error" : ""}`} 
+                              placeholder="Enter Address" 
+                              name="homeAddress" 
+                              value={formData.homeAddress} 
+                              onChange={handleChange} 
+                              required 
+                              />
                             </div>
                           </div>
                         </div>
@@ -311,7 +343,13 @@ export default function EditVoter() {
                           
                             <div className="fields-section-precinct">
                               <p>Precinct Number<span className="required">*</span></p>
-                              <input type="text" className={`add-voterprecinct-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} placeholder="Enter Precinct Number" name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} required/>
+                              <input 
+                              type="text" 
+                              className={`add-voterprecinct-input-field ${invalidFields.includes("precinctNumber") ? "input-error" : ""}`} 
+                              placeholder="Enter Precinct Number" 
+                              name="precinctNumber" value={formData.precinctNumber} onChange={handleChange} 
+                              required
+                              />
                             </div>
                          
                         </div>  
