@@ -457,6 +457,12 @@ const router = useRouter();
         if (maxParticipants <= 0) return true;
         return approvedParticipantCount >= maxParticipants;
       }
+      if(program.eventType === "multiple" && index !== undefined && program.approvedParticipantCountList){
+        const dayLimit = program.noParticipantLimitList && program.noParticipantLimitList[index] ? 0 : (program.particapantDays && program.particapantDays[index]) ? program.particapantDays[index] : 0;
+        const approvedCountForDay = approvedParticipantCountList && approvedParticipantCountList[index] ? approvedParticipantCountList[index] : 0;
+        if (dayLimit <= 0) return true;
+        return approvedCountForDay >= dayLimit;
+      }
     }
     if (volunteersCap <= 0) return true;
     return approvedVolunteerCount >= volunteersCap;
@@ -864,7 +870,7 @@ const confirmSubmit = async () => {
                 <h3>Participants</h3>
                   <div className="values">
                       <p>{program.noParticipantLimit ? (
-                        <>${program.startDate?.split("-")[0]}-
+                        <>
                           {approvedParticipantCount}
                         </>
                       ):(
@@ -969,7 +975,19 @@ const confirmSubmit = async () => {
             {visibleActions
               .filter((a) => !selectedAction || selectedAction === a.key)
               .map((action, index) => {
-                const reached = capacityReached(action.key);
+                let reached = false;
+                if(program.eventType === "multiple" && action.key === "Participant"){
+                  if(dayChosen !== null){
+                    reached = capacityReached(action.key, dayChosen);
+                  }
+                  else{
+                    reached = false;
+                  }
+                }
+                else{
+                  reached = capacityReached(action.key);
+                }
+
                 const disabledReason = reached ? capacityMessage(action.key) : "";
 
                 // TEXT fields: volunteers use predefined (ensure DOB present); participants use program-defined
