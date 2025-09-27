@@ -35,6 +35,7 @@ type Participant = {
   role?: string; // "Participant" | "Volunteer"
   approvalStatus?: string;
   attendance?: boolean; // new field
+  dayChosen?: number; // new field
 };
 
 type Resident = {
@@ -133,7 +134,10 @@ export default function ParticipantsList() {
       router.push("/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails");
     }
   };
-
+  const [noParticipantLimit, setNoParticipantLimit] = useState<boolean>(false);
+  const [particapantDays, setParticapantDays] = useState<number[]>([]);
+  const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
+  const [eventType, setEventType] = useState<string>("single");
   // Load program meta
   useEffect(() => {
     let cancelled = false;
@@ -154,11 +158,17 @@ export default function ParticipantsList() {
           const d = snap.data() as any;
           const capParticipants = Number(d?.participants);
           const capVolunteers = Number(d?.volunteers);
+          const noLimit = Boolean(d?.noParticipantLimit);
+
+          setNoParticipantLimit(noLimit);
+          setParticapantDays(Array.isArray(d?.particapantDays) ? d.particapantDays : []);
+          setNoParticipantLimitList(Array.isArray(d?.noParticipantLimitList) ? d.noParticipantLimitList : []);
           setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
           setProgramVolunteerCapacity(Number.isFinite(capVolunteers) ? capVolunteers : null);
           setProgramTitle(d?.programName || "");
           setProgramStatus((d?.progressStatus || "").toString());
-
+          setEventType(d?.eventType || "single");
+          
           const tfs: SimpleField[] = Array.isArray(d?.requirements?.textFields)
             ? d.requirements.textFields
             : [];
@@ -238,6 +248,7 @@ export default function ParticipantsList() {
             role: d.role ?? "Participant",
             approvalStatus: d.approvalStatus ?? "Approved",
             attendance,
+            dayChosen: d.dayChosen ?? null,
           });
         });
 
@@ -257,20 +268,34 @@ export default function ParticipantsList() {
     return () => unsub();
   }, [programId]);
 
+  const [dayChosen, setDayChosen] = useState<number>(1);
   // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
+    if(eventType === "single"){
+      return participants.filter((p) => {
+        const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
+        const matchesName = !q || name.includes(q);
+  
+        const role = (p.role || "Participant").toLowerCase();
+        const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
+  
+        return matchesName && matchesRole;
+      });
+    }
+    else{
+      return participants.filter((p) => {
+        const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
+        const matchesName = !q || name.includes(q);
+  
+        const role = (p.role || "Participant").toLowerCase();
+        const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
+        const matchesDay = p.dayChosen === dayChosen;
 
-    return participants.filter((p) => {
-      const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
-      const matchesName = !q || name.includes(q);
-
-      const role = (p.role || "Participant").toLowerCase();
-      const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
-
-      return matchesName && matchesRole;
-    });
-  }, [searchName, roleFilter, participants]);
+        return matchesName && matchesRole && matchesDay;
+      });
+    }
+  }, [searchName, roleFilter, participants,dayChosen,eventType]);
 
   // Role-specific counts
   const participantCount = useMemo(
@@ -282,10 +307,27 @@ export default function ParticipantsList() {
     [participants]
   );
 
-  const badgeParticipantsText = useMemo(
-    () => `Participants: ${participantCount} / ${programCapacity ?? "—"}`,
-    [participantCount, programCapacity]
+  const multipleDayParticipantCount = useMemo(
+    () => participants.filter((p) => (p.role || "Participant").toLowerCase() === "participant" && p.dayChosen === dayChosen).length,
+    [participants, dayChosen]
   );
+  const badgeParticipantsText = useMemo(() => {
+  if (!noParticipantLimit && noParticipantLimit === false && eventType === "single") {
+    return `Participants: ${participantCount} / ${programCapacity ?? "—"}`;
+  }else if(!noParticipantLimit && noParticipantLimit && eventType === "single") {
+   return `Participants: ${participantCount}`;
+  } 
+  else if (  noParticipantLimitList[dayChosen] === false && eventType === "multiple") {
+    return `Participants: ${multipleDayParticipantCount} / ${ particapantDays[dayChosen] ?? "—"}`;
+  }
+  else if(  noParticipantLimitList[dayChosen] === true && eventType === "multiple") {
+    return `Participants: ${multipleDayParticipantCount}`;
+  }
+  
+}, [noParticipantLimit, participantCount, programCapacity, particapantDays, dayChosen, noParticipantLimitList, eventType, multipleDayParticipantCount]);
+  console.log(particapantDays)
+  console.log(noParticipantLimitList)
+  console.log(participants)
   const badgeVolunteersText = useMemo(
     () => `Volunteers: ${volunteerCount} / ${programVolunteerCapacity ?? "—"}`,
     [volunteerCount, programVolunteerCapacity]
@@ -515,7 +557,30 @@ export default function ParticipantsList() {
             </button>
             <h1>{programTitle}</h1>
           </div>
+          {eventType === "multiple" && (
+            
+            <div className="action-btn-section-program" style={{ display: "flex", marginLeft: "52%" }}>
+              <div className="participants-count">
+                <p>Select A Day:</p>
+                  
+                <select
+                  value={dayChosen ?? ""}
+                  onChange={(e) => setDayChosen(Number(e.target.value))}
+                >
+                  <option value="" disabled hidden>
+                    {/* hidden placeholder, doesn't show in list */}
+                  </option>
+                  {particapantDays.map((day, index) => (
+                    <option value={index} key={index}>
+                      {`Day ${index + 1}`}
+                    </option>
+                  ))}
+                </select>
 
+              </div>
+            
+            </div>
+          )}
           <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
             <div className="participants-count">{badgeParticipantsText}</div>
             {showVolunteerBadge && <div className="participants-count">{badgeVolunteersText}</div>}

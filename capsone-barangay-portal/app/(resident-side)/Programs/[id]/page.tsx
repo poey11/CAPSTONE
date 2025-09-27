@@ -1,7 +1,7 @@
 "use client";
 import "@/CSS/Programs/SpecificProgram.css";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter} from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Handshake } from "lucide-react";
@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { register } from "module";
 
 const MONTHS = [
   "January","February","March","April","May","June",
@@ -153,6 +154,10 @@ type Program = {
   eligibleParticipants?: "resident" | "non-resident" | "both";
   photoURL?: string | null;
   photoURLs?: string[];
+  noParticipantLimit?: boolean;
+  particapantDays?: number[];
+  noParticipantLimitList?: boolean[];
+  approvedParticipantCountList?: number[];
   requirements?: {
     textFields?: { name: string }[];
     fileFields?: { name: string }[];
@@ -190,7 +195,7 @@ const router = useRouter();
     ],
     []
   );
-
+  const [dayChosen, setDayChosen] = useState<number | null>(null);
   const [program, setProgram] = useState<Program | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -209,6 +214,8 @@ const router = useRouter();
 
   // role-specific approved counts
   const [approvedParticipantCount, setApprovedParticipantCount] = useState<number>(0);
+  const [approvedParticipantCountList, setApprovedParticipantCountList] = useState<number[]>([]);
+
   const [approvedVolunteerCount, setApprovedVolunteerCount] = useState<number>(0);
 
   // prefilled ID for verified users
@@ -235,6 +242,7 @@ const router = useRouter();
       if (!snap.exists()) return setProgram(null);
       const p = { id: snap.id, ...snap.data() } as Program;
       setProgram(p);
+      
 
       const fromQuery = searchParams.getAll("image");
       const img =
@@ -261,14 +269,32 @@ const router = useRouter();
             where("role", "==", "Volunteer")
           )
         ),
+
       ]);
-      setApprovedParticipantCount(pCnt.data().count || 0);
-      setApprovedVolunteerCount(vCnt.data().count || 0);
+      if(p.eventType === "multiple"){
+        const counts: number[] = [];
+        if(p.particapantDays && p.particapantDays.length > 0){
+          for (let index = 0; index < p.particapantDays.length; index++) {
+            const c = await getCountFromServer(
+              query(
+                base,
+                where("programId", "==", snap.id),
+                where("approvalStatus", "==", "Approved"),
+                where("role", "==", "Participant"),
+                where("dayChosen", "==", index)
+              )
+            );
+            counts.push(c.data().count || 0);
+          }
+          setApprovedParticipantCountList(counts);
+        }
+        setApprovedParticipantCount(pCnt.data().count || 0);
+        setApprovedVolunteerCount(vCnt.data().count || 0);
+    };
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
   useEffect(() => {
     if (!images.length) return;
     const t = setInterval(() => setCurrentSlide((s) => (s + 1) % images.length), 6000);
@@ -376,6 +402,9 @@ const router = useRouter();
       );
       const snap = await getDocs(dupQ);
       setAlreadyRegistered(!snap.empty);
+      if(snap.docs[0].data().attendance === false){
+        setAlreadyRegistered(false);
+      }
     };
     checkDup();
   }, [program?.id, residentId]);
@@ -421,11 +450,13 @@ const router = useRouter();
   const volunteersCap   = Number(program?.volunteers ?? 0);
   const hasVolunteerCap = volunteersCap > 0;
 
-  const capacityReached = (role: Role) => {
+  const capacityReached = (role: Role, index?:number) => {
     if (!program) return false;
     if (role === "Participant") {
-      if (maxParticipants <= 0) return true;
-      return approvedParticipantCount >= maxParticipants;
+      if(program.eventType === "single"){
+        if (maxParticipants <= 0) return true;
+        return approvedParticipantCount >= maxParticipants;
+      }
     }
     if (volunteersCap <= 0) return true;
     return approvedVolunteerCount >= volunteersCap;
@@ -608,6 +639,9 @@ const handleSubmit = async (role: Role) => {
         age: userAge ?? null,
         fields: formData,
         files: uploadedFiles,
+        ...((program.eventType === "multiple" && dayChosen) && {
+          dayChosen,
+        })
       });
 
       const roleLabel = role === "Volunteer" ? "volunteer" : "participant";
@@ -684,7 +718,6 @@ const confirmSubmit = async () => {
   });
 
   // Numeric, role-aware labels
-  const participantsLabel = `${approvedParticipantCount}/${Math.max(0, maxParticipants)}`;
   const volunteersLabel   = hasVolunteerCap ? `${approvedVolunteerCount}/${volunteersCap}` : "";
 
   // toast position
@@ -764,6 +797,50 @@ const confirmSubmit = async () => {
         </p>
 
         <div className="programs-details-specific">
+          {program.eventType === "multiple" && (
+           <div className="program-detail-card-specific">
+              <h3>Pick a day to register</h3>
+              <div className="values">
+                <select
+                  className="day-select"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setDayChosen(val === "" ? null : Number(val));
+                  }}
+                  value={dayChosen !== null ? dayChosen : ""}
+                >
+                  {program.particapantDays && program.particapantDays.length > 0 && (
+                    <>
+                      <option value="" disabled>
+                        Select a day
+                      </option>
+                      {program.particapantDays.map((day, index) => {
+                        // ✅ compute actual date for this index
+                        const startDate = new Date(program.startDate || ""); // e.g. Sept 25
+                        const optionDate = new Date(startDate);
+                        optionDate.setDate(startDate.getDate() + index);
+
+                        // ✅ check if optionDate already passed
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0); // ignore time
+                        const isPast = optionDate < today;
+
+                        return (
+                          <option key={index} value={index} disabled={isPast}>
+                            Day {index + 1}{" "}
+                            {day ? `- ${day} ${day > 1 ? "slots" : ""}` : "- Unlimited"} (
+                            {optionDate.toLocaleDateString()})
+                          </option>
+                        );
+                      })}
+                    </>
+                  )}
+                </select>
+              </div>
+            </div>
+
+
+          )}
           <div className="program-detail-card-specific">
             <h3>Schedule</h3>
 
@@ -781,13 +858,66 @@ const confirmSubmit = async () => {
            
           </div>
 
-          <div className="program-detail-card-specific">
-            <h3>Participants</h3>
-              <div className="values">
-                  <p>{participantsLabel}</p>
+          {program.eventType === "single" ?(
+            <>
+              <div className="program-detail-card-specific">
+                <h3>Participants</h3>
+                  <div className="values">
+                      <p>{program.noParticipantLimit ? (
+                        <>${program.startDate?.split("-")[0]}-
+                          {approvedParticipantCount}
+                        </>
+                      ):(
+                      <>
+                        {approvedParticipantCount}/{Math.max(0, maxParticipants)}
+                      </>)}</p>
+                  </div>
               </div>
-           
-          </div>
+            </>
+          ):(
+          <>
+            {program.noParticipantLimitList && program.particapantDays && program.particapantDays.length > 0 && (
+              <>
+                {program.particapantDays.map((day, index) => {
+                  // ✅ calculate the actual date for this day
+                  const start = new Date(program.startDate || "");
+                  const date = new Date(start);
+                  date.setDate(start.getDate() + index);
+
+                  // convert to yyyy-mm-dd for your format function
+                  const ymd = date.toISOString().split("T")[0];
+
+                  return (
+                    <div className="program-detail-card-specific" key={index}>
+                      <h3>
+                        Participants (Day {index + 1}) {formatYMDToLong(ymd)}
+                      </h3>
+                      <div className="values">
+                        <p>
+                          {program.noParticipantLimitList && program.noParticipantLimitList[index] ? (
+                            <>
+                              {approvedParticipantCountList && approvedParticipantCountList.length > index
+                                ? approvedParticipantCountList[index]
+                                : 0}
+                            </>
+                          ) : (
+                            <>
+                              {approvedParticipantCountList && approvedParticipantCountList.length > index
+                                ? approvedParticipantCountList[index]
+                                : 0}
+                              /{Math.max(0, day)}
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </>
+          )}
+          
 
           {hasVolunteerCap && (
             <div className="program-detail-card-specific">
@@ -804,7 +934,8 @@ const confirmSubmit = async () => {
           <h3>Age Limit</h3>
           <div className="values">
             <span>Volunteers: 17+ years old</span>
-            <span>Participants: {participantAgeLimitText ? `${participantAgeLimitText} years old` : "None"}</span>          </div>
+            <span>Participants: {participantAgeLimitText ? `${participantAgeLimitText} years old` : "None"}</span>          
+            </div>
         </div>
 
         </div>
@@ -813,6 +944,7 @@ const confirmSubmit = async () => {
       <section className="get-involved">
         <h2 className="section-title">Get Involved</h2>
         <div className="programs-underline-specific"></div>
+        
 
         {isVerifiedResident && alreadyRegistered ? (
   <div className="program-detail-card-specific">
