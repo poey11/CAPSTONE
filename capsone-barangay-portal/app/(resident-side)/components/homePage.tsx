@@ -79,6 +79,27 @@ const homePage:React.FC = () => {
     const [siteVisits, setSiteVisits] = useState(0);
     const [newsSlide, setNewsSlide] = useState(0);
 
+
+
+    const [newsPerPage, setNewsPerPage] = useState(3);
+
+    useEffect(() => {
+      const handleResize = () => {
+        if (window.innerWidth <= 768) {
+          setNewsPerPage(1);  // mobile → 1 card
+        } else if (window.innerWidth <= 1024) {
+          setNewsPerPage(2);  // tablet → 2 cards
+        } else {
+          setNewsPerPage(3);  // desktop → 3 cards
+        }
+      };
+
+
+      handleResize(); // run on mount
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     const nextNews = () => {
       setNewsSlide((prev) => (prev + 1) % news.length);
     };
@@ -86,6 +107,17 @@ const homePage:React.FC = () => {
     const prevNews = () => {
       setNewsSlide((prev) => (prev - 1 + news.length) % news.length);
     };
+
+
+const getVisibleNews = () => {
+  const visible = [];
+  for (let i = 0; i < newsPerPage; i++) {
+    visible.push(news[(newsSlide + i) % news.length]);
+  }
+  return visible;
+};
+
+
 
     // Fetch the site visit count from Firestore
     const fetchSiteVisitCount = async () => {
@@ -133,6 +165,7 @@ const homePage:React.FC = () => {
       checkAndTrackVisit();
     }, []);
     
+
 
  const nextSlide = () => {
   setCurrentSlide((prev) =>
@@ -207,16 +240,6 @@ useEffect(() => {
 
   return () => window.removeEventListener("resize", handleResize);
 }, []);
-
-
-
-const getVisibleNews = () => {
-  const visible = [];
-  for (let i = 0; i < cardsPerPage; i++) {
-    visible.push(news[(newsSlide + i) % news.length]);
-  }
-  return visible;
-};
 
 
 
@@ -350,70 +373,31 @@ const getVisibleNews = () => {
   <div className="news-content-wrapper fade-slide-up" ref={newsRef}>
     <button className="slide-button" onClick={prevNews}>&lt;</button>
     <div className="news-cards-container-wrapper">
-      {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
-        <Link
-            key={item.id || index} // ✅ Use a unique id if available
+      {news.length > 0 &&
+        getVisibleNews().map((item, index) => (
+          <Link
+            key={item?.id || index}
             href={{
-              pathname: `/Announcements/${item.id || index}`,
+              pathname: `/Announcements/${item?.id || index}`,
               query: {
-                title: item.title,
-                description: item.description,
-                date: item.date,
-                image: item.image,
+                title: item?.title,
+                description: item?.description,
+                date: item?.date,
+                image: item?.image,
               },
             }}
           >
-            <div className="news-card" key={item.id || index}>
-              <img src={item.image} alt={item.title} className="news-image" />
+            <div className="news-card">
+              <img src={item?.image} alt={item?.title} className="news-image" />
               <div className="news-info">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                <span className="news-date">{item.date}</span>
+                <h3>{item?.title}</h3>
+                <p>{item?.description}</p>
+                <span className="news-date">{item?.date}</span>
               </div>
             </div>
           </Link>
       ))}
     </div>
-
-      {/* <div className="news-cards-container">
-        {news.slice(newsSlide, newsSlide + cardsPerPage).map((item, index) => (
-          <Link
-            key={item.id || index} // ✅ Use a unique id if available
-            href={{
-              pathname: `/Announcements/${item.id || index}`,
-              query: {
-                title: item.title,
-                description: item.description,
-                date: item.date,
-                image: item.image,
-              },
-            }}
-          >
-            <div className="news-card">
-              <img src={item.image} alt={item.title} className="news-image" />
-              <div className="news-info">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-                <span className="news-date">{item.date}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
-        
-    <div className="news-cards-container-wrapper">
-        {getVisibleNews().map((item, index) => (
-          <div className="news-card" key={index}>
-            <img src={item.image} alt={item.title} className="news-image" />
-            <div className="news-info">
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-              <span className="news-date">{item.date}</span>
-            </div>
-          </div>
-        ))}
-    </div> */}
-
     <button className="slide-button" onClick={nextNews}>&gt;</button>
   </div>
 </div>
