@@ -240,80 +240,90 @@ const ViewOnlineRequest = () => {
       }, [requestData]);
       
 
-      const handleJobseekerAutoAdd = async () => {
-        try {
-          if (!requestData) return true; // just safely skip if no data
-      
-          const jobSeekerRef = collection(db, "JobSeekerList");
-      
-          // Check by residentId
-          const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
-          const byResidentIdSnap = await getDocs(byResidentIdQuery);
-      
-          if (!byResidentIdSnap.empty) {
-            return true; // already exists by residentId
-          }
-      
-          // Fallback by split names + DOB
-          let firstName = "";
-          let lastName = "";
-          if (requestData.requestorFname) {
-            const parts = requestData.requestorFname.trim().split(" ");
-            firstName = parts[0] || "";
-            lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
-          }
-      
-          const snapshot = await getDocs(jobSeekerRef);
-          const matchDoc = snapshot.docs.find(doc => {
-            const data = doc.data();
-            const dbFirstName = (data.firstName || "").toLowerCase().trim();
-            const dbLastName = (data.lastName || "").toLowerCase().trim();
-            const dbDOB = (data.dateOfBirth || "").split("T")[0];
-            const localFirstName = firstName.toLowerCase().trim();
-            const localLastName = lastName.toLowerCase().trim();
-            const localDOB = (requestData.birthday || "").split("T")[0];
-            return dbFirstName === localFirstName && dbLastName === localLastName && dbDOB === localDOB;
-          });
-      
-          if (matchDoc) {
-            console.log("Automatically added to Jobseeker List.");
-            setJobseekerPopupMessage("This applicant is already in the First Time Jobseeker List. Payment will be required");
-            setShowJobseekerPopup(true);
-            return true; 
-            
-          }
-      
-          // If not in the list, auto add
-          const newDoc = {
-            dateApplied: new Date().toISOString().split("T")[0],
-            lastName,
-            firstName,
-            middleName: "",
-            age: parseInt(requestData.age || "0"),
-            dateOfBirth: requestData.birthday || "",
-            monthOfBirth: requestData.birthday ? (new Date(requestData.birthday).getMonth() + 1).toString() : "",
-            dayOfBirth: requestData.birthday ? new Date(requestData.birthday).getDate().toString() : "",
-            yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
-            sex: requestData.gender || "",
-            remarks: "",
-            residentId: requestData.residentId || "",
-            identificationFileURL: requestData.validIDjpg || "",
-            firstTimeClaimed: false,
-            createdBy: "Assistant Secretary",
-            createdAt: new Date().toISOString().split("T")[0], // "YYYY-MM-DD"
-          };
-      
-          await addDoc(jobSeekerRef, newDoc);
-          console.log("Automatically added to Jobseeker List.");
-          setJobseekerPopupMessage("This applicant has been added to the First Time Jobseeker List.");
-          setShowJobseekerPopup(true);
-          return true;
-      
-        } catch (err) {
-          console.error("Error auto-adding to JobSeekerList:", err);
-          return false;
-        }
-      };
+const handleJobseekerAutoAdd = async () => {
+  try {
+    if (!requestData) return true; // just safely skip if no data
+
+    const jobSeekerRef = collection(db, "JobSeekerList");
+
+    // Check by residentId
+    const byResidentIdQuery = query(jobSeekerRef, where("residentId", "==", requestData.residentId));
+    const byResidentIdSnap = await getDocs(byResidentIdQuery);
+    if (!byResidentIdSnap.empty) {
+      return true; // already exists by residentId
+    }
+
+    // Fallback by split names + DOB
+    let firstName = "";
+    let lastName = "";
+    if (requestData.requestorFname) {
+      const parts = requestData.requestorFname.trim().split(" ");
+      firstName = parts[0] || "";
+      lastName = parts.length >= 2 ? parts[parts.length - 1] : "";
+    }
+
+    const snapshot = await getDocs(jobSeekerRef);
+    const matchDoc = snapshot.docs.find((docu) => {
+      const data = docu.data();
+      const dbFirstName = (data.firstName || "").toLowerCase().trim();
+      const dbLastName = (data.lastName || "").toLowerCase().trim();
+      const dbDOB = (data.dateOfBirth || "").split("T")[0];
+      const localFirstName = firstName.toLowerCase().trim();
+      const localLastName = lastName.toLowerCase().trim();
+      const localDOB = (requestData.birthday || "").split("T")[0];
+      return dbFirstName === localFirstName && dbLastName === localLastName && dbDOB === localDOB;
+    });
+
+    if (matchDoc) {
+      console.log("Automatically added to Jobseeker List.");
+      setJobseekerPopupMessage("This applicant is already in the First Time Jobseeker List. Payment will be required");
+      setShowJobseekerPopup(true);
+      return true;
+    }
+
+    let identificationFileURL = "";
+    if (requestData.residentId) {
+      const residentRef = doc(db, "Residents", requestData.residentId);
+      const residentSnap = await getDoc(residentRef);
+      if (residentSnap.exists()) {
+        const residentData = residentSnap.data();
+        identificationFileURL = residentData?.identificationFileURL || "";
+      }
+    }
+
+    // Build the new JobSeeker doc
+    const newDoc = {
+      dateApplied: new Date().toISOString().split("T")[0],
+      lastName,
+      firstName,
+      middleName: "",
+      age: parseInt(requestData.age || "0"),
+      dateOfBirth: requestData.birthday || "",
+      monthOfBirth: requestData.birthday ? (new Date(requestData.birthday).getMonth() + 1).toString() : "",
+      dayOfBirth: requestData.birthday ? new Date(requestData.birthday).getDate().toString() : "",
+      yearOfBirth: requestData.birthday ? new Date(requestData.birthday).getFullYear().toString() : "",
+      sex: requestData.gender || "",
+      remarks: "",
+      residentId: requestData.residentId || "",
+      verificationFilesURLs: [requestData.validIDjpg].filter(Boolean),
+      identificationFileURL,
+      firstTimeClaimed: false,
+      createdBy: "Assistant Secretary",
+      createdAt: new Date().toISOString().split("T")[0], // "YYYY-MM-DD"
+    };
+
+    await addDoc(jobSeekerRef, newDoc);
+    console.log("Automatically added to Jobseeker List.");
+    setJobseekerPopupMessage("This applicant has been added to the First Time Jobseeker List.");
+    setShowJobseekerPopup(true);
+    return true;
+
+  } catch (err) {
+    console.error("Error auto-adding to JobSeekerList:", err);
+    return false;
+  }
+};
+
       
   
   
