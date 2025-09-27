@@ -355,12 +355,12 @@ if (searchDate) {
               </>
             ) : (
               <>
-                <button
+                {/* <button
                   className="residentmodule-action-edit"
                   onClick={() => handleEditClick(seeker.id)}
                 >
                      <img src="/Images/edit.png" alt="Edit" />
-                </button>
+                </button> */}
                 <button
                   className="residentmodule-action-delete"
                   onClick={() => handleDeleteClick(seeker.id)}
