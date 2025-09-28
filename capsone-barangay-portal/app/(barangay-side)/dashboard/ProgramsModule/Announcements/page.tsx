@@ -47,7 +47,10 @@ export default function AnnouncementModule() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
 
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const [announcementFile, setAnnouncementFile] = useState<File | null>(null);
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
@@ -83,68 +86,93 @@ export default function AnnouncementModule() {
     isActive: true,
   });
 
+
+  const validateFields = () => {
+    const newInvalidFields: string[] = [];
+
+    if (!newAnnouncement.announcementHeadline || newAnnouncement.announcementHeadline.trim() === "") {
+      newInvalidFields.push("announcementHeadline");
+      setPopupErrorMessage("Program Headline is required.");
+    }
+
+    if (!newAnnouncement.category || newAnnouncement.category.trim() === "") {
+      newInvalidFields.push("category");
+      setPopupErrorMessage("Program Category is required.");
+    }
+
+    if (!newAnnouncement.content || newAnnouncement.content.trim() === "") {
+      newInvalidFields.push("content");
+      setPopupErrorMessage("Description is required.");
+    }
+
+    if (!announcementFile) {
+      newInvalidFields.push("image");
+      setPopupErrorMessage("A picture is required.");
+    }
+
+    if (newInvalidFields.length > 0) {
+      setInvalidFields(newInvalidFields);
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+
+    setInvalidFields([]);
+    return true;
+  };
+
   const confirmSubmit = async () => {
     setShowSubmitPopup(false); // close confirm popup
     await createAnnouncement(); // call create
   };
 
   const createAnnouncement = async () => {
-    if (!newAnnouncement.announcementHeadline) {
-      alert("Please fill in the program headline.");
-      return;
-    }
-    if (!newAnnouncement.category) {
-      alert("Please select the program category.");
-      return;
-    }
-    if (!newAnnouncement.content) {
-      alert("Please fill in the program content/description.");
-      return;
-    }
-    if (!announcementFile) {
-      alert("Please upload the program photo.");
-      return;
+  // 🔑 Use your validator instead of alerts
+  if (!validateFields()) return;
+
+  try {
+    const storageRef = ref(
+      storage,
+      `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`
+    );
+    let imageurl = "";
+    if (announcementFile) {
+      await uploadBytes(storageRef, announcementFile);
+      const downloadURL = await getDownloadURL(storageRef);
+      imageurl = downloadURL;
     }
 
-    try {
-      const storageRef = ref(
-        storage,
-        `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`
-      );
-      let imageurl = "";
-      if (announcementFile) {
-        await uploadBytes(storageRef, announcementFile);
-        const downloadURL = await getDownloadURL(storageRef);
-        imageurl = downloadURL;
-      }
+    const announcementData = {
+      ...newAnnouncement,
+      image: imageurl,
+    };
 
-      const announcementData = {
-        ...newAnnouncement,
-        image: imageurl,
-      };
+    await addDoc(collection(db, "announcements"), announcementData);
 
-      await addDoc(collection(db, "announcements"), announcementData);
+    // reset form + close popup
+    setShowAddAnnouncementPopup(false);
+    setAnnouncementFile(null);
+    setAnnouncementPreview(null);
+    setNewAnnouncement({
+      createdAt: new Date().toLocaleString(),
+      createdBy: user?.fullName || "",
+      category: "Public Advisory",
+      isInFeatured: "Inactive",
+      isActive: true,
+    });
 
-      // close add popup
-      setShowAddAnnouncementPopup(false);
-      setAnnouncementFile(null);
-      setAnnouncementPreview(null);
-      setNewAnnouncement({
-        createdAt: new Date().toLocaleString(),
-        createdBy: user?.fullName || "",
-        category: "Public Advisory",
-        isInFeatured: "Inactive",
-        isActive: true,
-      });
+    // ✅ success popup
+    setPopupMessage("Announcement created successfully!");
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 3000);
+  } catch (error) {
+    console.error("Error creating announcement:", error);
+    setPopupErrorMessage("There was an error creating the announcement.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  }
+};
 
-      // show sliding popup instead of alert
-      setPopupMessage("Announcement created successfully!");
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 3000);
-    } catch (error) {
-      console.error("Error creating announcement:", error);
-    }
-  };
 
   const [activeFilter, setActiveFilter] = useState("");
   const [searchHeadline, setSearchHeadline] = useState("");
@@ -445,7 +473,7 @@ useEffect(() => {
           <div className="add-announcements-photo-section">
             <span className="add-announcements-details-label">Photo</span>
 
-            <div className="add-announcements-profile-container">
+            <div className={`add-announcements-profile-container ${invalidFields.includes("image") ? "input-error" : ""}`}>
               <img
                 src={announcementPreview || "/Images/thumbnail.png"} 
                 alt="Announcement"
@@ -482,7 +510,7 @@ useEffect(() => {
                 <p>Program Headline<span className="required">*</span></p>
                   <input
                   type="text"
-                  className="add-announcements-input-field"
+                  className={`add-announcements-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
                   placeholder="Program Name (E.g. Feeding Program)"
                   value ={newAnnouncement.announcementHeadline|| ""}
                   onChange={(e) => setNewAnnouncement({...newAnnouncement, announcementHeadline: e.target.value})}
@@ -492,7 +520,8 @@ useEffect(() => {
 
            <div className="fields-section-add-announcements">
               <p>Announcement Category<span className="required">*</span></p>
-              <select className="add-announcements-input-field"
+              <select
+                className={`add-announcements-input-field ${invalidFields.includes("category") ? "input-error" : ""}`}
                 value ={newAnnouncement.category}
                 onChange={(e) => setNewAnnouncement({...newAnnouncement, category: e.target.value})}
                 required
@@ -561,7 +590,7 @@ useEffect(() => {
                     <div className="title-description-announcements">
                         Full Content / Description
                     </div>
-                    <div className="box-container-description-announcements">
+                    <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
                       <textarea
                       placeholder="Write the full content/description of the announcement here..."
                       value ={newAnnouncement.content|| ""}
@@ -582,21 +611,38 @@ useEffect(() => {
 
 
        <div className="announcement-yesno-container">
-             <button onClick={() => {
-                setShowAddAnnouncementPopup(false);
-                setAnnouncementFile(null);
-                setAnnouncementPreview(null);
-                setNewAnnouncement({ 
-                  createdAt: new Date().toLocaleString(),
-                  createdBy: user?.fullName || "",
-                  category: "Public Advisory",
-                  isInFeatured: "Inactive",
-                  isActive: true,
-                });
-             }} className="announcement-no-button">Cancel</button>
-                     <button type = "button" onClick={() => setShowSubmitPopup(true)} className="announcement-yes-button">
-                     Save
-                </button>
+             <button
+                onClick={() => {
+                  setShowAddAnnouncementPopup(false);
+                  setAnnouncementFile(null);
+                  setAnnouncementPreview(null);
+                  setInvalidFields([]);       
+                  setPopupErrorMessage("");    
+                  setShowErrorPopup(false);    
+                  setNewAnnouncement({ 
+                    createdAt: new Date().toLocaleString(),
+                    createdBy: user?.fullName || "",
+                    category: "Public Advisory",
+                    isInFeatured: "Inactive",
+                    isActive: true,
+                  });
+                }}
+                className="announcement-no-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateFields()) {
+                    setShowSubmitPopup(true);
+                  }
+                }}
+                className="announcement-yes-button"
+              >
+                Save
+              </button>
+
 
        </div>
 
@@ -629,6 +675,15 @@ useEffect(() => {
           </div>
       </div>
   )}
+
+  {showErrorPopup && (
+            <div className={`error-popup-overlay show`}>
+                <div className="popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                    <p>{popupErrorMessage}</p>
+                </div>
+            </div>
+        )}
 
   {showSubmitPopup && (
     <div className="submit-announcements-confirmation-popup-overlay">
