@@ -164,7 +164,7 @@ return (
 
                         <div className="active-button-section-edit-announcement">
                                 <label className="switch-label">
-                                    Featured in Announcements
+                                    Featured in Home Page
                                     <label className="switch">
                                     <input type="checkbox" 
                                     checked={announcementData?.isInFeatured === "Active" || false}
