@@ -925,3 +925,214 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
   
+
+
+
+
+
+.addbrgyofficial-confirmation-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(px);
+  transition: background 0.3s ease-in-out;
+}
+
+.addbrgyofficial-confirmation-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.addbrgyofficial-confirmation-popup p{
+  color: rgb(97, 97, 97);
+}
+
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+
+  .barangay-official-yesno-container{
+    display: flex;
+    gap: 20px;
+  }
+
+
+  
+
+.addbrgyofficial-yes-button,
+.addbrgyofficial-no-button{
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  width: 150px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.addbrgyofficial-yes-button {
+  background-color: #4caf50; 
+}
+
+.addbrgyofficial-yes-buttonn:hover {
+  background-color: #3d8c40; 
+} 
+
+.addbrgyofficial-no-button {
+  background-color: #f44336;
+}
+
+.addbrgyofficial-no-button:hover {
+  background-color:  #c2352b; 
+} 
+
+
+
+@keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+
+.barangay-official-popup-overlay {
+    position: fixed;
+    top: 13%;
+    right: -3px;
+    background: #777575;
+    color: white;
+    width: 350px;
+    height: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-left: 10px solid #403f3e;
+  }
+  
+  .barangay-official-popup-overlay.show {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  .barangay-official-popup-overlay.hide {
+    animation: slideOut 0.5s ease-out;
+  }
+
+    .barangay-official-popup{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+
+
+
+
+.addbrgyofficial-error-popup-overlay{
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  color: white;
+  width: 430px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 3000;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.addbrgyofficial-error-popup-overlay{
+  background: #cc3434;
+  border-left: 10px solid #8a0f0f;
+}
+
+.addbrgyofficial-error-popup-overlay.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.addbrgyofficial-error-popup-overlay.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+
+
+
+.input-error {
+  border: 2px solid red !important;
+  background-color: #ffe5e5 !important;
+  animation: shake 0.3s ease-in-out;
+  transition: background-color 0.3s ease, border 0.3s ease;
+  box-shadow: 0 0 5px red;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+.input-error:hover {
+  background-color: #ffd6d6 !important;
+}
