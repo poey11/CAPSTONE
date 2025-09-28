@@ -506,17 +506,17 @@ useEffect(() => {
 
 
 
-              <div className="fields-section-add-announcements">
-                <label className="switch-label-add-announcement">
-                    <p>Featured in Announcements</p>
-                    <label className="switch">
-                    <input type="checkbox" defaultChecked 
-                    onChange={(e) => setNewAnnouncement({...newAnnouncement, isInFeatured: e.target.checked ? "Active" : "Inactive"})}
+              <div className="fields-section-add-announcements-toggle">
+ 
+                <p>Featured in Announcements</p>
+                <label className="switch">
+                <input type="checkbox" defaultChecked 
+                onChange={(e) => setNewAnnouncement({...newAnnouncement, isInFeatured: e.target.checked ? "Active" : "Inactive"})}
 
-                    />
-                    <span className="slider round"></span>
-                    </label>
+                />
+                <span className="slider round"></span>
                 </label>
+
                 </div>
 
             </div>

@@ -506,6 +506,21 @@ width: 100px;
   align-self: flex-start;
 }
 
+.fields-section-add-announcements-toggle{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.fields-section-add-announcements-toggle p{
+  font-size: 15px;
+  color: #2C3E50;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
   p .required {
     color: red;
     margin-left: 5px;
