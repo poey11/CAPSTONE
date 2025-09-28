@@ -92,35 +92,6 @@ export default function AnnouncementDetails() {
     const handleSaveChanges = async () => {
       if (!announcementId || !announcementData) return;
 
-      const newInvalidFields: string[] = [];
-
-      // Headline validation
-      if (!announcementData.announcementHeadline || announcementData.announcementHeadline.trim() === "") {
-        newInvalidFields.push("announcementHeadline");
-        setPopupErrorMessage("Program Headline is required.");
-      }
-
-      // Description validation
-      if (!announcementData.content || announcementData.content.trim() === "") {
-        newInvalidFields.push("content");
-        setPopupErrorMessage("Description is required.");
-      }
-
-      // Picture validation
-      if (!preview) {
-        newInvalidFields.push("image");
-        setPopupErrorMessage("A picture is required.");
-      }
-
-      if (newInvalidFields.length > 0) {
-        setInvalidFields(newInvalidFields);
-        setShowErrorPopup(true);
-        setTimeout(() => setShowErrorPopup(false), 3000);
-        return;
-      }
-
-      setInvalidFields([]); // clear errors if valid
-
       try {
         const docRef = doc(db, "announcements", announcementId);
         let updatedData = {
@@ -154,7 +125,7 @@ export default function AnnouncementDetails() {
 
         setPopupMessage("Announcement updated successfully!");
         setShowPopup(true);
-        
+
         setTimeout(() => {
           setShowPopup(false);
           router.push("/dashboard/ProgramsModule/Announcements");
@@ -168,12 +139,51 @@ export default function AnnouncementDetails() {
       }
     };
 
+    const validateFields = () => {
+      const newInvalidFields: string[] = [];
+
+      if (!announcementData?.announcementHeadline || announcementData.announcementHeadline.trim() === "") {
+        newInvalidFields.push("announcementHeadline");
+        setPopupErrorMessage("Program Headline is required.");
+        setActiveSection("details"); // 🔹 jump to details
+      }
+
+      if (!announcementData?.content || announcementData.content.trim() === "") {
+        newInvalidFields.push("content");
+        setPopupErrorMessage("Description is required.");
+        setActiveSection("description"); // 🔹 jump to description
+      }
+
+      if (!preview) {
+        newInvalidFields.push("image");
+        setPopupErrorMessage("A picture is required.");
+        setActiveSection("others"); // 🔹 jump to others
+      }
+
+      if (newInvalidFields.length > 0) {
+        setInvalidFields(newInvalidFields);
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return false; 
+      }
+
+      setInvalidFields([]);
+      return true; 
+    };
+
     const [activeSection, setActiveSection] = useState<"details" | "description" | "others">("details");
 
 
     const confirmSave = () => {
       setShowSavePopup(false); 
       handleSaveChanges();     
+    };
+
+
+    const handleSaveClick = () => {
+      if (validateFields()) {
+        setShowSavePopup(true); // only open confirmation if valid
+      }
     };
 
     const confirmDiscard = () => {
@@ -201,7 +211,7 @@ return (
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShowSavePopup(true)}
+                      onClick={handleSaveClick}   
                       className="action-save"
                     >
                       Save
