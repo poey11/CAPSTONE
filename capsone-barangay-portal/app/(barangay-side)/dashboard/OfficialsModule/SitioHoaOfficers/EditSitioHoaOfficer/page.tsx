@@ -38,6 +38,18 @@ export default function EditOfficer() {
     const [selectedOfficial, setSelectedOfficial] = useState<NewOfficerDetails>({});
     const [selectedOfficialData, setSelectedOfficialData] = useState<NewOfficerDetails>({});
     const [dataSet, setDataSet] = useState(false);
+
+
+
+
+
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  
     
     useEffect(()=>{
         if (!officialId) return;
@@ -83,37 +95,99 @@ export default function EditOfficer() {
 
     };
 
-    const handleSaveChanges = async () => {
-        if (!officialId) return;
-        try {
-            const docRef = doc(db, "hoaSitioOfficers", officialId as string);
-            let updateData={
-                ...selectedOfficial,
-                updatedAt: new Date().toLocaleString(),
-                updatedBy: user?.fullName || "Unknown",
-            };
-            if (identificationFile && !(selectedOfficial.image && selectedOfficial.image.includes(identificationFile.name))) {
-            
-                const imageRef = ref(storage, selectedOfficial.image);
-                await deleteObject(imageRef).catch((error) => { 
-                    console.log("No previous image to delete or error deleting:", error);
-                });
-                const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile.name}`);
-                await uploadBytes(storageRef, identificationFile);
-                const downloadURL = await getDownloadURL(storageRef);
-                updateData = {
-                  ...updateData,
-                  image: downloadURL,
-                };
-            }
 
-            await updateDoc(docRef, updateData);
-            alert("Officer details updated successfully!");
-            router.push("/dashboard/OfficialsModule/SitioHoaOfficers");
-        } catch (error) {
-            
-        }
+
+      //Validation before saving
+  const validateAndConfirm = () => {
+    const newInvalidFields: string[] = [];
+
+    if (!selectedOfficial.fullName) newInvalidFields.push("fullName");
+    if (!selectedOfficial.email) newInvalidFields.push("email");
+     if (!selectedOfficial.facebook) newInvalidFields.push("facebook");
+    if (!selectedOfficial.department) newInvalidFields.push("department");
+    if (!selectedOfficial.position) newInvalidFields.push("position");
+    if (selectedOfficial.position === "Others" && !selectedOfficial.otherPosition) newInvalidFields.push("otherPosition");
+    if (!selectedOfficial.location) newInvalidFields.push("location");
+    if (!selectedOfficial.clusterSection) newInvalidFields.push("clusterSection");
+    if (selectedOfficial.clusterSection === "Others" && !selectedOfficial.otherClusterSection) newInvalidFields.push("otherClusterSection");
+    if (!selectedOfficial.contact) newInvalidFields.push("contact");
+    if (!identificationFile && !selectedOfficial.image) newInvalidFields.push("identificationFile");
+
+    if (newInvalidFields.length > 0) {
+      setInvalidFields(newInvalidFields);
+      setErrorMessage("Please fill in all required fields.");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
     }
+
+    // ✅ Regex validations
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(selectedOfficial.contact || "")) {
+      setInvalidFields(["contact"]);
+      setErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (selectedOfficial.email && !emailRegex.test(selectedOfficial.email)) {
+      setInvalidFields(["email"]);
+      setErrorMessage("Invalid email address. Format: example@domain.com");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+
+    setInvalidFields([]);
+    setShowSubmitPopup(true);
+    return true;
+  };
+
+
+
+  const handleSaveChanges = async () => {
+    if (!officialId) return;
+    if (!validateAndConfirm()) return; // ✅ validation before saving
+
+      setShowSubmitPopup(false);
+
+    try {
+      const docRef = doc(db, "hoaSitioOfficers", officialId as string);
+      let updateData = {
+        ...selectedOfficial,
+        updatedAt: new Date().toLocaleString(),
+        updatedBy: user?.fullName || "Unknown",
+      };
+
+      if (identificationFile && !(selectedOfficial.image && selectedOfficial.image.includes(identificationFile.name))) {
+        if (selectedOfficial.image) {
+          const imageRef = ref(storage, selectedOfficial.image);
+          await deleteObject(imageRef).catch(() => {});
+        }
+        const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile.name}`);
+        await uploadBytes(storageRef, identificationFile);
+        const downloadURL = await getDownloadURL(storageRef);
+        updateData = { ...updateData, image: downloadURL };
+      }
+
+      await updateDoc(docRef, updateData);
+     // alert("Officer details updated successfully!");
+
+    // show success popup for 3s, then redirect
+        setPopupMessage("Barangay User created successfully!");
+        setShowPopup(true);
+
+        setTimeout(() => {
+        setShowPopup(false);
+        router.push("/dashboard/OfficialsModule/SitioHoaOfficers");
+        }, 3000);
+    } catch (error) {
+        setErrorMessage("There was an error adding the new officer.");
+        console.error(error);
+    }
+  };
 
     return (
         <main className="edit-officer-main-container">
@@ -129,7 +203,7 @@ export default function EditOfficer() {
 
                     <div className="action-btn-section">
                         <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-                        <button type = "button" onClick={handleSaveChanges} className="action-save">
+                        <button type = "button" onClick={validateAndConfirm} className="action-save">
                             Save
                         </button>
                     </div>
@@ -154,137 +228,243 @@ export default function EditOfficer() {
                         <form  className="edit-officer-section-2">
                             {activeSection === "details" && (
                                 <>
-                                    <div className="edit-officer-section-2-full-top">
-                                        <div className="edit-official-section-2-left-side">
-                                            <div className="fields-section-official">
-                                                <p>Officer Full Name<span className="required">*</span></p>
-                                                <input type="text" 
-                                                value ={selectedOfficial.fullName|| ""}
-                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, fullName: e.target.value})}
-                                                    className="edit-officer-input-field" />
-                                            </div>
-                                            <div className="fields-section-official">
-                                                <p>Email<span className="required">*</span></p>
-                                                <input type="text" 
-                                                value={selectedOfficial.email || ""}
-                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, email: e.target.value})}    
-                                        
-                                                className="edit-officer-input-field" />
-                                            </div>
-                                            <div className="fields-section-official">
-                                                <p>Facebook</p>
-                                                <input type="text" 
-                                                value={selectedOfficial.facebook || ""}
-                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, facebook: e.target.value})}
-                                                className="edit-officer-input-field" />
-                                            </div>
-                                            <div className="fields-section-official">
-                                                <p>Department<span className="required">*</span></p>
-                                                <select
-                                                    className="edit-officer-input-field"
-                                                    name="position"
-                                                    value={selectedOfficial.department || ""}
-                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, department: e.target.value})}
-                                                >
-                                                    <option value="" disabled>Select a Department</option>
-                                                    <option value="SITIO">SITIO</option>
-                                                    <option value="HOA">HOA</option>
-                                                </select>
-                                            </div>
+
+                            <div className="edit-officer-section-2-full-top">
+                                    <div className="edit-official-section-2-left-side">
+                                        <div className="fields-section-official">
+                                        <p>
+                                            Officer Full Name<span className="required">*</span>
+                                        </p>
+                                        <input
+                                            type="text"
+                                            value={selectedOfficial.fullName || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                fullName: e.target.value,
+                                            })
+                                            }
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("fullName") ? "input-error" : ""
+                                            }`}
+                                        />
                                         </div>
-                                        <div className="edit-officer-section-2-right-side">
-                                            <div className="fields-section-official">
-                                                <p>Position<span className="required">*</span></p>
-                                                <select
-                                                className="edit-officer-input-field"
-                                                name="position"
-                                                required
-                                                >
-                                                    <option value="" disabled>Position</option>
-                                                        {selectedOfficial.department === "HOA" ? (
-                                                          <>
-                                                            <option value="Association President">Association President</option>
-                                                            <option value="Association Officer">Association Officer</option>
-                                                          </>
-                                                        ):(
-                                                          <>
-                                                            <option value="Sitio President">Sitio President</option>
-                                                            <option value="Sitio Officer">Sitio Officer</option>
-                                                          </>
-                                                        )}
-                                                        <option value="Others">Others</option>
-                                                </select>
-                                            </div>
-                                            {selectedOfficial.position === "Others" && (
-                                                <div className="fields-section-official">
-                                                    <p>Please Specify Position<span className="required">*</span></p>
-                                                    <input 
-                                                        type="text" 
-                                                        className="edit-officer-input-field"
-                                                        name="otherPosition"
-                                                        value={selectedOfficial.otherPosition || ""}
-                                                        onChange={(e) => setSelectedOfficial({...selectedOfficial, otherPosition: e.target.value})}
-                                                    />
-                                                </div>
-                                            )}
-                                            <div className="fields-section-official">
-                                                <p>Location<span className="required">*</span></p>
-                                                <select
-                                                className="edit-officer-input-field"
-                                                name="position"
-                                                value={selectedOfficial.location || ""}
-                                                onChange={(e) => setSelectedOfficial({...selectedOfficial, location: e.target.value})}
-                                                >
-                                                <option value="" disabled>Location</option>
-                                                <option value="East Fairview">East Fairview</option>
-                                                <option value="West Fairview">West Fairview</option>
-                                                <option value="South Fairview">South Fairview</option>
-                                                </select>
-                                            </div>
-                                            <div className="fields-section-official">
-                                                <p>Cluster/Section<span className="required">*</span></p>
-                                                <select 
-                                                    className="edit-officer-input-field"
-                                                    name="clusterSection"
-                                                    value={selectedOfficial.clusterSection || ""}
-                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, clusterSection: e.target.value})}
-                                                >
-                                                    <option value="" disabled>Select Cluster/Section</option>
-                                                    <option value="SITIO KISLAP">SITIO KISLAP</option>
-                                                    <option value="URLINA">URLINA</option>
-                                                    <option value="EFHAI">EFHAI</option>
-                                                    <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
-                                                    <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
-                                                    <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
-                                                    <option value="Others">Others</option>
-                                                </select>
-                                            </div>
-                                            {selectedOfficial.clusterSection === "Others" && (
-                                                <div className="fields-section-official">
-                                                    <p>Please Specify Cluster/Section<span className="required">*</span></p>
-                                                    <input
-                                                        type="text"
-                                                        className="edit-officer-input-field"
-                                                        name="otherClusterSection"
-                                                        value={selectedOfficial.otherClusterSection || ""}
-                                                        onChange={(e) => setSelectedOfficial({...selectedOfficial, otherClusterSection: e.target.value})}
-                                                    />
-                                                </div>
-                                            )}
-                                            <div className="fields-section-official">
-                                                <p>Contact Number<span className="required">*</span></p>
-                                                <input 
-                                                    type="tel" 
-                                                    className="edit-officer-input-field"
-                                                    name="contact"
-                                                    pattern="^[0-9]{11}$" 
-                                                    placeholder="Enter 11-digit phone number" 
-                                                    value={selectedOfficial.contact || ""}
-                                                    onChange={(e) => setSelectedOfficial({...selectedOfficial, contact: e.target.value})}
-                                                />
-                                            </div>
+
+                                        <div className="fields-section-official">
+                                        <p>Email<span className="required">*</span></p>
+                                        <input
+                                            type="text"
+                                            value={selectedOfficial.email || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                email: e.target.value,
+                                            })
+                                            }
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("email") ? "input-error" : ""
+                                            }`}
+                                        />
+                                        </div>
+
+                                        <div className="fields-section-official">
+                                        <p>Facebook<span className="required">*</span></p>
+                                        <input
+                                            type="text"
+                                            value={selectedOfficial.facebook || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                facebook: e.target.value,
+                                            })
+                                            }
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("facebook") ? "input-error" : ""
+                                            }`}
+                                        />
+                                        </div>
+
+                                        <div className="fields-section-official">
+                                        <p>Department<span className="required">*</span></p>
+                                        <select
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("department") ? "input-error" : ""
+                                            }`}
+                                            name="department"
+                                            value={selectedOfficial.department || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                department: e.target.value,
+                                            })
+                                            }
+                                        >
+                                            <option value="" disabled>
+                                            Select a Department
+                                            </option>
+                                            <option value="SITIO">SITIO</option>
+                                            <option value="HOA">HOA</option>
+                                        </select>
                                         </div>
                                     </div>
+
+                                    <div className="edit-officer-section-2-right-side">
+                                        <div className="fields-section-official">
+                                        <p>Position<span className="required">*</span></p>
+                                        <select
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("position") ? "input-error" : ""
+                                            }`}
+                                            name="position"
+                                            value={selectedOfficial.position || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                position: e.target.value,
+                                            })
+                                            }
+                                        >
+                                            <option value="" disabled>
+                                            Position
+                                            </option>
+                                            {selectedOfficial.department === "HOA" ? (
+                                            <>
+                                                <option value="Association President">
+                                                Association President
+                                                </option>
+                                                <option value="Association Officer">Association Officer</option>
+                                            </>
+                                            ) : (
+                                            <>
+                                                <option value="Sitio President">Sitio President</option>
+                                                <option value="Sitio Officer">Sitio Officer</option>
+                                            </>
+                                            )}
+                                            <option value="Others">Others</option>
+                                        </select>
+                                        </div>
+
+                                        {selectedOfficial.position === "Others" && (
+                                        <div className="fields-section-official">
+                                            <p>
+                                            Please Specify Position<span className="required">*</span>
+                                            </p>
+                                            <input
+                                            type="text"
+                                            className={`edit-officer-input-field ${
+                                                invalidFields.includes("otherPosition") ? "input-error" : ""
+                                            }`}
+                                            name="otherPosition"
+                                            value={selectedOfficial.otherPosition || ""}
+                                            onChange={(e) =>
+                                                setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                otherPosition: e.target.value,
+                                                })
+                                            }
+                                            />
+                                        </div>
+                                        )}
+
+                                        <div className="fields-section-official">
+                                        <p>Location<span className="required">*</span></p>
+                                        <select
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("location") ? "input-error" : ""
+                                            }`}
+                                            name="location"
+                                            value={selectedOfficial.location || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                location: e.target.value,
+                                            })
+                                            }
+                                        >
+                                            <option value="" disabled>
+                                            Location
+                                            </option>
+                                            <option value="East Fairview">East Fairview</option>
+                                            <option value="West Fairview">West Fairview</option>
+                                            <option value="South Fairview">South Fairview</option>
+                                        </select>
+                                        </div>
+
+                                        <div className="fields-section-official">
+                                        <p>Cluster/Section<span className="required">*</span></p>
+                                        <select
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("clusterSection") ? "input-error" : ""
+                                            }`}
+                                            name="clusterSection"
+                                            value={selectedOfficial.clusterSection || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                clusterSection: e.target.value,
+                                            })
+                                            }
+                                        >
+                                            <option value="" disabled>
+                                            Select Cluster/Section
+                                            </option>
+                                            <option value="SITIO KISLAP">SITIO KISLAP</option>
+                                            <option value="URLINA">URLINA</option>
+                                            <option value="EFHAI">EFHAI</option>
+                                            <option value="TULIP RESIDENCES HOA">
+                                            TULIP RESIDENCES HOA
+                                            </option>
+                                            <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
+                                            <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
+                                            <option value="Others">Others</option>
+                                        </select>
+                                        </div>
+
+                                        {selectedOfficial.clusterSection === "Others" && (
+                                        <div className="fields-section-official">
+                                            <p>
+                                            Please Specify Cluster/Section<span className="required">*</span>
+                                            </p>
+                                            <input
+                                            type="text"
+                                            className={`edit-officer-input-field ${
+                                                invalidFields.includes("otherClusterSection") ? "input-error" : ""
+                                            }`}
+                                            name="otherClusterSection"
+                                            value={selectedOfficial.otherClusterSection || ""}
+                                            onChange={(e) =>
+                                                setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                otherClusterSection: e.target.value,
+                                                })
+                                            }
+                                            />
+                                        </div>
+                                        )}
+
+                                        <div className="fields-section-official">
+                                        <p>Contact Number<span className="required">*</span></p>
+                                        <input
+                                            type="tel"
+                                            className={`edit-officer-input-field ${
+                                            invalidFields.includes("contact") ? "input-error" : ""
+                                            }`}
+                                            name="contact"
+                                            pattern="^[0-9]{11}$"
+                                            placeholder="Enter 11-digit phone number"
+                                            value={selectedOfficial.contact || ""}
+                                            onChange={(e) =>
+                                            setSelectedOfficial({
+                                                ...selectedOfficial,
+                                                contact: e.target.value,
+                                            })
+                                            }
+                                        />
+                                        </div>
+                                    </div>
+                                    </div>
+
+          
                                 </>
                             )}
                             {activeSection === "others" && (
@@ -338,6 +518,47 @@ export default function EditOfficer() {
                 </div>
 
             </div>
+
+
+
+
+
+
+            {showSubmitPopup && (
+                <div className="addbrgyofficial-confirmation-popup-overlay">
+                         <div className="addbrgyofficial-confirmation-popup">
+                          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                           <p>Are you sure you want to submit?</p>
+                             <div className="barangay-official-yesno-container">
+                              <button onClick={() => setShowSubmitPopup(false)} className="addbrgyofficial-no-button">No</button>
+                           <button onClick={handleSaveChanges} className="addbrgyofficial-yes-button">Yes</button> 
+                       </div> 
+                    </div>
+               </div>
+           )}
+
+        
+            {showPopup && (
+                <div className={`barangay-official-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                     <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                     <p>{popupMessage}</p>
+                </div>
+            </div>
+            )}
+
+
+                    
+        {showErrorPopup && (
+                <div className={`addbrgyofficial-error-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{errorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
 
 
             {showDiscardPopup && (
