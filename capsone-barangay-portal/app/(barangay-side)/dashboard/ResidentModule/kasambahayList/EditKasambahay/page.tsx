@@ -514,13 +514,12 @@ export default function EditKasambahay() {
                       <div className="fields-section">
                         <p>Registration Control Number</p>
                         <input
-                          type="text" 
-                          name="registrationControlNumber" 
-                          value={formData.registrationControlNumber} 
-                          onChange={handleChange} 
-                          disabled={!canEditField("registrationControlNumber")}
-                          className={`add-resident-input-field${!canEditField("registrationControlNumber") ? "-disabled" : ""}`}
-                          style={disabledStyle("registrationControlNumber")}
+                          type="text"
+                          name="registrationControlNumber"
+                          value={formData.registrationControlNumber}
+                          onChange={handleChange}
+                          disabled={true}
+                          className="add-resident-input-field-disabled"                        
                         />
                       </div>
 
