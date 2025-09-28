@@ -41,6 +41,13 @@ export default function AnnouncementModule() {
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 10;
 
+  // popop
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteAnnouncementId, setDeleteAnnouncementId] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+
 
   const [announcementFile, setAnnouncementFile] = useState<File | null>(null);
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
@@ -76,42 +83,53 @@ export default function AnnouncementModule() {
     isActive: true,
   });
 
-  const createAnnouncement= async() => {
-    if(!newAnnouncement.announcementHeadline){
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false); // close confirm popup
+    await createAnnouncement(); // call create
+  };
+
+  const createAnnouncement = async () => {
+    if (!newAnnouncement.announcementHeadline) {
       alert("Please fill in the program headline.");
       return;
     }
-    if(!newAnnouncement.category){
+    if (!newAnnouncement.category) {
       alert("Please select the program category.");
       return;
     }
-    if(!newAnnouncement.content){
+    if (!newAnnouncement.content) {
       alert("Please fill in the program content/description.");
       return;
-    } 
-    if(!announcementFile){
+    }
+    if (!announcementFile) {
       alert("Please upload the program photo.");
       return;
     }
+
     try {
-      const storageRef = ref(storage, `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`);
+      const storageRef = ref(
+        storage,
+        `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`
+      );
       let imageurl = "";
       if (announcementFile) {
         await uploadBytes(storageRef, announcementFile);
         const downloadURL = await getDownloadURL(storageRef);
         imageurl = downloadURL;
       }
+
       const announcementData = {
         ...newAnnouncement,
         image: imageurl,
-      }
+      };
 
-      const docRef = await addDoc(collection(db, "announcements"), announcementData);
-      alert("Announcement created successfully!");
+      await addDoc(collection(db, "announcements"), announcementData);
+
+      // close add popup
       setShowAddAnnouncementPopup(false);
       setAnnouncementFile(null);
       setAnnouncementPreview(null);
-      setNewAnnouncement({ 
+      setNewAnnouncement({
         createdAt: new Date().toLocaleString(),
         createdBy: user?.fullName || "",
         category: "Public Advisory",
@@ -119,28 +137,14 @@ export default function AnnouncementModule() {
         isActive: true,
       });
 
+      // show sliding popup instead of alert
+      setPopupMessage("Announcement created successfully!");
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 3000);
     } catch (error) {
-      
+      console.error("Error creating announcement:", error);
     }
-  }
-  
-  const deleteAnnnounce = async (id: string) => {
-    if (confirm("Are you sure you want to delete this program?")) {
-      const announcementToDelete = announcements.find((a) => a.id === id);
-        if(announcementToDelete){
-          if(announcementToDelete.image){
-            const imageRef = ref(storage, announcementToDelete.image);
-            await deleteObject(imageRef).catch((error) => {
-              console.error("Error deleting image from storage: ", error);
-            });
-          }
-        
-          await deleteDoc(doc(db, "announcements", id));
-          alert("Announcement deleted successfully!");
-        }
-    }
-    
-  }
+  };
 
   const [activeFilter, setActiveFilter] = useState("");
   const [searchHeadline, setSearchHeadline] = useState("");
@@ -204,6 +208,37 @@ useEffect(() => {
 
 
 
+  const confirmDelete = async () => {
+    if (deleteAnnouncementId) {
+      try {
+        const announcementToDelete = announcements.find((a) => a.id === deleteAnnouncementId);
+
+        if (announcementToDelete) {
+
+          if (announcementToDelete.image) {
+            const imageRef = ref(storage, announcementToDelete.image);
+            await deleteObject(imageRef).catch((error) => {
+              console.error("Error deleting image from storage: ", error);
+            });
+          }
+
+          await deleteDoc(doc(db, "announcements", deleteAnnouncementId));
+
+          setPopupMessage("Announcement deleted successfully!");
+          setShowPopup(true);
+
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 3000);
+        }
+
+        setShowDeletePopup(false);
+        setDeleteAnnouncementId(null);
+      } catch (error) {
+        console.error("Error deleting announcement:", error);
+      }
+    }
+  };
 
 
 
@@ -353,10 +388,12 @@ useEffect(() => {
 
                           <button
                             type="button"
-                            onClick={() => { deleteAnnnounce(announcement.id); }}
+                            onClick={() => {
+                              setDeleteAnnouncementId(announcement.id);
+                              setShowDeletePopup(true);
+                            }}
                             className="action-announcements-button"
                           >
-
                             <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
                           </button>
                         </>
@@ -470,7 +507,7 @@ useEffect(() => {
 
 
               <div className="fields-section-add-announcements">
-                <label className="switch-label">
+                <label className="switch-label-add-announcement">
                     <p>Featured in Announcements</p>
                     <label className="switch">
                     <input type="checkbox" defaultChecked 
@@ -557,7 +594,7 @@ useEffect(() => {
                   isActive: true,
                 });
              }} className="announcement-no-button">Cancel</button>
-                     <button type = "button" onClick={createAnnouncement} className="announcement-yes-button">
+                     <button type = "button" onClick={() => setShowSubmitPopup(true)} className="announcement-yes-button">
                      Save
                 </button>
 
@@ -570,16 +607,41 @@ useEffect(() => {
 
 )}
 
-  {isPopupOpen && (
-    <div className="user-roles-view-popup-overlay add-incident-animated">
-      <div className="view-barangayuser-popup">
-
+  {showDeletePopup && (
+    <div className="announcements-confirmation-popup-overlay">
+      <div className="announcements-confirmation-popup">
+        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+        <p>Are you sure you want to delete this Announcement?</p>
+        <div className="announcements-yesno-container">
+          <button onClick={() => setShowDeletePopup(false)} className="announcements-no-button">No</button>
+          <button onClick={confirmDelete} className="announcements-yes-button">Yes</button>
+        </div> 
       </div>
     </div>
   )}
 
 
+  {showPopup && (
+      <div className={`announcements-popup-overlay show`}>
+          <div className="announcements-popup">
+              <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+              <p>{popupMessage}</p>
+          </div>
+      </div>
+  )}
 
+  {showSubmitPopup && (
+    <div className="submit-announcements-confirmation-popup-overlay">
+        <div className="submit-announcements-confirmation-popup">
+            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+            <p>Are you sure you want to submit?</p>
+            <div className="announcements-yesno-container">
+                <button onClick={() => setShowSubmitPopup(false)} className="announcements-no-button">No</button>
+                <button onClick={confirmSubmit} className="announcements-yes-button">Yes</button> 
+            </div> 
+        </div>
+    </div>
+  )}
 
 
     </main>

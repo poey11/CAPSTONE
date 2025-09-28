@@ -538,7 +538,7 @@ width: 100px;
 
 
 /* Label for the switch with text */
-.switch-label {
+.switch-label-announcement {
   display: flex;
   align-items: center;
   gap: 10px; /* space between text and switch */
@@ -702,3 +702,179 @@ width: 100px;
   background-color: #c2352b; 
 }
 
+  .announcements-confirmation-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; 
+  }
+
+    .announcements-confirmation-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 230px;
+    width: 470px;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    border: 2px solid rgb(168, 161, 158);
+    box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: lighter;
+    position: fixed;
+  }
+
+   .announcements-confirmation-popup p{
+    color: rgb(97, 97, 97);
+  }
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+  .announcements-yesno-container{
+    display: flex;
+    gap: 20px;
+  }
+
+
+  .announcements-yes-button,
+  .announcements-no-button{
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    width: 150px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    margin-top: 20px;
+  }
+  
+  .announcements-yes-button {
+    background-color: #4caf50; 
+  }
+
+  .announcements-yes-button:hover {
+    background-color: #3d8c40; 
+  } 
+
+  .announcements-no-button {
+    background-color: #f44336;
+  }
+
+  .announcements-no-button:hover {
+    background-color:  #c2352b; 
+  } 
+
+  @keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+  .announcements-popup-overlay {
+    position: fixed;
+    top: 13%;
+    right: -3px;
+    background: #777575;
+    color: white;
+    width: 350px;
+    height: 50px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    text-align: center;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-left: 10px solid #403f3e;
+  }
+
+    .announcements-popup-overlay.show {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  .announcements-popup-overlay.hide {
+    animation: slideOut 0.5s ease-out;
+  }
+
+   .announcements-popup{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+.submit-announcements-confirmation-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(px);
+  transition: background 0.3s ease-in-out;
+}
+
+.submit-announcements-confirmation-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.submit-announcements-confirmation-popup p{
+  color: rgb(97, 97, 97);
+}
