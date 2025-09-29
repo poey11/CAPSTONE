@@ -1299,3 +1299,24 @@ input[type="checkbox"] {
   justify-content: center;
   align-items: center;
 }
+
+
+/* BarangayCertificate.css */
+
+.employers-table-row.claimed {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.employers-table-row.unclaimed {
+  cursor: pointer;
+}
+
+.status-cell {
+  font-weight: 400;
+}
+
+.status-cell.claimed {
+  color: #b91c1c; /* tailwind's red-700 */
+  font-weight: 600;
+}

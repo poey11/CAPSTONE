@@ -126,6 +126,61 @@ export default function Action({ searchParams }: any) {
 
   const [checkingAccess, setCheckingAccess] = useState(true);
 
+
+  // new addition of blocking jobseeker cert after first time(firstTimeClaimed dependent on JobSeekerList collection)
+  const [jobseekerClaimed, setJobseekerClaimed] = useState<boolean | null>(null);
+  const [checkingJobseekerStatus, setCheckingJobseekerStatus] = useState(false);
+
+
+  useEffect(() => {
+  const checkJobseekerClaim = async () => {
+    // only check if user is verified and has residentId
+    if (!userData?.residentId || userData?.status !== "Verified") {
+      setJobseekerClaimed(false);
+      return;
+    }
+
+    setCheckingJobseekerStatus(true);
+    try {
+      // Adjust collection name if yours differs (e.g. "JobSeekers", "JobSeekerList")
+      const qRef = query(
+        collection(db, "JobSeekerList"),
+        where("residentId", "==", userData.residentId),
+        where("firstTimeClaimed", "==", true)
+      );
+
+      const snap = await getDocs(qRef);
+      setJobseekerClaimed(!snap.empty); // true if at least one claimed record exists
+    } catch (err) {
+      console.error("Failed to check JobSeeker first-claim status:", err);
+      // Fail-safe: don't block if we can't verify, but you can choose to block instead.
+      setJobseekerClaimed(false);
+    } finally {
+      setCheckingJobseekerStatus(false);
+    }
+  };
+
+  checkJobseekerClaim();
+}, [userData?.residentId, userData?.status]);
+
+// end of jobseeker cert blocking
+
+function formatCreatedAtPH(date: Date): string {
+  // No manual math — let Intl handle the timezone.
+  return date.toLocaleString("en-US", {
+    timeZone: "Asia/Manila",
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+}
+
+
+
 // docs that require a Verified resident
 const RESTRICTED_DOCS = new Set([
   "Barangay Certificate",
@@ -196,6 +251,7 @@ useEffect(() => {
     accountId: user?.uid || "Guest",
     residentId: userData?.residentId || "Guest",
     docType: docB || "" ,
+    docB,
     isViewed: false,
     requestId: "",
     purpose: purpose || "",
@@ -924,9 +980,9 @@ const handleFileChange = (
       requestorId: userData?.residentId || "Guest",
       isRead: false,
       ...(documentTypeIs !== "" ? {
-        transactionType: documentTypeIs,}:
+        transactionType: "Online Service Request",}:
       {
-        transactionType: "ServiceRequest",
+        transactionType: "Online Service Request",
       }),      recipientRole: (
         clearanceInput.purpose === "First Time Jobseeker" ||
         clearanceInput.docB === "Barangay Certificate" ||
@@ -949,9 +1005,9 @@ const handleFileChange = (
     message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
     timestamp: new Date(),
     ...(documentTypeIs !== "" ? {
-        transactionType: documentTypeIs,}:
+        transactionType: "Online Service Request",}:
       {
-        transactionType: "ServiceRequest",
+        transactionType: "Online Service Request",
       }),
     isRead: false,
   });
@@ -1309,7 +1365,7 @@ const handleFileChange = (
       clearanceInput.purpose === "First Time Jobseeker"
       ) {
       const clearanceVars: Record<string, any> = {
-        createdAt: clearanceInput.dateRequested,
+        createdAt: formatCreatedAtPH(new Date()),
         requestId: clearanceInput.requestId,
         reqType: "Online",
         status: "Pending",
@@ -1317,6 +1373,7 @@ const handleFileChange = (
         requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
         accID: clearanceInput.accountId,
         docType: docB,
+        docB,
         purpose: clearanceInput.purpose,
         dateOfResidency: clearanceInput.dateOfResidency,
         address: clearanceInput.address,
@@ -1449,7 +1506,7 @@ const handleFileChange = (
       // 📌 Handling for Temporary Business Permit & Business Permit
       if (docB === "Temporary Business Permit" || docB === "Business Permit") {
       const clearanceVars = {
-        createdAt: clearanceInput.dateRequested,
+        createdAt: formatCreatedAtPH(new Date()),
         requestId: clearanceInput.requestId,
         status: "Pending",
         reqType: "Online",
@@ -1465,6 +1522,7 @@ const handleFileChange = (
         contact: clearanceInput.contact,
         citizenship: clearanceInput.citizenship,
         docType: docB,
+        docB,
         purpose: clearanceInput.purpose,
         businessName: clearanceInput.businessName,
         businessLocation: clearanceInput.businessLocation,
@@ -1482,7 +1540,7 @@ const handleFileChange = (
       // 📌 Handling for Construction Permit
       if (docB === "Construction") {
       const clearanceVars = {
-        createdAt: clearanceInput.dateRequested,
+        createdAt: formatCreatedAtPH(new Date()),
         requestId: clearanceInput.requestId,
         status: "Pending",
         statusPriority: 1,
@@ -1490,6 +1548,7 @@ const handleFileChange = (
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         docType: docB,
+        docB,
         typeofconstruction: clearanceInput.typeofconstruction,
         homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
         dateOfResidency: clearanceInput.dateOfResidency,
@@ -1525,7 +1584,7 @@ const handleFileChange = (
         !["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose)
       ) {
       const clearanceVars: Record<string, any> = {
-        createdAt: clearanceInput.dateRequested,
+        createdAt: formatCreatedAtPH(new Date()),
         requestId: clearanceInput.requestId,
         reqType: "Online",
         status: "Pending",
@@ -1533,6 +1592,7 @@ const handleFileChange = (
         requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
         accID: clearanceInput.accountId,
         docType: docB,
+        docB,
         purpose: clearanceInput.purpose,
         dateOfResidency: clearanceInput.dateOfResidency,
         address: clearanceInput.address,
@@ -1873,7 +1933,22 @@ const handleFileChange = (
                               {!isGuest && (
                                 <>
                                   <option value="Barangay ID">Barangay ID</option>
-                                  <option value="First Time Jobseeker">Jobseeker Certificate</option>
+
+                                  {/* First Time Jobseeker: show only if not claimed */}
+                                  {jobseekerClaimed === false && (
+                                    <option value="First Time Jobseeker">First Time Jobseeker Certificate</option>
+                                  )}
+                                  {jobseekerClaimed === true && (
+                                    <option value="First Time Jobseeker" disabled>
+                                      First Time Jobseeker Certificate (already claimed)
+                                    </option>
+                                  )}
+                                  {/* Optional: while checking, keep it disabled */}
+                                  {checkingJobseekerStatus && (
+                                    <option value="" disabled>
+                                      Checking jobseeker eligibility…
+                                    </option>
+                                  )}
                                 </>
                               )}
 
