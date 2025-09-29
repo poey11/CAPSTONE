@@ -587,7 +587,7 @@ export default function EditBarangayAccount() {
                         <p>{popupErrorMessage}</p>
                     </div>
                 </div>
-                )}
+            )}
 
         </main>
     );
