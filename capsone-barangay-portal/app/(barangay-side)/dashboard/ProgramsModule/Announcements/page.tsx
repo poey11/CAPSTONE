@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/AnnouncementsBrgy/Announcements.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {useSession} from "next-auth/react";
 import { addDoc, collection, onSnapshot, deleteDoc, doc} from "firebase/firestore";
@@ -16,6 +16,8 @@ interface AnnouncementHeader {
   updatedBy?: string;
   image:string;
   isInFeatured?: string;
+  isActive?: boolean;
+  content?: string;
 }
 interface AnnouncementFormProps {
   announcementHeadline?: string;
@@ -49,11 +51,17 @@ export default function AnnouncementModule() {
   const [showSubmitPopup, setShowSubmitPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [showViewPopup, setShowViewPopup] = useState(false);
+
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementHeader | null>(null);
 
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const [announcementFile, setAnnouncementFile] = useState<File | null>(null);
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
+
+  const popupRef = useRef<HTMLDivElement | null>(null);
+  const [activeSection, setActiveSection] = useState("details");
 
   const handleAnnouncementFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -289,6 +297,17 @@ useEffect(() => {
       router.push(`/dashboard/ProgramsModule/Announcements/AnnouncementDetails?id=${id}`)
     };
 
+
+    const handleBack = () => {
+        setShowViewPopup(false);
+        /*setViewUser(null);
+    
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });*/
+    };
+
   return (
     <main className="announcement-main-container">
     <div className="announcement-module-section-1">
@@ -402,6 +421,21 @@ useEffect(() => {
                       
                       {user?.position === "Admin Staff" && (
                         <>
+                          <button
+                            type="button"
+                            className="action-announcements-button"
+                            onClick={() => {
+                              setSelectedAnnouncement(announcement); 
+                              setShowViewPopup(true);               
+                            }}
+                          >
+                            <img
+                              src="/Images/view.png"
+                              alt="View"
+                              className="action-announcements-view"
+                            />
+                          </button>
+
                           <button
                             type="button"
                             className="action-announcements-button"
@@ -551,11 +585,7 @@ useEffect(() => {
             </div>
 
             <div className="add-announcements-content-right-side">
-              
-                
-             
-
-
+ 
               <div className="fields-section-add-announcements">
                   <p> Published Date <span className="required">*</span></p>
                     <input
@@ -652,6 +682,158 @@ useEffect(() => {
   </div>
 
 )}
+
+
+  {showViewPopup && selectedAnnouncement && (
+    <div className="announcements-view-popup-overlay">
+      <div className="view-announcements-popup" ref={popupRef}>
+        <div className="view-announcement-main-section1">
+          <div className="view-announcement-header-first-section">
+            <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+          </div>
+          <div className="view-announcement-header-second-section">
+            <h2 className="gov-info">Republic of the Philippines</h2>
+            <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+            <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+            <h2 className="contact">930-0040 / 428-9030</h2>
+          </div>
+          <div className="view-announcement-header-third-section">
+              <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+          </div>
+        </div>
+
+        <div className="view-announcement-header-body">
+          <div className="view-announcement-header-body-top-section">
+            <div className="view-announcement-backbutton-container">
+              <button onClick={handleBack}>
+                  <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+              </button>
+            </div>
+            <div className="view-announcement-info-toggle-wrapper">
+              {[ "details" ].map((section) => (
+              <button
+                  key={section}
+                  type="button"
+                  className={`announcement-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                  onClick={() => setActiveSection(section)}
+              >
+      
+                  {section === "details" && "Details"}
+              </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="view-announcement-header-body-bottom-section">
+            <div className="announcement-photo-section">
+              <span className="announcement-details-label">Announcement Details</span>
+              <div className="announcement-pic-container">
+                <img
+                    src={selectedAnnouncement.image || "/Images/thumbnail.png"}
+                    alt="Identification"
+                    className="resident-id-photo"
+                />
+              </div>
+            </div> 
+            <div className="view-announcement-info-main-container">
+              <div className="view-announcemnt-info-main-content">
+                {activeSection === "details" && (
+                  <>
+                    <div className="view-announcement-content-top-section">
+                      <div className="view-main-user-content-left-side">
+                        <div className="view-user-fields-section">
+                            <p>Publish Date</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.createdAt}
+                              readOnly
+                            />
+                        </div>
+                        <div className="view-user-fields-section">
+                            <p>Author</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.createdBy}
+                              readOnly
+                            />
+                        </div>
+                      </div>
+                      <div className="view-main-user-content-right-side-announce">
+                        <div className="view-user-fields-section">
+                            <p>Announcement Category</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.category}
+                              readOnly
+                            />
+                        </div>
+
+                        <div className="view-user-featured-active-section">
+                          <div className="view-user-fields-section-active-featured">
+                              <p>Active</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedAnnouncement.isActive ? "Yes" : "No"}
+                                readOnly
+                              />
+                          </div>
+                          <div className="view-user-fields-section-active-featured">
+                              <p>Featured</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedAnnouncement.isInFeatured === "Active" ? "Yes" : "No"}
+                                readOnly
+                              />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="view-announcement-content-bottom-section">
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Program Headline
+                            </div>
+                            <div className={`box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="headline-input-field-announcements"
+                                value={selectedAnnouncement.announcementHeadline || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Full Content / Description
+                            </div>
+                            <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="description-input-field-announcements"
+                                value={selectedAnnouncement.content || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+                    </div> 
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
 
   {showDeletePopup && (
     <div className="announcements-confirmation-popup-overlay">
