@@ -201,22 +201,53 @@ const addNewOfficer = async () => {
   }
 };
 
-  const deleteOfficer = async(id: string) => {
-    const officerToDelete = officersData.find((officer) => officer.id === id);
-    if (officerToDelete) {
-      if (officerToDelete.image) {
-        const imageRef = ref(storage, officerToDelete.image);
-        await deleteObject(imageRef).catch((error) => {
-          console.error("Error deleting image from storage: ", error);
-        });
-      }
-      const officerDoc = deleteDoc(doc(db, "hoaSitioOfficers", id));
-      officerDoc.catch((error) => {
-        console.error("Error deleting officer document: ", error);
+
+
+
+// --- DELETE STATE ---
+const [showDeletePopup, setShowDeletePopup] = useState(false);
+const [officerToDeleteId, setOfficerToDeleteId] = useState<string | null>(null);
+const [officerToDeleteName, setOfficerToDeleteName] = useState<string | null>(null);
+
+// --- CONFIRM BEFORE DELETE ---
+const confirmDeleteOfficer = (id: string, name: string) => {
+  setOfficerToDeleteId(id);
+  setOfficerToDeleteName(name);
+  setShowDeletePopup(true);
+};
+
+
+const deleteOfficer = async () => {
+  if (!officerToDeleteId) return;
+
+  const officerToDelete = officersData.find(
+    (officer) => officer.id === officerToDeleteId
+  );
+
+  if (officerToDelete) {
+    if (officerToDelete.image) {
+      const imageRef = ref(storage, officerToDelete.image);
+      await deleteObject(imageRef).catch((error) => {
+        console.error("Error deleting image from storage: ", error);
       });
     }
-    
+    await deleteDoc(doc(db, "hoaSitioOfficers", officerToDeleteId)).catch(
+      (error) => {
+        console.error("Error deleting officer document: ", error);
+      }
+    );
   }
+
+  // Reset state after deletion
+  setShowDeletePopup(false);
+  setOfficerToDeleteId(null);
+  setOfficerToDeleteName(null);
+
+  // ✅ Success popup
+  setPopupMessage("Sitio/HOA Officer deleted successfully!");
+  setShowPopup(true);
+  setTimeout(() => setShowPopup(false), 2000);
+};
 
 
 
@@ -408,8 +439,14 @@ const addNewOfficer = async () => {
                             <img src="/Images/edit.png" alt="Edit"/>
                           </button>
                             
-                          <button type = "button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
-                             <img src="/Images/delete.png" alt="Delete" />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              confirmDeleteOfficer(official.id || "", official.fullName || "this officer")
+                            }
+                            className="brgy-official-action-delete"
+                          >
+                            <img src="/Images/delete.png" alt="Delete" />
                           </button>
                         </>
                       )}
@@ -444,7 +481,29 @@ const addNewOfficer = async () => {
 
 
 
-
+                      {showDeletePopup && (
+                        <div className="confirmation-popup-overlay-module-barangay-official">
+                          <div className="confirmation-popup-module-barangay-official">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                            <p>Are you sure you want to delete this Officer?</p>
+                          <h2>Official Name: {officerToDeleteName}</h2>
+                            <div className="yesno-container-module-barangay-official">
+                              <button
+                                onClick={() => setShowDeletePopup(false)}
+                                className="no-button-module-barangay-official"
+                              >
+                                No
+                              </button>
+                              <button
+                                onClick={deleteOfficer}
+                                className="yes-button-module-barangay-official"
+                              >
+                                Yes
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
 
             {showSubmitPopup && (
