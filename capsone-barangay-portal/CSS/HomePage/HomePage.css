@@ -470,6 +470,7 @@ position: relative;
   align-items: center;
   position: relative;
   overflow: hidden;
+  height: 450px;
 }
 
 
@@ -490,14 +491,18 @@ position: relative;
 }
 
 .news-card h3 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: #1f2937;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .news-card p {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: #555;
   margin-bottom: 1rem;
   line-height: 1.4;
