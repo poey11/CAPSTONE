@@ -357,20 +357,42 @@ const addNewOfficer = async () => {
 };
 
 
+const [showDeletePopup, setShowDeletePopup] = useState(false);
+const [officerToDeleteId, setOfficerToDeleteId] = useState<string | null>(null);
+const [officerToDeleteName, setOfficerToDeleteName] = useState<string | null>(null);
 
 
-    const deleteOfficer = async (id: string) => {
-      try {
-        const officerToDelete = displayedOfficials.find((officer) => officer.id === id);
-        if (officerToDelete && officerToDelete.image) {
-          const imageRef = ref(storage, officerToDelete.image);
-          await deleteObject(imageRef);
-        }
-        await deleteDoc(doc(db, "DisplayedOfficials", id));
-      } catch (error) {
-        console.error("Error deleting document: ", error);
-      }
+  // --- DELETE LOGIC WITH POPUP ---
+const confirmDeleteOfficer = (id: string, name: string) => {
+  setOfficerToDeleteId(id);
+  setOfficerToDeleteName(name);
+  setShowDeletePopup(true);
+};
+
+const deleteOfficer = async () => {
+  if (!officerToDeleteId) return;
+  try {
+    const officerToDelete = displayedOfficials.find((officer) => officer.id === officerToDeleteId);
+    if (officerToDelete && officerToDelete.image) {
+      const imageRef = ref(storage, officerToDelete.image);
+      await deleteObject(imageRef);
     }
+    await deleteDoc(doc(db, "DisplayedOfficials", officerToDeleteId));
+
+    // Success popup
+    setPopupMessage("Barangay Official deleted successfully!");
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  } catch (error) {
+    console.error("Error deleting document: ", error);
+    setErrorMessage("Something went wrong while deleting the official.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  } finally {
+    setShowDeletePopup(false);
+    setOfficerToDeleteId(null);
+  }
+};
 
     const [showAddOfficialPopup, setShowAddOfficialPopup] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -566,10 +588,13 @@ const addNewOfficer = async () => {
                            >
                             <img src="/Images/edit.png" alt="Edit"/>
                           </button>
-                          <button type="button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
-                             <img src="/Images/delete.png" alt="Delete" />
-                          </button>
-                        </>
+                            <button
+                              onClick={() => confirmDeleteOfficer(official.id, official.name)}
+                              className="brgy-official-action-delete"
+                            >
+                              <img src="/Images/delete.png" alt="Delete" />
+                            </button>
+                                   </>
                       )}
                     
 
@@ -605,6 +630,29 @@ const addNewOfficer = async () => {
 
 
 
+{showDeletePopup && (
+  <div className="confirmation-popup-overlay-module-barangay-official">
+    <div className="confirmation-popup-module-barangay-official">
+      <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+      <p>Are you sure you want to delete this Barangay Official?</p>
+     <h2>Official Name: {officerToDeleteName}</h2>
+      <div className="yesno-container-module-barangay-official">
+        <button
+          onClick={() => setShowDeletePopup(false)}
+          className="no-button-module-barangay-official"
+        >
+          No
+        </button>
+        <button
+          onClick={deleteOfficer}
+          className="yes-button-module-barangay-official"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
 
