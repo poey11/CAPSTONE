@@ -186,7 +186,7 @@ const addNewOfficer = async () => {
 
     setShowSubmitPopup(false);
 
-    setPopupMessage("Barangay User created successfully!");
+    setPopupMessage("Officier created successfully!");
     setShowPopup(true); // ✅ success popup
     setTimeout(() => setShowPopup(false), 2000);
 
