@@ -102,99 +102,152 @@ export default function SitioHoaOfficersModule() {
   console.log("Officers Data:", officersData);
 
 
-  const addNewOfficer = async () => {
-    if (!identificationFile) {
-      alert("Please upload an identification picture.");
-      return;
-    }
-    if(!newOfficerDetails.fullName){
-      alert("Please enter the officer's full name.");
-      return;
-    }
-    if(!newOfficerDetails.email){
-      alert("Please enter the officer's email.");
-      return;
-    }
-    if(!newOfficerDetails.facebook){
-      alert("Please enter the officer's facebook link.");
-      return;
-    }
-    if(!newOfficerDetails.position){
-      alert("Please select the officer's position.");
-      return;
-    } 
-    if(newOfficerDetails.position === "Others" && !newOfficerDetails.otherPosition){
-      alert("Please specify the officer's position.");
-      return;
-    }
-    if(!newOfficerDetails.location){
-      alert("Please select the officer's location.");
-      return;
-    }
-    if(!newOfficerDetails.clusterSection){
-      alert("Please select the officer's cluster/section.");
-      return;
-    }
-    if(newOfficerDetails.clusterSection === "Others" && !newOfficerDetails.otherClusterSection){
-      alert("Please specify the officer's cluster/section.");
-      return;
-    }
-    if(!newOfficerDetails.contact){
-      alert("Please enter the officer's contact number.");
-      return;
-    }
-    if(!newOfficerDetails.department){
-      alert("Please select the officer's department.");
-      return;
-    }
-    
+// --- STATE HOOKS ---
+const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+const [showErrorPopup, setShowErrorPopup] = useState(false);
+const [errorMessage, setErrorMessage] = useState("");
+const [showPopup, setShowPopup] = useState(false);
+const [popupMessage, setPopupMessage] = useState("");
+const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
-    try {
-      // Upload identification picture to Firebase Storage
-      const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile.name}`);
-      await uploadBytes(storageRef, identificationFile);
-      const imageUrl = await getDownloadURL(storageRef);
 
-      // Prepare officer object with image included
-      const officerData = {
-        ...newOfficerDetails,
-        image: imageUrl,
-        createdAt: new Date().toLocaleString(),
-        createdBy: user?.fullName || "Unknown",
-        updatedAt: new Date().toLocaleString(),
-      };
+const validateAndConfirm = () => {
+  const newInvalidFields: string[] = [];
 
-      // Save officer details to Firestore
-      const officersCollection = collection(db, "hoaSitioOfficers");
-      await addDoc(officersCollection, officerData);
+  if (!identificationFile) newInvalidFields.push("identificationFile");
+  if (!newOfficerDetails.fullName) newInvalidFields.push("fullName");
+  if (!newOfficerDetails.email) newInvalidFields.push("email");
+  if (!newOfficerDetails.facebook) newInvalidFields.push("facebook");
+  if (!newOfficerDetails.position) newInvalidFields.push("position");
+  if (newOfficerDetails.position === "Others" && !newOfficerDetails.otherPosition) newInvalidFields.push("otherPosition");
+  if (!newOfficerDetails.location) newInvalidFields.push("location");
+  if (!newOfficerDetails.clusterSection) newInvalidFields.push("clusterSection");
+  if (newOfficerDetails.clusterSection === "Others" && !newOfficerDetails.otherClusterSection) newInvalidFields.push("otherClusterSection");
+  if (!newOfficerDetails.contact) newInvalidFields.push("contact");
+  if (!newOfficerDetails.department) newInvalidFields.push("department");
 
-      alert("New officer added successfully.");
-      setNewOfficerDetails({});
-      setIdentificationFile(null);
-      setIdentificationPreview(null);
-      setShowAddOOfficerPopup(false);
-    } catch (error) {
-      console.error("Error adding new officer: ", error);
-      alert("There was an error adding the new officer. Please try again.");
-    }
-  };
+  if (newInvalidFields.length > 0) {
+    setInvalidFields(newInvalidFields);
+    setErrorMessage("Please fill in all required fields.");
+    setShowErrorPopup(true);
 
-  const deleteOfficer = async(id: string) => {
-    const officerToDelete = officersData.find((officer) => officer.id === id);
-    if (officerToDelete) {
-      if (officerToDelete.image) {
-        const imageRef = ref(storage, officerToDelete.image);
-        await deleteObject(imageRef).catch((error) => {
-          console.error("Error deleting image from storage: ", error);
-        });
-      }
-      const officerDoc = deleteDoc(doc(db, "hoaSitioOfficers", id));
-      officerDoc.catch((error) => {
-        console.error("Error deleting officer document: ", error);
+        setTimeout(() => {
+          setShowErrorPopup(false);
+        }, 3000);
+        return;
+  }
+
+    // Phone number validation
+  const phoneRegex = /^09\d{9}$/;
+  if (!phoneRegex.test(newOfficerDetails.contact || "")) {
+    setInvalidFields(["contact"]);
+    setErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+  // Email validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (newOfficerDetails.email && !emailRegex.test(newOfficerDetails.email)) {
+    setInvalidFields(["email"]);
+    setErrorMessage("Invalid email address. Format: example@domain.com");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+
+
+
+
+  setInvalidFields([]); // ✅ clear highlights
+  setShowSubmitPopup(true);
+};
+
+
+// --- ADD OFFICER (ONLY IF CONFIRMED) ---
+const addNewOfficer = async () => {
+  try {
+    const storageRef = ref(storage, `hoaSitioPictures/${Date.now()}_${identificationFile?.name}`);
+    await uploadBytes(storageRef, identificationFile!);
+    const imageUrl = await getDownloadURL(storageRef);
+
+    const officerData = {
+      ...newOfficerDetails,
+      image: imageUrl,
+      createdAt: new Date().toLocaleString(),
+      updatedAt: new Date().toLocaleString(),
+      createdBy: user?.fullName || "Unknown",
+    };
+
+    const officersCollection = collection(db, "hoaSitioOfficers");
+    await addDoc(officersCollection, officerData);
+
+    setShowSubmitPopup(false);
+
+    setPopupMessage("Officier created successfully!");
+    setShowPopup(true); // ✅ success popup
+    setTimeout(() => setShowPopup(false), 2000);
+
+    setNewOfficerDetails({});
+    setIdentificationFile(null);
+    setIdentificationPreview(null);
+    setShowAddOOfficerPopup(false);
+  } catch (error) {
+    console.error("Error adding officer:", error);
+    setErrorMessage("There was an error adding the new officer.");
+    setShowErrorPopup(true);
+  }
+};
+
+
+
+
+// --- DELETE STATE ---
+const [showDeletePopup, setShowDeletePopup] = useState(false);
+const [officerToDeleteId, setOfficerToDeleteId] = useState<string | null>(null);
+const [officerToDeleteName, setOfficerToDeleteName] = useState<string | null>(null);
+
+// --- CONFIRM BEFORE DELETE ---
+const confirmDeleteOfficer = (id: string, name: string) => {
+  setOfficerToDeleteId(id);
+  setOfficerToDeleteName(name);
+  setShowDeletePopup(true);
+};
+
+
+const deleteOfficer = async () => {
+  if (!officerToDeleteId) return;
+
+  const officerToDelete = officersData.find(
+    (officer) => officer.id === officerToDeleteId
+  );
+
+  if (officerToDelete) {
+    if (officerToDelete.image) {
+      const imageRef = ref(storage, officerToDelete.image);
+      await deleteObject(imageRef).catch((error) => {
+        console.error("Error deleting image from storage: ", error);
       });
     }
-    
+    await deleteDoc(doc(db, "hoaSitioOfficers", officerToDeleteId)).catch(
+      (error) => {
+        console.error("Error deleting officer document: ", error);
+      }
+    );
   }
+
+  // Reset state after deletion
+  setShowDeletePopup(false);
+  setOfficerToDeleteId(null);
+  setOfficerToDeleteName(null);
+
+  // ✅ Success popup
+  setPopupMessage("Sitio/HOA Officer deleted successfully!");
+  setShowPopup(true);
+  setTimeout(() => setShowPopup(false), 2000);
+};
 
 
 
@@ -247,20 +300,30 @@ export default function SitioHoaOfficersModule() {
     setFilteredUser(filtered);
     setCurrentPage(1); // Reset to first page on filter change
   },[nameSearch, officersData, positionDropdown, locationDropdown]);
-  // Pagination logic
+
+
+  // --- Pagination logic for Users ---
   const indexOfLastUser = currentPage * UserPerPage;
   const indexOfFirstUser = indexOfLastUser - UserPerPage;
   const currentUser = filteredUser.slice(indexOfFirstUser, indexOfLastUser);
+
   const totalPages = Math.ceil(filteredUser.length / UserPerPage);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const nextPage = () =>
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () =>
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   const getPageNumbers = () => {
     const pageNumbersToShow: (number | string)[] = [];
+
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
         pageNumbersToShow.push(i);
       } else if (
         (i === currentPage - 2 || i === currentPage + 2) &&
@@ -269,6 +332,7 @@ export default function SitioHoaOfficersModule() {
         pageNumbersToShow.push("...");
       }
     }
+
     return pageNumbersToShow;
   };
 
@@ -386,8 +450,14 @@ export default function SitioHoaOfficersModule() {
                             <img src="/Images/edit.png" alt="Edit"/>
                           </button>
                             
-                          <button type = "button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
-                             <img src="/Images/delete.png" alt="Delete" />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              confirmDeleteOfficer(official.id || "", official.fullName || "this officer")
+                            }
+                            className="brgy-official-action-delete"
+                          >
+                            <img src="/Images/delete.png" alt="Delete" />
                           </button>
                         </>
                       )}
@@ -400,236 +470,295 @@ export default function SitioHoaOfficersModule() {
         )}
       </div>
 
-      {filteredUser.length > UserPerPage && (
-        <div className="redirection-section-users">
-          <button onClick={prevPage} disabled={currentPage === 1}>
-            &laquo;
+
+      <div className="redirection-section-users" >
+        <button onClick={prevPage} disabled={currentPage === 1}>
+          &laquo;
+        </button>
+        {getPageNumbers().map((number: any, index: number) => (
+          <button key={index} onClick={() => typeof number === "number" && paginate(number)} className={currentPage === number ? "active" : ""}>
+            {number}
           </button>
-          {getPageNumbers().map((number, index) => (
-            <button
-              key={index}
-              onClick={() => typeof number === "number" && paginate(number)}
-              className={currentPage === number ? "active" : ""}
-            >
-              {number}
-            </button>
-          ))}
-          <button onClick={nextPage} disabled={currentPage === totalPages}>
-            &raquo;
-          </button>
-        </div>
-      )}
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>
+          &raquo;
+        </button>
+      </div>
 
 
-        {showAddOfficerPopup && (
-            <div className="add-officer-popup-overlay">
-                <div className="add-officer-confirmation-popup">
-                    <h2>Add New Officer</h2>
 
-                    <div className="add-officer-main-container">
-                      <div className="add-officer-photo-section">
-                        <span className="add-officer-details-label">Identification Picture</span>
-                            
-                        <div className="add-officer-profile-container">
-                          <img
-                            src={identificationPreview || "/Images/default-identificationpic.jpg"}
-                            alt="Identification"
-                            className="add-officer-id-photo"
-                          />
-                        </div>
-                            
-                        <label htmlFor="identification-file-upload" className="add-officer-upload-link">
-                          Click to Upload File
-                        </label>
-                        <input
-                          id="identification-file-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden" // hides the raw input, use the label instead
-                          onChange={handleIdentificationFileChange}
-                        />
-                      </div>
 
-                      <div className="add-officer-info-main-container">
-                        <div className="add-officer-content-left-side">
-                            <div className="fields-section">
-                                <p>Officer Full Name<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-officer-input-field"
-                                  placeholder="Enter Full  Name"
-                                  value={newOfficerDetails.fullName||""}
-                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, fullName: e.target.value})}
-                                  name="fullName"
-                                  required
-                                />
-                             </div>
-                            <div className="fields-section">
-                                <p>Email<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-officer-input-field"
-                                  placeholder="Enter Email"
-                                  name="email"
-                                  value={newOfficerDetails.email||""}
-                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, email: e.target.value})}
-                                  required
-                                />
-                             </div> 
-
-                             <div className="fields-section">
-                                <p>Facebook Link<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-officer-input-field"
-                                  placeholder="Enter Facebook Link"
-                                  value={newOfficerDetails.facebook||""}
-                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, facebook: e.target.value})}
-                                  name="facebook"
-                                  required
-                                />
-                             </div>
-
-                             <div className="fields-section">
-                              <p>Department<span className="required">*</span></p>
-                              <select
-                                className="add-officer-input-field"
-                                name="department"
-                                required
-                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, department: e.target.value})}
+                      {showDeletePopup && (
+                        <div className="confirmation-popup-overlay-module-barangay-official">
+                          <div className="confirmation-popup-module-barangay-official">
+                            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                            <p>Are you sure you want to delete this Officer?</p>
+                          <h2>Official Name: {officerToDeleteName}</h2>
+                            <div className="yesno-container-module-barangay-official">
+                              <button
+                                onClick={() => setShowDeletePopup(false)}
+                                className="no-button-module-barangay-official"
                               >
-                                <option value="" disabled>Select a Department</option>
-                                <option value="SITIO">SITIO</option>
-                                <option value="HOA">HOA</option>
-                              
-                              </select>
+                                No
+                              </button>
+                              <button
+                                onClick={deleteOfficer}
+                                className="yes-button-module-barangay-official"
+                              >
+                                Yes
+                              </button>
                             </div>
-                        </div>
-
-                        <div className="add-officer-content-right-side">
-                          <div className="fields-section">
-                            <p>Position<span className="required">*</span></p>
-                            <select
-                              className="add-officer-input-field"
-                              name="position"
-                              required
-                              onChange={(e) => setNewOfficerDetails({...newOfficerDetails, position: e.target.value})}
-                            >
-                              <option value="" disabled>Position</option>
-                              {newOfficerDetails.department === "SITIO" ? (
-                                <>
-                                  
-                                  <option value="Sitio President">Sitio President</option>
-                                </>
-                              ):(
-                                <>
-                                  <option value="Association President">Association President</option>
-                                </>
-                              )}
-                              {/* <option value="Others">Others</option> */}
-                              {/* not sure if pwede may ibang position*/}
-                            </select>
                           </div>
-                          {newOfficerDetails.position === "Others" && (
-                            <div className="fields-section">
-                              <p>Please Specify Position<span className="required">*</span></p>
-                              <input
-                                type="text"
-                                className="add-officer-input-field"
-                                placeholder="Enter Position"
-                                value={newOfficerDetails.otherPosition||""}
-                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, otherPosition: e.target.value})}
-                                name="otherPosition"  
-                                required
-                              />
-                            </div>
-                          )}
-                        <div className="fields-section">
-                            <p>Location<span className="required">*</span></p>
-                            <select
-                              className="add-officer-input-field"
-                              name="location"
-                              required
-                              onChange={(e) => setNewOfficerDetails({...newOfficerDetails, location: e.target.value})}
-                            >
-                              <option value="" disabled>Location</option>
-                              <option value="East Fairview">East Fairview</option>
-                              <option value="West Fairview">West Fairview</option>
-                              <option value="South Fairview">South Fairview</option>
-                            </select>
                         </div>
+                      )}
 
-                        <div className="fields-section">
-                                <p>Cluster/Section</p>
-                                <select
-                                  className="add-officer-input-field"
-                                  name="clusterSection"
-                                  onChange={(e) => setNewOfficerDetails({...newOfficerDetails, clusterSection: e.target.value})}
-                                  required
-                                >
-                                  
-                                  <option value="" disabled>Select Cluster/Section</option>
-                                  <option value="SITIO KISLAP">SITIO KISLAP</option>
-                                  <option value="URLINA">URLINA</option>
-                                  <option value="EFHAI">EFHAI</option>
-                                  <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
-                                  <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
-                                  <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
-                                  <option value="Others">Others</option>
-                                  {/* Add more options as needed */}
-                                </select>
-                          </div>
-                          {newOfficerDetails.clusterSection === "Others" && (
-                            <div className="fields-section">
-                              <p>Please Specify Cluster/Section<span className="required">*</span></p>
-                              <input
-                                type="text"
-                                className="add-officer-input-field"
-                                placeholder="Enter Cluster/Section"
-                                value={newOfficerDetails.otherClusterSection||""}
-                                onChange={(e) => setNewOfficerDetails({...newOfficerDetails, otherClusterSection: e.target.value})}
-                                name="otherClusterSection"
-                                required
-                              />
-                            </div>
-                          )}
 
-                          <div className="fields-section">
-                                      <p>Contact Number<span className="required">*</span></p>
-                                      <input 
-                                        type="tel" 
-                                        className="add-officer-input-field"
-                                        name="contact"
-                                        value={newOfficerDetails.contact||""}
-                                        onChange={(e) => setNewOfficerDetails({...newOfficerDetails, contact: e.target.value})}
-                                        required
-                                        pattern="^[0-9]{11}$" 
-                                        placeholder="Enter 11-digit phone number" 
-                                      />
-                             </div>
-                          
-                        </div>
-                      </div>
-
+            {showSubmitPopup && (
+                <div className="addbrgyofficial-confirmation-popup-overlay">
+                         <div className="addbrgyofficial-confirmation-popup">
+                          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                           <p>Are you sure you want to submit?</p>
+                             <div className="barangay-official-yesno-container">
+                              <button onClick={() => setShowSubmitPopup(false)} className="addbrgyofficial-no-button">No</button>
+                           <button onClick={addNewOfficer} className="addbrgyofficial-yes-button">Yes</button> 
+                       </div> 
                     </div>
+               </div>
+           )}
 
-                    
-                
-                    {/* Buttons */}
-                    <div className="officer-yesno-container">
-                        <button onClick={() => {
-                          setShowAddOOfficerPopup(false);
-                          setNewOfficerDetails({});
-                          setIdentificationFile(null);
-                          setIdentificationPreview(null);
-                        }} className="official-no-button">Cancel</button>
-                        <button type="button" onClick={addNewOfficer} className="official-yes-button">
-                            Save
-                        </button>
-                    </div>
+        
+            {showPopup && (
+                <div className={`barangay-official-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                     <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                     <p>{popupMessage}</p>
                 </div>
             </div>
             )}
+
+
+                    
+        {showErrorPopup && (
+                <div className={`addbrgyofficial-error-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{errorMessage}</p>
+                    </div>
+                </div>
+                )}
+
+
+
+          {showAddOfficerPopup && (
+            <div className="add-officer-popup-overlay">
+              <div className="add-officer-confirmation-popup">
+                <h2>Add New Officer</h2>
+
+                <div className="add-officer-main-container">
+                  <div className="add-officer-photo-section">
+                    <span className="add-officer-details-label">Identification Picture<span className="required">*</span></span>
+
+                    <div className={`add-officer-profile-container ${invalidFields.includes("identificationFile") ? "input-error" : ""}`}>
+                      <img
+                        src={identificationPreview || "/Images/default-identificationpic.jpg"}
+                        alt="Identification"
+                        className="add-officer-id-photo"
+                      />
+                    </div>
+
+                    <label htmlFor="identification-file-upload" className="add-officer-upload-link">
+                      Click to Upload File
+                    </label>
+                    <input
+                      id="identification-file-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleIdentificationFileChange}
+                    />
+                  </div>
+
+                  <div className="add-officer-info-main-container">
+                    <div className="add-officer-content-left-side">
+                      <div className="fields-section">
+                        <p>Officer Full Name<span className="required">*</span></p>
+                        <input
+                          type="text"
+                          className={`add-officer-input-field ${invalidFields.includes("fullName") ? "input-error" : ""}`}
+                          placeholder="Enter Full Name"
+                          value={newOfficerDetails.fullName || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, fullName: e.target.value })}
+                          name="fullName"
+                          required
+                        />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Email<span className="required">*</span></p>
+                        <input
+                          type="text"
+                          className={`add-officer-input-field ${invalidFields.includes("email") ? "input-error" : ""}`}
+                          placeholder="Enter Email"
+                          name="email"
+                          value={newOfficerDetails.email || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, email: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Facebook Link<span className="required">*</span></p>
+                        <input
+                          type="text"
+                          className={`add-officer-input-field ${invalidFields.includes("facebook") ? "input-error" : ""}`}
+                          placeholder="Enter Facebook Link"
+                          value={newOfficerDetails.facebook || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, facebook: e.target.value })}
+                          name="facebook"
+                          required
+                        />
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Department<span className="required">*</span></p>
+                        <select
+                          className={`add-officer-input-field ${invalidFields.includes("department") ? "input-error" : ""}`}
+                          name="department"
+                          required
+                          value={newOfficerDetails.department || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, department: e.target.value })}
+                        >
+                          <option value="" disabled>Select a Department</option>
+                          <option value="SITIO">SITIO</option>
+                          <option value="HOA">HOA</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="add-officer-content-right-side">
+                      <div className="fields-section">
+                        <p>Position<span className="required">*</span></p>
+                        <select
+                          className={`add-officer-input-field ${invalidFields.includes("position") ? "input-error" : ""}`}
+                          name="position"
+                          required
+                          value={newOfficerDetails.position || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, position: e.target.value })}
+                        >
+                          <option value="" disabled>Position</option>
+                          {newOfficerDetails.department === "SITIO" ? (
+                            <option value="Sitio President">Sitio President</option>
+                          ) : (
+                            <option value="Association President">Association President</option>
+                          )}
+                          {/* <option value="Others">Others</option> */}
+                        </select>
+                      </div>
+
+                      {newOfficerDetails.position === "Others" && (
+                        <div className="fields-section">
+                          <p>Please Specify Position<span className="required">*</span></p>
+                          <input
+                            type="text"
+                            className={`add-officer-input-field ${invalidFields.includes("otherPosition") ? "input-error" : ""}`}
+                            placeholder="Enter Position"
+                            value={newOfficerDetails.otherPosition || ""}
+                            onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, otherPosition: e.target.value })}
+                            name="otherPosition"
+                            required
+                          />
+                        </div>
+                      )}
+
+                      <div className="fields-section">
+                        <p>Location<span className="required">*</span></p>
+                        <select
+                          className={`add-officer-input-field ${invalidFields.includes("location") ? "input-error" : ""}`}
+                          name="location"
+                          required
+                          value={newOfficerDetails.location || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, location: e.target.value })}
+                        >
+                          <option value="" disabled>Location</option>
+                          <option value="East Fairview">East Fairview</option>
+                          <option value="West Fairview">West Fairview</option>
+                          <option value="South Fairview">South Fairview</option>
+                        </select>
+                      </div>
+
+                      <div className="fields-section">
+                        <p>Cluster/Section<span className="required">*</span></p>
+                        <select
+                          className={`add-officer-input-field ${invalidFields.includes("clusterSection") ? "input-error" : ""}`}
+                          name="clusterSection"
+                          value={newOfficerDetails.clusterSection || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, clusterSection: e.target.value })}
+                          required
+                        >
+                          <option value="" disabled>Select Cluster/Section</option>
+                          <option value="SITIO KISLAP">SITIO KISLAP</option>
+                          <option value="URLINA">URLINA</option>
+                          <option value="EFHAI">EFHAI</option>
+                          <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
+                          <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
+                          <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
+                          <option value="Others">Others</option>
+                        </select>
+                      </div>
+
+                      {newOfficerDetails.clusterSection === "Others" && (
+                        <div className="fields-section">
+                          <p>Please Specify Cluster/Section<span className="required">*</span></p>
+                          <input
+                            type="text"
+                            className={`add-officer-input-field ${invalidFields.includes("otherClusterSection") ? "input-error" : ""}`}
+                            placeholder="Enter Cluster/Section"
+                            value={newOfficerDetails.otherClusterSection || ""}
+                            onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, otherClusterSection: e.target.value })}
+                            name="otherClusterSection"
+                            required
+                          />
+                        </div>
+                      )}
+
+                      <div className="fields-section">
+                        <p>Contact Number<span className="required">*</span></p>
+                        <input
+                          type="tel"
+                          className={`add-officer-input-field ${invalidFields.includes("contact") ? "input-error" : ""}`}
+                          name="contact"
+                          value={newOfficerDetails.contact || ""}
+                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, contact: e.target.value })}
+                          required
+                          pattern="^[0-9]{11}$"
+                          placeholder="Enter 11-digit phone number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div className="officer-yesno-container">
+                  <button
+                    onClick={() => {
+                      setShowAddOOfficerPopup(false);
+                      setNewOfficerDetails({});
+                      setIdentificationFile(null);
+                      setIdentificationPreview(null);
+                    }}
+                    className="official-no-button"
+                  >
+                    Cancel
+                  </button>
+                  <button type="button" onClick={validateAndConfirm} className="official-yes-button">
+                    Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
 
 
             {isPopupOpen && (
