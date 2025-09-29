@@ -608,25 +608,21 @@ const deleteOfficer = async () => {
       </div>
 
 
-    {filteredUser.length > UserPerPage && (
-        <div className="redirection-section-users">
-          <button onClick={prevPage} disabled={currentPage === 1}>
-            &laquo;
+      <div className="redirection-section-users" >
+        <button onClick={prevPage} disabled={currentPage === 1}>
+          &laquo;
+        </button>
+        {getPageNumbers().map((number: any, index: number) => (
+          <button key={index} onClick={() => typeof number === "number" && paginate(number)} className={currentPage === number ? "active" : ""}>
+            {number}
           </button>
-          {getPageNumbers().map((number, index) => (
-            <button
-              key={index}
-              onClick={() => typeof number === "number" && paginate(number)}
-              className={currentPage === number ? "active" : ""}
-            >
-              {number}
-            </button>
-          ))}
-          <button onClick={nextPage} disabled={currentPage === totalPages}>
-            &raquo;
-          </button>
-        </div>
-      )}
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>
+          &raquo;
+        </button>
+      </div>
+
+
 
 
 

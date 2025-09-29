@@ -300,20 +300,30 @@ const deleteOfficer = async () => {
     setFilteredUser(filtered);
     setCurrentPage(1); // Reset to first page on filter change
   },[nameSearch, officersData, positionDropdown, locationDropdown]);
-  // Pagination logic
+
+
+  // --- Pagination logic for Users ---
   const indexOfLastUser = currentPage * UserPerPage;
   const indexOfFirstUser = indexOfLastUser - UserPerPage;
   const currentUser = filteredUser.slice(indexOfFirstUser, indexOfLastUser);
+
   const totalPages = Math.ceil(filteredUser.length / UserPerPage);
 
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-  const nextPage = () => setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
-  const prevPage = () => setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
+  const nextPage = () =>
+    setCurrentPage((prev) => (prev < totalPages ? prev + 1 : prev));
+  const prevPage = () =>
+    setCurrentPage((prev) => (prev > 1 ? prev - 1 : prev));
 
   const getPageNumbers = () => {
     const pageNumbersToShow: (number | string)[] = [];
+
     for (let i = 1; i <= totalPages; i++) {
-      if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - 1 && i <= currentPage + 1)
+      ) {
         pageNumbersToShow.push(i);
       } else if (
         (i === currentPage - 2 || i === currentPage + 2) &&
@@ -322,6 +332,7 @@ const deleteOfficer = async () => {
         pageNumbersToShow.push("...");
       }
     }
+
     return pageNumbersToShow;
   };
 
@@ -459,25 +470,21 @@ const deleteOfficer = async () => {
         )}
       </div>
 
-      {filteredUser.length > UserPerPage && (
-        <div className="redirection-section-users">
-          <button onClick={prevPage} disabled={currentPage === 1}>
-            &laquo;
+
+      <div className="redirection-section-users" >
+        <button onClick={prevPage} disabled={currentPage === 1}>
+          &laquo;
+        </button>
+        {getPageNumbers().map((number: any, index: number) => (
+          <button key={index} onClick={() => typeof number === "number" && paginate(number)} className={currentPage === number ? "active" : ""}>
+            {number}
           </button>
-          {getPageNumbers().map((number, index) => (
-            <button
-              key={index}
-              onClick={() => typeof number === "number" && paginate(number)}
-              className={currentPage === number ? "active" : ""}
-            >
-              {number}
-            </button>
-          ))}
-          <button onClick={nextPage} disabled={currentPage === totalPages}>
-            &raquo;
-          </button>
-        </div>
-      )}
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>
+          &raquo;
+        </button>
+      </div>
+
 
 
 
