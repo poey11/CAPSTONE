@@ -392,7 +392,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             else{
               setShowSubmitPopupB(true);
             }
-          }, 3000);
+          }, 1000);
 
         }
     }
@@ -880,13 +880,13 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 >
                   No
                 </button>
-
-
-                
                 <button  
                   onClick={() => {
-                    handleClosingCase(true)
-                    
+                    setShowDoneIncidentPopup(false);
+                    setPopupMessage("Incident case has been Settled.");
+                    setShowPopup(true);
+                    setTimeout(() => setShowPopup(false), 3000);
+                    handleClosingCase(true);
                   }}
                   className="yes-button-add"
                 >
