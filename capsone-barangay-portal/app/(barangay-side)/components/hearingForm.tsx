@@ -879,11 +879,14 @@ const [showGovAgencyPopup, setShowGovAgencyPopup] = useState<string | null>(null
             Refer to Government Agency
           </button>
         )}
-      
 
         {/* YES button (shared by all) */}
         <button
           onClick={() => {
+            setShowDoneIncidentPopup(false);
+            setPopupMessage("Incident case has been Settled.");
+            setShowPopup(true);
+            setTimeout(() => setShowPopup(false), 3000); 
             handleClosingCase(true);
           }}
           className="yes-button-add"
