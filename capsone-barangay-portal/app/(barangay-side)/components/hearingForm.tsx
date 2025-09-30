@@ -511,7 +511,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         }
       }
 
-    const [showGovAgencyPopup, setShowGovAgencyPopup] = useState(false);
+const [showGovAgencyPopup, setShowGovAgencyPopup] = useState<string | null>(null);
 
       const [activeSection, setActiveSection] = useState("meeting");
 
@@ -873,7 +873,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           </button>
         ):(hearing === 3 && department !== "Lupon") && (
           <button
-            onClick={() => setShowGovAgencyPopup(true)}
+            onClick={() => setShowGovAgencyPopup("")}
             className="no-button-add bg-gray-600"
           >
             Refer to Government Agency
@@ -896,91 +896,86 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 )}
 
 
-{showGovAgencyPopup && (
+{showGovAgencyPopup !== null && (
   <div className="confirmation-popup-overlay-add">
     <div className="confirmation-popup-add">
       <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
       <p>Which Government Agency to Refer this to?</p>
+
+      {/* Quick-pick buttons that fill the same text field */}
       <div className="settlement-options-modern-section">
         {[
-          { label: "Social Services Development Department (SSDD)", key: "SSDD" },
-          { label: "Department of Social Welfare and Development (DSWD)", key: "DSWD" },
-          { label: "Police Station", key: "PS" },
-          { label: "Others", key: "Others" },
-        ].map(({ label, key }) => {
-          const isSelected = toUpdate?.[key] === true;
-          return (
-            
-            <label
-              className={`settlement-card-section ${isSelected ? "selected-section" : ""}`}
-              key={key}
-            >
-              <input
-                type="radio"
-                name="settlementMethod"
-                checked={isSelected}
-                onChange={() =>
-                  setToUpdate((prev: any) => ({
-                    ...prev,
-                    SSDD: key === "SSDD",
-                    DSWD: key === "DSWD",
-                    PS: key === "PS",
-                    Others: key === "Others",
-                  }))
-                }
-              />
-              <span>{label}</span>
-              {toUpdate?.Others && key === "Others" && (
-                <input
-                  type="text"
-                  className="edit-incident-input-field mt-2"
-                  placeholder="Please specify"
-                  value={toUpdate?.OtherAgencyName || ""}
-                  onChange={(e) =>
-                    setToUpdate((prev: any) => ({
-                      ...prev,
-                      OtherAgencyName: e.target.value,
-                    }))
-                  }
-                />
-              )}
-            </label>
-
-          );
-        })}
+          "Social Services Development Department (SSDD)",
+          "Department of Social Welfare and Development (DSWD)",
+          "Police Station",
+        ].map((label) => (
+          <label
+            key={label}
+            className={`settlement-card-section ${
+              showGovAgencyPopup === label ? "selected-section" : ""
+            }`}
+            onClick={() => setShowGovAgencyPopup(label)}
+          >
+            <input
+              type="radio"
+              name="govAgencyPick"
+              checked={showGovAgencyPopup === label}
+              onChange={() => setShowGovAgencyPopup(label)}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
       </div>
+
+      {/* Single input used for any agency (preset or custom) */}
+      <input
+        type="text"
+        className="edit-incident-input-field mt-3"
+        placeholder="Type or confirm the government agency name"
+        value={showGovAgencyPopup ?? ""}
+        onChange={(e) => setShowGovAgencyPopup(e.target.value)}
+        autoFocus
+      />
 
       <div className="yesno-container-add-section">
         <button
+          className="no-button-add"
+          onClick={() => setShowGovAgencyPopup(null)}
+        >
+          Cancel
+        </button>
+
+        <button
           className="yes-button-add-section"
-          onClick={() => {
-            const isAnySelected =
-              toUpdate?.SSDD || toUpdate?.DSWD || toUpdate?.PS || toUpdate?.Others;
-            const isOthersValid = toUpdate?.Others ? !!toUpdate?.OtherAgencyName?.trim() : true;
-            if (!isAnySelected || !isOthersValid) {
-              setPopupErrorMessage("Please select a government agency before submitting.");
+          onClick={async () => {
+            const agency = (showGovAgencyPopup ?? "").trim();
+
+            if (!agency) {
+              setPopupErrorMessage("Please enter a government agency before submitting.");
               setShowErrorPopup(true);
-              // Auto-hide after 3 seconds
-              setTimeout(() => {
-                setShowErrorPopup(false);
-              }, 3000);
-            } else {
-              const mainDocRef = doc(db, "IncidentReports", id);
-              updateDoc(mainDocRef, {
-                status: "Refer to Government Agency",
-                statusPriority: 6,
-              });
-              confirmSubmitB();
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
             }
+
+            // Persist the status + chosen agency
+            const mainDocRef = doc(db, "IncidentReports", id);
+            await updateDoc(mainDocRef, {
+              status: "Refer to Government Agency",
+              statusPriority: 6,
+              referredAgency: agency, // <-- stored in one field
+            });
+
+            setShowGovAgencyPopup(null);
+            // If you want to also leverage your existing confirmSubmitB flow, you can still call it:
+            // (this keeps the same success UX + redirect timing you already have)
+            confirmSubmitB();
           }}
         >
           Submit
         </button>
-
       </div>
     </div>
-  </div>  
-
+  </div>
 )}
 
 

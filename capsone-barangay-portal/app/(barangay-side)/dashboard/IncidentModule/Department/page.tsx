@@ -800,7 +800,18 @@ const generateIncidentCaseReport = async (
     });
 
     try {
-      ws.getCell("A1").value = "BARANGAY FAIRVIEW\nINDIVIDUAL INCIDENT REPORT";
+        let reportTitle = "BARANGAY FAIRVIEW\nINDIVIDUAL INCIDENT REPORT";
+
+          if (inc.status === "Refer to Government Agency") {
+            const agency =
+              (inc.referredAgency && String(inc.referredAgency).trim()) || "N/A";
+
+            reportTitle = `BARANGAY FAIRVIEW\nINDIVIDUAL INCIDENT REPORT\nREFERRED TO AGENCY:\n${agency.toUpperCase()}\nREPORT`;
+        } else if (inc.status === "CFA") {
+          reportTitle = "BARANGAY FAIRVIEW\nINDIVIDUAL INCIDENT REPORT\nCERTIFICATE TO FILE ACTION REPORT";
+        }
+
+        ws.getCell("A1").value = reportTitle;
       ws.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
       ws.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
       if (!sheetHasPlaceholder(ws, "{{CaseNumber}}")) {
@@ -1069,7 +1080,7 @@ const formatStatus = (status: string) => {
                           <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
                         )}
                           <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
-                        {incident.status == "CFA" && (
+                        {(incident.status === "CFA" || incident.status === "Refer to Government Agency") && (
                           <button
                             className="action-print-departments-main"
                             onClick={(e) => {
