@@ -18,6 +18,8 @@ export default function Page() {
     const [hasSummonLetter, setHasSummonLetter] = useState(false);
     const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
     const [toUpdate, setToUpdate] = useState<any|null>({
           complainant: {
             fname: "",
@@ -307,8 +309,14 @@ export default function Page() {
                             ? "Third"
                             : "";
                           
-                          setErrorPopup({ show: true, message: `${hearingLabel} Hearing Refailure Updated Successfully` });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                              setPopupMessage("Refailure Dialogue Updated Successfully");
+                              setShowPopup(true);
+                              setTimeout(() => setShowPopup(false), 3000);
+                              setTimeout(() => {
+                                router.push(
+                                  `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+                                );
+                              }, 2000);
                           
                         }}
                         
@@ -323,6 +331,15 @@ export default function Page() {
           </div>
         </div>
 
+
+              {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
 
 
         {errorPopup.show && (
