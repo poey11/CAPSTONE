@@ -476,28 +476,36 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     const [showSubmitPopupB, setShowSubmitPopupB] = useState(false);
     const [showDoneIncidentPopup, setShowDoneIncidentPopup] = useState(false);
     
-    const handleClosingCase = async(status:boolean) => {
+    const handleClosingCase = async (status: boolean) => {
         if (!docId) return;
         setShowDoneIncidentPopup(false);
+
         const docRef = doc(db, "IncidentReports", docId);
-        if(status) {
-          // If the case is closed, update the status to "Settled" and reset other fields
+
+        if (status) {
+          // Case closed → Settled
           setPopupMessage("Incident case has been Settled.");
           setShowPopup(true);
+
           await updateDoc(docRef, {
             status: "settled",
             statusPriority: 3,
           });
 
-
-    setTimeout(() => {
-      setShowPopup(false);
-      }, 3000); // Wait 3 seconds before redirecting or showing next popup
-        }
-        else{
-          // If the case is not closed, update the status to "cfa"
+          setTimeout(() => {
+            setShowPopup(false);
+            if (department !== "Lupon") {
+              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            } else {
+              // Lupon: ask how it was settled (same as dialogueForm)
+              setShowSubmitPopupB(true);
+            }
+          }, 1000); // show next step after 1s
+        } else {
+          // Not closed → set to CFA
           setPopupMessage("Incident case has been set to CFA.");
           setShowPopup(true);
+
           await updateDoc(docRef, {
             status: "CFA",
             statusPriority: 4,
@@ -506,12 +514,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           setTimeout(() => {
             setShowPopup(false);
             router.push(`/dashboard/IncidentModule/Department?id=${department}`);
-          }, 3000); // ✅ Delay redirect
-
+          }, 2000);
         }
-      }
+      };
 
-const [showGovAgencyPopup, setShowGovAgencyPopup] = useState<string | null>(null);
+
+      const [showGovAgencyPopup, setShowGovAgencyPopup] = useState<string | null>(null);
 
       const [activeSection, setActiveSection] = useState("meeting");
 

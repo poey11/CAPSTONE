@@ -392,7 +392,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             else{
               setShowSubmitPopupB(true);
             }
-          }, 3000);
+          }, 1000);
 
         }
     }
