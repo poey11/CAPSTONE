@@ -17,6 +17,9 @@ export default function Page() {
     const [hasSummonLetter, setHasSummonLetter] = useState(false);
     const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    // wala yung success pop up here!!!!
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
 
     
     console.log(docId)
@@ -288,9 +291,14 @@ export default function Page() {
                                 reasonForFailureToAppearDialogue: toUpdate.reasonForFailureToAppearDialogue || reportData?.reasonForFailureToAppearDialogue || "",
                               })
 
-                              setErrorPopup({ show: true, message: "Refailure Dialogue Updated Successfully"});
-                              setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                              setPopupMessage("Refailure Dialogue Updated Successfully");
+                              setShowPopup(true);
+                              setTimeout(() => setShowPopup(false), 3000);
+                              setTimeout(() => {
+                                router.push(
+                                  `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+                                );
+                              }, 2000);
 
                             }}
                           >
@@ -302,6 +310,15 @@ export default function Page() {
             </div>
 
            
+
+              {showPopup && (
+                <div className={`popup-overlay-add show`}>
+                    <div className="popup-add">
+                      <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                      <p>{popupMessage}</p>
+                    </div>
+                </div>
+            )}
 
         {errorPopup.show && (
             <div className={'popup-overlay-error show'}>

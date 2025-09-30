@@ -293,33 +293,30 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
             const mainDocRef = doc(db, "IncidentReports", id); 
             
-            if(details.Rstatus === "Absent" && details.Cstatus !== "Absent"){
-              //Send letter of refailure to appear to respondent
-              // A small window or popup to set the date and time of explaination of the failure to appear
-              //setShowSetRefailureMeetingPopup(true);
-              await updateDoc(mainDocRef, {
-              //[`sentLetterOfFailureToAppearHearing${index}`]: true,
-              
-              // sentLetterOfFailureToAppearHearing: {
-              //   ...(data?.sentLetterOfFailureToAppearHearing || {}),
-              //   [index]: true
-              // },
-
+          if (details.Rstatus === "Absent" && details.Cstatus !== "Absent") {
+            await updateDoc(mainDocRef, {
               [`respondentAbsentInHearing${index}`]: true,
               respondentAbsents: (data?.respondentAbsents || 0) + 1,
-              })
-              if(index === 2){
-                await updateDoc(mainDocRef, {
-                  status: "CFA",
-                  statusPriority: 4,
-                })
-              }
-              
-              setTimeout(() => {
-                setShowPopup(false);
-              }, 3000);
-              return;
+            });
+
+            if (index === 2) {
+              await updateDoc(mainDocRef, { status: "CFA", statusPriority: 4 });
             }
+
+            // optional: show a toast first
+            setPopupMessage("Respondent marked absent. Redirecting…");
+            setShowPopup(true);
+
+            // 🔔 redirect after 2 seconds to RefailureInfo, with dynamic id & department
+            setTimeout(() => {
+              router.push(
+                `/dashboard/IncidentModule/EditIncident/RefailureHearing/RefailureInfo?id=${id}&department=${department}`
+              );
+            }, 2000);
+
+            return;
+          }
+
             else if(details.Cstatus === "Absent" && details.Rstatus !== "Absent"){
               await updateDoc(mainDocRef, {
                   complainantAbsents: (data?.complainantAbsents || 0) + 1,                
