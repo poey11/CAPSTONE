@@ -29,6 +29,16 @@ export default function AnnouncementDetails() {
     const [selectedAnnnouncementData, setSelectedAnnouncementData] = useState<AnnouncementFormProps | null>(null);
     const [dataSet, setDataSet] = useState(false);
 
+    const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+    //popup
+    const [showErrorPopup, setShowErrorPopup] = useState(false);
+    const [popupErrorMessage, setPopupErrorMessage] = useState("");
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [showSavePopup, setShowSavePopup] = useState(false); 
+    const [showDiscardPopup, setShowDiscardPopup] = useState(false);
+
     useEffect(() => {
       if (!announcementId) return;
       const docRef = doc(db, "announcements", announcementId);
@@ -81,6 +91,7 @@ export default function AnnouncementDetails() {
 
     const handleSaveChanges = async () => {
       if (!announcementId || !announcementData) return;
+
       try {
         const docRef = doc(db, "announcements", announcementId);
         let updatedData = {
@@ -88,41 +99,99 @@ export default function AnnouncementDetails() {
           updatedAt: new Date().toLocaleString(),
           updatedBy: session?.user?.fullName || "Unknown",
         };
-      
+
         if (file && !(announcementData.image && announcementData.image.includes(file.name))) {
-          // Delete old image if exists
           if (announcementData.image) {
             const oldImageRef = ref(storage, announcementData.image);
             await deleteObject(oldImageRef).catch((error) => {
               console.log("No previous image to delete or error deleting:", error);
             });
           }
-        
-          // Upload new image
+
           const storageRef = ref(
             storage,
             `announcementsPictures/${Date.now()}-${announcementData.announcementHeadline}`
           );
           await uploadBytes(storageRef, file);
           const imageUrl = await getDownloadURL(storageRef);
-        
+
           updatedData = {
             ...updatedData,
             image: imageUrl,
           };
         }
-      
+
         await updateDoc(docRef, updatedData);
-        alert("Announcement updated successfully!");
-        router.push("/dashboard/ProgramsModule/Announcements");
+
+        setPopupMessage("Announcement updated successfully!");
+        setShowPopup(true);
+
+        setTimeout(() => {
+          setShowPopup(false);
+          router.push("/dashboard/ProgramsModule/Announcements");
+        }, 3000);
+
       } catch (error) {
         console.error("Error updating announcement:", error);
-        alert("There was an error updating the announcement.");
+        setPopupErrorMessage("There was an error updating the announcement.");
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
       }
     };
 
+    const validateFields = () => {
+      const newInvalidFields: string[] = [];
+
+      if (!announcementData?.announcementHeadline || announcementData.announcementHeadline.trim() === "") {
+        newInvalidFields.push("announcementHeadline");
+        setPopupErrorMessage("Program Headline is required.");
+        setActiveSection("details"); // 🔹 jump to details
+      }
+
+      if (!announcementData?.content || announcementData.content.trim() === "") {
+        newInvalidFields.push("content");
+        setPopupErrorMessage("Description is required.");
+        setActiveSection("description"); // 🔹 jump to description
+      }
+
+      if (!preview) {
+        newInvalidFields.push("image");
+        setPopupErrorMessage("A picture is required.");
+        setActiveSection("others"); // 🔹 jump to others
+      }
+
+      if (newInvalidFields.length > 0) {
+        setInvalidFields(newInvalidFields);
+        setShowErrorPopup(true);
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return false; 
+      }
+
+      setInvalidFields([]);
+      return true; 
+    };
 
     const [activeSection, setActiveSection] = useState<"details" | "description" | "others">("details");
+
+
+    const confirmSave = () => {
+      setShowSavePopup(false); 
+      handleSaveChanges();     
+    };
+
+
+    const handleSaveClick = () => {
+      if (validateFields()) {
+        setShowSavePopup(true); // only open confirmation if valid
+      }
+    };
+
+    const confirmDiscard = () => {
+      setAnnouncementData(selectedAnnnouncementData);
+      handleDelete();
+      setShowDiscardPopup(false); 
+    };
+
 return (
     <main className="edit-announcement-main-container">
         <div className="edit-announcement-main-content">
@@ -134,11 +203,19 @@ return (
                     <h1> Edit Announcement Details </h1>
                 </div>
                 <div className="action-btn-section-program">
-                    <button onClick={()=>{
-                      setAnnouncementData(selectedAnnnouncementData)
-                      handleDelete()
-                      }} className="action-discard">Discard</button>
-                     <button type ="button" onClick={handleSaveChanges} className="action-save">Save</button>
+                    <button 
+                      onClick={() => setShowDiscardPopup(true)} 
+                      className="action-discard"
+                    >
+                      Discard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveClick}   
+                      className="action-save"
+                    >
+                      Save
+                    </button>
                 </div>
 
 
@@ -164,7 +241,7 @@ return (
 
                         <div className="active-button-section-edit-announcement">
                                 <label className="switch-label">
-                                    Featured in Announcements
+                                    Featured in Home Page
                                     <label className="switch">
                                     <input type="checkbox" 
                                     checked={announcementData?.isInFeatured === "Active" || false}
@@ -182,7 +259,7 @@ return (
                                 
                         </div>    
                         <div className="active-button-section-edit-announcement">
-                                <label className="switch-label">
+                                <label className="switch-label-edit-announcement">
                                     Set as Active
                                     <label className="switch">
                                     <input type="checkbox" 
@@ -211,7 +288,7 @@ return (
                                     <p>Program Headline<span className="required">*</span></p>
                                     <input
                                     type="text"
-                                    className="edit-announcement-input-field"
+                                    className={`edit-announcement-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
                                     placeholder="Program Name (E.g. Feeding Program)"
                                     id="announcementHeadline"
                                     value={announcementData?.announcementHeadline || ""}
@@ -281,7 +358,7 @@ return (
                                           <div className="edit-title-description-announcements">
                                               Full Content / Description
                                           </div>
-                                          <div className="edit-box-container-description-announcements">
+                                          <div className={`edit-box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
                                             <textarea 
                                               value={announcementData?.content || ""}
                                               onChange={(e) =>
@@ -291,7 +368,8 @@ return (
                                                 }))
                                               }
                                               placeholder="Write the full content or description of the announcement here..."
-                                            className="edit-description-input-field-announcements" />
+                                              className="edit-description-input-field-announcements"
+                                             />
                                           </div>
                                       </div>
                                  </div>
@@ -303,7 +381,10 @@ return (
                         
                         {activeSection === "others" && (
                           <>
-                           <div className="box-container-outer-announcementpic"  style={{ display: activeSection === "others" ? "block" : "none" }}>
+                           <div
+                              className={`box-container-outer-announcementpic ${invalidFields.includes("image") ? "input-error" : ""}`}
+                              style={{ display: activeSection === "others" ? "block" : "none" }}
+                            >
                             <div className="title-announcementpic">Photo</div>
                             <div className="box-container-announcementpic">
                               <div className="identificationpic-container-announcement">
@@ -357,6 +438,51 @@ return (
             </div>
 
         </div>
+
+
+        {showDiscardPopup && (
+            <div className="confirmation-popup-overlay-add">
+                <div className="confirmation-popup-add">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to discard the changes?</p>
+                    <div className="yesno-container-add">
+                        <button onClick={() => setShowDiscardPopup(false)} className="no-button-add">No</button>
+                        <button onClick={confirmDiscard} className="yes-button-add">Yes</button> 
+                    </div> 
+                </div>
+            </div>
+        )}
+
+        {showSavePopup && (
+            <div className="confirmation-popup-overlay">
+                <div className="confirmation-popup">
+                    <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                    <p>Are you sure you want to save the changes?</p>
+                    <div className="yesno-container">
+                        <button onClick={() => setShowSavePopup(false)} className="no-button">No</button> 
+                        <button onClick={confirmSave} className="yes-button">Yes</button> 
+                    </div> 
+                </div>
+            </div>
+          )}
+
+        {showPopup && (
+          <div className={`popup-overlay show`}>
+              <div className="popup">
+                  <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                  <p>{popupMessage}</p>
+              </div>
+          </div>
+        )}
+
+        {showErrorPopup && (
+            <div className={`error-popup-overlay show`}>
+                <div className="popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                    <p>{popupErrorMessage}</p>
+                </div>
+            </div>
+        )}
 
     </main>
 

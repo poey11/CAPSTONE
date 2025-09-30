@@ -5,7 +5,7 @@ import { ChangeEvent, useState, useEffect,useRef } from "react";
 import "@/CSS/barangaySide/ServicesModule/BarangayDocs/BarangayCertificate.css";
 import { getLocalDateString,formatDateMMDDYYYY } from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
-import { addDoc, collection, doc, getDocs, onSnapshot} from "firebase/firestore";
+import { addDoc, collection, doc, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
@@ -135,6 +135,8 @@ export default function action() {
     const [forResidentOnlyMap, setForResidentOnlyMap] = useState<{ [title: string]: boolean }>({});
     const [otherDocFields, setOtherDocFields] = useState<{ [title: string]: string[] }>({});
     const [otherDocImageFields, setOtherDocImageFields] = useState<{ [title: string]: string[] }>({});
+    const [claimedFTJ, setClaimedFTJ] = useState<Set<string>>(new Set());
+
 
     // State for all file containers
     const [files1, setFiles1] = useState<{ name: string, preview: string | undefined }[]>([]);
@@ -154,6 +156,28 @@ export default function action() {
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
     
+
+
+    useEffect(() => {
+  // Adjust the collection name if yours differs (e.g. "JobSeekers", "JobSeekerListCollection")
+  const q = query(
+    collection(db, "JobSeekerList"),
+    where("firstTimeClaimed", "==", true)
+  );
+
+  const unsub = onSnapshot(q, (snap) => {
+    const s = new Set<string>();
+    snap.forEach((d) => {
+      const rid = (d.data() as any)?.residentId;
+      if (typeof rid === "string" && rid) s.add(rid);
+    });
+    setClaimedFTJ(s);
+  });
+
+  return () => unsub();
+}, []);
+
+
     useEffect(() => {
         const fetchResidents = async () => {
           try {
@@ -1608,6 +1632,10 @@ const handleChange = (
     }));
   }
 }, [clearanceInput.purpose, docType]);
+
+const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
+
+
     return (
         <main className="createRequest-main-container">
           {/* NEW */}
@@ -4448,80 +4476,105 @@ const handleChange = (
                                     <th>Middle Name</th>
                                     <th>Last Name</th>
                                     <th>Age</th>
+                                    {showFTJStatus && <th>Status</th>}
+
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {filteredResidents.map((resident) => (
+                                {filteredResidents.map((resident) => {
+                                  const isFTJ = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
+                                  const alreadyClaimed = isFTJ && claimedFTJ.has(resident.id);
+
+                                  return (
                                     <tr
                                       key={resident.id}
                                       className="employers-table-row"
                                       onClick={async () => {
+                                        // Block selection if FTJ already claimed
+                                        if (alreadyClaimed) {
+                                          setPopupErrorMessage("Already claimed");
+                                          setShowErrorPopup(true);
+                                          setTimeout(() => setShowErrorPopup(false), 2000);
+                                          return;
+                                        }
+
                                         try {
                                           const selectedFullName = `${resident.firstName} ${resident.middleName} ${resident.lastName}`;
                                           const purpose = clearanceInput.purpose ?? "";
-                                      
+
                                           let update: any = {
                                             ...clearanceInput,
                                             residentId: resident.id,
                                           };
-                                      
+
                                           if (selectingFor === "fullName") {
                                             update.fullName = selectedFullName;
-                                      
-                                            // ✅ Only update fromAddress for Occupancy / Moving Out
+
+                                            // Only update fromAddress for Occupancy / Moving Out
                                             if (purpose === "Occupancy /  Moving Out") {
                                               update.fromAddress = resident.address || "";
                                             }
-                                      
-                                            // ✅ Do NOT update 'address' here — only update fromAddress
+
                                             setIsResidentSelected(true);
                                           }
-                                      
+
                                           if (selectingFor === "requestor") {
                                             update = {
                                               ...update,
                                               requestorFname: selectedFullName,
                                               requestorMrMs: resident.sex === "Male" ? "Mr." : "Ms.",
-                                              gender: resident.sex || '',
-                                              address: resident.address || '',
-                                              birthday: resident.dateOfBirth || '',
-                                              civilStatus: resident.civilStatus || '',
-                                              contact: resident.contactNumber || '',
-                                              age: resident.age || '',
-                                              occupation: resident.occupation || '',
-                                              dateOfResidency: resident.dateOfResidency || '',
-                                              citizenship: resident.citizenship || '',
-                                              validIDjpg: resident.verificationFilesURLs[0] || '',
+                                              gender: resident.sex || "",
+                                              address: resident.address || "",
+                                              birthday: resident.dateOfBirth || "",
+                                              civilStatus: resident.civilStatus || "",
+                                              contact: resident.contactNumber || "",
+                                              age: resident.age || "",
+                                              occupation: resident.occupation || "",
+                                              dateOfResidency: resident.dateOfResidency || "",
+                                              citizenship: resident.citizenship || "",
+                                              validIDjpg: resident.verificationFilesURLs?.[0] || "",
                                             };
-                                            handleValidIDUpload(resident.verificationFilesURLs[0] || '');
-                                            
-                                            console.log("Valid ID URL:", clearanceInput.validIDjpg);
 
-                                            // Only clear fromAddress if purpose is NOT Occupancy
+                                            // Reflect preview for Valid ID in UI
+                                            if (resident.verificationFilesURLs?.[0]) {
+                                              handleValidIDUpload(resident.verificationFilesURLs[0]);
+                                            }
+
+                                            // Only clear fromAddress if NOT Occupancy
                                             if (purpose !== "Occupancy /  Moving Out") {
                                               update.fromAddress = "";
                                             }
-                                      
+
                                             setIsRequestorSelected(true);
                                           }
-                                      
+
                                           setClearanceInput(update);
                                           setShowResidentsPopup(false);
-                                        } catch (error) {
+                                        } catch {
                                           setPopupErrorMessage("An error occurred. Please try again.");
                                           setShowErrorPopup(true);
                                           setTimeout(() => setShowErrorPopup(false), 3000);
                                         }
                                       }}
-                                      style={{ cursor: 'pointer' }}
+                                      style={{
+                                        cursor: alreadyClaimed ? "not-allowed" : "pointer",
+                                        opacity: alreadyClaimed ? 0.55 : 1,
+                                      }}
+                                      title={alreadyClaimed ? "Already claimed" : undefined}
                                     >
                                       <td>{resident.residentNumber}</td>
                                       <td>{resident.firstName}</td>
                                       <td>{resident.middleName}</td>
                                       <td>{resident.lastName}</td>
                                       <td>{resident.age}</td>
+                                      {showFTJStatus && (
+                                        <td className={`status-cell ${alreadyClaimed ? "claimed" : ""}`}>
+                                          {alreadyClaimed ? "Already claimed" : ""}
+                                        </td>
+                                      )}
                                     </tr>
-                                  ))}
+                                  );
+                                })}
                                 </tbody>
                               </table>
                             )}

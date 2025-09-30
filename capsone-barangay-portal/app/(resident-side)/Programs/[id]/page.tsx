@@ -708,9 +708,6 @@ const confirmSubmit = async () => {
     return (
       <main className="main-container-specific">
         <div className="headerpic-specific"><p>PROGRAMS</p></div>
-        <section className="programs-header-specific">
-          <h1 className="programs-title-specific">Program not found</h1>
-        </section>
       </main>
     );
   }
