@@ -296,24 +296,26 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             if(details.Rstatus === "Absent" && details.Cstatus !== "Absent"){
               //Send letter of refailure to appear to respondent
               // A small window or popup to set the date and time of explaination of the failure to appear
-              setShowSetRefailureMeetingPopup(true);
+              //setShowSetRefailureMeetingPopup(true);
               await updateDoc(mainDocRef, {
               //[`sentLetterOfFailureToAppearHearing${index}`]: true,
-              sentLetterOfFailureToAppearHearing: {
-                ...(data?.sentLetterOfFailureToAppearHearing || {}),
-                [index]: true
-              },
+              
+              // sentLetterOfFailureToAppearHearing: {
+              //   ...(data?.sentLetterOfFailureToAppearHearing || {}),
+              //   [index]: true
+              // },
 
+              [`respondentAbsentInHearing${index}`]: true,
               respondentAbsents: (data?.respondentAbsents || 0) + 1,
               })
-
               if(index === 2){
                 await updateDoc(mainDocRef, {
                   status: "CFA",
                   statusPriority: 4,
                 })
               }
-
+              
+              router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing/RefailureInfo?id=${id}&department=${department}`);
               setTimeout(() => {
                 setShowPopup(false);
               }, 3000);

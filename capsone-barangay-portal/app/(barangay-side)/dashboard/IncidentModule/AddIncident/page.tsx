@@ -38,6 +38,12 @@ export default function AddIncident() {
 
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
+  const today = new Date();
+  const todayString = today.toISOString().split("T")[0];
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayString = yesterday.toISOString().split("T")[0];
+
 
   const currentDate = getLocalDateString(new Date());
   const currentTime = getLocalTimeString(new Date());
@@ -1290,8 +1296,12 @@ const handleSubmit = async (event: React.FormEvent) => {
 
               <div className="fields-section-add">
                   <p>Date of Incident<span className="required">*</span></p>
-                  <input type="date" className="add-incident-input-field" max={currentDate} id="dateFiled" name="dateFiled" 
-                    value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
+                  <input type="date" className="add-incident-input-field" 
+                  //max={currentDate} 
+                  max={todayString}
+                  min={yesterdayString}
+                  id="dateFiled" name="dateFiled" 
+                  value = {reportInfo.dateFiled} onChange={handleFormChange} required/>
               </div>
 
               <div className="fields-section-add">
