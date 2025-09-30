@@ -879,9 +879,12 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           >
             CFA
           </button>
-        ):(hearing === 3 && department !== "Lupon") && (
+        ): (hearing === 3 && department !== "Lupon") && (
           <button
-            onClick={() => setShowGovAgencyPopup("")}
+            onClick={() => {
+              setShowGovAgencyPopup("");
+              setShowDoneIncidentPopup(false);
+            }}
             className="no-button-add bg-gray-600"
           >
             Refer to Government Agency
