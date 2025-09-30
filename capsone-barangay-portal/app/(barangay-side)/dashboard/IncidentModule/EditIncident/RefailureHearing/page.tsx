@@ -5,6 +5,8 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { getSpecificDocument, generateDownloadLink } from "../../../../../helpers/firestorehelper";
 import { collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+import MenuBar from "@/app/(barangay-side)/components/incidentMenuBar";
+
 
 export default function Page() {
     const router = useRouter();
@@ -44,7 +46,6 @@ export default function Page() {
           nosofFemaleChildren: "",
           
           
-          refailureDialogueStatus:"Present",
           reasonForFailureToAppearDialogue: reportData?.reasonForFailureToAppearDialogue || "",
         });
     useEffect(() => {
@@ -117,22 +118,6 @@ export default function Page() {
               };
             });
         };
-    const handleInformationSection = (e:any) => {
-        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
-    };
-
-    const handleGenerateLetterAndInvitation = (e: any) => {
-    const action = e.currentTarget.name;
-    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${department}`);
-    };
-
-    const handleDialogueSection = () => {
-    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
-    };
-
-    const handleHearingSection = (e:any) => {
-    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
-    }
     
     useEffect(()=>{
             if (!docId) return;
@@ -191,167 +176,16 @@ export default function Page() {
       console.log("reportData", reportData);
      return (
         <main className="main-container-dialogue-hearing">
-            <div className="edit-incident-redirectionpage-section">
-                <button className="edit-incident-redirection-buttons" onClick={handleInformationSection}>
-                    <div className="edit-incident-redirection-icons-section">
-                    <img src="/Images/profile-user.png" alt="user info" className="redirection-icons-info" /> 
-                    </div>
-                    <h1>Incident Information</h1>
-                </button>
-
-                <div className="dialogue-dropdown">
-                    <button className="edit-incident-redirection-buttons">
-                        <div className="edit-incident-redirection-icons-section">
-                            <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue" /> 
-                        </div>
-                        <h1>Dialogue Meeting</h1>
+          <MenuBar id = {docId||""} department={department ||  ""} />
+          <div className="edit-incident-main-content">
+            <div className="edit-incident-main-section1">
+                <div className="edit-incident-main-section1-left">
+                    <button onClick={() => router.back()} >
+                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                     </button>
-
-                    <div className="dialogue-submenu">
-                    <button className="submenu-button" name="dialogue" onClick={handleGenerateLetterAndInvitation}>
-                        <h1>Generate Dialogue Letters</h1>
-                    </button>
-
-                    {reportData?.isDialogue ? (
-                        <button className="submenu-button" name="section" onClick={handleDialogueSection}>
-                        <h1>Dialogue Section</h1>
-                        </button>
-                    ) : (
-                        <button
-                        className="submenu-button"
-                        name="section"
-                        onClick={() => {
-                            setErrorPopup({ show: true, message: "Generate a Dialogue Letter First." });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                        }}
-                        >
-                        <h1>Dialogue Section</h1>
-                        </button>
-                    )}
-                    </div>
+                    <h1> Incident Details </h1>
                 </div>
-
-                <div className="hearing-dropdown">
-                    <button className="edit-incident-redirection-buttons">
-                    <div className="edit-incident-redirection-icons-section">
-                        <img src="/Images/group-discussion.png" alt="user info" className="redirection-icons-hearing" /> 
-                    </div>
-                    <h1>Hearing Section</h1>
-                    </button>
-
-                    <div className="hearing-submenu">
-                    <button
-                      className="submenu-button"
-                      name="summon"
-                      onClick={(e) => {
-                        const lastSummon = summonLetterData[summonLetterData.length];
-                        const summonNo = ["First", "Second", "Third"];
-                      
-                        
-                        if (reportData?.isDialogue === false) {
-                          setErrorPopup({ show: true, message: "Generate a Dialogue Letter first." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                          return;
-                        }
-                      
-                        // ✅ Step 2: Check if dialogue section is filled
-                        if (!isDialogueSectionFilled) {
-                          
-                          setErrorPopup({ show: true, message: "Fill out the Dialogue Section first." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                          
-                          return;
-                        }
-                      
-                        // ✅ Step 3: Check if latest summon is not yet filled
-                        if(                          
-                          reportData?.generatedHearingSummons > 0 &&
-                          reportData?.generatedHearingSummons < 3 &&
-                          reportData?.generatedHearingSummons > summonLetterData.length 
-                        ) {
-                        if ((!lastSummon?.filled)) { 
-                            setErrorPopup({ show: true, message: `Fill out the ${summonNo[summonLetterData.length]} Hearing summons first.` });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                            return;
-                          }
-                        }
-                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
-                            setErrorPopup({ show: true, message: `Fill out Refailure Meeting (Dialogue) first.` });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                          return;
-                        }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
-                          setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                          return;
-                        }
-                        // ✅ All good
-                        handleGenerateLetterAndInvitation(e);
-                      }}
-                    >
-                      <h1>Generate Summon Letters</h1>
-                    </button>
-
-                    {hasSummonLetter ? (
-                        <button className="submenu-button" name="section" onClick={(e)=>{
-                        if(!reportData?.reasonForFailureToAppearDialogue && reportData?.sentLetterOfFailureToAppearDialogue ){
-                            setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Dialogue) first." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
-                          
-                          return
-                        }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
-                          setErrorPopup({ show: true, message: "Fill out Refailure Meeting (Hearing) first." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000)
-                          return;
-                        }
-                          handleHearingSection(e);
-                          }
-                        }>
-                        <h1>Hearing Section</h1>
-                        </button>
-                    ) : (
-                        <button
-                        className="submenu-button"
-                        name="section"
-                       onClick={() => {
-                          setErrorPopup({ show: true, message: "Generate a Summon Letter First." });
-                          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                        }}
-                        >
-                        <h1>Hearing Section</h1>
-                        </button>
-                    )}
-                    </div>
-                </div>
-                {(reportData?.sentLetterOfFailureToAppearDialogue) && (
-                  <button className="edit-incident-redirection-buttons" type ="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureDialogue?id=${docId}&department=${department}`)}}>
-                      <div className="edit-incident-redirection-icons-section">
-                        <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                      </div>
-                      <h1>Refailure Meeting (Dialogue)</h1>
-                  </button>
-                )}  
-                {(reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length > 0 ) && (
-                  <button className="edit-incident-redirection-buttons-selected-dialogue-hearing" type ="button" onClick={()=>{router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&department=${department}`)}}>
-                    <div className="edit-incident-redirection-icons-section">
-                      <img src="/Images/team.png" alt="user info" className="redirection-icons-dialogue"/> 
-                    </div>
-                    <h1>Refailure Meeting (Hearing)</h1>
-                  </button>
-                )}
             </div>
-
-           <div className="edit-incident-main-content">
-                <div className="edit-incident-main-section1">
-                    <div className="edit-incident-main-section1-left">
-                        <button onClick={() => router.back()} >
-                        <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-                        </button>
-
-                        <h1> Incident Details </h1>
-                    </div>
-                </div>
                 
           <div className="edit-incident-header-body">
            {reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0 && (
@@ -415,14 +249,14 @@ export default function Page() {
                               : reportData?.refailureHearingDetails?.[key]?.reason || ""
                           }
                           disabled={
-                            toUpdate[`refailureHearingStatus${key}`] === "Absent" ||
+            
                               !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
                           
                           }
                           onChange={(e) => {
-                            if (toUpdate[`refailureHearingStatus${key}`] === "Present") {
+                            
                               handleFormChange(e); // only allow typing if Present
-                            }
+                            
                           }}
                           className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700

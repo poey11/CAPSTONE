@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/AnnouncementsBrgy/Announcements.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {useSession} from "next-auth/react";
 import { addDoc, collection, onSnapshot, deleteDoc, doc} from "firebase/firestore";
@@ -16,6 +16,8 @@ interface AnnouncementHeader {
   updatedBy?: string;
   image:string;
   isInFeatured?: string;
+  isActive?: boolean;
+  content?: string;
 }
 interface AnnouncementFormProps {
   announcementHeadline?: string;
@@ -41,9 +43,25 @@ export default function AnnouncementModule() {
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 10;
 
+  // popop
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [deleteAnnouncementId, setDeleteAnnouncementId] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [showViewPopup, setShowViewPopup] = useState(false);
+
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementHeader | null>(null);
+
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   const [announcementFile, setAnnouncementFile] = useState<File | null>(null);
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
+
+  const popupRef = useRef<HTMLDivElement | null>(null);
+  const [activeSection, setActiveSection] = useState("details");
 
   const handleAnnouncementFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -76,71 +94,93 @@ export default function AnnouncementModule() {
     isActive: true,
   });
 
-  const createAnnouncement= async() => {
-    if(!newAnnouncement.announcementHeadline){
-      alert("Please fill in the program headline.");
-      return;
-    }
-    if(!newAnnouncement.category){
-      alert("Please select the program category.");
-      return;
-    }
-    if(!newAnnouncement.content){
-      alert("Please fill in the program content/description.");
-      return;
-    } 
-    if(!announcementFile){
-      alert("Please upload the program photo.");
-      return;
-    }
-    try {
-      const storageRef = ref(storage, `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`);
-      let imageurl = "";
-      if (announcementFile) {
-        await uploadBytes(storageRef, announcementFile);
-        const downloadURL = await getDownloadURL(storageRef);
-        imageurl = downloadURL;
-      }
-      const announcementData = {
-        ...newAnnouncement,
-        image: imageurl,
-      }
 
-      const docRef = await addDoc(collection(db, "announcements"), announcementData);
-      alert("Announcement created successfully!");
-      setShowAddAnnouncementPopup(false);
-      setAnnouncementFile(null);
-      setAnnouncementPreview(null);
-      setNewAnnouncement({ 
-        createdAt: new Date().toLocaleString(),
-        createdBy: user?.fullName || "",
-        category: "Public Advisory",
-        isInFeatured: "Inactive",
-        isActive: true,
-      });
+  const validateFields = () => {
+    const newInvalidFields: string[] = [];
 
-    } catch (error) {
-      
+    if (!newAnnouncement.announcementHeadline || newAnnouncement.announcementHeadline.trim() === "") {
+      newInvalidFields.push("announcementHeadline");
+      setPopupErrorMessage("Program Headline is required.");
     }
-  }
-  
-  const deleteAnnnounce = async (id: string) => {
-    if (confirm("Are you sure you want to delete this program?")) {
-      const announcementToDelete = announcements.find((a) => a.id === id);
-        if(announcementToDelete){
-          if(announcementToDelete.image){
-            const imageRef = ref(storage, announcementToDelete.image);
-            await deleteObject(imageRef).catch((error) => {
-              console.error("Error deleting image from storage: ", error);
-            });
-          }
-        
-          await deleteDoc(doc(db, "announcements", id));
-          alert("Announcement deleted successfully!");
-        }
+
+    if (!newAnnouncement.category || newAnnouncement.category.trim() === "") {
+      newInvalidFields.push("category");
+      setPopupErrorMessage("Program Category is required.");
     }
-    
+
+    if (!newAnnouncement.content || newAnnouncement.content.trim() === "") {
+      newInvalidFields.push("content");
+      setPopupErrorMessage("Description is required.");
+    }
+
+    if (!announcementFile) {
+      newInvalidFields.push("image");
+      setPopupErrorMessage("A picture is required.");
+    }
+
+    if (newInvalidFields.length > 0) {
+      setInvalidFields(newInvalidFields);
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+
+    setInvalidFields([]);
+    return true;
+  };
+
+  const confirmSubmit = async () => {
+    setShowSubmitPopup(false); // close confirm popup
+    await createAnnouncement(); // call create
+  };
+
+  const createAnnouncement = async () => {
+  // 🔑 Use your validator instead of alerts
+  if (!validateFields()) return;
+
+  try {
+    const storageRef = ref(
+      storage,
+      `announcementsPictures/${Date.now()}-${newAnnouncement.announcementHeadline}`
+    );
+    let imageurl = "";
+    if (announcementFile) {
+      await uploadBytes(storageRef, announcementFile);
+      const downloadURL = await getDownloadURL(storageRef);
+      imageurl = downloadURL;
+    }
+
+    const announcementData = {
+      ...newAnnouncement,
+      image: imageurl,
+    };
+
+    await addDoc(collection(db, "announcements"), announcementData);
+
+    // reset form + close popup
+    setShowAddAnnouncementPopup(false);
+    setAnnouncementFile(null);
+    setAnnouncementPreview(null);
+    setNewAnnouncement({
+      createdAt: new Date().toLocaleString(),
+      createdBy: user?.fullName || "",
+      category: "Public Advisory",
+      isInFeatured: "Inactive",
+      isActive: true,
+    });
+
+    // ✅ success popup
+    setPopupMessage("Announcement created successfully!");
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 3000);
+  } catch (error) {
+    console.error("Error creating announcement:", error);
+    setPopupErrorMessage("There was an error creating the announcement.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
   }
+};
+
 
   const [activeFilter, setActiveFilter] = useState("");
   const [searchHeadline, setSearchHeadline] = useState("");
@@ -204,6 +244,37 @@ useEffect(() => {
 
 
 
+  const confirmDelete = async () => {
+    if (deleteAnnouncementId) {
+      try {
+        const announcementToDelete = announcements.find((a) => a.id === deleteAnnouncementId);
+
+        if (announcementToDelete) {
+
+          if (announcementToDelete.image) {
+            const imageRef = ref(storage, announcementToDelete.image);
+            await deleteObject(imageRef).catch((error) => {
+              console.error("Error deleting image from storage: ", error);
+            });
+          }
+
+          await deleteDoc(doc(db, "announcements", deleteAnnouncementId));
+
+          setPopupMessage("Announcement deleted successfully!");
+          setShowPopup(true);
+
+          setTimeout(() => {
+            setShowPopup(false);
+          }, 3000);
+        }
+
+        setShowDeletePopup(false);
+        setDeleteAnnouncementId(null);
+      } catch (error) {
+        console.error("Error deleting announcement:", error);
+      }
+    }
+  };
 
 
 
@@ -224,6 +295,17 @@ useEffect(() => {
 
     const handleEditClick = async(id:string) => {
       router.push(`/dashboard/ProgramsModule/Announcements/AnnouncementDetails?id=${id}`)
+    };
+
+
+    const handleBack = () => {
+        setShowViewPopup(false);
+        /*setViewUser(null);
+    
+        const params = new URLSearchParams(window.location.search);
+        params.delete("id");
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        router.replace(newUrl, { scroll: false });*/
     };
 
   return (
@@ -342,6 +424,21 @@ useEffect(() => {
                           <button
                             type="button"
                             className="action-announcements-button"
+                            onClick={() => {
+                              setSelectedAnnouncement(announcement); 
+                              setShowViewPopup(true);               
+                            }}
+                          >
+                            <img
+                              src="/Images/view.png"
+                              alt="View"
+                              className="action-announcements-view"
+                            />
+                          </button>
+
+                          <button
+                            type="button"
+                            className="action-announcements-button"
                             onClick={() => handleEditClick(announcement.id)}
                           >
                             <img
@@ -353,10 +450,12 @@ useEffect(() => {
 
                           <button
                             type="button"
-                            onClick={() => { deleteAnnnounce(announcement.id); }}
+                            onClick={() => {
+                              setDeleteAnnouncementId(announcement.id);
+                              setShowDeletePopup(true);
+                            }}
                             className="action-announcements-button"
                           >
-
                             <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
                           </button>
                         </>
@@ -408,7 +507,7 @@ useEffect(() => {
           <div className="add-announcements-photo-section">
             <span className="add-announcements-details-label">Photo</span>
 
-            <div className="add-announcements-profile-container">
+            <div className={`add-announcements-profile-container ${invalidFields.includes("image") ? "input-error" : ""}`}>
               <img
                 src={announcementPreview || "/Images/thumbnail.png"} 
                 alt="Announcement"
@@ -445,7 +544,7 @@ useEffect(() => {
                 <p>Program Headline<span className="required">*</span></p>
                   <input
                   type="text"
-                  className="add-announcements-input-field"
+                  className={`add-announcements-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
                   placeholder="Program Name (E.g. Feeding Program)"
                   value ={newAnnouncement.announcementHeadline|| ""}
                   onChange={(e) => setNewAnnouncement({...newAnnouncement, announcementHeadline: e.target.value})}
@@ -455,7 +554,8 @@ useEffect(() => {
 
            <div className="fields-section-add-announcements">
               <p>Announcement Category<span className="required">*</span></p>
-              <select className="add-announcements-input-field"
+              <select
+                className={`add-announcements-input-field ${invalidFields.includes("category") ? "input-error" : ""}`}
                 value ={newAnnouncement.category}
                 onChange={(e) => setNewAnnouncement({...newAnnouncement, category: e.target.value})}
                 required
@@ -470,26 +570,25 @@ useEffect(() => {
 
 
               <div className="fields-section-add-announcements">
-                <label className="switch-label">
-                    <p>Featured in Home Page</p>
-                    <label className="switch">
-                    <input type="checkbox" defaultChecked 
-                    onChange={(e) => setNewAnnouncement({...newAnnouncement, isInFeatured: e.target.checked ? "Active" : "Inactive"})}
-
-                    />
-                    <span className="slider round"></span>
-                    </label>
+                <p className="switch-label">Featured in Home Page</p> 
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    defaultChecked
+                    onChange={(e) =>
+                      setNewAnnouncement({
+                        ...newAnnouncement,
+                        isInFeatured: e.target.checked ? "Active" : "Inactive",
+                      })
+                    }
+                  />
+                  <span className="slider round"></span>
                 </label>
-                </div>
-
+              </div>
             </div>
 
             <div className="add-announcements-content-right-side">
-              
-                
-             
-
-
+ 
               <div className="fields-section-add-announcements">
                   <p> Published Date <span className="required">*</span></p>
                     <input
@@ -524,7 +623,7 @@ useEffect(() => {
                     <div className="title-description-announcements">
                         Full Content / Description
                     </div>
-                    <div className="box-container-description-announcements">
+                    <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
                       <textarea
                       placeholder="Write the full content/description of the announcement here..."
                       value ={newAnnouncement.content|| ""}
@@ -545,21 +644,38 @@ useEffect(() => {
 
 
        <div className="announcement-yesno-container">
-             <button onClick={() => {
-                setShowAddAnnouncementPopup(false);
-                setAnnouncementFile(null);
-                setAnnouncementPreview(null);
-                setNewAnnouncement({ 
-                  createdAt: new Date().toLocaleString(),
-                  createdBy: user?.fullName || "",
-                  category: "Public Advisory",
-                  isInFeatured: "Inactive",
-                  isActive: true,
-                });
-             }} className="announcement-no-button">Cancel</button>
-                     <button type = "button" onClick={createAnnouncement} className="announcement-yes-button">
-                     Save
-                </button>
+             <button
+                onClick={() => {
+                  setShowAddAnnouncementPopup(false);
+                  setAnnouncementFile(null);
+                  setAnnouncementPreview(null);
+                  setInvalidFields([]);       
+                  setPopupErrorMessage("");    
+                  setShowErrorPopup(false);    
+                  setNewAnnouncement({ 
+                    createdAt: new Date().toLocaleString(),
+                    createdBy: user?.fullName || "",
+                    category: "Public Advisory",
+                    isInFeatured: "Inactive",
+                    isActive: true,
+                  });
+                }}
+                className="announcement-no-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateFields()) {
+                    setShowSubmitPopup(true);
+                  }
+                }}
+                className="announcement-yes-button"
+              >
+                Save
+              </button>
+
 
        </div>
 
@@ -570,16 +686,202 @@ useEffect(() => {
 
 )}
 
-  {isPopupOpen && (
-    <div className="user-roles-view-popup-overlay add-incident-animated">
-      <div className="view-barangayuser-popup">
 
+  {showViewPopup && selectedAnnouncement && (
+    <div className="announcements-view-popup-overlay">
+      <div className="view-announcements-popup" ref={popupRef}>
+        <div className="view-announcement-main-section1">
+          <div className="view-announcement-header-first-section">
+            <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+          </div>
+          <div className="view-announcement-header-second-section">
+            <h2 className="gov-info">Republic of the Philippines</h2>
+            <h1 className="barangay-name">BARANGAY FAIRVIEW</h1>
+            <h2 className="address">Dahlia Avenue, Fairview Park, Quezon City</h2>
+            <h2 className="contact">930-0040 / 428-9030</h2>
+          </div>
+          <div className="view-announcement-header-third-section">
+              <img src="/Images/logo.png" alt="Brgy Logo" className="user-logo2-image-side-bar-1" />
+          </div>
+        </div>
+
+        <div className="view-announcement-header-body">
+          <div className="view-announcement-header-body-top-section">
+            <div className="view-announcement-backbutton-container">
+              <button onClick={handleBack}>
+                  <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+              </button>
+            </div>
+            <div className="view-announcement-info-toggle-wrapper">
+              {[ "details" ].map((section) => (
+              <button
+                  key={section}
+                  type="button"
+                  className={`announcement-info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                  onClick={() => setActiveSection(section)}
+              >
+      
+                  {section === "details" && "Details"}
+              </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="view-announcement-header-body-bottom-section">
+            <div className="announcement-photo-section">
+              <span className="announcement-details-label">Announcement Details</span>
+              <div className="announcement-pic-container">
+                <img
+                    src={selectedAnnouncement.image || "/Images/thumbnail.png"}
+                    alt="Identification"
+                    className="resident-id-photo"
+                />
+              </div>
+            </div> 
+            <div className="view-announcement-info-main-container">
+              <div className="view-announcemnt-info-main-content">
+                {activeSection === "details" && (
+                  <>
+                    <div className="view-announcement-content-top-section">
+                      <div className="view-main-user-content-left-side">
+                        <div className="view-user-fields-section">
+                            <p>Publish Date</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.createdAt}
+                              readOnly
+                            />
+                        </div>
+                        <div className="view-user-fields-section">
+                            <p>Author</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.createdBy}
+                              readOnly
+                            />
+                        </div>
+                      </div>
+                      <div className="view-main-user-content-right-side-announce">
+                        <div className="view-user-fields-section">
+                            <p>Announcement Category</p>
+                            <input
+                              type="text"
+                              className="view-user-input-field"
+                              value={selectedAnnouncement.category}
+                              readOnly
+                            />
+                        </div>
+
+                        <div className="view-user-featured-active-section">
+                          <div className="view-user-fields-section-active-featured">
+                              <p>Active</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedAnnouncement.isActive ? "Yes" : "No"}
+                                readOnly
+                              />
+                          </div>
+                          <div className="view-user-fields-section-active-featured">
+                              <p>Featured</p>
+                              <input
+                                type="text"
+                                className="view-user-input-field"
+                                value={selectedAnnouncement.isInFeatured === "Active" ? "Yes" : "No"}
+                                readOnly
+                              />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="view-announcement-content-bottom-section">
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Program Headline
+                            </div>
+                            <div className={`box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="headline-input-field-announcements"
+                                value={selectedAnnouncement.announcementHeadline || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Full Content / Description
+                            </div>
+                            <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="description-input-field-announcements"
+                                value={selectedAnnouncement.content || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+                    </div> 
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )}
 
 
+  {showDeletePopup && (
+    <div className="announcements-confirmation-popup-overlay">
+      <div className="announcements-confirmation-popup">
+        <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+        <p>Are you sure you want to delete this Announcement?</p>
+        <div className="announcements-yesno-container">
+          <button onClick={() => setShowDeletePopup(false)} className="announcements-no-button">No</button>
+          <button onClick={confirmDelete} className="announcements-yes-button">Yes</button>
+        </div> 
+      </div>
+    </div>
+  )}
 
+
+  {showPopup && (
+      <div className={`announcements-popup-overlay show`}>
+          <div className="announcements-popup">
+              <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+              <p>{popupMessage}</p>
+          </div>
+      </div>
+  )}
+
+  {showErrorPopup && (
+            <div className={`error-popup-overlay show`}>
+                <div className="popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                    <p>{popupErrorMessage}</p>
+                </div>
+            </div>
+        )}
+
+  {showSubmitPopup && (
+    <div className="submit-announcements-confirmation-popup-overlay">
+        <div className="submit-announcements-confirmation-popup">
+            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+            <p>Are you sure you want to submit?</p>
+            <div className="announcements-yesno-container">
+                <button onClick={() => setShowSubmitPopup(false)} className="announcements-no-button">No</button>
+                <button onClick={confirmSubmit} className="announcements-yes-button">Yes</button> 
+            </div> 
+        </div>
+    </div>
+  )}
 
 
     </main>

@@ -213,81 +213,186 @@ useEffect(() => {
 
 
     console.log(officialsData);
-    const addNewOfficer = async () => {
-      if (!selectedNewOfficial && !manualNewOfficial) {
-        alert("Please select or enter an official to add.");
-        return;
-      }
-      if (!identificationFile) {
-        alert("Please upload an identification picture.");
-        return;
-      }
-      let  officialToAdd = null;
-      if( selectedNewOfficial) officialToAdd = selectedNewOfficial;
-      else if( manualNewOfficial) officialToAdd = manualNewOfficial;
-      
-      if (!officialToAdd) {
-        alert("Official details are incomplete.");
-        return;
-      }
-      if (!officialToAdd.name || !officialToAdd.contact || !officialToAdd.term || !officialToAdd.email) {
-        alert("Please fill in all required fields.");
-        return;
-      }
-      try{
-      const storageRef = ref(storage, `DisplayedOfficials/${Date.now()}_${identificationFile.name}`);
-      await uploadBytes(storageRef, identificationFile);
-      const imageUrl = await getDownloadURL(storageRef);
-      
 
-      // Format the term into "YYYY - YYYY+3"
-      let termFormatted = "N/A";
-      if (officialToAdd.term) {
-        const startYear = new Date(officialToAdd.term).getFullYear();
-        const endYear = startYear + 3;
-        termFormatted = `${startYear} - ${endYear}`;
-      }
 
-      const newOfficialData = {
-        name: officialToAdd.name,
-        contact: officialToAdd.contact,
-        term: termFormatted, // use formatted value
-        email: officialToAdd.email,
-        facebook: officialToAdd.facebook || "N/A",
-        position: position,
-        image: imageUrl || "/images/default-profile.png",
-        createdBy: session?.user.fullName || "Unknown",
-        createdAt: new Date().toLocaleString(),
-      };
 
-      console.log("selectedNewOfficial", selectedNewOfficial);
-      console.log("manualNewOfficial", manualNewOfficial);
-      console.log("official to add", officialToAdd);
-      console.log("New Official Data:", newOfficialData);
-        const docRef = collection(db, "DisplayedOfficials");
-        addDoc(docRef, newOfficialData);
-        alert("New official added successfully!");
-        setShowAddOfficialPopup(false)
-        setIdentificationFile(null);
-        setIdentificationPreview(null);
-        setSelectedNewOfficial(null);
-        setManualNewOfficial(null);
-      } catch (error) {
-        console.error("Error adding document: ", error);
-      }
+// --- STATE HOOKS ---
+const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+const [showErrorPopup, setShowErrorPopup] = useState(false);
+const [errorMessage, setErrorMessage] = useState("");
+const [showPopup, setShowPopup] = useState(false);
+const [popupMessage, setPopupMessage] = useState("");
+const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+
+const validateAndConfirm = () => {
+  const newInvalidFields: string[] = [];
+
+  // ✅ Check if identification file uploaded
+  if (!identificationFile) newInvalidFields.push("identificationFile");
+
+  // ✅ Check if official details are selected/entered
+  const officialToAdd = selectedNewOfficial || manualNewOfficial;
+
+  if (!officialToAdd) {
+    setErrorMessage("Please select or enter an official to add.");
+    setInvalidFields(["name", "facebook", "contact", "term", "email"]);
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+    //  Phone number validation (must start with 09 + 9 digits = 11 total)
+  const phoneRegex = /^09\d{9}$/;
+  if (officialToAdd.contact && !phoneRegex.test(officialToAdd.contact)) {
+    setInvalidFields(["contact"]);
+    setErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+  //  Email validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (officialToAdd.email && !emailRegex.test(officialToAdd.email)) {
+    setInvalidFields(["email"]);
+    setErrorMessage("Invalid email address. Format: example@domain.com");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+  
+
+  if (!officialToAdd.name) newInvalidFields.push("name");
+  if (!officialToAdd.facebook) newInvalidFields.push("facebook");
+  if (!officialToAdd.contact) newInvalidFields.push("contact");
+  if (!officialToAdd.term) newInvalidFields.push("term");
+  if (!officialToAdd.email) newInvalidFields.push("email");
+
+
+
+
+
+  if (newInvalidFields.length > 0) {
+    setInvalidFields(newInvalidFields);
+    setErrorMessage("Please fill in all required fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+
+
+
+
+
+
+  // ✅ If all good, show confirmation popup
+  setInvalidFields([]);
+  setShowSubmitPopup(true);
+};
+
+
+
+const addNewOfficer = async () => {
+  try {
+    const officialToAdd = selectedNewOfficial || manualNewOfficial;
+
+    // ✅ Upload identification file to Firebase
+    const storageRef = ref(storage, `DisplayedOfficials/${Date.now()}_${identificationFile!.name}`);
+    await uploadBytes(storageRef, identificationFile!);
+    const imageUrl = await getDownloadURL(storageRef);
+
+    // ✅ Format the term into "YYYY - YYYY+3"
+    let termFormatted = "N/A";
+    if (officialToAdd?.term) {
+      const startYear = new Date(officialToAdd.term).getFullYear();
+      const endYear = startYear + 3;
+      termFormatted = `${startYear} - ${endYear}`;
     }
-    const deleteOfficer = async (id: string) => {
-      try {
-        const officerToDelete = displayedOfficials.find((officer) => officer.id === id);
-        if (officerToDelete && officerToDelete.image) {
-          const imageRef = ref(storage, officerToDelete.image);
-          await deleteObject(imageRef);
-        }
-        await deleteDoc(doc(db, "DisplayedOfficials", id));
-      } catch (error) {
-        console.error("Error deleting document: ", error);
-      }
+
+    const newOfficialData = {
+      name: officialToAdd?.name || "N/A",
+      contact: officialToAdd?.contact || "N/A",
+      term: termFormatted,
+      email: officialToAdd?.email || "N/A",
+      facebook: officialToAdd?.facebook || "N/A",
+      position: position,
+      image: imageUrl || "/images/default-profile.png",
+      createdBy: session?.user.fullName || "Unknown",
+      createdAt: new Date().toLocaleString(),
+    };
+
+    console.log("Official To Add:", officialToAdd);
+    console.log("New Official Data:", newOfficialData);
+
+    // ✅ Save to Firestore
+    const docRef = collection(db, "DisplayedOfficials");
+    await addDoc(docRef, newOfficialData);
+
+
+    setShowSubmitPopup(false);
+
+    // ✅ Success popup
+       setPopupMessage("Barangay Official created successfully!");
+    setShowPopup(true); // ✅ success popup
+    setTimeout(() => setShowPopup(false), 2000);
+   
+   
+   
+   
+    setShowAddOfficialPopup(false);
+    setIdentificationFile(null);
+    setIdentificationPreview(null);
+    setSelectedNewOfficial(null);
+    setManualNewOfficial(null);
+
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    setErrorMessage("Something went wrong while adding the official.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  }
+};
+
+
+const [showDeletePopup, setShowDeletePopup] = useState(false);
+const [officerToDeleteId, setOfficerToDeleteId] = useState<string | null>(null);
+const [officerToDeleteName, setOfficerToDeleteName] = useState<string | null>(null);
+
+
+  // --- DELETE LOGIC WITH POPUP ---
+const confirmDeleteOfficer = (id: string, name: string) => {
+  setOfficerToDeleteId(id);
+  setOfficerToDeleteName(name);
+  setShowDeletePopup(true);
+};
+
+const deleteOfficer = async () => {
+  if (!officerToDeleteId) return;
+  try {
+    const officerToDelete = displayedOfficials.find((officer) => officer.id === officerToDeleteId);
+    if (officerToDelete && officerToDelete.image) {
+      const imageRef = ref(storage, officerToDelete.image);
+      await deleteObject(imageRef);
     }
+    await deleteDoc(doc(db, "DisplayedOfficials", officerToDeleteId));
+
+    // Success popup
+    setPopupMessage("Barangay Official deleted successfully!");
+    setShowPopup(true);
+    setTimeout(() => setShowPopup(false), 2000);
+  } catch (error) {
+    console.error("Error deleting document: ", error);
+    setErrorMessage("Something went wrong while deleting the official.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  } finally {
+    setShowDeletePopup(false);
+    setOfficerToDeleteId(null);
+  }
+};
 
     const [showAddOfficialPopup, setShowAddOfficialPopup] = useState(false);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -483,10 +588,13 @@ useEffect(() => {
                            >
                             <img src="/Images/edit.png" alt="Edit"/>
                           </button>
-                          <button type="button" onClick={()=>deleteOfficer(official.id)} className="brgy-official-action-delete">
-                             <img src="/Images/delete.png" alt="Delete" />
-                          </button>
-                        </>
+                            <button
+                              onClick={() => confirmDeleteOfficer(official.id, official.name)}
+                              className="brgy-official-action-delete"
+                            >
+                              <img src="/Images/delete.png" alt="Delete" />
+                            </button>
+                                   </>
                       )}
                     
 
@@ -500,25 +608,84 @@ useEffect(() => {
       </div>
 
 
-    {filteredUser.length > UserPerPage && (
-        <div className="redirection-section-users">
-          <button onClick={prevPage} disabled={currentPage === 1}>
-            &laquo;
+      <div className="redirection-section-users" >
+        <button onClick={prevPage} disabled={currentPage === 1}>
+          &laquo;
+        </button>
+        {getPageNumbers().map((number: any, index: number) => (
+          <button key={index} onClick={() => typeof number === "number" && paginate(number)} className={currentPage === number ? "active" : ""}>
+            {number}
           </button>
-          {getPageNumbers().map((number, index) => (
-            <button
-              key={index}
-              onClick={() => typeof number === "number" && paginate(number)}
-              className={currentPage === number ? "active" : ""}
-            >
-              {number}
-            </button>
-          ))}
-          <button onClick={nextPage} disabled={currentPage === totalPages}>
-            &raquo;
-          </button>
-        </div>
-      )}
+        ))}
+        <button onClick={nextPage} disabled={currentPage === totalPages}>
+          &raquo;
+        </button>
+      </div>
+
+
+
+
+
+{showDeletePopup && (
+  <div className="confirmation-popup-overlay-module-barangay-official">
+    <div className="confirmation-popup-module-barangay-official">
+      <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+      <p>Are you sure you want to delete this Barangay Official?</p>
+     <h2>Official Name: {officerToDeleteName}</h2>
+      <div className="yesno-container-module-barangay-official">
+        <button
+          onClick={() => setShowDeletePopup(false)}
+          className="no-button-module-barangay-official"
+        >
+          No
+        </button>
+        <button
+          onClick={deleteOfficer}
+          className="yes-button-module-barangay-official"
+        >
+          Yes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+            {showSubmitPopup && (
+                <div className="addbrgyofficial-confirmation-popup-overlay">
+                         <div className="addbrgyofficial-confirmation-popup">
+                          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                           <p>Are you sure you want to submit?</p>
+                             <div className="barangay-official-yesno-container">
+                              <button onClick={() => setShowSubmitPopup(false)} className="addbrgyofficial-no-button">No</button>
+                           <button onClick={addNewOfficer} className="addbrgyofficial-yes-button">Yes</button> 
+                       </div> 
+                    </div>
+               </div>
+           )}
+
+        
+            {showPopup && (
+                <div className={`barangay-official-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                     <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                     <p>{popupMessage}</p>
+                </div>
+            </div>
+            )}
+
+
+                    
+        {showErrorPopup && (
+                <div className={`addbrgyofficial-error-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{errorMessage}</p>
+                    </div>
+                </div>
+                )}
+
 
 
       {showAddOfficialPopup && (
@@ -527,209 +694,199 @@ useEffect(() => {
                     <h2>Add New Barangay Official</h2>
 
                     <div className="add-official-main-container">
+                      {/* ✅ Identification Picture */}
                       <div className="add-official-photo-section">
                         <span className="add-official-details-label">Identification Picture</span>
-                        <div className="add-official-profile-container">
+                        <div
+                          className={`add-official-profile-container ${
+                            invalidFields.includes("identificationFile") ? "input-error" : ""
+                          }`}
+                        >
                           <img
                             src={identificationPreview || "/Images/default-identificationpic.jpg"}
                             alt="Identification"
                             className="add-official-id-photo"
                           />
                         </div>
-                        <label htmlFor="identification-file-upload" className="add-official-upload-link">Click to Upload File</label>
+                        <label htmlFor="identification-file-upload" className="add-official-upload-link">
+                          Click to Upload File
+                        </label>
                         <input
                           className="hidden"
                           type="file"
                           id="identification-file-upload"
                           accept="image/*"
-                          //style={{ display: "none" }}
                           onChange={handleIdentificationFileChange}
                         />
                       </div>
-                     
+
                       <div className="add-official-info-main-container">
                         <div className="add-official-content-left-side">
-                          {(position === "Punong Barangay" || position === "Secretary"
-                        || position === "Assistant Secretary" || position === "Barangay Administrator"
-                        || position === "GAD Focal Person" || position === "VAWC Focal Person"
-                        || position === "BCPC Focal Person" 
-                      ) && (
-                        <>
+                          {(position === "Punong Barangay" ||
+                            position === "Secretary" ||
+                            position === "Assistant Secretary" ||
+                            position === "Barangay Administrator" ||
+                            position === "GAD Focal Person" ||
+                            position === "VAWC Focal Person" ||
+                            position === "BCPC Focal Person") && (
+                            <>
+                              <div className="fields-section">
+                                <p>Select an Official <span className="required">*</span></p>
+                                <select
+                                  className={`add-official-input-field ${invalidFields.includes("officialId") ? "input-error" : ""}`}
+                                  name="officialId"
+                                  value={selectedNewOfficial ? selectedNewOfficial.id : ""}
+                                  onChange={(e) => {
+                                    const official = filteredOfficials.find(o => o.id === e.target.value);
+                                    setSelectedNewOfficial(official);
+                                  }}
+                                  required
+                                >
+                                  <option value="" disabled>Select an Official</option>
+                                  {filteredOfficials.map((official) => (
+                                    <option key={official.id} value={official.id}>
+                                      {official.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </>
+                          )}
+
+                          {/* ✅ Full Name */}
                           <div className="fields-section">
-                            <p>Select an Official <span className="required">*</span></p>
-                            <select 
-                              className="add-official-input-field"
-                              name="officialId"
-                              value={selectedNewOfficial ? selectedNewOfficial.id : ""}
+                            <p>Full Name<span className="required">*</span></p>
+                            <input
+                              type="text"
+                              className={`add-official-input-field ${invalidFields.includes("name") ? "input-error" : ""}`}
+                              placeholder="Enter Full Name"
+                              name="name"
+                              required
+                              value={selectedNewOfficial?.name || manualNewOfficial?.name || ""}
+                              readOnly={!!selectedNewOfficial}
                               onChange={(e) => {
-                                const official = filteredOfficials.find(o => o.id === e.target.value);
-                                setSelectedNewOfficial(
-                                  official
-                                );
+                                if (selectedNewOfficial) {
+                                  setSelectedNewOfficial({ ...selectedNewOfficial, name: e.target.value });
+                                } else {
+                                  setManualNewOfficial({ ...manualNewOfficial, name: e.target.value } as Official);
+                                }
+                              }}
+                            />
+                          </div>
+
+                          {/* ✅ Facebook */}
+                          <div className="fields-section">
+                            <p>Facebook<span className="required">*</span></p>
+                            <input
+                              type="text"
+                              className={`add-official-input-field ${invalidFields.includes("facebook") ? "input-error" : ""}`}
+                              placeholder="Enter Facebook Link"
+                              name="facebook"
+                              required
+                              value={selectedNewOfficial?.facebook || manualNewOfficial?.facebook || ""}
+                              readOnly={!!selectedNewOfficial}
+                              onChange={(e) => {
+                                if (selectedNewOfficial) {
+                                  setSelectedNewOfficial({ ...selectedNewOfficial, facebook: e.target.value });
+                                } else {
+                                  setManualNewOfficial({ ...manualNewOfficial, facebook: e.target.value } as Official);
+                                }
+                              }}
+                            />
+                          </div>
+
+                          {/* ✅ Contact */}
+                          <div className="fields-section">
+                            <p>Contact Number<span className="required">*</span></p>
+                            <input
+                              type="tel"
+                              className={`add-official-input-field ${invalidFields.includes("contact") ? "input-error" : ""}`}
+                              name="contact"
+                              pattern="^[0-9]{11}$"
+                              placeholder="Enter 11-digit phone number"
+                              required
+                              value={selectedNewOfficial?.contact || manualNewOfficial?.contact || ""}
+                              readOnly={!!selectedNewOfficial}
+                              onChange={(e) => {
+                                if (selectedNewOfficial) {
+                                  setSelectedNewOfficial({ ...selectedNewOfficial, contact: e.target.value });
+                                } else {
+                                  setManualNewOfficial({ ...manualNewOfficial, contact: e.target.value } as Official);
+                                }
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="add-official-content-right-side">
+                          {/* ✅ Position */}
+                          <div className="fields-section">
+                            <p>Position<span className="required">*</span></p>
+                            <select
+                              className={`add-official-input-field ${invalidFields.includes("position") ? "input-error" : ""}`}
+                              name="position"
+                              value={position}
+                              onChange={(e) => {
+                                setPosition(e.target.value);
+                                setSelectedNewOfficial(null);
+                                setManualNewOfficial(null);
                               }}
                               required
                             >
-                              <option value="" disabled>Select an Official</option>
-                              {filteredOfficials.map((official, index) => (
-                                <option key={official.id} value={official.id}>
-                                  {official.name}
+                              <option value="" disabled>Select a Position</option>
+                              {positionsList.map((pos) => (
+                                <option key={pos} value={pos} disabled={takenPositions.has(pos)}>
+                                  {pos}
                                 </option>
                               ))}
                             </select>
                           </div>
-                        </>
-                      )}
-                      <div className="fields-section">
-                          <p>Full Name<span className="required">*</span></p>
-                          <input
-                            type="text"
-                            className="add-official-input-field"
-                            placeholder="Enter Last Name"
-                            name="name"
-                            required
-                            value={selectedNewOfficial?.name || manualNewOfficial?.name  || ""}
-                            readOnly = { !!selectedNewOfficial}
-                            onChange={(e) => {
-                              if (selectedNewOfficial) {
-                                setSelectedNewOfficial({ ...selectedNewOfficial, name: e.target.value });
-                              } else {
-                                setManualNewOfficial({ ...manualNewOfficial, name: e.target.value } as Official);
-                              }
-                            }}
-                            />
-                      </div>
-                      
-                      <div className="fields-section">
-                          <p>Facebook<span className="required">*</span></p>
-                          <input
-                            type="text"
-                            className="add-official-input-field"
-                            placeholder="Enter Facebook Link"
-                            name="facebook"
-                            required
-                            value={selectedNewOfficial?.facebook || manualNewOfficial?.facebook  || ""}
-                            readOnly = { !!selectedNewOfficial}
-                            onChange={(e) => {
-                              if (selectedNewOfficial) {
-                                setSelectedNewOfficial({ ...selectedNewOfficial, facebook: e.target.value });
-                              } else {
-                                setManualNewOfficial({ ...manualNewOfficial, facebook: e.target.value } as Official);
-                              }
-                            }}
-                            />
-                      </div>
-                      <div className="fields-section">
-                        <p>Contact Number<span className="required">*</span></p>
-                        <input 
-                          type="tel" 
-                          className="add-official-input-field"
-                          name="contact"
-                          pattern="^[0-9]{11}$" 
-                          placeholder="Enter 11-digit phone number" 
-                          required
-                          value={selectedNewOfficial?.contact||manualNewOfficial?.contact ||""}
-                          readOnly = { !!selectedNewOfficial }
-                          onChange={(e) => {
-                            if (selectedNewOfficial) {
-                              setSelectedNewOfficial({ ...selectedNewOfficial, contact: e.target.value });
-                            } else {
-                              setManualNewOfficial({ ...manualNewOfficial, contact: e.target.value } as Official);
-                            }
-                          }}
-                    
-                        />
-                      </div>
-                    </div>
-                        
 
-                        <div className="add-official-content-right-side">
+                          {/* ✅ Term */}
                           <div className="fields-section">
-                            <p>Position<span className="required">*</span></p>
-                            <select
-                                className="add-official-input-field"
-                                name="position"
-                                value={position}
-                                onChange={(e) => {
-                                  setPosition(e.target.value);
-                                  setSelectedNewOfficial(null);
-                                  setManualNewOfficial(null);
-                                }}
-                                required
-                              >
-                                <option value="" disabled>Select a Position</option>
-
-                                {positionsList.map((pos) => (
-                                  <option key={pos} value={pos} disabled={takenPositions.has(pos)}>
-                                    {pos}
-                                  </option>
-                                ))}
-                              </select>
-
-
+                            <p>Term Duration<span className="required">*</span></p>
+                            <input
+                              type="date"
+                              className={`add-official-input-field ${invalidFields.includes("term") ? "input-error" : ""}`}
+                              name="term"
+                              required
+                              min={new Date().toISOString().split("T")[0]}
+                              value={selectedNewOfficial?.term || manualNewOfficial?.term || ""}
+                              readOnly={!!selectedNewOfficial}
+                              onChange={(e) => {
+                                if (selectedNewOfficial) {
+                                  setSelectedNewOfficial({ ...selectedNewOfficial, term: e.target.value });
+                                } else {
+                                  setManualNewOfficial({ ...manualNewOfficial, term: e.target.value } as Official);
+                                }
+                              }}
+                            />
                           </div>
 
-                          {/* {position === "LF Staff" && (
-                            <div className="fields-section">
-                              <p>
-                                Department<span className="required">*</span>
-                              </p>
-                              <select
-                                className="add-official-input-field"
-                                name="department"
-                                required
-                              >
-                                <option value="" disabled>Select a Department</option>
-                                <option value="Lupon">Lupon</option>
-                                <option value="GAD">GAD</option>
-                                <option value="VAWC">VAWC</option>
-                                <option value="BCPC">BCPC</option>
-                              </select>
-                            </div>
-                          )} */}
-                           <div className="fields-section">
-                              <p>Term Duration<span className="required">*</span></p>
-                              <input
-                                type="date"
-                                className="add-official-input-field"
-                                name="term"
-                                required
-                                min={new Date().toISOString().split("T")[0]}
-                                value={ selectedNewOfficial?.term || manualNewOfficial?.term ||""}
-                                readOnly = { !!selectedNewOfficial }
-                                onChange={(e) => {
-                                  if (selectedNewOfficial) {
-                                    setSelectedNewOfficial({ ...selectedNewOfficial, term: e.target.value });
-                                  } else {
-                                    setManualNewOfficial({ ...manualNewOfficial, term: e.target.value } as Official);
-                                  }
-                                }}
-                                    
-                              />
-                            </div>
-                             <div className="fields-section">
-                                <p>Email Address<span className="required">*</span></p>
-                                <input
-                                  type="text"
-                                  className="add-official-input-field"
-                                  placeholder="Enter Email Address"
-                                  name="emailAddress"
-                                  required
-                                  value={ selectedNewOfficial?.email|| manualNewOfficial?.email || ""}
-                                  readOnly = { !!selectedNewOfficial }
-                                  onChange={(e) => {
-                                    if (selectedNewOfficial) {
-                                      setSelectedNewOfficial({ ...selectedNewOfficial, email: e.target.value });
-                                    } else {
-                                      setManualNewOfficial({ ...manualNewOfficial, email: e.target.value } as Official);
-                                    }
-                                  }}
-                                    
-                                />
-                             </div>
+                          {/* ✅ Email */}
+                          <div className="fields-section">
+                            <p>Email Address<span className="required">*</span></p>
+                            <input
+                              type="text"
+                              className={`add-official-input-field ${invalidFields.includes("email") ? "input-error" : ""}`}
+                              placeholder="Enter Email Address"
+                              name="email"
+                              required
+                              value={selectedNewOfficial?.email || manualNewOfficial?.email || ""}
+                              readOnly={!!selectedNewOfficial}
+                              onChange={(e) => {
+                                if (selectedNewOfficial) {
+                                  setSelectedNewOfficial({ ...selectedNewOfficial, email: e.target.value });
+                                } else {
+                                  setManualNewOfficial({ ...manualNewOfficial, email: e.target.value } as Official);
+                                }
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
-
                     </div>
+
 
                     
                 
@@ -745,7 +902,7 @@ useEffect(() => {
 
                         } className="official-no-button">Cancel</button>
                         <button type= "button" onClick={()=>{
-                          addNewOfficer()
+                        validateAndConfirm()
                          
 
                         }} className="official-yes-button">

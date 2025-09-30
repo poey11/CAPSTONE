@@ -1,0 +1,496 @@
+
+"use client"
+import "@/CSS/IncidentModule/Letters.css";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChangeEvent, use, useEffect, useState } from "react";
+import { collection,doc, getDocs, onSnapshot, orderBy, query, updateDoc, where } from "firebase/firestore";
+import { db } from "@/app/db/firebase";
+import { useSession } from "next-auth/react";
+import { handleLetterOfFailure } from "@/app/helpers/pdfhelper";
+import MenuBar from "@/app/(barangay-side)/components/incidentMenuBar";
+import { report } from "process";
+
+interface otherInfoType {
+    DateOfDelivery?: string;
+    DateTimeOfMeeting?: string;
+    LuponStaff?: string;
+    LuponStaffId?: string;
+    DateFiled?: string;
+}
+
+export default function Page() {
+    const router = useRouter();
+    const searchParam = useSearchParams();
+    const docId = searchParam.get("id")?.split("?")[0];
+    const department = searchParam.get("department");
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState("");
+    const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+    const [showSubmitPopup, setShowSubmitPopup] = useState<{ show: boolean; message: string; message2: string; letterType?: "dialogue" | "summon" }>({
+        show: false,
+        message: "",
+        message2: "",
+        letterType: undefined,
+    });
+
+    const phTime = new Date()
+    const today  = new Date(phTime.getTime() - phTime.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split("T")[0];
+    const [otherInfo, setOtherInfo] = useState<otherInfoType>(
+        {
+            DateOfDelivery: "",
+            DateTimeOfMeeting: "",
+            LuponStaff: "",
+            DateFiled: today,
+        }
+    );
+    const [dateFiled, setDateFiled] = useState(today);
+    const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
+    useEffect(() => {
+        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+        const unsubscribe = onSnapshot(staffquery, (snapshot) => {
+            const staffList: any[] = [];
+            snapshot.forEach((doc) => {
+                staffList.push({ ...doc.data(), id: doc.id });
+            });
+            console.log("Staff List:", staffList);
+            setListOfStaffs(staffList);
+        });                     
+
+            
+        return () => { unsubscribe();  // Clean up the listener on unmount}
+            }
+    },[]);
+
+    const filteredStaffs = listOfStaffs.filter((staff) => staff.department === department);
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [reportData, setReportData] = useState<any>(null);
+    useEffect(() => {
+      if(!docId) return;
+        const docRef = doc(db, "IncidentReports", docId);
+        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setReportData(data);
+          } else {
+            console.log("No such document!");
+          }
+        });
+      // Cleanup function to unsubscribe from the snapshot listener
+        return () => unsubscribe();
+      
+      
+    }, [docId]);
+    const [index, setIndex] = useState(0);
+    const [length, setLength] = useState(0);
+
+    useEffect(() => {
+    if (!reportData) return;
+
+    // Get all keys like respondentAbsentInHearing0, respondentAbsentInHearing1, ...
+    const keys = Object.keys(reportData).filter((key) =>
+        key.startsWith("respondentAbsentInHearing")
+    );
+
+    // Count how many there are
+    setLength(keys.length);
+
+    if (keys.length > 0) {
+        // Extract numeric suffix (e.g., 0,1,2)
+        const indices = keys.map((key) =>
+        Number(key.replace("respondentAbsentInHearing", ""))
+        );
+
+        // Get the latest (max index)
+        const maxIndex = Math.max(...indices);
+
+        setIndex(maxIndex);
+    } else {
+        setIndex(0);
+    }
+    }, [reportData]);
+    console.log("Latest Index:", index, "Total Count:", length);
+
+    const [refailureHearingData, setRefailureHearingData] = useState<any>();
+    useEffect(() => {
+        if (!reportData) return;
+        setRefailureHearingData({
+             [`refailureExplainationMeetingHearing${index}`]: reportData?.[`refailureExplainationMeetingHearing${index}`] || "",
+            [`refailureLetterHearingDeliverBy${index}`]: reportData?.[`refailureLetterHearingDeliverBy${index}`] || "",
+            [`refailureLetterHearingDeliverDate${index}`]:  reportData?.[`refailureLetterHearingDeliverDate${index}`] || "",
+            [`refailureLetterHearingDateFiled${index}`]:   reportData?.[`refailureLetterHearingDateFiled${index}`] || "",
+        })
+     
+    },[reportData,index]);
+    console.log("Refailure Hearing Data:", refailureHearingData);
+
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
+            const { name, value } = e.target;
+            const keys = name.split("."); 
+        
+            setOtherInfo((prev:any) => {
+                if (keys.length === 2) {
+                    const [parentKey, childKey] = keys;
+                    return {
+                        ...prev,
+                        [parentKey]: {
+                            ...(prev[parentKey as keyof typeof prev] as object), 
+                            [childKey]: value 
+                        }
+                    };
+                }
+                return { ...prev, [name]: value };
+            });
+        };
+
+        const [barangayList, setBarangayList] = useState<any[]>([]);
+    useEffect(() => {
+        const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
+        const unsubscribe = onSnapshot(staffquery, (snapshot) => {
+            const staffList: any[] = [];
+            snapshot.forEach((doc) => {
+                staffList.push({ ...doc.data(), id: doc.id });
+            });
+            console.log("Staff List:", staffList);
+            setBarangayList(staffList);
+        });                     
+
+            
+        return () => { unsubscribe();  // Clean up the listener on unmount}
+            }
+        },[]);
+    
+            const handleRescheduleMeeting = async (DateTimeOfMeeting: string) => {
+        const deliver = barangayList.find((staff) => staff.id === otherInfo?.LuponStaffId);
+        if (!docId) return
+        const mainDocRef = doc(db, "IncidentReports", docId);
+          await updateDoc(mainDocRef, {
+            sentLetterOfFailureToAppearHearing:{
+                ...(reportData?.sentLetterOfFailureToAppearHearing || {}),
+                [index]: true
+            },
+            [`refailureExplainationMeetingHearing${index}`]: DateTimeOfMeeting,
+            [`refailureLetterHearingDeliverBy${index}`]: `${deliver?.firstName} ${deliver?.lastName}`,
+            [`refailureLetterHearingDeliverDate${index}`]: otherInfo?.DateOfDelivery,
+            [`refailureLetterHearingDateFiled${index}`]: new Date().toLocaleString(),
+      })        
+    }
+    const isLetterSent = !!reportData?.sentLetterOfFailureToAppearHearing?.[2];
+    console.log("Is Letter Sent for index 2:", isLetterSent);
+
+    return (
+        <main className="main-container-letter">
+
+
+        {errorPopup.show && (
+            <div className={'popup-overlay-error show'}>
+                <div className="popup-letter">
+                      <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert-letter"/>
+                    <p>{errorPopup.message}</p>
+                </div>
+            </div>
+        )}
+
+            {showPopup && (
+            <div className={`popup-overlay-add show`}>
+                <div className="popup-add">
+                  <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                  <p>{popupMessage}</p>
+                </div>
+            </div>
+        )}
+
+
+
+                {showSubmitPopup.show && (
+                <div className="popup-backdrop">
+                    <div className="popup-content">
+                    <img
+                        src="/Images/check.png"
+                        alt="check icon"
+                        className="successful-icon-popup-letter"
+                    />
+                    <p>{showSubmitPopup.message}</p>
+                    <h2>{showSubmitPopup.message2}</h2>
+
+                    {showSubmitPopup.letterType === "summon" ? (
+                            <button
+                            onClick={() => {
+                                setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+
+                                // Show the success popup message immediately
+                                setPopupMessage("SMS sent successfully!!");
+                                setShowPopup(true);
+
+                                if (showSubmitPopup.letterType === "summon") {
+                                // Redirect to HearingSection after 3 seconds
+                                //sendSMSForSummons();
+                                setTimeout(() => {
+                                    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
+                                    setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                                }, 3000);
+                                } else {
+                                // Go back after 2 seconds
+                                setTimeout(() => {
+                                    setShowPopup(false);
+                                    router.back();
+                                }, 2000);
+                                }
+                            }}
+                            className="send-sms-btn"
+                            >
+                            Send SMS
+                            </button>
+
+                    ) : (
+                        // CODE BLOCK FOR SEND SMS BUTTON INSIDE POP UP
+                        <button
+                            onClick={() => {
+                                setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+
+                                // Show popup immediately
+                                setPopupMessage("SMS sent successfully!!");
+                                setShowPopup(true);
+
+                                if (showSubmitPopup.letterType === "dialogue") {
+                                //sendSMSForDialogue(); 
+                                setTimeout(() => {
+                                    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
+                                    setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
+                                }, 3000);
+                                } else {
+                                // Redirect after 2 seconds
+                                setTimeout(() => {
+                                    setShowPopup(false);
+                                    router.back();
+                                }, 2000);
+                                }
+                            }}
+                            className="send-sms-btn"
+                            >
+                            Send SMS
+                        </button> 
+                    )}
+                    </div>
+                </div>
+                )}
+            {isLoading && (
+                <div className="popup-backdrop">
+                    <div className="popup-content">
+                        <div className="spinner"/>
+                        <p>Generating letter, please wait...</p>
+                    </div>
+                </div>
+            )}
+
+        <MenuBar id = {docId||""} department={department ||  ""} />
+
+        <div className="main-content-letter">
+                    <form  className="container-letters">
+
+                        <div className="section-1-letter">
+
+                            <div className="section-left-side-letter">
+                                <button type="button" onClick={router.back} className="back-btn-letter-container">
+                                    <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
+                                </button>
+
+                                <h1 className="NewOfficial">Refailure Meeting (Hearing)</h1> 
+                            </div>
+                        <div className="actions-letter">
+                        {(!refailureHearingData ||
+                                (!refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] ||
+                                !refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] ||
+                                !refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]) ||
+                                !(isLetterSent)                        
+                        ) && (
+                            <button
+                                className="letter-announcement-btn"
+                                type="submit"
+                                name="print"
+                                onClick={(e) => {
+                                e.preventDefault();
+                                if (!otherInfo?.DateOfDelivery || !otherInfo?.DateTimeOfMeeting || !otherInfo?.LuponStaff) {
+                                    setErrorPopup({ show: true, message: "Please fill up all the required fields." });
+                                    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                                    return;
+                                }
+
+                                handleRescheduleMeeting(otherInfo?.DateTimeOfMeeting);
+                                setPopupMessage("Refailure Meeting (Hearing) Info Updated Successfully!!");
+                                setShowPopup(true);
+                                setTimeout(() => {
+                                    setShowPopup(false);
+                                    router.push(
+                                    `/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&department=${department}`
+                                    );
+                                }, 2000);
+
+                                handleLetterOfFailure(
+                                    docId ?? "",
+                                    otherInfo?.DateTimeOfMeeting ?? "",
+                                    `${reportData?.complainant?.fname ?? ""} ${reportData?.complainant?.lname ?? ""}`,
+                                    `${reportData?.respondent?.fname ?? ""} ${reportData?.respondent?.lname ?? ""}`,
+                                    "summon",
+                                    index
+                                );
+                                }}
+                            >
+                                Print
+                            </button>
+                            )}
+
+                           
+                            
+                        </div>
+                    </div>
+
+
+
+                   <div className="scroll-letter">
+                        <div className="section-2-letter">
+                            <div className="section-2-letter-lower">
+
+                                    <div className="section-2-letter-lower">
+                                    <div className="section-2-information-section">
+                                        <div className="section-2-information-top">
+                                            <div className="section-title-letter">
+                                            <h1>Refailure Information ({Number(index) === 0 ? (<>First</>) : Number(index) === 1 ? (<>Second</>) : Number(index) === 2 && (<>Third</>)} Hearing)</h1>
+                                            </div>
+                                        </div>
+                                        <div className="section-2-information-bottom">
+                                            <div className="section-2-information-bottom">
+                                            <div className="section-2-letter-left-side-others">
+                                                <div className="fields-section-letter">
+                                                    <p>Date of Delivery</p>
+                                                    <input
+                                                        type="date"
+                                                        className="generate-letter-input-field"
+                                                        placeholder="Enter Date of Delivery"
+                                                        value={refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`] || otherInfo?.DateOfDelivery||""}
+                                                        id="DateOfDelivery"
+                                                        name="DateOfDelivery"
+                                                        min={(() => {
+                                                            const tomorrow = new Date();
+                                                            tomorrow.setDate(tomorrow.getDate() + 1);   
+
+                                                            const pad = (n: number) => n.toString().padStart(2, "0");
+                                                            const yyyy = tomorrow.getFullYear();
+                                                            const mm = pad(tomorrow.getMonth() + 1);
+                                                            const dd = pad(tomorrow.getDate());
+                                                            return `${yyyy}-${mm}-${dd}`;
+                                                        })()}
+                                                        onKeyDown={(e) => e.preventDefault()}
+                                                        onChange={(e) => {
+                                                            handleChange(e); // ✅ actually call it
+                                                            setOtherInfo((prev: any) => ({
+                                                            ...prev,
+                                                            DateTimeOfMeeting: "", // ✅ reset meeting when delivery date changes
+                                                            }));
+                                                        }}
+                                                        required
+                                                        disabled={!!refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]}
+                                                        />
+
+                                                </div>
+                                                <div className="fields-section-letter">
+                                                    <p>Date and Time of Meeting</p>
+                                                    <input
+                                                        type="datetime-local"
+                                                        className="generate-letter-input-field"
+                                                        value={refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] || otherInfo?.DateTimeOfMeeting}
+                                                        onKeyDown={(e) => e.preventDefault()}
+                                                        id="DateTimeOfMeeting"
+                                                        name="DateTimeOfMeeting"
+                                                        onChange={handleChange}
+                                                        min={(() => {
+                                                        if (!otherInfo?.DateOfDelivery) return "";
+                                                        const tomorrow = new Date(otherInfo.DateOfDelivery);
+                                                        tomorrow.setDate(tomorrow.getDate() + 1);
+
+                                                        const pad = (n: number) => n.toString().padStart(2, "0");
+                                                        const yyyy = tomorrow.getFullYear();
+                                                        const mm = pad(tomorrow.getMonth() + 1);
+                                                        const dd = pad(tomorrow.getDate());
+                                                        const hh = pad(tomorrow.getHours());
+                                                        const min = pad(tomorrow.getMinutes());
+
+                                                        // Must return `YYYY-MM-DDTHH:MM`
+                                                        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+                                                        })()}
+                                                        required
+                                                        disabled={!!refailureHearingData?.[`refailureExplainationMeetingHearing${index}`]}
+                                                    />
+                                                    </div>
+
+                                            </div>
+                                            <div className="section-2-letter-right-side-others">
+                                            <div className="fields-section-letter">
+                                                    <p>Delivered By</p>      
+                                                    <select
+                                                            className="generate-letter-input-field-dropdown"
+                                                            value={refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] || otherInfo?.LuponStaff}
+                                                            onChange={(e) => {
+                                                                const select = e.target;
+                                                                const selectedOption = select.options[select.selectedIndex];
+                                                                const selectedName = selectedOption.value;
+                                                                const selectedId = selectedOption.getAttribute("data-staffid") || "";
+                                                                console.log("DEBUG SELECT:", selectedName, selectedId);
+                                                                setOtherInfo((prev: any) => ({
+                                                                    ...prev,
+                                                                    LuponStaff: selectedName,
+                                                                    LuponStaffId: selectedId
+                                                                }));
+                                                            }}
+                                                            required
+                                                            disabled={!!refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] }
+                                                        >
+                                                            <option disabled value="">Select Official/Kagawad</option>
+                                                            {filteredStaffs.map((staff, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={`${staff.firstName} ${staff.lastName}`}
+                                                                    data-staffid={staff.id}
+                                                                >
+                                                                    {staff.firstName} {staff.lastName}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                </div>
+                                                <div className="fields-section-letter">
+                                                    <p>Date Filed</p>
+                                                <input type="datetime" className="generate-letter-input-field" 
+                                                    value={refailureHearingData?.[`refailureLetterHearingDateFiled${index}`]?.dateFiled || otherInfo?.DateFiled}
+                                                    max={today}
+                                                    id="DateFiled"
+                                                    name="DateFiled"
+                                                    onKeyDown={(e) => e.preventDefault()}
+                                                    onChange={handleChange}
+                                                    disabled
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+
+                            </div>
+
+                        </div>
+                    
+                        </div>
+
+                    
+                    </form>
+
+            </div> 
+      
+
+        </main>
+    )
+}

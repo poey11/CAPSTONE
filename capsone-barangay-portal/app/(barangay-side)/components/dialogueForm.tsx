@@ -257,16 +257,17 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
             const mainDocRef = doc(db, "IncidentReports", id);
             
             if(details.Rstatus === "Absent" && details.Cstatus !== "Absent"){
-              setShowSetRefailureMeetingPopup(true);
+              //setShowSetRefailureMeetingPopup(true);
               await updateDoc(mainDocRef, {
-                sentLetterOfFailureToAppearDialogue: true,
+                //sentLetterOfFailureToAppearDialogue: true,
+                respondentAbsentInDialogue: true,
                 respondentAbsents: (data?.respondentAbsents || 0) + 1,
               })
-
+              
               setTimeout(() => {
                 setShowPopup(false);
               }, 3000);
-
+              router.push(`/dashboard/IncidentModule/EditIncident/RefailureDialogue/RefailureInfo?id=${id}&department=${department}`);
             }
             else if(details.Cstatus === "Absent" && details.Rstatus !== "Absent"){
                 await updateDoc(mainDocRef, {
