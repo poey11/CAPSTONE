@@ -8,6 +8,15 @@ import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { handleLetterOfFailure } from "@/app/helpers/pdfhelper";
 import MenuBar from "@/app/(barangay-side)/components/incidentMenuBar";
+import { report } from "process";
+
+interface otherInfoType {
+    DateOfDelivery?: string;
+    DateTimeOfMeeting?: string;
+    LuponStaff?: string;
+    LuponStaffId?: string;
+    DateFiled?: string;
+}
 
 export default function Page() {
     const router = useRouter();
@@ -28,14 +37,15 @@ export default function Page() {
     const today  = new Date(phTime.getTime() - phTime.getTimezoneOffset() * 60000)
     .toISOString()
     .split("T")[0];
-    const [otherInfo, setOtherInfo] = useState<any>({
-        DateOfDelivery: "",
-        DateTimeOfMeeting: "",
-
-        LuponStaff: "",
-        LuponStaffId: "",
-        DateFiled: today,
-    });
+    const [otherInfo, setOtherInfo] = useState<otherInfoType>(
+        {
+            DateOfDelivery: "",
+            DateTimeOfMeeting: "",
+            LuponStaff: "",
+            DateFiled: today,
+        }
+    );
+    const [dateFiled, setDateFiled] = useState(today);
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     useEffect(() => {
         const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
@@ -73,12 +83,6 @@ export default function Page() {
       
       
     }, [docId]);
-    
-    const [refailureHearingData, setrefailureHearingData] = useState<any[]>([]);
-    useEffect(() => {
-        
-     
-    },[reportData]);
     const [index, setIndex] = useState(0);
     const [length, setLength] = useState(0);
 
@@ -108,6 +112,19 @@ export default function Page() {
     }
     }, [reportData]);
     console.log("Latest Index:", index, "Total Count:", length);
+
+    const [refailureHearingData, setRefailureHearingData] = useState<any>();
+    useEffect(() => {
+        if (!reportData) return;
+        setRefailureHearingData({
+             [`refailureExplainationMeetingHearing${index}`]: reportData?.[`refailureExplainationMeetingHearing${index}`] || "",
+            [`refailureLetterHearingDeliverBy${index}`]: reportData?.[`refailureLetterHearingDeliverBy${index}`] || "",
+            [`refailureLetterHearingDeliverDate${index}`]:  reportData?.[`refailureLetterHearingDeliverDate${index}`] || "",
+            [`refailureLetterHearingDateFiled${index}`]:   reportData?.[`refailureLetterHearingDateFiled${index}`] || "",
+        })
+     
+    },[reportData]);
+    
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
@@ -147,16 +164,19 @@ export default function Page() {
         },[]);
     
             const handleRescheduleMeeting = async (DateTimeOfMeeting: string) => {
-        const deliver = barangayList.find((staff) => staff.id === otherInfo.LuponStaffId);
-        if (!docId) return;
+        const deliver = barangayList.find((staff) => staff.id === otherInfo?.LuponStaffId);
+        if (!docId) return
         const mainDocRef = doc(db, "IncidentReports", docId);
           await updateDoc(mainDocRef, {
-            [`sentLetterOfFailureToAppearDialogue`]: true,
-            refailureExplainationMeetingDialogue: DateTimeOfMeeting,
-            refailureLetterDialogueDeliverBy: `${deliver?.firstName} ${deliver?.lastName}`,
-            refailureLetterDialogueDeliverDate: otherInfo.DateOfDelivery,
-            refailureLetterDialogueDateFiled: new Date().toLocaleString(),
-          })        
+            sentLetterOfFailureToAppearHearing:{
+                ...(reportData?.sentLetterOfFailureToAppearHearing || {}),
+                [index]: true
+            },
+            [`refailureExplainationMeetingHearing${index}`]: DateTimeOfMeeting,
+            [`refailureLetterHearingDeliverBy${index}`]: `${deliver?.firstName} ${deliver?.lastName}`,
+            [`refailureLetterHearingDeliverDate${index}`]: otherInfo?.DateOfDelivery,
+            [`refailureLetterHearingDateFiled${index}`]: new Date().toLocaleString(),
+      })        
     }
     return (
         <main className="main-container-letter">
@@ -278,17 +298,18 @@ export default function Page() {
                                 <h1 className="NewOfficial">Refailure Meeting (Dialogue)</h1> 
                             </div>
                         <div className="actions-letter">
-                        {(
-                            !refailureHearingData 
-                            
-                            ) && (
+                        {(!refailureHearingData ||
+                                !refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] ||
+                                !refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] ||
+                                !refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]
+                        ) && (
                             <button
                                 className="letter-announcement-btn"
                                 type="submit"
                                 name="print"
                                 onClick={(e) => {
                                 e.preventDefault();
-                                if (!otherInfo.DateOfDelivery || !otherInfo.DateTimeOfMeeting || !otherInfo.LuponStaff) {
+                                if (!otherInfo?.DateOfDelivery || !otherInfo?.DateTimeOfMeeting || !otherInfo?.LuponStaff) {
                                     setErrorPopup({ show: true, message: "Please fill up all the required fields." });
                                     setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
                                     return;
@@ -300,7 +321,7 @@ export default function Page() {
                                 setTimeout(() => {
                                     setShowPopup(false);
                                     router.push(
-                                    `/dashboard/IncidentModule/EditIncident/RefailureDialogue?id=${docId}&department=${department}`
+                                    `/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&department=${department}`
                                     );
                                 }, 2000);
 
@@ -309,7 +330,8 @@ export default function Page() {
                                     otherInfo?.DateTimeOfMeeting ?? "",
                                     `${reportData?.complainant?.fname ?? ""} ${reportData?.complainant?.lname ?? ""}`,
                                     `${reportData?.respondent?.fname ?? ""} ${reportData?.respondent?.lname ?? ""}`,
-                                    "dialogue"
+                                    "summon",
+                                    index
                                 );
                                 }}
                             >
@@ -344,12 +366,12 @@ export default function Page() {
                                                         type="date"
                                                         className="generate-letter-input-field"
                                                         placeholder="Enter Date of Delivery"
-                                                        value={refailureHearingData[0]?.DateOfDelivery || otherInfo.DateOfDelivery}
+                                                        value={refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`] || otherInfo?.DateOfDelivery||""}
                                                         id="DateOfDelivery"
                                                         name="DateOfDelivery"
                                                         min={(() => {
                                                             const tomorrow = new Date();
-                                                            tomorrow.setDate(tomorrow.getDate() + 1);
+                                                            tomorrow.setDate(tomorrow.getDate() + 1);   
 
                                                             const pad = (n: number) => n.toString().padStart(2, "0");
                                                             const yyyy = tomorrow.getFullYear();
@@ -366,7 +388,7 @@ export default function Page() {
                                                             }));
                                                         }}
                                                         required
-                                                        disabled={!!refailureHearingData[0]?.DateOfDelivery}
+                                                        disabled={!!refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]}
                                                         />
 
                                                 </div>
@@ -375,13 +397,13 @@ export default function Page() {
                                                     <input
                                                         type="datetime-local"
                                                         className="generate-letter-input-field"
-                                                        value={refailureHearingData[0]?.DateTimeOfMeeting || otherInfo.DateTimeOfMeeting}
+                                                        value={refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] || otherInfo?.DateTimeOfMeeting}
                                                         onKeyDown={(e) => e.preventDefault()}
                                                         id="DateTimeOfMeeting"
                                                         name="DateTimeOfMeeting"
                                                         onChange={handleChange}
                                                         min={(() => {
-                                                        if (!otherInfo.DateOfDelivery) return "";
+                                                        if (!otherInfo?.DateOfDelivery) return "";
                                                         const tomorrow = new Date(otherInfo.DateOfDelivery);
                                                         tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -396,7 +418,7 @@ export default function Page() {
                                                         return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
                                                         })()}
                                                         required
-                                                        disabled={!!refailureHearingData[0]?.DateTimeOfMeeting}
+                                                        disabled={!!refailureHearingData?.[`refailureExplainationMeetingHearing${index}`]}
                                                     />
                                                     </div>
 
@@ -406,7 +428,7 @@ export default function Page() {
                                                     <p>Delivered By</p>      
                                                     <select
                                                             className="generate-letter-input-field-dropdown"
-                                                            value={refailureHearingData[0]?.LuponStaff||otherInfo.LuponStaff}
+                                                            value={refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] || otherInfo?.LuponStaff}
                                                             onChange={(e) => {
                                                                 const select = e.target;
                                                                 const selectedOption = select.options[select.selectedIndex];
@@ -420,7 +442,7 @@ export default function Page() {
                                                                 }));
                                                             }}
                                                             required
-                                                            disabled={!!refailureHearingData[0]?.LuponStaff}
+                                                            disabled={!!refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] }
                                                         >
                                                             <option disabled value="">Select Official/Kagawad</option>
                                                             {filteredStaffs.map((staff, index) => (
@@ -437,7 +459,7 @@ export default function Page() {
                                                 <div className="fields-section-letter">
                                                     <p>Date Filed</p>
                                                 <input type="datetime" className="generate-letter-input-field" 
-                                                    value={refailureHearingData[0]?.DateFiled||otherInfo.DateFiled}
+                                                    value={refailureHearingData?.[`refailureLetterHearingDateFiled${index}`]?.dateFiled || otherInfo?.DateFiled}
                                                     max={today}
                                                     id="DateFiled"
                                                     name="DateFiled"

@@ -19,6 +19,7 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
     const pathname = usePathname();
     const path = pathname.split("?")[0]; 
     const lastSegment = path.split("/").pop();
+    const secondToTheLastSegment = path.split("/").slice(-2, -1)[0];
 
     const [reportData, setReportData] = useState<any | null>(null);
     useEffect(() => {
@@ -287,7 +288,7 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
                 
                 {(reportData?.respondentAbsentInDialogue === true) && (
                   <div className="dialogue-dropdown">
-                      <button className = {((lastSegment === "RefailureDialogue" || lastSegment === "RefailureInfo"))? 
+                      <button className = {((lastSegment === "RefailureDialogue" || (lastSegment === "RefailureInfo" && secondToTheLastSegment === "RefailureDialogue")))? 
                         "edit-incident-redirection-buttons-selected" :"edit-incident-redirection-buttons"} >
 
                         <div className="edit-incident-redirection-icons-section">
@@ -326,7 +327,7 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
                     key => key.startsWith("respondentAbsentInHearing") && reportData[key] === true
                   ) && (
                   <div className="hearing-dropdown">
-                      <button className = {((lastSegment === "RefailureHearing" || lastSegment === "RefailureInfo"))? 
+                      <button className = {((lastSegment === "RefailureHearing" || (lastSegment === "RefailureInfo" && secondToTheLastSegment === "RefailureHearing")))? 
                         "edit-incident-redirection-buttons-selected" :"edit-incident-redirection-buttons"} >
                         <div className="edit-incident-redirection-icons-section">
                             <img src="/Images/group-discussion.png" alt="user info" className="redirection-icons-hearing" />
