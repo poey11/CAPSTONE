@@ -1076,7 +1076,7 @@ const formatStatus = (status: string) => {
                       </button>
                       {isAuthorized && (
                         <>
-                        {incident.status !== "settled" && incident.status !== "CFA" && incident.status !=="Refer to Government Agency" && (
+                        {incident.status !== "settled" && incident.status !== "CFA" && incident.status !=="Refer to Government Agency" && incident.status !=="dismissed" && (
                           <button className="action-edit-departments-main" onClick={(e) => { e.stopPropagation(); handleEdit(incident.id); }}> <img src="/Images/edit.png" alt="Edit" /></button>
                         )}
                           <button className="action-delete-departments-main" onClick={(e) => { e.stopPropagation(); handleDeleteClick(incident.id, incident.caseNumber); }}><img src="/Images/delete.png" alt="Delete" /></button>
