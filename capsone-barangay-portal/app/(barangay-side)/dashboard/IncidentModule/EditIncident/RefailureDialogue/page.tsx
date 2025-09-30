@@ -18,22 +18,6 @@ export default function Page() {
     const [isDialogueSectionFilled, setIsDialogueSectionFilled] = useState(false);
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
 
-    const handleInformationSection = (e:any) => {
-        router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
-    };
-
-    const handleGenerateLetterAndInvitation = (e: any) => {
-    const action = e.currentTarget.name;
-    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=${action}&department=${department}`);
-    };
-
-    const handleDialogueSection = () => {
-    router.push(`/dashboard/IncidentModule/EditIncident/DialogueSection?id=${docId}&department=${department}`);
-    };
-
-    const handleHearingSection = (e:any) => {
-    router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
-    }
     
     console.log(docId)
     useEffect(() => {

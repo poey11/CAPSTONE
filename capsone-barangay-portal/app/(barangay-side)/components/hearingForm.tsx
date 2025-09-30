@@ -315,11 +315,10 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                 })
               }
               
-              router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing/RefailureInfo?id=${id}&department=${department}`);
               setTimeout(() => {
                 setShowPopup(false);
               }, 3000);
-              
+              return;
             }
             else if(details.Cstatus === "Absent" && details.Rstatus !== "Absent"){
               await updateDoc(mainDocRef, {
@@ -331,6 +330,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                   statusPriority: 5,
                 })
               }  
+              return;
             } 
             else if(details.Rstatus === "Absent" && details.Cstatus === "Absent"){
               await updateDoc(mainDocRef, {
@@ -343,10 +343,14 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
                     statusPriority: 5,
                   })
                 }  
+              return;
             }
             else if (details.Cstatus !== "Absent" && details.Rstatus !== "Absent") {
               setShowDoneIncidentPopup(true);
+              return;
             }    
+            router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${id}&department=${department}`);
+
 
         } catch (error:any) {
             console.error("Error saving data:", error.message);

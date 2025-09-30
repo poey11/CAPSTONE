@@ -46,7 +46,6 @@ export default function Page() {
           nosofFemaleChildren: "",
           
           
-          refailureDialogueStatus:"Present",
           reasonForFailureToAppearDialogue: reportData?.reasonForFailureToAppearDialogue || "",
         });
     useEffect(() => {
@@ -250,14 +249,14 @@ export default function Page() {
                               : reportData?.refailureHearingDetails?.[key]?.reason || ""
                           }
                           disabled={
-                            toUpdate[`refailureHearingStatus${key}`] === "Absent" ||
+            
                               !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
                           
                           }
                           onChange={(e) => {
-                            if (toUpdate[`refailureHearingStatus${key}`] === "Present") {
+                            
                               handleFormChange(e); // only allow typing if Present
-                            }
+                            
                           }}
                           className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
                             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700

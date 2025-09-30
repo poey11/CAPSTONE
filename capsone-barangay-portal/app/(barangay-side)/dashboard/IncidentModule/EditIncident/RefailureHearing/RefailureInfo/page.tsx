@@ -123,8 +123,8 @@ export default function Page() {
             [`refailureLetterHearingDateFiled${index}`]:   reportData?.[`refailureLetterHearingDateFiled${index}`] || "",
         })
      
-    },[reportData]);
-    
+    },[reportData,index]);
+    console.log("Refailure Hearing Data:", refailureHearingData);
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => { 
@@ -178,6 +178,9 @@ export default function Page() {
             [`refailureLetterHearingDateFiled${index}`]: new Date().toLocaleString(),
       })        
     }
+    const isLetterSent = !!reportData?.sentLetterOfFailureToAppearHearing?.[2];
+    console.log("Is Letter Sent for index 2:", isLetterSent);
+
     return (
         <main className="main-container-letter">
 
@@ -295,13 +298,14 @@ export default function Page() {
                                     <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn-letter"/> 
                                 </button>
 
-                                <h1 className="NewOfficial">Refailure Meeting (Dialogue)</h1> 
+                                <h1 className="NewOfficial">Refailure Meeting (Hearing)</h1> 
                             </div>
                         <div className="actions-letter">
                         {(!refailureHearingData ||
-                                !refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] ||
+                                (!refailureHearingData?.[`refailureExplainationMeetingHearing${index}`] ||
                                 !refailureHearingData?.[`refailureLetterHearingDeliverBy${index}`] ||
-                                !refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]
+                                !refailureHearingData?.[`refailureLetterHearingDeliverDate${index}`]) ||
+                                !(isLetterSent)                        
                         ) && (
                             <button
                                 className="letter-announcement-btn"
@@ -316,7 +320,7 @@ export default function Page() {
                                 }
 
                                 handleRescheduleMeeting(otherInfo?.DateTimeOfMeeting);
-                                setPopupMessage("Refailure Meeting (Dialogue) Info Updated Successfully!!");
+                                setPopupMessage("Refailure Meeting (Hearing) Info Updated Successfully!!");
                                 setShowPopup(true);
                                 setTimeout(() => {
                                     setShowPopup(false);
@@ -354,7 +358,7 @@ export default function Page() {
                                     <div className="section-2-information-section">
                                         <div className="section-2-information-top">
                                             <div className="section-title-letter">
-                                            <h1>Refailure Information (Dialogue)</h1>
+                                            <h1>Refailure Information ({Number(index) === 0 ? (<>First</>) : Number(index) === 1 ? (<>Second</>) : Number(index) === 2 && (<>Third</>)} Hearing)</h1>
                                             </div>
                                         </div>
                                         <div className="section-2-information-bottom">

@@ -116,6 +116,9 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
         );
     }
 
+
+console.log(reportData?.sentLetterOfFailureToAppearDialogue)
+console.log(reportData?.reasonForFailureToAppearDialogue)
 	return (
 		<div className="edit-incident-redirectionpage-section">
             <button className= {lastSegment ==="EditIncident" ? "edit-incident-redirection-buttons-selected" : "edit-incident-redirection-buttons"} type="button" onClick={()=>{
@@ -213,28 +216,43 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
                           }
                         }
                       
-                        
+                        const hasRespondentAbsentInHearing = Object.keys(reportData || {}).some(key =>
+                          key.startsWith("respondentAbsentInHearing")
+                        );
 
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                        if (
+                          hasRespondentAbsentInHearing &&
+                          !reportData?.sentLetterOfFailureToAppearHearing &&
+                          !reportData?.refailureHearingDetails
+                        ) {
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
                           setTimeout(() => setShowErrorPopup(false), 3000);
                           return;
                         }
 
-                        if(!reportData?.sentLetterOfFailureToAppearDialogue){
-                          setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
-                          setShowErrorPopup(true);
-                          setTimeout(() => setShowErrorPopup(false), 3000);
-                          return;
+                        if( reportData?.generatedHearingSummons < 3){
+
+                          if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                            setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
+                            setShowErrorPopup(true);
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            return;
+                          }
+  
+  
+                          if (
+                            reportData?.sentLetterOfFailureToAppearDialogue && 
+                            (!reportData?.reasonForFailureToAppearDialogue) 
+                          ) {
+                            setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
+                            setShowErrorPopup(true);  
+                            setTimeout(() => setShowErrorPopup(false), 3000);
+                            return;
+                          }
+                          
                         }
 
-                        if(!reportData?.reasonForFailureToAppearDialogue){
-                          setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
-                          setShowErrorPopup(true);
-                          setTimeout(() => setShowErrorPopup(false), 3000);
-                          return;
-                        }
                         // ✅ All good
                         handleGenerateLetterAndInvitation(e);
                       }}
@@ -247,18 +265,28 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
 
                     {hasSummonLetter ? (
                       <button className="submenu-button" name="section" onClick={(e)=>{
-                        if(reportData?.sentLetterOfFailureToAppearDialogue && !reportData?.reasonForFailureToAppearDialogue){
+                        if (
+                          reportData?.sentLetterOfFailureToAppearDialogue && 
+                          (!reportData?.reasonForFailureToAppearDialogue)
+                        ) {
                           setPopupErrorMessage("Fill out Refailure Meeting (Dialogue) first.");
-                          setShowErrorPopup(true);
-                          setTimeout(() => setShowErrorPopup(false), 3000);
-                          return
-                        }
-                        if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
-                          setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
-                          setShowErrorPopup(true);
+                          setShowErrorPopup(true);  
                           setTimeout(() => setShowErrorPopup(false), 3000);
                           return;
                         }
+
+                        if( reportData?.generatedHearingSummons < 3){
+                        
+                            if((reportData?.refailureHearingDetails &&Object.keys(reportData?.refailureHearingDetails).length) !== (reportData?.sentLetterOfFailureToAppearHearing&&Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length)){
+                              setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
+                              setShowErrorPopup(true);
+                              setTimeout(() => setShowErrorPopup(false), 3000);
+                              return;
+                            }
+                        
+                        }
+
+
                           handleHearingSection(e);
                 
                         }
@@ -339,7 +367,7 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
                         <h1>Generate Refailure Letters</h1>
                     </button>
                     {reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData?.sentLetterOfFailureToAppearHearing).length > 0 ? (
-                        <button className="submenu-button" name="section" onClick={() => router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing/RefailureInfo?id=${id}&department=${department}`)}>
+                        <button className="submenu-button" name="section" onClick={() => router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${id}&department=${department}`)}>
                         <h1>Refailure Meeting Section</h1>
                         </button>
                     ) : (
