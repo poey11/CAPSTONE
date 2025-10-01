@@ -138,10 +138,6 @@ export default function ParticipantsList() {
   const [particapantDays, setParticapantDays] = useState<number[]>([]);
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   const [eventType, setEventType] = useState<string>("single");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
   // Load program meta
   useEffect(() => {
     let cancelled = false;
@@ -672,9 +668,11 @@ export default function ParticipantsList() {
                     <th>Location</th>
                     <th>Role</th>
                     {
-
+                      isAttendanceEditable && (
+                        <th>Attendance</th>
+                      )
                     }
-                    <th>Attendance</th>
+                    
                   </tr>
                 </thead>
                 <tbody>
@@ -692,11 +690,12 @@ export default function ParticipantsList() {
                         <td className="td-truncate">{p.emailAddress || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
                         <td className="td-truncate">{p.role || "Participant"}</td>
-                        <td
-                          onClick={(e) => e.stopPropagation()}
-                          style={{ textAlign: "center" }}
-                        >
-                          <input
+                        {isAttendanceEditable && (
+                          <td
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ textAlign: "center" }}
+                          >
+                              <input
                             type="checkbox"
                             checked={!!p.attendance}
                             disabled={!isAttendanceEditable}
@@ -708,6 +707,7 @@ export default function ParticipantsList() {
                             }
                           />
                         </td>
+                        )}
                       </tr>
                     );
                   })}

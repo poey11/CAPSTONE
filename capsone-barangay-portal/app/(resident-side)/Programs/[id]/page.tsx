@@ -20,7 +20,6 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { register } from "module";
 
 const MONTHS = [
   "January","February","March","April","May","June",
@@ -106,6 +105,7 @@ const isAllowedFile = (f: File) => {
 type SimpleField = { name: string; description?: string };
 
 const PRETTY_LABELS: Record<string, string> = {
+  dayChosen: "Chosen Day",
   firstName: "First Name",
   lastName: "Last Name",
   contactNumber: "Contact Number",
@@ -402,7 +402,7 @@ const router = useRouter();
       );
       const snap = await getDocs(dupQ);
       setAlreadyRegistered(!snap.empty);
-      if(snap.docs[0].data().attendance === false){
+      if(snap?.docs[0]?.data().attendance === false){
         setAlreadyRegistered(false);
       }
     };
@@ -1094,14 +1094,14 @@ const confirmSubmit = async () => {
                               );
                             }
 
-                            const lower = name.toLowerCase();
+                            const lower = name?.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
                               lower.includes("contact") || lower.includes("phone") ? "tel" :
                               "text";
 
                             const formattedLabel = renderPrettyLabel(name);
-
+       
                             return (
                               <div className="form-group-specific" key={`tf-${i}`}>
                                 <label className="form-label-specific">

@@ -422,6 +422,11 @@ export default function AddNewProgramModal({
       // Resolve agency to store
       const resolvedAgency =
         agency === "others" ? (otherAgency.trim() || "Others") : agency;
+      const baseTextFields = [...PREDEFINED_REQ_TEXT, ...reqTextFields];
+      const textFields =
+        eventType ==="multiple"
+          ? [{name: "dayChosen", description: "Used to save the chosen day for the program for multiple days event",}, ...baseTextFields]
+          : baseTextFields;
 
       const payload: any = {
         programName: programName.trim(),
@@ -461,7 +466,7 @@ export default function AddNewProgramModal({
         suggestedBy: staffDisplayName || null,
         suggestedByUid: userUid,
         requirements: {
-          textFields: [...PREDEFINED_REQ_TEXT, ...reqTextFields],
+          textFields,
           fileFields: [...PREDEFINED_REQ_FILES, ...reqFileFields],
         },
       };
