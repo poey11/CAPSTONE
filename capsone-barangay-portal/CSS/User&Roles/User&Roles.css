@@ -1583,14 +1583,14 @@ p .required {
   overflow-y: auto;
 }
 
-.view-main-user-content-left-side{
+.view-userrole-content-left-side{
   display: flex;
   flex-direction: column;
   width: 50%;
   padding-top: 22px;
 } 
 
-.view-main-user-content-right-side {
+.view-userrole-content-right-side {
   display: flex;
   flex-direction: column;
   width: 50%;
