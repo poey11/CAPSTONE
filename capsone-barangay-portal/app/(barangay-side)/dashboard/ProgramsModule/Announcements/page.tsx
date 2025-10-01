@@ -404,38 +404,26 @@ useEffect(() => {
                   <td>
                     <div className="actions-announcements">
 
-                    {/*}
+                    <>
+                      
                       <button
-                        className="action-programs-button"
-                        onClick={openPopup}
+                        type="button"
+                        className="action-announcements-button"
+                        onClick={() => {
+                          setSelectedAnnouncement(announcement);
+                          setShowViewPopup(true);
+                        }}
                       >
                         <img
                           src="/Images/view.png"
                           alt="View"
-                          className="action-programs-view"
-                          
+                          className="action-announcements-view"
                         />
                       </button>
 
-                      */}
-                      
-                      {user?.position === "Admin Staff" && (
+                      {/* Edit & Delete buttons - only for Admin Staff */}
+                      {user?.position === "Admin Staff" || user?.position === "Punong Barangay"|| user?.position === "Secretary"|| user?.position === "Assistant Secretary" && (
                         <>
-                          <button
-                            type="button"
-                            className="action-announcements-button"
-                            onClick={() => {
-                              setSelectedAnnouncement(announcement); 
-                              setShowViewPopup(true);               
-                            }}
-                          >
-                            <img
-                              src="/Images/view.png"
-                              alt="View"
-                              className="action-announcements-view"
-                            />
-                          </button>
-
                           <button
                             type="button"
                             className="action-announcements-button"
@@ -456,10 +444,15 @@ useEffect(() => {
                             }}
                             className="action-announcements-button"
                           >
-                            <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-announcements-delete"
+                            />
                           </button>
                         </>
                       )}
+                    </>
 
 
                     </div>
