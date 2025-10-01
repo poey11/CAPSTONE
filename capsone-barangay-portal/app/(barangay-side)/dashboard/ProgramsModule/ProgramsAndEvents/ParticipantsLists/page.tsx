@@ -248,7 +248,7 @@ export default function ParticipantsList() {
             role: d.role ?? "Participant",
             approvalStatus: d.approvalStatus ?? "Approved",
             attendance,
-            dayChosen: d.dayChosen ?? null,
+            dayChosen: Number(d.dayChosen) ?? null,
           });
         });
 
@@ -269,6 +269,7 @@ export default function ParticipantsList() {
   }, [programId]);
 
   const [dayChosen, setDayChosen] = useState<number>(0);
+  console.log(participants)
   // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();

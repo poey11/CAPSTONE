@@ -405,9 +405,38 @@ const router = useRouter();
       if(snap?.docs[0]?.data().attendance === false){
         setAlreadyRegistered(false);
       }
+      const participantData = snap.docs[0].data();
+      const attendance = participantData.attendance;
+      const dayChosen = participantData.dayChosen; // assuming you store this
+      const startDate = new Date(program.startDate || "");
+      const chosenDate = new Date(startDate);
+      chosenDate.setDate(startDate.getDate() + (dayChosen ?? 0));
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      chosenDate.setHours(0, 0, 0, 0);
+
+      if (program.eventType === "multiple") {
+        if (attendance === false && chosenDate < today) {
+          // ✅ absent + day already passed → allow re-register
+          setAlreadyRegistered(false);
+        } else if (attendance === true) {
+          // ✅ present → block
+          setAlreadyRegistered(true);
+        } else {
+          // still future or undecided → block
+          setAlreadyRegistered(true);
+        }
+      } else {
+        // single-day → any registration blocks
+        setAlreadyRegistered(true);
+      }
+
+
     };
     checkDup();
   }, [program?.id, residentId]);
+  
 
   // form handlers
   const onTextChange = (field: string, value: string) =>
@@ -801,50 +830,7 @@ const confirmSubmit = async () => {
         </p>
 
         <div className="programs-details-specific">
-          {program.eventType === "multiple" && (
-           <div className="program-detail-card-specific">
-              <h3>Pick a day to register</h3>
-              <div className="values">
-                <select
-                  className="day-select"
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setDayChosen(val === "" ? null : Number(val));
-                  }}
-                  value={dayChosen !== null ? dayChosen : ""}
-                >
-                  {program.particapantDays && program.particapantDays.length > 0 && (
-                    <>
-                      <option value="" disabled>
-                        Select a day
-                      </option>
-                      {program.particapantDays.map((day, index) => {
-                        // ✅ compute actual date for this index
-                        const startDate = new Date(program.startDate || ""); // e.g. Sept 25
-                        const optionDate = new Date(startDate);
-                        optionDate.setDate(startDate.getDate() + index);
-
-                        // ✅ check if optionDate already passed
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0); // ignore time
-                        const isPast = optionDate < today;
-
-                        return (
-                          <option key={index} value={index} disabled={isPast}>
-                            Day {index + 1}{" "}
-                            {day ? `- ${day} ${day > 1 ? "slots" : ""}` : "- Unlimited"} (
-                            {optionDate.toLocaleDateString()})
-                          </option>
-                        );
-                      })}
-                    </>
-                  )}
-                </select>
-              </div>
-            </div>
-
-
-          )}
+          
           <div className="program-detail-card-specific">
             <h3>Schedule</h3>
 
@@ -883,12 +869,11 @@ const confirmSubmit = async () => {
             {program.noParticipantLimitList && program.particapantDays && program.particapantDays.length > 0 && (
               <>
                 {program.particapantDays.map((day, index) => {
-                  // ✅ calculate the actual date for this day
+                  // ✅ calculate date using the actual day offset
                   const start = new Date(program.startDate || "");
                   const date = new Date(start);
-                  date.setDate(start.getDate() + index);
+                  date.setDate(start.getDate() + (index+1)); 
 
-                  // convert to yyyy-mm-dd for your format function
                   const ymd = date.toISOString().split("T")[0];
 
                   return (
@@ -919,6 +904,7 @@ const confirmSubmit = async () => {
                 })}
               </>
             )}
+
           </>
           )}
           
@@ -988,7 +974,7 @@ const confirmSubmit = async () => {
                 
                 let disabledReason = "";
                 if(program.eventType ==="single" && program.noParticipantLimit ){
-                  reached = false;
+                  reached = false;  
                 }
                 else{
                   disabledReason = reached ? capacityMessage(action.key) : "";
@@ -1093,7 +1079,45 @@ const confirmSubmit = async () => {
                                 </div>
                               );
                             }
+                             if (name === "dayChosen") {
+                              return (
+                                <div className="form-group-specific" key={`tf-day-${i}`}>
+                                  <label className="form-label-specific">
+                                    {renderPrettyLabel(name)} <span className="required">*</span>
+                                  </label>
+                                  <select
+                                    className="form-input-specific"
+                                    required
+                                    value={dayChosen || ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setDayChosen(val === "" ? null : Number(val));
+                                    }}
 
+                                  >
+                                    <option value="" disabled>
+                                      Select a day
+                                    </option>
+                                    {program.particapantDays?.map((day: number, idx: number) => {
+                                    
+                                      const startDate = new Date(program.startDate || ""); // e.g. Sept 25
+                                      const optionDate = new Date(startDate);
+                                      optionDate.setDate(startDate.getDate() + idx);
+
+                                      // ✅ check if optionDate already passed
+                                      const today = new Date();
+                                      today.setHours(0, 0, 0, 0); // ignore time
+                                      const isPast = optionDate < today;
+
+                                      return(
+                                        <option key={idx} value={idx} disabled={isPast}>
+                                          Day {idx + 1} ({optionDate.toDateString()})
+                                        </option>
+                                    )})}
+                                  </select>
+                                </div>
+                              );
+                            }
                             const lower = name?.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
