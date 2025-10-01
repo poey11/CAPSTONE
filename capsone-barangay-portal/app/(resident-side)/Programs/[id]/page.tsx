@@ -287,10 +287,10 @@ const router = useRouter();
             counts.push(c.data().count || 0);
           }
           setApprovedParticipantCountList(counts);
-        }
-        setApprovedParticipantCount(pCnt.data().count || 0);
-        setApprovedVolunteerCount(vCnt.data().count || 0);
-    };
+        };
+      }
+      setApprovedParticipantCount(pCnt.data().count || 0);
+      setApprovedVolunteerCount(vCnt.data().count || 0);
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -467,11 +467,12 @@ const router = useRouter();
     if (volunteersCap <= 0) return true;
     return approvedVolunteerCount >= volunteersCap;
   };
-
+  console.log(program)
   const capacityMessage = (role: Role) =>
     role === "Participant"
       ? "Max limit of participants has been reached!"
       : "Max limit of volunteers has been reached!";
+    
 
   // audience gating
   const ep = program?.eligibleParticipants || "both";
@@ -984,8 +985,14 @@ const confirmSubmit = async () => {
                 else{
                   reached = capacityReached(action.key);
                 }
-
-                const disabledReason = reached ? capacityMessage(action.key) : "";
+                
+                let disabledReason = "";
+                if(program.eventType ==="single" && program.noParticipantLimit ){
+                  reached = false;
+                }
+                else{
+                  disabledReason = reached ? capacityMessage(action.key) : "";
+                }
 
                 // TEXT fields: volunteers use predefined (ensure DOB present); participants use program-defined
                 const textFields: SimpleField[] =

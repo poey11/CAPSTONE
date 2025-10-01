@@ -138,6 +138,10 @@ export default function ParticipantsList() {
   const [particapantDays, setParticapantDays] = useState<number[]>([]);
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   const [eventType, setEventType] = useState<string>("single");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
+  const [endTime, setEndTime] = useState<string>("");
   // Load program meta
   useEffect(() => {
     let cancelled = false;
@@ -268,7 +272,7 @@ export default function ParticipantsList() {
     return () => unsub();
   }, [programId]);
 
-  const [dayChosen, setDayChosen] = useState<number>(1);
+  const [dayChosen, setDayChosen] = useState<number>(0);
   // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
@@ -283,18 +287,32 @@ export default function ParticipantsList() {
         return matchesName && matchesRole;
       });
     }
-    else{
-      return participants.filter((p) => {
+   else {
+      const participantsFiltered = participants.filter((p) => {
         const name = (p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim()).toLowerCase();
         const matchesName = !q || name.includes(q);
-  
+
         const role = (p.role || "Participant").toLowerCase();
         const matchesRole = !roleFilter || role === roleFilter.toLowerCase();
         const matchesDay = p.dayChosen === dayChosen;
 
-        return matchesName && matchesRole && matchesDay;
+        // ✅ Only apply day filter for Participants
+        if (role === "participant") {
+          return matchesName && matchesRole && matchesDay;
+        }
+
+        // ✅ For Volunteers, ignore day filter
+        if (role === "volunteer") {
+          return matchesName && matchesRole;
+        }
+
+        // default (other roles)
+        return matchesName && matchesRole;
       });
+
+      return participantsFiltered;
     }
+
   }, [searchName, roleFilter, participants,dayChosen,eventType]);
 
   // Role-specific counts
@@ -312,9 +330,9 @@ export default function ParticipantsList() {
     [participants, dayChosen]
   );
   const badgeParticipantsText = useMemo(() => {
-  if (!noParticipantLimit && noParticipantLimit === false && eventType === "single") {
+  if (!noParticipantLimit  && eventType === "single") {
     return `Participants: ${participantCount} / ${programCapacity ?? "—"}`;
-  }else if(!noParticipantLimit && noParticipantLimit && eventType === "single") {
+  }else if(noParticipantLimit === true && eventType === "single") {
    return `Participants: ${participantCount}`;
   } 
   else if (  noParticipantLimitList[dayChosen] === false && eventType === "multiple") {
@@ -530,7 +548,7 @@ export default function ParticipantsList() {
       setTimeout(() => setShowErrorToast(false), 2500);
     }
   };
-
+  console.log(eventType)
   return (
     <main className="edit-program-main-container">
       <div className="program-redirectionpage-section">
@@ -559,7 +577,7 @@ export default function ParticipantsList() {
           </div>
           {eventType === "multiple" && (
             
-            <div className="action-btn-section-program" style={{ display: "flex", marginLeft: "52%" }}>
+            <div className="action-btn-section-program" >
               <div className="participants-count">
                 <p>Select A Day:</p>
                   
@@ -579,10 +597,12 @@ export default function ParticipantsList() {
 
               </div>
             
-            </div>
+            </div>                      
           )}
           <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
-            <div className="participants-count">{badgeParticipantsText}</div>
+            <div className="participants-count">
+              {badgeParticipantsText}
+            </div>
             {showVolunteerBadge && <div className="participants-count">{badgeVolunteersText}</div>}
           </div>
         </div>
@@ -651,6 +671,9 @@ export default function ParticipantsList() {
                     <th>Email Address</th>
                     <th>Location</th>
                     <th>Role</th>
+                    {
+
+                    }
                     <th>Attendance</th>
                   </tr>
                 </thead>

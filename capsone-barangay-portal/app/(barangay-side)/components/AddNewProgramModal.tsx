@@ -887,7 +887,7 @@ export default function AddNewProgramModal({
                                 ].join(" ").trim()}
                                 min={1} // TODO: replace with state if you want it editable
                                 placeholder="E.g. 50"
-                                value={particapantDays[i] || "0"}
+                                value={particapantDays[i] || ''}
                                 //style={{width: '30%'}}
                                 onChange={(e) => {
                                   const v = e.target.value;
