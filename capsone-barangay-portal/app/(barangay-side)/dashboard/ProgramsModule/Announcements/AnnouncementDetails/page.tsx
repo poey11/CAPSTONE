@@ -83,10 +83,13 @@ export default function AnnouncementDetails() {
     };
 
     const handleDelete = () => {
-      if(!selectedAnnnouncementData?.image) return;
-      setPreview(selectedAnnnouncementData?.image);
+      if (!announcementData?.image) return;
+
+      setPreview(null);
       setFile(null);
-      setAnnouncementData((prev) => prev ? { ...prev, image: selectedAnnnouncementData?.image } : null);
+      setAnnouncementData((prev) =>
+        prev ? { ...prev, image: "" } : null
+      );
     };
 
     const handleSaveChanges = async () => {
@@ -100,11 +103,23 @@ export default function AnnouncementDetails() {
           updatedBy: session?.user?.fullName || "Unknown",
         };
 
-        if (file && !(announcementData.image && announcementData.image.includes(file.name))) {
+        //  If image was removed
+        if (!preview && !file) {
           if (announcementData.image) {
             const oldImageRef = ref(storage, announcementData.image);
             await deleteObject(oldImageRef).catch((error) => {
               console.log("No previous image to delete or error deleting:", error);
+            });
+          }
+          updatedData.image = "";
+        }
+
+        // If new file uploaded
+        if (file) {
+          if (announcementData.image) {
+            const oldImageRef = ref(storage, announcementData.image);
+            await deleteObject(oldImageRef).catch((error) => {
+              console.log("Error deleting old image:", error);
             });
           }
 
@@ -115,10 +130,7 @@ export default function AnnouncementDetails() {
           await uploadBytes(storageRef, file);
           const imageUrl = await getDownloadURL(storageRef);
 
-          updatedData = {
-            ...updatedData,
-            image: imageUrl,
-          };
+          updatedData.image = imageUrl;
         }
 
         await updateDoc(docRef, updatedData);
@@ -130,7 +142,6 @@ export default function AnnouncementDetails() {
           setShowPopup(false);
           router.push("/dashboard/ProgramsModule/Announcements");
         }, 3000);
-
       } catch (error) {
         console.error("Error updating announcement:", error);
         setPopupErrorMessage("There was an error updating the announcement.");
@@ -138,6 +149,7 @@ export default function AnnouncementDetails() {
         setTimeout(() => setShowErrorPopup(false), 3000);
       }
     };
+
 
     const validateFields = () => {
       const newInvalidFields: string[] = [];
@@ -156,7 +168,7 @@ export default function AnnouncementDetails() {
 
       if (!preview) {
         newInvalidFields.push("image");
-        setPopupErrorMessage("A picture is required.");
+        setPopupErrorMessage("A photo is required.");
         setActiveSection("others"); // 🔹 jump to others
       }
 
@@ -388,11 +400,11 @@ return (
                         {activeSection === "others" && (
                           <>
                            <div
-                              className={`box-container-outer-announcementpic ${invalidFields.includes("image") ? "input-error" : ""}`}
+                              className="box-container-outer-announcementpic"
                               style={{ display: activeSection === "others" ? "block" : "none" }}
                             >
                             <div className="title-announcementpic">Photo</div>
-                            <div className="box-container-announcementpic">
+                            <div className={`box-container-announcementpic ${invalidFields.includes("image") ? "input-error" : ""}`}>
                               <div className="identificationpic-container-announcement">
                                 <label
                                   htmlFor="identification-file-upload"
