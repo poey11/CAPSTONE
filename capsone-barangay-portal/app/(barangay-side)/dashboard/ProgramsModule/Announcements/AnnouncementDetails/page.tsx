@@ -145,13 +145,13 @@ export default function AnnouncementDetails() {
       if (!announcementData?.announcementHeadline || announcementData.announcementHeadline.trim() === "") {
         newInvalidFields.push("announcementHeadline");
         setPopupErrorMessage("Program Headline is required.");
-        setActiveSection("details"); // 🔹 jump to details
+        setActiveSection("content"); // 🔹 jump to details
       }
 
       if (!announcementData?.content || announcementData.content.trim() === "") {
         newInvalidFields.push("content");
         setPopupErrorMessage("Description is required.");
-        setActiveSection("description"); // 🔹 jump to description
+        setActiveSection("content"); // 🔹 jump to description
       }
 
       if (!preview) {
@@ -171,7 +171,7 @@ export default function AnnouncementDetails() {
       return true; 
     };
 
-    const [activeSection, setActiveSection] = useState<"details" | "description" | "others">("details");
+    const [activeSection, setActiveSection] = useState<"content" | "details" | "others">("content");
 
 
     const confirmSave = () => {
@@ -223,84 +223,119 @@ return (
 
             <div className="edit-announcement-bottom-section">
                     <nav className="edit-announcement-info-toggle-wrapper">
-                        {["details", "description", "others"].map((section) => (
+                        {["content", "details", "others"].map((section) => (
                         <button
                             key={section}
                             type="button"
                             className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                            onClick={() => setActiveSection(section as "details" | "description" | "others")}
+                            onClick={() => setActiveSection(section as "content" | "details" | "others")}
                         >
+                            {section === "content" && "Content"}
                             {section === "details" && "Details"}
-                            {section === "description" && "Description"}
                             {section === "others" && "Others"}
                         </button>
                         ))}
                     </nav>
 
                     <div className="edit-announcement-bottom-section-scroll">
+                      <form className="edit-announcement-section-2" >
 
-                        <div className="active-button-section-edit-announcement">
-                                <label className="switch-label">
-                                    Featured in Home Page
-                                    <label className="switch">
-                                    <input type="checkbox" 
-                                    checked={announcementData?.isInFeatured === "Active" || false}
-                                    onChange={(e) => {
-                                      const updatedValue = e.target.checked ? "Active" : "Inactive";
-                                      setAnnouncementData((prev) => ({
-                                        ...prev,
-                                        isInFeatured: updatedValue,
-                                      }));
-                                    }}    
-                                    />
-                                    <span className="slider round"></span>
-                                    </label>
-                                </label>
-                                
-                        </div>    
-                        <div className="active-button-section-edit-announcement">
-                                <label className="switch-label-edit-announcement">
-                                    Set as Active
-                                    <label className="switch">
-                                    <input type="checkbox" 
-                                    checked={announcementData?.isActive || false}
-                                    onChange={(e) => {
-                                      const updatedValue = e.target.checked;
-                                      setAnnouncementData((prev) => ({
-                                        ...prev,
-                                        isActive: updatedValue,
-                                      }));
-                                    }}
+                        {activeSection === "content" && (
+                        <>
+                          <div className="edit-announcement-upper-section">
+                            <div className="edit-announcements-description-container">
+                                <div className="edit-box-container-outer-headline-announcements">
+                                    <div className="edit-title-description-announcements">
+                                        Announcement Headline
+                                    </div>
+                                    <div className={`edit-box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                                      <textarea 
+                                        value={announcementData?.announcementHeadline || ""}
+                                        onChange={(e) =>
+                                          setAnnouncementData((prev) => ({
+                                            ...prev,
+                                            content: e.target.value,
+                                          }))
+                                        }
+                                        placeholder="Write the full content or description of the announcement here..."
+                                        className="edit-headline-input-field-announcements"
+                                        />
+                                    </div>
+                                </div>
 
-                                    />
-                                    <span className="slider round"></span>
-                                    </label>
-                                </label>
-                                
-                        </div>  
+                                <div className="edit-box-container-outer-description-announcements">
+                                    <div className="edit-title-description-announcements">
+                                        Full Content / Description
+                                    </div>
+                                    <div className={`edit-box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                                      <textarea 
+                                        value={announcementData?.content || ""}
+                                        onChange={(e) =>
+                                          setAnnouncementData((prev) => ({
+                                            ...prev,
+                                            content: e.target.value,
+                                          }))
+                                        }
+                                        placeholder="Write the full content or description of the announcement here..."
+                                        className="edit-description-input-field-announcements"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
 
-                        <form className="edit-announcement-section-2" >
+                          </div>
+
+                         </>
+                      )}
+
                         {activeSection === "details" && (
                         <>
                           <div className="edit-announcement-upper-section">
                             <div className="edit-announcement-section-2-left-side">
-                                <div className="fields-section-edit-announcement">
-                                    <p>Program Headline<span className="required">*</span></p>
-                                    <input
-                                    type="text"
-                                    className={`edit-announcement-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
-                                    placeholder="Program Name (E.g. Feeding Program)"
-                                    id="announcementHeadline"
-                                    value={announcementData?.announcementHeadline || ""}
-                                    onChange={(e) =>
-                                      setAnnouncementData((prev) => ({
-                                        ...prev,
-                                        announcementHeadline: e.target.value,
-                                      }))
-                                    }
-                                    />
-                                </div>
 
+                              <div className="active-featured-section">
+
+                                <div className="active-button-section-edit-announcement">
+                                  <label className="switch-label-edit-announcement">
+                                      Featured in Home Page
+                                      <label className="switch">
+                                      <input type="checkbox" 
+                                      checked={announcementData?.isInFeatured === "Active" || false}
+                                      onChange={(e) => {
+                                        const updatedValue = e.target.checked ? "Active" : "Inactive";
+                                        setAnnouncementData((prev) => ({
+                                          ...prev,
+                                          isInFeatured: updatedValue,
+                                        }));
+                                      }}    
+                                      />
+                                      <span className="slider round"></span>
+                                      </label>
+                                  </label>
+                                  
+                                </div>    
+                                <div className="active-button-section-edit-announcement">
+                                  <label className="switch-label-edit-announcement">
+                                      Set as Active
+                                      <label className="switch">
+                                      <input type="checkbox" 
+                                      checked={announcementData?.isActive || false}
+                                      onChange={(e) => {
+                                        const updatedValue = e.target.checked;
+                                        setAnnouncementData((prev) => ({
+                                          ...prev,
+                                          isActive: updatedValue,
+                                        }));
+                                      }}
+
+                                      />
+                                      <span className="slider round"></span>
+                                      </label>
+                                  </label>
+                                </div>  
+
+                              </div>
+                            
                               <div className="fields-section-edit-announcement">
                                 <p>Announcement Category<span className="required">*</span></p>
                                         <select className="edit-announcement-input-field"
@@ -348,35 +383,6 @@ return (
                           </div>
 
                         </>
-                        )}
-
-                     {activeSection === "description" && (
-                        <>
-                          <div className="edit-announcement-upper-section">
-                                 <div className="edit-announcements-description-container">
-                                      <div className="edit-box-container-outer-description-announcements">
-                                          <div className="edit-title-description-announcements">
-                                              Full Content / Description
-                                          </div>
-                                          <div className={`edit-box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
-                                            <textarea 
-                                              value={announcementData?.content || ""}
-                                              onChange={(e) =>
-                                                setAnnouncementData((prev) => ({
-                                                  ...prev,
-                                                  content: e.target.value,
-                                                }))
-                                              }
-                                              placeholder="Write the full content or description of the announcement here..."
-                                              className="edit-description-input-field-announcements"
-                                             />
-                                          </div>
-                                      </div>
-                                 </div>
-
-                          </div>
-
-                         </>
                         )}
                         
                         {activeSection === "others" && (

@@ -71,6 +71,11 @@ export default function AnnouncementModule() {
     }
   };
 
+  useEffect(() => {
+    if (selectedAnnouncement) {
+      setActiveSection("content");
+    }
+  }, [selectedAnnouncement]);
 
 
   useEffect(() => {
@@ -100,7 +105,7 @@ export default function AnnouncementModule() {
 
     if (!newAnnouncement.announcementHeadline || newAnnouncement.announcementHeadline.trim() === "") {
       newInvalidFields.push("announcementHeadline");
-      setPopupErrorMessage("Program Headline is required.");
+      setPopupErrorMessage("Announcement Headline is required.");
     }
 
     if (!newAnnouncement.category || newAnnouncement.category.trim() === "") {
@@ -534,11 +539,11 @@ useEffect(() => {
            <div className="add-announcements-upper-section">
             <div className="add-announcements-content-left-side">
               <div className="fields-section-add-announcements">
-                <p>Program Headline<span className="required">*</span></p>
+                <p>Announcement Headline<span className="required">*</span></p>
                   <input
                   type="text"
                   className={`add-announcements-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
-                  placeholder="Program Name (E.g. Feeding Program)"
+                  placeholder="Announcement Headline (E.g. Community Meeting, Barangay Assembly)"
                   value ={newAnnouncement.announcementHeadline|| ""}
                   onChange={(e) => setNewAnnouncement({...newAnnouncement, announcementHeadline: e.target.value})}
                   required
@@ -739,7 +744,7 @@ useEffect(() => {
                       <div className="view-announcements-description-container">
                         <div className="box-container-outer-description-announcements">
                             <div className="title-description-announcements">
-                                Program Headline
+                                Announcement Headline
                             </div>
                             <div className={`box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
                               <textarea
