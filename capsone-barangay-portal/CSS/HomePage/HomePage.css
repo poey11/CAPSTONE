@@ -279,7 +279,7 @@ position: relative;
 
 .captain-role {
   font-size: 1rem;
-  color: #2C3E50;
+  color: #DF7426;
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -542,6 +542,14 @@ position: relative;
     flex-wrap: nowrap;
     overflow: hidden;
     max-width: 1000px; /* Controls overall row width */
+}
+
+.homepage-underline {
+  width: 100px;
+  height: 4px;
+  background-color: #DF7426; 
+  margin: 0.5rem auto 1.5rem auto;
+  border-radius: 5px;
 }
 
 

@@ -265,6 +265,7 @@ useEffect(() => {
 
           <div className="section-content-home">
             <h2>Our Services</h2>
+            <div className="homepage-underline"></div>
             <p>
               Request documents, report issues, and connect with your barangay anytime.
             </p>
@@ -366,6 +367,7 @@ useEffect(() => {
   <div className="fifth-section-home-upper">
     <div className="section-content-home">
       <h2>News & Announcements</h2>
+      <div className="homepage-underline"></div>
       <p>Stay updated with the latest news and announcements in Barangay Fairview.</p>
     </div>
   </div>
@@ -408,6 +410,7 @@ useEffect(() => {
   <div className="fouth-section-home-upper">
     <div className="section-content-home">
       <h2>Our Facilities</h2>
+      <div className="homepage-underline"></div>
       <p>
         Explore the various facilities available in our barangay, designed to support community activities, public services, and resident well-being.
       </p>
