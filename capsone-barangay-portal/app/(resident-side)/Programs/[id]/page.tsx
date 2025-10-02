@@ -155,7 +155,7 @@ type Program = {
   photoURL?: string | null;
   photoURLs?: string[];
   noParticipantLimit?: boolean;
-  particapantDays?: number[];
+  participantDays?: number[];
   noParticipantLimitList?: boolean[];
   approvedParticipantCountList?: number[];
   requirements?: {
@@ -273,8 +273,8 @@ const router = useRouter();
       ]);
       if(p.eventType === "multiple"){
         const counts: number[] = [];
-        if(p.particapantDays && p.particapantDays.length > 0){
-          for (let index = 0; index < p.particapantDays.length; index++) {
+        if(p.participantDays && p.participantDays.length > 0){
+          for (let index = 0; index < p.participantDays.length; index++) {
             const c = await getCountFromServer(
               query(
                 base,
@@ -487,7 +487,7 @@ const router = useRouter();
         return approvedParticipantCount >= maxParticipants;
       }
       if(program.eventType === "multiple" && index !== undefined && program.approvedParticipantCountList){
-        const dayLimit = program.noParticipantLimitList && program.noParticipantLimitList[index] ? 0 : (program.particapantDays && program.particapantDays[index]) ? program.particapantDays[index] : 0;
+        const dayLimit = program.noParticipantLimitList && program.noParticipantLimitList[index] ? 0 : (program.participantDays && program.participantDays[index]) ? program.participantDays[index] : 0;
         const approvedCountForDay = approvedParticipantCountList && approvedParticipantCountList[index] ? approvedParticipantCountList[index] : 0;
         if (dayLimit <= 0) return true;
         return approvedCountForDay >= dayLimit;
@@ -675,7 +675,7 @@ const handleSubmit = async (role: Role) => {
         age: userAge ?? null,
         fields: formData,
         files: uploadedFiles,
-        ...((program.eventType === "multiple" && dayChosen) && {
+        ...((program.eventType === "multiple" && dayChosen !== null) && {
           dayChosen,
         })
       });
@@ -866,9 +866,9 @@ const confirmSubmit = async () => {
             </>
           ):(
           <>
-            {program.noParticipantLimitList && program.particapantDays && program.particapantDays.length > 0 && (
+            {program.noParticipantLimitList && program.participantDays && program.participantDays.length > 0 && (
               <>
-                {program.particapantDays.map((day, index) => {
+                {program.participantDays.map((day, index) => {
                   // ✅ calculate date using the actual day offset
                   const start = new Date(program.startDate || "");
                   const date = new Date(start);
@@ -1088,7 +1088,7 @@ const confirmSubmit = async () => {
                                   <select
                                     className="form-input-specific"
                                     required
-                                    value={dayChosen || ""}
+                                    value={dayChosen ?? ""}
                                     onChange={(e) => {
                                       const val = e.target.value;
                                       setDayChosen(val === "" ? null : Number(val));
@@ -1098,7 +1098,7 @@ const confirmSubmit = async () => {
                                     <option value="" disabled>
                                       Select a day
                                     </option>
-                                    {program.particapantDays?.map((day: number, idx: number) => {
+                                    {program.participantDays?.map((day: number, idx: number) => {
                                     
                                       const startDate = new Date(program.startDate || ""); // e.g. Sept 25
                                       const optionDate = new Date(startDate);

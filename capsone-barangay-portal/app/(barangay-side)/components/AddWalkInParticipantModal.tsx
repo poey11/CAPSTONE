@@ -61,6 +61,14 @@ const DEFAULT_LABELS: Record<string, string> = {
 
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 
+// Minimal program shape for schedule/day options
+type ProgramLite = {
+  id: string;
+  eventType?: "single" | "multiple";
+  startDate?: string;           // "YYYY-MM-DD"
+  participantDays?: number[];   // array length = number of days
+};
+
 // Compute age from YYYY-MM-DD
 function computeAgeFromDOB(dobYMD?: string): number | null {
   if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
@@ -115,6 +123,27 @@ export default function AddWalkInParticipantModal({
   const [saving, setSaving] = useState(false);
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
+
+  // --- Load program to power dayChosen select ---
+  const [program, setProgram] = useState<ProgramLite | null>(null);
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      if (!programId) return;
+      const snap = await getDoc(doc(db, "Programs", programId));
+      if (!snap.exists()) return;
+      const p = { id: snap.id, ...snap.data() } as any;
+      if (isMounted) {
+        setProgram({
+          id: snap.id,
+          eventType: p.eventType,
+          startDate: p.startDate,
+          participantDays: Array.isArray(p.participantDays) ? p.participantDays : [],
+        });
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [programId]);
 
   // --- Previews for ALL file fields ---
   const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
@@ -302,6 +331,10 @@ export default function AddWalkInParticipantModal({
       const dateOfBirth = formData.dateOfBirth || "";
       const computedAge = computeAgeFromDOB(dateOfBirth);
 
+      // dayChosen: keep 0 as Day 1
+      const dayChosenStr = formData.dayChosen; // "0" | "1" | "2" | undefined
+      const dayChosenNum = dayChosenStr !== undefined && dayChosenStr !== "" ? Number(dayChosenStr) : null;
+
       const uidTag = resident?.id ? `resident-${resident.id}` : "manual";
       let uploadedFiles = await uploadAllFiles(uidTag);
 
@@ -330,7 +363,10 @@ export default function AddWalkInParticipantModal({
         dateOfBirth: dateOfBirth || "",
         age: computedAge ?? null,
 
-        // keep full map of submitted fields (including DOB)
+        // ✅ include selected day when provided (keeps Day 1 = 0)
+        ...(dayChosenNum !== null ? { dayChosen: dayChosenNum } : {}),
+
+        // keep full map of submitted fields (including DOB and dayChosen string)
         fields: formData,
         files: uploadedFiles,
       });
@@ -415,6 +451,47 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
+                            // Special handling for dayChosen → dropdown from program schedule
+                            if (name === "dayChosen") {
+                              const days = program?.participantDays ?? [];
+                              const start = program?.startDate ? new Date(program.startDate) : null;
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dayChosen")} <span className="required">*</span>
+                                  </p>
+                                  <select
+                                    className="walkin-input-field"
+                                    required
+                                    // keep "0" using nullish coalescing (avoid falsy bug)
+                                    value={formData.dayChosen ?? ""}
+                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
+                                  >
+                                    <option value="" disabled>Select a day</option>
+                                    {days.map((_, idx) => {
+                                      let label = `Day ${idx + 1}`;
+                                      let disabled = false;
+                                      if (start) {
+                                        const optionDate = new Date(start);
+                                        optionDate.setDate(start.getDate() + idx);
+                                        label += ` (${optionDate.toDateString()})`;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        optionDate.setHours(0, 0, 0, 0);
+                                        disabled = optionDate < today; // optional: disable past days
+                                      }
+                                      return (
+                                        <option key={idx} value={String(idx)} disabled={disabled}>
+                                          {label}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
@@ -434,7 +511,7 @@ export default function AddWalkInParticipantModal({
                                   type={type}
                                   className="walkin-input-field"
                                   required
-                                  value={formData[name] || ""}
+                                  value={formData[name] ?? ""}
                                   onChange={(e) => handleFormTextChange(name, e.target.value)}
                                   placeholder={`Enter ${formattedLabel}`}
                                 />
@@ -478,6 +555,46 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
+                            // Duplicate dayChosen handling for right column
+                            if (name === "dayChosen") {
+                              const days = program?.participantDays ?? [];
+                              const start = program?.startDate ? new Date(program.startDate) : null;
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dayChosen")} <span className="required">*</span>
+                                  </p>
+                                  <select
+                                    className="walkin-input-field"
+                                    required
+                                    value={formData.dayChosen ?? ""}
+                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
+                                  >
+                                    <option value="" disabled>Select a day</option>
+                                    {days.map((_, idx) => {
+                                      let label = `Day ${idx + 1}`;
+                                      let disabled = false;
+                                      if (start) {
+                                        const optionDate = new Date(start);
+                                        optionDate.setDate(start.getDate() + idx);
+                                        label += ` (${optionDate.toDateString()})`;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        optionDate.setHours(0, 0, 0, 0);
+                                        disabled = optionDate < today;
+                                      }
+                                      return (
+                                        <option key={idx} value={String(idx)} disabled={disabled}>
+                                          {label}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email") ? "email" :
@@ -496,7 +613,7 @@ export default function AddWalkInParticipantModal({
                                   type={type}
                                   className="walkin-input-field"
                                   required
-                                  value={formData[name] || ""}
+                                  value={formData[name] ?? ""}
                                   onChange={(e) => handleFormTextChange(name, e.target.value)}
                                   placeholder={`Enter ${formattedLabel}`}
                                 />
