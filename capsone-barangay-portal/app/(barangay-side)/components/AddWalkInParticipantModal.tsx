@@ -49,6 +49,7 @@ type Props = {
 };
 
 const DEFAULT_LABELS: Record<string, string> = {
+  dayChosen: "Day Chosen",
   firstName: "First Name",
   lastName: "Last Name",
   contactNumber: "Contact Number",
@@ -256,8 +257,29 @@ export default function AddWalkInParticipantModal({
     [fileFields]
   );
 
+  function prettifyFieldName(name: string, prettyLabels?: Record<string, string>): string {
+  // 1. Check overrides
+  if (prettyLabels?.[name]) return prettyLabels[name];
+  if (DEFAULT_LABELS[name]) return DEFAULT_LABELS[name];
+
+  // 2. Clean file extensions
+  let label = name.replace(/\.(jpg|jpeg|png|pdf)$/i, "");
+
+  // 3. Insert spaces before capital letters
+  label = label.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+
+  // 4. Uppercase first letter
+  label = label.charAt(0).toUpperCase() + label.slice(1);
+
+  // 5. Fix common cases
+  label = label.replace(/\bId\b/g, "ID");
+
+  return label;
+}
+
+
   const needsValidId = fileFieldsToRender.some((f) => f.name === "validIDjpg");
-  const labelFor = (name: string) => LABELS[name] || name;
+  const labelFor = (name: string) => prettifyFieldName(name, prettyLabels);
 
   const handleFormTextChange = (field: string, value: string) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
