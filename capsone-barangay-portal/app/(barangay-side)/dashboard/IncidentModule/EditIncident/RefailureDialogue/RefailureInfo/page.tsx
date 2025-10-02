@@ -40,7 +40,7 @@ export default function RefailureInfo() {
     const [reportData, setReportData] = useState<any>(null);
     const [hasSummonLetter, setHasSummonLetter] = useState(false);
     const [refailureDialogueData, setRefailureDialogueData] = useState<any>(null);
-    
+        
 
      useEffect(() => {
       if(!docId) return;
@@ -69,7 +69,7 @@ export default function RefailureInfo() {
         }, [reportData]);
         console.log("Refailure Dialogue Data:", refailureDialogueData);
   
-          
+
     useEffect(() => {
         const staffquery = query(collection(db, "BarangayUsers"), where("position", "==","LF Staff"), where("firstTimelogin", "==", false));
         const unsubscribe = onSnapshot(staffquery, (snapshot) => {
@@ -160,7 +160,80 @@ export default function RefailureInfo() {
           })        
     }
     //add the notification func here
+    const [staffContactNos, setStaffContactNos] = useState("");
+    const [staffName, setStaffName] = useState("");
+    const [staffLastName, setStaffLastName] = useState("");
+    const [DateOfDelivery, setDateOfDelivery] = useState("");
+    useEffect(() => {
+        if (!otherInfo.LuponStaffId) return;
+        
+        const staff = filteredStaffs.find(staff => staff.id === otherInfo.LuponStaffId);
+        setStaffContactNos(staff?.phone || "");
+        setStaffName(staff?.firstName || "");
+        setStaffLastName(staff?.lastName || "");
+        setDateOfDelivery(otherInfo.DateOfDelivery || "");
+    }, [otherInfo, filteredStaffs]);
 
+    const handleSMSNotification = async () => {
+        try{
+          const response = await fetch("/api/clickSendApi", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                    to: reportData?.respondent.contact,
+                    message: 
+                    `Good day Mr./Ms. ${reportData?.respondent.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay 
+                    Fairview will be delivering a Refailure Meeting (Dialgoue) Invitation to you. The invitation will be handed personally by ${staffName} ${staffLastName}  on 
+                    ${DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled meeting and deadline for the excuse of absence. 
+                    We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+                    \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.
+                    \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+              })
+          });
+          if (!response.ok) throw new Error("Failed to send SMS");
+  
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+            console.error("Error sending SMS:", error);
+        }
+        
+        try {
+            const responseC = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: staffContactNos,
+                message:  `Good day Mr./Ms. ${staffName} ${staffLastName},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a 
+                 Refailure letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${DateOfDelivery} 
+                 to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
+                 \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
+                 \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+
+            })
+
+        });
+        if (!responseC.ok) throw new Error("Failed to send SMS");
+        const dataC = await responseC.json();
+        console.log(dataC);
+        } catch (error) {
+            console.error("Error sending SMS:", error);
+        }
+        console.log("SMS Notification Sent to Staff", {
+            to: staffContactNos,
+            message:  `Good day Mr./Ms. ${staffName} ${staffLastName},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a
+                Refailure letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${DateOfDelivery}
+                to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
+                \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
+                \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+        });
+    }
     return (
         <main className="main-container-letter">
 
@@ -316,12 +389,13 @@ export default function RefailureInfo() {
                                     `${reportData?.respondent?.fname ?? ""} ${reportData?.respondent?.lname ?? ""}`,
                                     "dialogue"
                                 );
+                                //handleSMSNotification();
                                 }}
                             >
                                 Print
                             </button>
                             )}
-
+                                
                            
                             
                         </div>

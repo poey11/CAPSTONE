@@ -108,17 +108,48 @@ const incidentMenuBar: React.FC<IncidentMenuBarProps> = ({ id, department, actio
     const handleHearingSection = (e:any) => {
         router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${id}&department=${department}`);
     };
-    if (!reportData) {
+    
+  const [hasRespondentAbsentInHearingIndex, setHasRespondentAbsentInHearingIndex] = useState(0);
+  const [hasRespondentAbsentInHearingLength, setHasRespondentAbsentInHearingLength] = useState(0);
+
+  useEffect(() => {
+     if (!reportData) return;
+ 
+     // Get all keys like respondentAbsentInHearing0, respondentAbsentInHearing1, ...
+     const keys = Object.keys(reportData).filter((key) =>
+         key.startsWith("respondentAbsentInHearing")
+     );
+ 
+     // Count how many there are
+     setHasRespondentAbsentInHearingLength(keys.length);
+ 
+     if (keys.length > 0) {
+         // Extract numeric suffix (e.g., 0,1,2)
+         const indices = keys.map((key) =>
+         Number(key.replace("respondentAbsentInHearing", ""))
+         );
+ 
+         // Get the latest (max index)
+         const maxIndex = Math.max(...indices);
+ 
+         setHasRespondentAbsentInHearingIndex(maxIndex);
+     } else {
+         setHasRespondentAbsentInHearingIndex(0);
+     }
+  }, [reportData]);
+
+  console.log("hasRespondentAbsentInHearingIndex:", hasRespondentAbsentInHearingIndex);
+  console.log("hasRespondentAbsentInHearingLength:", hasRespondentAbsentInHearingLength);
+
+  console.log(reportData?.sentLetterOfFailureToAppearDialogue)
+  console.log(reportData?.reasonForFailureToAppearDialogue)
+  if (!reportData) {
         return (
             <div className="edit-incident-redirectionpage-section">
             <p>Loading incident data...</p>
             </div>
         );
     }
-
-
-console.log(reportData?.sentLetterOfFailureToAppearDialogue)
-console.log(reportData?.reasonForFailureToAppearDialogue)
 	return (
 		<div className="edit-incident-redirectionpage-section">
             <button className= {lastSegment ==="EditIncident" ? "edit-incident-redirection-buttons-selected" : "edit-incident-redirection-buttons"} type="button" onClick={()=>{
@@ -216,14 +247,9 @@ console.log(reportData?.reasonForFailureToAppearDialogue)
                           }
                         }
                       
-                        const hasRespondentAbsentInHearing = Object.keys(reportData || {}).some(key =>
-                          key.startsWith("respondentAbsentInHearing")
-                        );
-
+                        
                         if (
-                          hasRespondentAbsentInHearing &&
-                          !reportData?.sentLetterOfFailureToAppearHearing &&
-                          !reportData?.refailureHearingDetails
+                          hasRespondentAbsentInHearingLength !== Object.keys(reportData?.refailureHearingDetails || {}).length
                         ) {
                           setPopupErrorMessage("Fill out Refailure Meeting (Hearing) first.");
                           setShowErrorPopup(true);
@@ -375,7 +401,10 @@ console.log(reportData?.reasonForFailureToAppearDialogue)
                         className="submenu-button"
                         name="section"
                         onClick={() => {
-                          router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${id}&department=${department}`);
+                          setPopupErrorMessage("Generate a Refailure Letter first.");
+                          setShowErrorPopup(true);
+                          setTimeout(() => setShowErrorPopup(false), 3000);
+                          return;
                         }}>
                         <h1>Refailure Meeting Section</h1>
                         </button>
