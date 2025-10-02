@@ -135,7 +135,7 @@ export default function ParticipantsList() {
     }
   };
   const [noParticipantLimit, setNoParticipantLimit] = useState<boolean>(false);
-  const [particapantDays, setParticapantDays] = useState<number[]>([]);
+  const [participantDays, setParticipantDays] = useState<number[]>([]);
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   const [eventType, setEventType] = useState<string>("single");
   // Load program meta
@@ -161,7 +161,7 @@ export default function ParticipantsList() {
           const noLimit = Boolean(d?.noParticipantLimit);
 
           setNoParticipantLimit(noLimit);
-          setParticapantDays(Array.isArray(d?.particapantDays) ? d.particapantDays : []);
+          setParticipantDays(Array.isArray(d?.participantDays) ? d.participantDays : []);
           setNoParticipantLimitList(Array.isArray(d?.noParticipantLimitList) ? d.noParticipantLimitList : []);
           setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
           setProgramVolunteerCapacity(Number.isFinite(capVolunteers) ? capVolunteers : null);
@@ -333,14 +333,14 @@ export default function ParticipantsList() {
    return `Participants: ${participantCount}`;
   } 
   else if (  noParticipantLimitList[dayChosen] === false && eventType === "multiple") {
-    return `Participants: ${multipleDayParticipantCount} / ${ particapantDays[dayChosen] ?? "—"}`;
+    return `Participants: ${multipleDayParticipantCount} / ${ participantDays[dayChosen] ?? "—"}`;
   }
   else if(  noParticipantLimitList[dayChosen] === true && eventType === "multiple") {
     return `Participants: ${multipleDayParticipantCount}`;
   }
   
-}, [noParticipantLimit, participantCount, programCapacity, particapantDays, dayChosen, noParticipantLimitList, eventType, multipleDayParticipantCount]);
-  console.log(particapantDays)
+}, [noParticipantLimit, participantCount, programCapacity, participantDays, dayChosen, noParticipantLimitList, eventType, multipleDayParticipantCount]);
+  console.log(participantDays)
   console.log(noParticipantLimitList)
   console.log(participants)
   const badgeVolunteersText = useMemo(
@@ -585,7 +585,7 @@ export default function ParticipantsList() {
                   <option value="" disabled hidden>
                     {/* hidden placeholder, doesn't show in list */}
                   </option>
-                  {particapantDays.map((day, index) => (
+                  {participantDays.map((day, index) => (
                     <option value={index} key={index}>
                       {`Day ${index + 1}`}
                     </option>
