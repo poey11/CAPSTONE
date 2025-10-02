@@ -336,6 +336,100 @@ const deleteOfficer = async () => {
     return pageNumbersToShow;
   };
 
+
+    const clusterOptions: Record<string, string[]> = {
+    "East Fairview": [
+      "RINA",
+      "SAMAFA",
+      "SAMAPLI",
+      "SITIO KISLAP",
+      "EFHAI",
+      "EFHNAI",
+      "RABOSNA HOA",
+      "SAPAMANAI HOA",
+      "TOP JADE",
+      "UEHAI",
+      "SUNNY VILLAS HOA",
+      "SIRNAI HOA"
+    ],
+    "West Fairview": [
+      "AUSTIN",
+      "BASILIO 1",
+      "DARISNAI",
+      "IRIS KALIWA",
+      "IRIS KANAN",
+      "JAGUAR",
+      "L.S.T.",
+      "LOTUS",
+      "MAGNOLIA 1",
+      "MAGNOLIA 2",
+      "MALIBU",
+      "MUSTANG BENZ",
+      "MUSTANG LUPAMU",
+      "MUSTANG RELESA",
+      "MUSTANG VILLE",
+      "NARCISSUS",
+      "OPEL",
+      "PAAS COMPOUND",
+      "Q LAWS",
+      "Q MAGNOLIA",
+      "REGALADO",
+      "ROCES VILLAS",
+      "SITIO TIBAGAN",
+      "TARUNAI",
+      "TUPHA",
+      "ULNA",
+      "UNITED FAIRLANE",
+      "URLINA",
+      "VERBENA 1",
+      "VERBENA 2",
+      "VERBENA 3",
+      "VERBENA 4",
+      "VERBENA 5",
+      "ACHIEVERS HOA",
+      "BISTEKVILLE HOA",
+      "BRESCIA SUBD. HOA",
+      "COUNTRY HOME HOA",
+      "CUIDAD VERDE HOA",
+      "DAIT HOA",
+      "DE VEGA HOA",
+      "FALCON HOA",
+      "HUNTER-HILLMAN HOA",
+      "IVORY EXECUTIVE VILLAGE",
+      "LUPANG BIYAYA HOA",
+      "ORCHID VILLAS HOA",
+      "PITIMINI HOA",
+      "PONTIAC HOA",
+      "PRIMAVERA HOMES",
+      "STO. NIÑO VILLAGE",
+      "VILLA ORION HOA",
+      "WEST FAIRVEW HOA",
+      "TULIP RESIDENCES HOA",
+    ],
+    "South Fairview": [
+      "AKAP",
+      "ARNAI",
+      "BASILIO 2",
+      "BUICK EXT.",
+      "CUGON",
+      "F.L.N.A",
+      "FEWRANO",
+      "HILLMAN",
+      "LYRIC",
+      "REREFNAI",
+      "SIKAP",
+      "BBCHAI HOA",
+      "BELCHA",
+      "BUICK HOA",
+      "COLT HOA",
+      "SAMAKA VILLAGE",
+      "UPPER CORVETTE HOA",
+      "WINDSOR HOA",
+    ]
+  };
+
+
+
   return (
 
     <main className="officiers-main-container">
@@ -669,7 +763,7 @@ const deleteOfficer = async () => {
                           />
                         </div>
                       )}
-
+                      {/* Location */}
                       <div className="fields-section">
                         <p>Location<span className="required">*</span></p>
                         <select
@@ -677,15 +771,25 @@ const deleteOfficer = async () => {
                           name="location"
                           required
                           value={newOfficerDetails.location || ""}
-                          onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, location: e.target.value })}
+                          onChange={(e) => {
+                            const newLocation = e.target.value;
+                            setNewOfficerDetails({ 
+                              ...newOfficerDetails, 
+                              location: newLocation, 
+                              clusterSection: "" // reset cluster when location changes
+                            });
+                          }}
                         >
                           <option value="" disabled>Location</option>
-                          <option value="East Fairview">East Fairview</option>
-                          <option value="West Fairview">West Fairview</option>
-                          <option value="South Fairview">South Fairview</option>
+                          {Object.keys(clusterOptions).map((loc) => (
+                            <option key={loc} value={loc}>
+                              {loc}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
+                      {/* Cluster/Section */}
                       <div className="fields-section">
                         <p>Cluster/Section<span className="required">*</span></p>
                         <select
@@ -694,17 +798,20 @@ const deleteOfficer = async () => {
                           value={newOfficerDetails.clusterSection || ""}
                           onChange={(e) => setNewOfficerDetails({ ...newOfficerDetails, clusterSection: e.target.value })}
                           required
+                          disabled={!newOfficerDetails.location} // disable until location is picked
                         >
-                          <option value="" disabled>Select Cluster/Section</option>
-                          <option value="SITIO KISLAP">SITIO KISLAP</option>
-                          <option value="URLINA">URLINA</option>
-                          <option value="EFHAI">EFHAI</option>
-                          <option value="TULIP RESIDENCES HOA">TULIP RESIDENCES HOA</option>
-                          <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
-                          <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
-                          <option value="Others">Others</option>
+                          <option value="" disabled>
+                            {newOfficerDetails.location ? "Select Cluster/Section" : "Select Location First"}
+                          </option>
+                          {newOfficerDetails.location &&
+                            clusterOptions[newOfficerDetails.location].map((cluster) => (
+                              <option key={cluster} value={cluster}>
+                                {cluster}
+                              </option>
+                            ))}
                         </select>
                       </div>
+
 
                       {newOfficerDetails.clusterSection === "Others" && (
                         <div className="fields-section">
