@@ -126,6 +126,7 @@ export default function EditOfficial() {
       setIdentificationFile(file);
       setIdentificationPreview(URL.createObjectURL(file)); // local preview
     };
+    console.log("selectedOfficial",selectedOfficial);
 
     return (
         <main className="edit-official-main-container">
@@ -174,6 +175,7 @@ export default function EditOfficial() {
                                                 value={selectedOfficial?.name || "N/A"}
                                                 className="edit-official-input-field" 
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, name: e.target.value})}
+                                                disabled={selectedOfficial?.id ? true: false}
                                                 />
                                             </div>
                                             <div className="fields-section-official">
@@ -181,7 +183,11 @@ export default function EditOfficial() {
                                                 <input type="text" 
                                                 value={selectedOfficial?.facebook || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, facebook: e.target.value})}
-                                                className="edit-official-input-field" />
+                                                className="edit-official-input-field"
+                                                disabled={selectedOfficial?.id ? true: false}
+
+                                                />
+                                                
                                             </div>
                                             {/*<div className="fields-section-official">
                                                 <p>Middle Name<span className="required">*</span></p>
@@ -195,7 +201,10 @@ export default function EditOfficial() {
                                                 <input type="text" 
                                                 value={selectedOfficial?.contact || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, contact: e.target.value})}
+                                                disabled={selectedOfficial?.id ? true: false}
+
                                                 className="edit-official-input-field" />
+                                                
                                             </div>
                                         </div>
                                         <div className="edit-official-section-2-right-side">
@@ -248,7 +257,7 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Email Address<span className="required">*</span></p>
                                                 <input type="text" 
-                                                
+                                                disabled={selectedOfficial?.id ? true: false}
                                                 value={selectedOfficial?.email || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, email: e.target.value})}
                                                 className="edit-official-input-field" />

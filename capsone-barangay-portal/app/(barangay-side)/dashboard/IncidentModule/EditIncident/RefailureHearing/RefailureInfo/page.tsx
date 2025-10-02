@@ -16,6 +16,11 @@ interface otherInfoType {
     LuponStaff?: string;
     LuponStaffId?: string;
     DateFiled?: string;
+    respondent?: {
+        fname?: string;
+        lname?: string;
+        contact?: string;
+    };
 }
 
 export default function Page() {
@@ -178,9 +183,74 @@ export default function Page() {
             [`refailureLetterHearingDateFiled${index}`]: new Date().toLocaleString(),
       })        
     }
-    const isLetterSent = !!reportData?.sentLetterOfFailureToAppearHearing?.[2];
+    const isLetterSent = !!reportData?.sentLetterOfFailureToAppearHearing?.[index];
     console.log("Is Letter Sent for index 2:", isLetterSent);
 
+     const [staffContactNos, setStaffContactNos] = useState("");
+    const [staffName, setStaffName] = useState("");
+    const [staffLastName, setStaffLastName] = useState("");
+    const [DateOfDelivery, setDateOfDelivery] = useState("");
+    useEffect(() => {
+        if (!otherInfo.LuponStaffId) return;
+        
+        const staff = filteredStaffs.find(staff => staff.id === otherInfo.LuponStaffId);
+        setStaffContactNos(staff?.phone || "");
+        setStaffName(staff?.firstName || "");
+        setStaffLastName(staff?.lastName || "");
+        setDateOfDelivery(otherInfo.DateOfDelivery || "");
+    }, [otherInfo, filteredStaffs]);
+
+    const handleSMSNotification = async (index:string) => {
+        try{
+          const response = await fetch("/api/clickSendApi", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                    to: reportData?.respondent?.contact,
+                    message: 
+                    `Good day Mr./Ms. ${reportData?.respondent?.fname},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay 
+                    Fairview will be delivering a Refailure Meeting (${index} Hearing) Invitation to you. The invitation will be handed personally by ${staffName} ${staffLastName}  on 
+                    ${DateOfDelivery}.\n\nThis letter contains important details regarding the scheduled meeting and deadline for the excuse of absence. 
+                    We kindly ask for your attention and cooperation in receiving and acknowledging the said document.
+                    \n\nShould you have any questions or concerns, you may contact the Barangay Hall for further assistance.\n\nThank you and we appreciate your cooperation.
+                    \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+              })
+          });
+            
+          if (!response.ok) throw new Error("Failed to send SMS");
+  
+          const data = await response.json();
+          console.log(data);
+        } catch (error) {
+            console.error("Error sending SMS:", error);
+        }
+        try {
+            const responseC = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: staffContactNos,
+                message:  `Good day Mr./Ms. ${staffName} ${staffLastName},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a 
+                 Refailure letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${DateOfDelivery} 
+                 to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
+                 \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
+                 \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
+            })
+        });
+
+        
+        if (!responseC.ok) throw new Error("Failed to send SMS");
+        const dataC = await responseC.json();
+        console.log(dataC);
+        } catch (error) {
+            console.error("Error sending SMS:", error);
+        }
+    }
     return (
         <main className="main-container-letter">
 
@@ -224,11 +294,9 @@ export default function Page() {
                                 // Show the success popup message immediately
                                 setPopupMessage("SMS sent successfully!!");
                                 setShowPopup(true);
-
+                                
                                 if (showSubmitPopup.letterType === "summon") {
-                                // Redirect to HearingSection after 3 seconds
-                                //sendSMSForSummons();
-                                setTimeout(() => {
+                                    setTimeout(() => {
                                     router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
                                     setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
                                 }, 3000);
@@ -322,6 +390,11 @@ export default function Page() {
                                 handleRescheduleMeeting(otherInfo?.DateTimeOfMeeting);
                                 setPopupMessage("Refailure Meeting (Hearing) Info Updated Successfully!!");
                                 setShowPopup(true);
+                                let number ="";
+                                if (index===0) number= "First";
+                                else if (index===1) number= "Second";
+                                else if (index===2) number= "Third";
+                                //handleSMSNotification(number);
                                 setTimeout(() => {
                                     setShowPopup(false);
                                     router.push(

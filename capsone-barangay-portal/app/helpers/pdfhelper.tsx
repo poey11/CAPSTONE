@@ -953,11 +953,18 @@ const handleLetterOfFailure = async(id:string, refailureExplainationMeeting: str
     const monthToday = getMonthName(parseInt(dateToday.split("-")[1]));
     const yearToday = dateToday.split("-")[0];
 
-    const failureMeetingMonth = refailureExplainationMeeting.split('-')[1] ;
-    const failureMeetingDay = refailureExplainationMeeting.split('-')[2];
     const failureMeetingYear = refailureExplainationMeeting.split('-')[0];
+    const failureMeetingMonth = refailureExplainationMeeting.split('-')[1] ;
+    const failureMeetingDay = refailureExplainationMeeting.split('-')[2].split('T')[0];
+    // const failureMeetingTime = refailureExplainationMeeting.split('-')[2].split('T')[1];
     
     
+    console.log("failureMeetingMonth:", failureMeetingMonth);
+    console.log("failureMeetingDay:", failureMeetingDay);
+    console.log("failureMeetingYear:", failureMeetingYear);
+    // console.log("failureMeetingTime:", failureMeetingTime);
+    
+
     console.log("Document Data:", documentData);
 
     const incidentRef = query(
@@ -975,47 +982,50 @@ const handleLetterOfFailure = async(id:string, refailureExplainationMeeting: str
     console.log("Incident Data:", incidentData);
     
 
-    const newBody = replacePlaceholders(documentData?.Body, {
-      dayToday,
-      monthToday,
-      yearToday,
-      ...(letterType === "dialogue" && {
-        DateTimeOfMeeting: new Date(incidentData[0].DateTimeOfMeeting).toLocaleString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false // set to true if you want AM/PM
-        }).replace(",", " at"),
-      }),
-      ...(letterType === "summon" && {
-        DateTimeOfMeeting: new Date(incidentData[i || 0].DateTimeOfMeeting).toLocaleString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true
-        }).replace(",", " at"),
-      }),
-      CName: complainant.toUpperCase(),
-      RName: respondent.toUpperCase(),
-      refailureExplainationMeeting: `${getMonthName(parseInt(failureMeetingMonth))} ${failureMeetingDay}, ${failureMeetingYear}`,
-    });
-
     
-
+    
     const formatDateTime = (dateStr: string) =>
-      new Date(dateStr).toLocaleString("en-PH", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true // change to true for AM/PM
-      }).replace(",", " at");
-  
+        new Date(dateStr).toLocaleString("en-PH", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true, // ✅ ensures AM/PM instead of 24h
+        })
+        
+        
+        const newBody = replacePlaceholders(documentData?.Body, {
+          dayToday,
+          monthToday,
+          yearToday,
+          ...(letterType === "dialogue" && {
+            DateTimeOfMeeting: new Date(incidentData[0].DateTimeOfMeeting).toLocaleString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true // set to true if you want AM/PM
+            })
+          }),
+          ...(letterType === "summon" && {
+            DateTimeOfMeeting: new Date(incidentData[i || 0].DateTimeOfMeeting).toLocaleString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true
+            })
+          }),
+          CName: complainant.toUpperCase(),
+          RName: respondent.toUpperCase(),
+          refailureExplainationMeeting: `${getMonthName(parseInt(failureMeetingMonth))} ${failureMeetingDay}, ${failureMeetingYear}`,
+        });
+    
+    console.log("New Body after replacement:", newBody);
+    
     const boldWords: any[] = [
       dayToday,
       monthToday,
