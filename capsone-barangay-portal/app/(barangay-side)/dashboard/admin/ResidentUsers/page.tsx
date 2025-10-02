@@ -707,7 +707,7 @@ const confirmAccept = async () => {
 
                       {viewActiveSection === "account" && (
                         <>
-                          <div className="view-main-user-content-left-side">
+                          <div className="view-userrole-content-left-side">
                             <div className="view-user-fields-section">
                               <p>Created At</p>
                               <input
@@ -743,7 +743,7 @@ const confirmAccept = async () => {
                               />
                             </div>
                           </div>
-                          <div className="view-main-user-content-right-side">
+                          <div className="view-userrole-content-right-side">
                             <div className="view-user-fields-section">
                               <p>Status</p>
                               <input

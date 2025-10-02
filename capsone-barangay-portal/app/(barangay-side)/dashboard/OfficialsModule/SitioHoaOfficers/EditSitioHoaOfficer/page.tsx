@@ -189,6 +189,100 @@ export default function EditOfficer() {
     }
   };
 
+
+  // put this above your component (or import it from a shared file)
+const clusterOptions: Record<string, string[]> = {
+  "East Fairview": [
+    "RINA",
+    "SAMAFA",
+    "SAMAPLI",
+    "SITIO KISLAP",
+    "EFHAI",
+    "EFHNAI",
+    "RABOSNA HOA",
+    "SAPAMANAI HOA",
+    "TOP JADE",
+    "UEHAI",
+    "SUNNY VILLAS HOA",
+    "SIRNAI HOA"
+  ],
+  "West Fairview": [
+    "AUSTIN",
+    "BASILIO 1",
+    "DARISNAI",
+    "IRIS KALIWA",
+    "IRIS KANAN",
+    "JAGUAR",
+    "L.S.T.",
+    "LOTUS",
+    "MAGNOLIA 1",
+    "MAGNOLIA 2",
+    "MALIBU",
+    "MUSTANG BENZ",
+    "MUSTANG LUPAMU",
+    "MUSTANG RELESA",
+    "MUSTANG VILLE",
+    "NARCISSUS",
+    "OPEL",
+    "PAAS COMPOUND",
+    "Q LAWS",
+    "Q MAGNOLIA",
+    "REGALADO",
+    "ROCES VILLAS",
+    "SITIO TIBAGAN",
+    "TARUNAI",
+    "TUPHA",
+    "ULNA",
+    "UNITED FAIRLANE",
+    "URLINA",
+    "VERBENA 1",
+    "VERBENA 2",
+    "VERBENA 3",
+    "VERBENA 4",
+    "VERBENA 5",
+    "ACHIEVERS HOA",
+    "BISTEKVILLE HOA",
+    "BRESCIA SUBD. HOA",
+    "COUNTRY HOME HOA",
+    "CUIDAD VERDE HOA",
+    "DAIT HOA",
+    "DE VEGA HOA",
+    "FALCON HOA",
+    "HUNTER-HILLMAN HOA",
+    "IVORY EXECUTIVE VILLAGE",
+    "LUPANG BIYAYA HOA",
+    "ORCHID VILLAS HOA",
+    "PITIMINI HOA",
+    "PONTIAC HOA",
+    "PRIMAVERA HOMES",
+    "STO. NIÑO VILLAGE",
+    "VILLA ORION HOA",
+    "WEST FAIRVEW HOA",
+    "TULIP RESIDENCES HOA",
+  ],
+  "South Fairview": [
+    "AKAP",
+    "ARNAI",
+    "BASILIO 2",
+    "BUICK EXT.",
+    "CUGON",
+    "F.L.N.A",
+    "FEWRANO",
+    "HILLMAN",
+    "LYRIC",
+    "REREFNAI",
+    "SIKAP",
+    "BBCHAI HOA",
+    "BELCHA",
+    "BUICK HOA",
+    "COLT HOA",
+    "SAMAKA VILLAGE",
+    "UPPER CORVETTE HOA",
+    "WINDSOR HOA",
+  ]
+};
+
+
     return (
         <main className="edit-officer-main-container">
             <div className="edit-officer-main-content">
@@ -365,60 +459,53 @@ export default function EditOfficer() {
                                             />
                                         </div>
                                         )}
+                                    {/* Location */}
+                                    <div className="fields-section-official">
+                                    <p>Location<span className="required">*</span></p>
+                                    <select
+                                        className={`edit-officer-input-field ${invalidFields.includes("location") ? "input-error" : ""}`}
+                                        name="location"
+                                        value={selectedOfficial.location || ""}
+                                        onChange={(e) =>
+                                        setSelectedOfficial({
+                                            ...selectedOfficial,
+                                            location: e.target.value,
+                                            clusterSection: "" // reset cluster if location changes
+                                        })
+                                        }
+                                    >
+                                        <option value="" disabled>Select Location</option>
+                                        {Object.keys(clusterOptions).map((loc) => (
+                                        <option key={loc} value={loc}>{loc}</option>
+                                        ))}
+                                    </select>
+                                    </div>
 
-                                        <div className="fields-section-official">
-                                        <p>Location<span className="required">*</span></p>
-                                        <select
-                                            className={`edit-officer-input-field ${
-                                            invalidFields.includes("location") ? "input-error" : ""
-                                            }`}
-                                            name="location"
-                                            value={selectedOfficial.location || ""}
-                                            onChange={(e) =>
-                                            setSelectedOfficial({
-                                                ...selectedOfficial,
-                                                location: e.target.value,
-                                            })
-                                            }
-                                        >
-                                            <option value="" disabled>
-                                            Location
-                                            </option>
-                                            <option value="East Fairview">East Fairview</option>
-                                            <option value="West Fairview">West Fairview</option>
-                                            <option value="South Fairview">South Fairview</option>
-                                        </select>
-                                        </div>
+                                    {/* Cluster/Section */}
+                                    <div className="fields-section-official">
+                                    <p>Cluster/Section<span className="required">*</span></p>
+                                    <select
+                                        className={`edit-officer-input-field ${invalidFields.includes("clusterSection") ? "input-error" : ""}`}
+                                        name="clusterSection"
+                                        value={selectedOfficial.clusterSection || ""}
+                                        onChange={(e) =>
+                                        setSelectedOfficial({
+                                            ...selectedOfficial,
+                                            clusterSection: e.target.value
+                                        })
+                                        }
+                                        disabled={!selectedOfficial.location}
+                                    >
+                                        <option value="" disabled>
+                                        {selectedOfficial.location ? "Select Cluster/Section" : "Select Location First"}
+                                        </option>
+                                        {selectedOfficial.location &&
+                                        clusterOptions[selectedOfficial.location].map((cluster) => (
+                                            <option key={cluster} value={cluster}>{cluster}</option>
+                                        ))}
+                                    </select>
+                                    </div>
 
-                                        <div className="fields-section-official">
-                                        <p>Cluster/Section<span className="required">*</span></p>
-                                        <select
-                                            className={`edit-officer-input-field ${
-                                            invalidFields.includes("clusterSection") ? "input-error" : ""
-                                            }`}
-                                            name="clusterSection"
-                                            value={selectedOfficial.clusterSection || ""}
-                                            onChange={(e) =>
-                                            setSelectedOfficial({
-                                                ...selectedOfficial,
-                                                clusterSection: e.target.value,
-                                            })
-                                            }
-                                        >
-                                            <option value="" disabled>
-                                            Select Cluster/Section
-                                            </option>
-                                            <option value="SITIO KISLAP">SITIO KISLAP</option>
-                                            <option value="URLINA">URLINA</option>
-                                            <option value="EFHAI">EFHAI</option>
-                                            <option value="TULIP RESIDENCES HOA">
-                                            TULIP RESIDENCES HOA
-                                            </option>
-                                            <option value="UPPER CORVETTE HOA">UPPER CORVETTE HOA</option>
-                                            <option value="WEST FAIRVEW HOA">WEST FAIRVEW HOA</option>
-                                            <option value="Others">Others</option>
-                                        </select>
-                                        </div>
 
                                         {selectedOfficial.clusterSection === "Others" && (
                                         <div className="fields-section-official">

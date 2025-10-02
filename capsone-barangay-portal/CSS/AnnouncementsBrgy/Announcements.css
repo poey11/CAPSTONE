@@ -1197,14 +1197,14 @@ width: 100px;
   overflow-y: auto;
 }
 
-.view-announcement-content-top-section{
+.view-announcement-content-details-section{
   display: flex;
   flex-direction: row;
   width: 100%;
   padding-top: 22px;
 } 
 
-.view-announcement-content-bottom-section{
+.view-announcement-content-content-section{
   display: flex;
   flex-direction: column;
   width: 100%;

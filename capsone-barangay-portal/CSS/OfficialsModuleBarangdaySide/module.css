@@ -413,6 +413,14 @@ box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
   opacity: 0.85;  
 }
 
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
  /* NEW UPDATED */
 .no-result-icon {
   width: 46px;

@@ -202,10 +202,17 @@ animation: fadeSlideIn 0.5s ease-out;
   
 }
 
+.active-featured-section {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  height: 100px;
+}
 
 .active-button-section-edit-announcement{
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   margin-top: 30px;
   margin-left: 40px;
   width: 100%;
@@ -251,7 +258,14 @@ animation: fadeSlideIn 0.5s ease-out;
   }
 
 
-    .edit-box-container-outer-description-announcements {
+  .edit-box-container-outer-description-announcements {
+    position: relative; 
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .edit-box-container-outer-headline-announcements {
     position: relative; 
     margin-bottom: 20px;
     display: flex;
@@ -274,7 +288,7 @@ animation: fadeSlideIn 0.5s ease-out;
     text-align: center;
   }
   
-      .edit-box-container-description-announcements {
+  .edit-box-container-description-announcements {
     position: relative;
     width: 100%;
     border: 1px solid #5a6b7c;
@@ -284,7 +298,17 @@ animation: fadeSlideIn 0.5s ease-out;
     height: 330px;
   }
 
-    .edit-description-input-field-announcements {
+  .edit-box-container-headline-announcements {
+    position: relative;
+    width: 100%;
+    border: 1px solid #5a6b7c;
+    border-radius: 10px;
+    background-color: #ffffff;
+    margin-top: 30px;
+    height: 100px;
+  }
+
+  .edit-description-input-field-announcements {
     padding: 8px;
     width: 100%;
     border-radius: 5px;
@@ -295,7 +319,19 @@ animation: fadeSlideIn 0.5s ease-out;
     resize: none;
   }
 
-  .edit-description-input-field-announcements:focus {
+    .edit-headline-input-field-announcements {
+    padding: 8px;
+    width: 100%;
+    border-radius: 5px;
+    color: #000000;
+    text-align: left;
+    height: 70px;
+    margin-top: 20px;
+    resize: none;
+  }
+
+  .edit-description-input-field-announcements:focus,
+  .edit-headline-input-field-announcements:focus {
     outline: none;
     border-color: rgba(36, 53, 76, 0.7); /* keep the same as default or change as needed */
     box-shadow: none;
