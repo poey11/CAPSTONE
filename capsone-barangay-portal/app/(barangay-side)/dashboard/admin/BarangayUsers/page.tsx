@@ -26,6 +26,9 @@ interface dbBarangayUser{
     birthDate: string;
     sex: string;
     department: string;
+    term: string;
+    facebookLink: string;
+    email: string;
 }
 
 
@@ -510,7 +513,8 @@ useEffect(() => {
         setShowSubmitPopup(true);
     };
 
-
+        const todayYear = new Date().getFullYear();
+        const next3year = todayYear + 3;
       const confirmSubmit = async () => {
         setShowSubmitPopup(false);
         setShowAddUserPopup(false);
@@ -526,6 +530,7 @@ useEffect(() => {
           firstName: "User",
           lastName: "",
           createdBy: user?.fullName || user?.name || "Unknown",
+          term: `${todayYear} - ${next3year}`,
 
         });
     
@@ -929,6 +934,10 @@ useEffect(() => {
                                                 <p>Birthday</p>
                                                 <input type="date" className="view-user-input-field" name="birthDate" value={viewUser.birthDate} readOnly/>
                                             </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Term</p>
+                                                <input type="text" className="view-user-input-field" name="term" value={viewUser.term} readOnly/>
+                                            </div>
                                         </div>
                                         <div className="view-userrole-content-right-side">
                                             <div className="view-user-fields-section">
@@ -961,6 +970,14 @@ useEffect(() => {
                                             <div className="view-user-fields-section">
                                                 <p>Address</p>
                                                 <input type="input" className="view-user-input-field" name="address" value={viewUser.address || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Email</p>
+                                                <input type="input" className="view-user-input-field" name="email" value={viewUser.email || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Facebook</p>
+                                                <input type="input" className="view-user-input-field" name="facebookLink" value={viewUser.facebookLink || "N/A"} readOnly/>
                                             </div>
                                         </div>
                                     </>

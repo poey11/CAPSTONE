@@ -10,6 +10,7 @@ import "@/CSS/User&Roles/ModifyBarangayAcc.css";
 import Link from "next/link";
 import { hash } from 'bcryptjs'; 
 import { useSession } from "next-auth/react";
+import { set } from "date-fns";
 
 
 const metadata:Metadata = { 
@@ -34,6 +35,8 @@ interface BarangayUser {
     department: string;
     updatedBy?: string;
     updatedAt?: string;
+    term?: string;
+    facebookLink?: string;
   }
 
 export default function EditBarangayAccount() {
@@ -65,7 +68,10 @@ export default function EditBarangayAccount() {
         lastName: "",
         phone: "",
         sex: "",
-        department: ""
+        department: "",
+        term: "", // Added term property
+        facebookLink: "", // Added facebookLink property
+        email: "", // Added email property
       });
 
 
@@ -133,7 +139,7 @@ export default function EditBarangayAccount() {
             }
         }
     
-        const contactPattern = /^091\d{8}$/;
+        const contactPattern = /^09\d{9}$/;
         if (!contactPattern.test(formData.phone)) {
             setPopupErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
             setShowErrorPopup(true);
@@ -198,6 +204,7 @@ export default function EditBarangayAccount() {
     const handleToggleClickPasswordDetails = () => {
         setShowPasswordDetails(prevState => !prevState);
     };
+    const [chosenTerm, setChosenTerm] = useState("");
 
 
     useEffect(() => {
@@ -224,6 +231,9 @@ export default function EditBarangayAccount() {
                         phone: docSnap.data().phone || "",
                         sex: docSnap.data().sex || "",
                         department: docSnap.data().department || "",
+                        term: docSnap.data().term || "",
+                        facebookLink: docSnap.data().facebookLink || "",
+                        email: docSnap.data().email || "",
                     };
 
                     setFormData(data);
@@ -390,7 +400,39 @@ export default function EditBarangayAccount() {
                                                 <option value="Male">Male</option>
                                                 <option value="Female">Female</option>
                                             </select>
-                                        </div> 
+                                        </div>
+
+                                         <div className="fields-section">
+                                            <p>Email</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Official Email"
+                                                name="email"
+                                                value={formData.email || "" }
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+                                        
+                                        <div className="fields-section">
+                                            <p>Update Term</p>
+                                            <input
+                                                type="date"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Term"
+                                                name="term"
+                                                value={chosenTerm || ""}
+                                                onChange={()=> {
+                                                    const input = (document.getElementsByName("term")[0] as HTMLInputElement).value;
+                                                    const year = new Date(input).getFullYear();
+                                                    const next3year = year + 3;
+                                                    setChosenTerm(input);
+                                                    setFormData((prevData) => ({ ...prevData, term: `${year} - ${next3year}` }));
+                                                }}
+                                                min={new Date().toISOString().split("T")[0]}
+                                            />
+                                        </div>
+                                        
 
                                     </div>
 
@@ -487,7 +529,30 @@ export default function EditBarangayAccount() {
                                             />
                                         </div>
 
-                                        
+                                        <div className="fields-section">
+                                            <p>Facebook Link</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Enter Facebook Link"
+                                                name="facebookLink"
+                                                value={formData.facebookLink || ""  }
+                                                onChange={handleChange}
+                                            />
+                                        </div>
+
+                                        <div className="fields-section">
+                                            <p>Current Term Duration</p>
+                                            <input
+                                                type="text"
+                                                className="editbrgyuser-input-field"
+                                                placeholder="Term"
+                                                name="term"
+                                                value={formData.term || ""}
+                                                onChange={handleChange}
+                                                readOnly
+                                            />
+                                        </div>
 
                                     </div>
                                 </div>

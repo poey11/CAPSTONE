@@ -23,6 +23,8 @@ interface AccountSetupProps {
     department?: string; // Only required if LF Staff
     password: string;
     confirmPassword: string;
+    facebookLink?: string;
+    email?: string;
 }
 
 const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
@@ -45,6 +47,9 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
         department: '',
         password: '',
         confirmPassword: '',
+        facebookLink: '',
+        email: ''
+
     });
 
     const [error, setError] = useState<string | null>(null);
@@ -127,6 +132,8 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                 department: position === "LF Staff" ? user.department : "", // Only save department if LF Staff
                 password: hashedPassword,
                 firstTimelogin: false,
+                facebookLink: user.facebookLink,
+                email: user.email
                
             });
 
@@ -162,7 +169,20 @@ const AccSetupForm: React.FC<AccSetupFormProps> = ({ userID }) => {
                         <div className="form-group-accsetup-form">
                             <label htmlFor="lName">Last Name:<span className="required">*</span></label>
                             <input onChange={handleChange} value={user.lName} id="lName" type="text" name="lName" placeholder="Enter Last Name" className="form-input-accsetup-form" required />
-                        </div>      
+                        </div>
+
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="lName">Email:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.email} id="email" type="text" name="email" placeholder="Enter Email" className="form-input-accsetup-form" required />
+                        </div>     
+                         
+                        
+
+                        <div className="form-group-accsetup-form">
+                            <label htmlFor="lName">Facebook:<span className="required">*</span></label>
+                            <input onChange={handleChange} value={user.facebookLink} id="facebookLink" type="text" name="facebookLink" placeholder="Enter Facebook Link" className="form-input-accsetup-form" required />
+                        </div>     
+                         
                         
                         <div className="form-group-accsetup-form">
                             <label htmlFor="sex">Gender:<span className="required">*</span></label>
