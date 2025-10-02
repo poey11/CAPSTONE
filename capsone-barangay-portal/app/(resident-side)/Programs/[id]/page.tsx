@@ -1,7 +1,7 @@
 "use client";
 import "@/CSS/Programs/SpecificProgram.css";
 
-import { use, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Handshake } from "lucide-react";
@@ -45,7 +45,7 @@ function formatHHmmTo12h(hhmm?: string): string {
   return `${h}:${String(m).padStart(2, "0")}${period}`;
 }
 
-// ---- NEW: Local-only date helpers (avoid UTC parsing drift) ----
+// ---- Local-only date helpers (avoid UTC parsing drift) ----
 const formatYMD = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
     d.getDate()
@@ -208,7 +208,7 @@ export default function SpecificProgram() {
   const [program, setProgram] = useState<Program | null>(null);
   const [images, setImages] = useState<string[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [selectedAction, setSelectedAction] = useState<Role | null>(null);
+  const [selectedAction, setSelectedAction] = useState<null | Role>(null);
 
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File>>({});
@@ -397,7 +397,7 @@ export default function SpecificProgram() {
     fetchUserData();
   }, [user]);
 
-  // check duplicate
+  // check duplicate (FIXED single-day branch)
   useEffect(() => {
     const checkDup = async () => {
       if (!program?.id || !residentId) {
@@ -410,15 +410,19 @@ export default function SpecificProgram() {
         where("residentId", "==", residentId)
       );
       const snap = await getDocs(dupQ);
-      setAlreadyRegistered(!snap.empty);
+
+      // if first doc has attendance === false, allow re-register check
       if (snap?.docs[0]?.data().attendance === false) {
         setAlreadyRegistered(false);
+      } else {
+        setAlreadyRegistered(!snap.empty);
       }
+
       const participantData = snap.docs[0]?.data?.() || snap.docs[0]?.data();
       const attendance = participantData?.attendance;
       const chosenIdx = participantData?.dayChosen as number | null | undefined;
 
-      // ---- FIX: local date math for chosen day ----
+      // multi-day: allow re-register if absent and day already passed
       if (program.startDate && program.eventType === "multiple" && chosenIdx != null) {
         const startLocal = ymdToDateLocal(program.startDate);
         const chosenDate = new Date(startLocal);
@@ -435,8 +439,26 @@ export default function SpecificProgram() {
         } else {
           setAlreadyRegistered(true);
         }
-      } else if (program.eventType !== "multiple") {
-        setAlreadyRegistered(true);
+      } else if (program.eventType === "single") {
+        // ✅ FIX: only mark as registered if there is actually a doc
+        setAlreadyRegistered(!snap.empty);
+
+        // OPTIONAL: If you want to allow re-registering on single-day after event with attendance === false:
+        /*
+        if (!snap.empty) {
+          const startYMD = program.startDate || program.endDate || "";
+          if (startYMD) {
+            const day = ymdToDateLocal(startYMD);
+            const today = new Date();
+            day.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            const attended = participantData?.attendance === true;
+            if (!attended && day < today) {
+              setAlreadyRegistered(false);
+            }
+          }
+        }
+        */
       }
     };
     checkDup();
@@ -487,7 +509,7 @@ export default function SpecificProgram() {
     if (!program) return false;
     if (role === "Participant") {
       if (program.eventType === "single") {
-        if (program.noParticipantLimit) return false;
+        if (program.noParticipantLimit) return false; // no cap for single-day with no limit
         if (maxParticipants <= 0) return true;
         return approvedParticipantCount >= maxParticipants;
       }
@@ -500,6 +522,7 @@ export default function SpecificProgram() {
           approvedParticipantCountList && approvedParticipantCountList[index]
             ? approvedParticipantCountList[index]
             : 0;
+
         if (program.noParticipantLimitList && program.noParticipantLimitList[index]) return false;
         if (dayLimit <= 0) return true;
         return approvedCountForDay >= dayLimit;
@@ -518,7 +541,6 @@ export default function SpecificProgram() {
   // audience gating
   const ep = program?.eligibleParticipants || "both";
   const { user: authUser } = useAuth();
-  const isGuest = !authUser?.uid;
   const isResident = isVerifiedResident;
   const isNonResident = !isResident;
 
@@ -770,7 +792,7 @@ export default function SpecificProgram() {
   // audience block message
   const audienceBlockedMsg =
     !userAllowedAtAll
-      ? (ep === "resident"
+      ? (program.eligibleParticipants === "resident"
           ? "Only Verified Resident Users can participate."
           : "This program is for non-residents only.")
       : "";
@@ -861,7 +883,7 @@ export default function SpecificProgram() {
                       <>{approvedParticipantCount}</>
                     ) : (
                       <>
-                        {approvedParticipantCount}/{Math.max(0, maxParticipants)}
+                        {approvedParticipantCount}/{Math.max(0, Number(program.participants ?? 0))}
                       </>
                     )}
                   </p>
@@ -873,12 +895,11 @@ export default function SpecificProgram() {
               {program.noParticipantLimitList && program.participantDays && program.participantDays.length > 0 && (
                 <>
                   {program.participantDays.map((day, index) => {
-                    // ---- FIX 1: Local date math & correct index (no +1) ----
+                    // local date math & correct index (Day 1 = +0)
                     const sYMD = program.startDate || "";
                     const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
                     const date = new Date(startLocal);
-                    date.setDate(startLocal.getDate() + index); // Day 1 = +0
-
+                    date.setDate(startLocal.getDate() + index);
                     const ymd = formatYMD(date);
 
                     return (
@@ -1093,7 +1114,7 @@ export default function SpecificProgram() {
                                       Select a day
                                     </option>
                                     {program.participantDays?.map((day: number, idx: number) => {
-                                      // ---- FIX 2: Local date math for each option ----
+                                      // Local date math for each option
                                       const sYMD = program.startDate || "";
                                       const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
                                       const optionDate = new Date(startLocal);
