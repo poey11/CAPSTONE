@@ -773,7 +773,7 @@ const canEditAttendanceByTime = (p: Participant) => {
                                 canEditNow
                                   ? "Mark attendance"
                                   : !timeGate
-                                  ? "Attendance locked — day has ended"
+                                  ? "Attendance locked — day has ended/not yet started"
                                   : `Attendance disabled — program is ${programStatus || "not ongoing"}`
                               }
                             />
