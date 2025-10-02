@@ -262,7 +262,7 @@ export default function ViewKasambahay() {
 
         <div className="resident-photo-section">
          
-            <span className="resident-details-label">Resident Details</span>
+            <span className="resident-details-label">Kasambahay Details</span>
 
             <div className="resident-profile-container">
                 

@@ -61,7 +61,7 @@ export default function AnnouncementModule() {
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
 
   const popupRef = useRef<HTMLDivElement | null>(null);
-  const [activeSection, setActiveSection] = useState("details");
+  const [activeSection, setActiveSection] = useState("content");
 
   const handleAnnouncementFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -71,6 +71,11 @@ export default function AnnouncementModule() {
     }
   };
 
+  useEffect(() => {
+    if (selectedAnnouncement) {
+      setActiveSection("content");
+    }
+  }, [selectedAnnouncement]);
 
 
   useEffect(() => {
@@ -100,7 +105,7 @@ export default function AnnouncementModule() {
 
     if (!newAnnouncement.announcementHeadline || newAnnouncement.announcementHeadline.trim() === "") {
       newInvalidFields.push("announcementHeadline");
-      setPopupErrorMessage("Program Headline is required.");
+      setPopupErrorMessage("Announcement Headline is required.");
     }
 
     if (!newAnnouncement.category || newAnnouncement.category.trim() === "") {
@@ -404,38 +409,26 @@ useEffect(() => {
                   <td>
                     <div className="actions-announcements">
 
-                    {/*}
+                    <>
+                      
                       <button
-                        className="action-programs-button"
-                        onClick={openPopup}
+                        type="button"
+                        className="action-announcements-button"
+                        onClick={() => {
+                          setSelectedAnnouncement(announcement);
+                          setShowViewPopup(true);
+                        }}
                       >
                         <img
                           src="/Images/view.png"
                           alt="View"
-                          className="action-programs-view"
-                          
+                          className="action-announcements-view"
                         />
                       </button>
 
-                      */}
-                      
-                      {user?.position === "Admin Staff" && (
+                      {/* Edit & Delete buttons - only for Admin Staff */}
+                      {user?.position === "Admin Staff" || user?.position === "Punong Barangay"|| user?.position === "Secretary"|| user?.position === "Assistant Secretary" && (
                         <>
-                          <button
-                            type="button"
-                            className="action-announcements-button"
-                            onClick={() => {
-                              setSelectedAnnouncement(announcement); 
-                              setShowViewPopup(true);               
-                            }}
-                          >
-                            <img
-                              src="/Images/view.png"
-                              alt="View"
-                              className="action-announcements-view"
-                            />
-                          </button>
-
                           <button
                             type="button"
                             className="action-announcements-button"
@@ -456,10 +449,15 @@ useEffect(() => {
                             }}
                             className="action-announcements-button"
                           >
-                            <img src="/Images/delete.png" alt="Delete" className="action-announcements-delete" />
+                            <img
+                              src="/Images/delete.png"
+                              alt="Delete"
+                              className="action-announcements-delete"
+                            />
                           </button>
                         </>
                       )}
+                    </>
 
 
                     </div>
@@ -541,11 +539,11 @@ useEffect(() => {
            <div className="add-announcements-upper-section">
             <div className="add-announcements-content-left-side">
               <div className="fields-section-add-announcements">
-                <p>Program Headline<span className="required">*</span></p>
+                <p>Announcement Headline<span className="required">*</span></p>
                   <input
                   type="text"
                   className={`add-announcements-input-field ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}
-                  placeholder="Program Name (E.g. Feeding Program)"
+                  placeholder="Announcement Headline (E.g. Community Meeting, Barangay Assembly)"
                   value ={newAnnouncement.announcementHeadline|| ""}
                   onChange={(e) => setNewAnnouncement({...newAnnouncement, announcementHeadline: e.target.value})}
                   required
@@ -713,14 +711,14 @@ useEffect(() => {
               </button>
             </div>
             <div className="view-announcement-info-toggle-wrapper">
-              {[ "details" ].map((section) => (
+              {[ "content", "details" ].map((section) => (
               <button
                   key={section}
                   type="button"
                   className={`announcement-info-toggle-btn ${activeSection === section ? "active" : ""}`}
                   onClick={() => setActiveSection(section)}
               >
-      
+                  {section === "content" && "Content"}
                   {section === "details" && "Details"}
               </button>
               ))}
@@ -740,9 +738,45 @@ useEffect(() => {
             </div> 
             <div className="view-announcement-info-main-container">
               <div className="view-announcemnt-info-main-content">
+                {activeSection === "content" && (
+                  <>
+                    <div className="view-announcement-content-content-section">
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Announcement Headline
+                            </div>
+                            <div className={`box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="headline-input-field-announcements"
+                                value={selectedAnnouncement.announcementHeadline || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+
+                      <div className="view-announcements-description-container">
+                        <div className="box-container-outer-description-announcements">
+                            <div className="title-description-announcements">
+                                Full Content / Description
+                            </div>
+                            <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                              <textarea
+                                className="description-input-field-announcements"
+                                value={selectedAnnouncement.content || ""}
+                                readOnly
+                              />
+                            </div>
+                        </div>
+                      </div>
+                    </div> 
+                  </>
+                )}
+
                 {activeSection === "details" && (
                   <>
-                    <div className="view-announcement-content-top-section">
+                    <div className="view-announcement-content-details-section">
                       <div className="view-main-user-content-left-side">
                         <div className="view-user-fields-section">
                             <p>Publish Date</p>
@@ -796,37 +830,6 @@ useEffect(() => {
                         </div>
                       </div>
                     </div>
-                    <div className="view-announcement-content-bottom-section">
-                      <div className="view-announcements-description-container">
-                        <div className="box-container-outer-description-announcements">
-                            <div className="title-description-announcements">
-                                Program Headline
-                            </div>
-                            <div className={`box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
-                              <textarea
-                                className="headline-input-field-announcements"
-                                value={selectedAnnouncement.announcementHeadline || ""}
-                                readOnly
-                              />
-                            </div>
-                        </div>
-                      </div>
-
-                      <div className="view-announcements-description-container">
-                        <div className="box-container-outer-description-announcements">
-                            <div className="title-description-announcements">
-                                Full Content / Description
-                            </div>
-                            <div className={`box-container-description-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
-                              <textarea
-                                className="description-input-field-announcements"
-                                value={selectedAnnouncement.content || ""}
-                                readOnly
-                              />
-                            </div>
-                        </div>
-                      </div>
-                    </div> 
                   </>
                 )}
               </div>

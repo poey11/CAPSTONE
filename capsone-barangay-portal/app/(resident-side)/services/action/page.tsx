@@ -2719,7 +2719,14 @@ const handleFileChange = (
                     <>
                       <div className="form-group-document-req">
                         
-                        <label htmlFor="appointmentDate" className="form-label-document-req">Set Interview Appointment<span className="required">*</span></label>
+                        <label htmlFor="appointmentDate" className="form-label-document-req">
+                          {clearanceInput.purpose === "Residency" && docB === "Barangay Certificate"
+                            ? "Set Picture Taking Appointment"
+                            : docB === "Barangay Indigency"
+                            ? "Set Interview Appointment"
+                            : "Set Appointment"}
+                          <span className="required">*</span>
+                        </label>
                         <DatePicker
                           selected={selectedDate}
                           name="appointmentDate"
@@ -3966,7 +3973,7 @@ const handleFileChange = (
                       
                       &&(
                         <>
-                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairvirew</label>
+                          <label className="form-label-required-documents"> Valid ID with an  address in Barangay Fairview</label>
                           <label className="form-sub-label-required-documents"> (for residents with no Barangay ID)</label>
                         </>
                       )}

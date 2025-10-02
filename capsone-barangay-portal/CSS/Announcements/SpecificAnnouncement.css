@@ -262,45 +262,6 @@
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* Recent Posts */
-.recent-posts-announcement {
-  margin-top: 2rem;
-}
-
-.recent-posts-announcement h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: #214666;
-}
-
-.recent-post-card {
-  display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1rem;
-  align-items: center;
-}
-
-.recent-post-card img {
-  width: 100px;
-  height: 55px;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.recent-post-content{
-  width: 100%;
-}
-
-.recent-post-card p {
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin: 0;
-}
-
-.recent-post-card span {
-  font-size: 0.75rem;
-  color: gray;
-}
 
 /* Tablets (portrait & small landscape) */
 @media (max-width: 1024px) and (min-width: 769px) {

@@ -659,7 +659,7 @@ export default function KasambahayListModule() {
 
             <div className="view-user-header-body-bottom-section">
               <div className="mainresident-photo-section">
-                <span className="user-details-label">Resident Details</span>
+                <span className="user-details-label">Kasambahay Details</span>
                 <div className="user-profile-container">
                   <img
                     src={selectedUser.identificationFileURL || "/Images/default-identificationpic.jpg"}

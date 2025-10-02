@@ -912,7 +912,7 @@ useEffect(() => {
                                 <div className="view-user-info-main-content">
                                 {activeSection === "full" && (
                                     <>
-                                        <div className="view-main-user-content-left-side">
+                                        <div className="view-userrole-content-left-side">
                                             <div className="view-user-fields-section">
                                                 <p>User ID</p>
                                                 <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.userid} readOnly/>
@@ -930,7 +930,7 @@ useEffect(() => {
                                                 <input type="date" className="view-user-input-field" name="birthDate" value={viewUser.birthDate} readOnly/>
                                             </div>
                                         </div>
-                                        <div className="view-main-user-content-right-side">
+                                        <div className="view-userrole-content-right-side">
                                             <div className="view-user-fields-section">
                                                 <p>Position</p>
                                                 <input type="text" className="view-user-input-field" name="position" value={viewUser.position} readOnly/>
@@ -967,7 +967,7 @@ useEffect(() => {
                                 )}
                                 {activeSection === "history" && (
                                     <>
-                                        <div className="view-main-user-content-left-side">
+                                        <div className="view-userrole-content-left-side">
                                             <div className="view-user-fields-section">
                                                 <p>Created By</p>
                                                 <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.createdBy} readOnly/>
@@ -977,7 +977,7 @@ useEffect(() => {
                                                 <input type="text" className="view-user-input-field" name="residentNumber" value={viewUser.createdAt} readOnly/>
                                             </div>
                                         </div>
-                                        <div className="view-main-user-content-right-side">
+                                        <div className="view-userrole-content-right-side">
                                             <div className="view-user-fields-section">
                                                 <p>Updated By</p>
                                                 <input
