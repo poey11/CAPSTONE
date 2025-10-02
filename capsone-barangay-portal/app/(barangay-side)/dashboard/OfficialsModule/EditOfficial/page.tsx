@@ -78,8 +78,6 @@ export default function EditOfficial() {
     const handleUpload = async (e:any) => {
       e.preventDefault();
       if (!officialId) return;
-      const docRef = doc(db, "DisplayedOfficials", officialId as string);
-      const docRefBarangayUser = doc(db, "BarangayUsers", isOfficialIdSet as string);
       let termFormatted = "";
       if(updateTerm){
         const startYear = new Date(updateTerm).getFullYear();
@@ -106,9 +104,13 @@ export default function EditOfficial() {
           handleIdentificationFileDelete(); // clear state after successful upload
         }
         
-        await updateDoc(docRef, updateDate);
         if(isOfficialIdSet){
+          const docRefBarangayUser = doc(db, "BarangayUsers", isOfficialIdSet as string);
           await updateDoc(docRefBarangayUser, updateDate);
+        }else{
+          const docRef = doc(db, "DisplayedOfficials", officialId as string);
+  
+          await updateDoc(docRef, updateDate);
         }
         router.push("/dashboard/OfficialsModule");
       } catch (error) {
@@ -116,6 +118,8 @@ export default function EditOfficial() {
         alert("Failed to upload file.");
       }
     };
+    
+    console.log("isOfficialIdSet",isOfficialIdSet);
 
     const handleIdentificationFileDelete = () => {
       setIdentificationFile(null);
