@@ -314,7 +314,7 @@ export default function Page() {
                               setTimeout(() => setShowPopup(false), 3000);
                               setTimeout(() => {
                                 router.push(
-                                  `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+                                  `/dashboard/IncidentModule/Department?id=Lupon`
                                 );
                               }, 2000);
                           

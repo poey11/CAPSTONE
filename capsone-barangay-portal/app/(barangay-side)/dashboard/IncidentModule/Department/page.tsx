@@ -12,7 +12,7 @@ import ExcelJS from "exceljs";
 import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import { saveAs } from "file-saver";
 
-const statusOptions = ["Pending", "CFA", "Settled", "Archived", "Refer to Government Agency"];
+const statusOptions = ["Pending", "CFA", "Settled", "Dismissed", "Refer to Government Agency"];
 
 export default function Department() {
   const user = useSession().data?.user;

@@ -313,6 +313,9 @@ const addNewOfficer = async () => {
     }
 
     const newOfficialData = {
+      ...(officialToAdd?.id && {
+        id: officialToAdd?.id || ""
+      }),
       name: officialToAdd?.name || "N/A",
       contact: officialToAdd?.contact || "N/A",
       term: termFormatted,
@@ -872,7 +875,7 @@ const deleteOfficer = async () => {
                               placeholder="Enter Email Address"
                               name="email"
                               required
-                              value={selectedNewOfficial?.email || manualNewOfficial?.email || ""}
+                              value={selectedNewOfficial?.email || manualNewOfficial?.email || "example@domain.com"}
                               readOnly={!!selectedNewOfficial}
                               onChange={(e) => {
                                 if (selectedNewOfficial) {

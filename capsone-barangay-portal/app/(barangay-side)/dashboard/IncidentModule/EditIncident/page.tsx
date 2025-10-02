@@ -278,20 +278,6 @@ export default function EditLuponIncident() {
 
     
 
-    const handleSubmit = (event: React.FormEvent) => {
-      event.preventDefault();
-      const form = event.target as HTMLFormElement;
-      console.log(toUpdate);  //
-     
-      if (form.checkValidity()) {
-
-    
-        setShowSubmitPopup(true); // ✅ Show confirmation only
-      } else {
-        form.reportValidity();
-      }
-    };
-    
     
 
   const confirmSubmit = async () => {
@@ -557,15 +543,111 @@ useEffect(() => {
     }
 
   }
-    console.log(
-  "refailureHearingDetails Length:",
-  Object.keys(reportData?.refailureHearingDetails || {}).length
-);
 
-console.log(
-  "sentLetterOfFailureToAppearHearing Length:",
-  Object.keys(reportData?.sentLetterOfFailureToAppearHearing || {}).length
-); 
+const [hasRespondentAbsentInHearingIndex, setHasRespondentAbsentInHearingIndex] = useState(0);
+  const [hasRespondentAbsentInHearingLength, setHasRespondentAbsentInHearingLength] = useState(0);
+
+  useEffect(() => {
+     if (!reportData) return;
+ 
+     // Get all keys like respondentAbsentInHearing0, respondentAbsentInHearing1, ...
+     const keys = Object.keys(reportData).filter((key) =>
+         key.startsWith("respondentAbsentInHearing")
+     );
+ 
+     // Count how many there are
+     setHasRespondentAbsentInHearingLength(keys.length);
+ 
+     if (keys.length > 0) {
+         // Extract numeric suffix (e.g., 0,1,2)
+         const indices = keys.map((key) =>
+         Number(key.replace("respondentAbsentInHearing", ""))
+         );
+ 
+         // Get the latest (max index)
+         const maxIndex = Math.max(...indices);
+ 
+         setHasRespondentAbsentInHearingIndex(maxIndex);
+     } else {
+         setHasRespondentAbsentInHearingIndex(0);
+     }
+  }, [reportData]);
+  useEffect(() => {
+    if (!reportData) return;
+
+    const parsedDeadline = reportData?.refailureExplainationMeetingDialogue
+      ? new Date(reportData.refailureExplainationMeetingDialogue)
+      : null;
+
+
+    if (!parsedDeadline) return;
+
+    // ✅ Create an interval to check every minute
+    const interval = setInterval(async () => {
+      const now = new Date();
+      if ((now > parsedDeadline) && (!reportData?.reasonForFailureToAppearDialogue)) { 
+        await updateDoc(doc(db, "IncidentReports", docId || ""), {
+          reasonForFailureToAppearDialogue: "Respondent Did not Appear",
+        });
+
+        clearInterval(interval); // stop checking once condition is met
+      }
+    }, 60 * 1000); // every 1 minute
+
+    // ✅ Run an immediate check so it doesn’t wait 1 min for the first evaluation
+    const now = new Date();
+    if (now > parsedDeadline) {
+      updateDoc(doc(db, "IncidentReports", docId || ""), {
+        reasonForFailureToAppearDialogue: "Respondent Did not Appear",
+      });
+      clearInterval(interval);
+    }
+
+    // cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, [reportData, docId]);
+
+
+  useEffect(() => {
+    if (!reportData) return;
+
+    const refailureHearingKey = `refailureExplainationMeetingHearing${hasRespondentAbsentInHearingIndex}`;
+    const parsedDeadline = reportData && reportData[refailureHearingKey]
+      ? new Date(reportData[refailureHearingKey])
+      : null;
+
+
+    if (!parsedDeadline) return;
+
+    // ✅ Create an interval to check every minute
+    const interval = setInterval(async () => {
+      const now = new Date();
+      if ((now > parsedDeadline) && (!reportData?.refailureHearingDetails?.[hasRespondentAbsentInHearingIndex]?.reason ||reportData?.refailureHearingDetails?.[hasRespondentAbsentInHearingIndex]?.reason === "")) {
+        await updateDoc(doc(db, "IncidentReports", docId || ""), {
+          [`refailureHearingDetails.${hasRespondentAbsentInHearingIndex}`]: {
+          //resStatus: toUpdate[`refailureHearingStatus${key}`] || "Absent",
+          reason: "Respondent Did not Appear",
+          }        
+        });
+
+        clearInterval(interval); // stop checking once condition is met
+      }
+    }, 60 * 1000); // every 1 minute
+
+    // ✅ Run an immediate check so it doesn’t wait 1 min for the first evaluation
+    const now = new Date();
+    if (now > parsedDeadline) {
+      updateDoc(doc(db, "IncidentReports", docId || ""), {
+        reasonForFailureToAppearDialogue: "Respondent Did not Appear",
+      });
+      clearInterval(interval);
+    }
+
+    // cleanup interval on unmount
+    return () => clearInterval(interval);
+  }, [reportData, docId]);
+
+
   return (
     <>
       {loading ? (       <p></p> ) : (
