@@ -181,7 +181,7 @@ export default function ProgramDetails() {
   isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" &&progressStatus !== "Completed";
 
   const [noParticipantLimit, setNoParticipantLimit] = useState(false);
-  const [particapantDays, setParticipantDays] = useState<number[]>([]);
+  const [participantDays, setParticipantDays] = useState<number[]>([]);
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   // Load program
   useEffect(() => {
@@ -197,7 +197,7 @@ export default function ProgramDetails() {
         }
         const data: any = snap.data() || {};
         setNoParticipantLimit(data.noParticipantLimit || false);
-        setParticipantDays(data.particapantDays || []);
+        setParticipantDays(data.participantDays || []);
         setNoParticipantLimitList(data.noParticipantLimitList || []);
         setProgramName(data.programName ?? "");
         setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
@@ -280,7 +280,7 @@ export default function ProgramDetails() {
     };
     load();
   }, [programId]);
-  console.log(particapantDays);
+  console.log(participantDays);
 
   const handleBack = () => {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
@@ -381,7 +381,7 @@ export default function ProgramDetails() {
       location: location.trim(),
       eventType,
       noParticipantLimit,
-      particapantDays,
+      participantDays,
       noParticipantLimitList,
       startDate: normalizedStart,
       endDate: normalizedEnd,
@@ -950,7 +950,7 @@ export default function ProgramDetails() {
                       </div>
                       {eventType === "multiple" ? (
                         <>
-                          { particapantDays.map((day, index) => (
+                          { participantDays.map((day, index) => (
                             <div key={index} className="fields-section-edit-programs">
                               <p>
                                 Number of Participants for Day {index + 1}

@@ -61,6 +61,14 @@ const DEFAULT_LABELS: Record<string, string> = {
 
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 
+// Minimal program shape for schedule/day options
+type ProgramLite = {
+  id: string;
+  eventType?: "single" | "multiple";
+  startDate?: string; // "YYYY-MM-DD"
+  participantDays?: number[]; // array length = number of days
+};
+
 // Compute age from YYYY-MM-DD
 function computeAgeFromDOB(dobYMD?: string): number | null {
   if (!dobYMD || !/^\d{4}-\d{2}-\d{2}$/.test(dobYMD)) return null;
@@ -95,7 +103,9 @@ export default function AddWalkInParticipantModal({
     for (const f of textFields || []) init[f.name] = "";
 
     if (resident) {
-      const fullName = `${resident.firstName || ""} ${resident.middleName ? resident.middleName + " " : ""}${resident.lastName || ""}`
+      const fullName = `${resident.firstName || ""} ${
+        resident.middleName ? resident.middleName + " " : ""
+      }${resident.lastName || ""}`
         .replace(/\s+/g, " ")
         .trim();
       for (const f of textFields || []) {
@@ -115,6 +125,79 @@ export default function AddWalkInParticipantModal({
   const [saving, setSaving] = useState(false);
 
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
+
+  // --- Load program to power dayChosen select ---
+  const [program, setProgram] = useState<ProgramLite | null>(null);
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      if (!programId) return;
+      const snap = await getDoc(doc(db, "Programs", programId));
+      if (!snap.exists()) return;
+      const p = { id: snap.id, ...snap.data() } as any;
+      if (isMounted) {
+        setProgram({
+          id: snap.id,
+          eventType: p.eventType,
+          startDate: p.startDate,
+          participantDays: Array.isArray(p.participantDays) ? p.participantDays : [],
+        });
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [programId]);
+
+  // --- Determine which days are already FULL (Approved >= cap) ---
+  const [dayFull, setDayFull] = useState<boolean[]>([]);
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      if (!programId) return;
+
+      const progSnap = await getDoc(doc(db, "Programs", programId));
+      if (!progSnap.exists()) return;
+
+      const pd: number[] = Array.isArray((progSnap.data() as any)?.participantDays)
+        ? (progSnap.data() as any).participantDays
+        : [];
+
+      const checks = pd.map(async (rawCap: any, idx: number) => {
+        const cap = Number(rawCap);
+        if (!Number.isFinite(cap) || cap <= 0) return false; // no/invalid cap => never "full"
+
+        const qDay = query(
+          collection(db, "ProgramsParticipants"),
+          where("programId", "==", programId),
+          where("approvalStatus", "==", "Approved"),
+          where("role", "==", "Participant"),
+          where("dayChosen", "==", idx)
+        );
+        const snapCount = await getCountFromServer(qDay);
+        const count = snapCount.data().count || 0;
+        return count >= cap;
+      });
+
+      const results = await Promise.all(checks);
+      if (isMounted) setDayFull(results);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [programId]);
+
+  // If current selection becomes FULL after the effect above, clear it.
+  useEffect(() => {
+    const v = formData.dayChosen;
+    if (v === undefined || v === "") return;
+    const idx = Number(v);
+    if (Number.isInteger(idx) && dayFull[idx]) {
+      setFormData((prev) => ({ ...prev, dayChosen: "" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayFull]);
 
   // --- Previews for ALL file fields ---
   const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
@@ -233,7 +316,10 @@ export default function AddWalkInParticipantModal({
     const urls: Record<string, string> = {};
     const entries = Object.entries(formFiles).filter(([, f]) => !!f) as [string, File][];
     for (const [field, file] of entries) {
-      const sref = ref(storage, `Programs/${programId}/walkinUploads/${uidTag}/${Date.now()}-${field}-${file.name}`);
+      const sref = ref(
+        storage,
+        `Programs/${programId}/walkinUploads/${uidTag}/${Date.now()}-${field}-${file.name}`
+      );
       await uploadBytes(sref, file);
       urls[field] = await getDownloadURL(sref);
     }
@@ -294,13 +380,16 @@ export default function AddWalkInParticipantModal({
       const contactNumber = formData.contactNumber ?? (resident ? resident.contactNumber || "" : "");
       const emailAddress = formData.emailAddress ?? (resident ? resident.emailAddress || "" : "");
       const location = formData.location ?? (resident ? resident.address || resident.location || "" : "");
-      const fullName =
-        (formData.fullName ||
-          `${firstName || ""} ${lastName || ""}`.trim()) || "";
+      const fullName = (formData.fullName || `${firstName || ""} ${lastName || ""}`.trim()) || "";
 
       // DOB + Age for saving
       const dateOfBirth = formData.dateOfBirth || "";
       const computedAge = computeAgeFromDOB(dateOfBirth);
+
+      // dayChosen: keep 0 as Day 1
+      const dayChosenStr = formData.dayChosen; // "0" | "1" | "2" | undefined
+      const dayChosenNum =
+        dayChosenStr !== undefined && dayChosenStr !== "" ? Number(dayChosenStr) : null;
 
       const uidTag = resident?.id ? `resident-${resident.id}` : "manual";
       let uploadedFiles = await uploadAllFiles(uidTag);
@@ -330,7 +419,10 @@ export default function AddWalkInParticipantModal({
         dateOfBirth: dateOfBirth || "",
         age: computedAge ?? null,
 
-        // keep full map of submitted fields (including DOB)
+        // ✅ include selected day when provided (keeps Day 1 = 0)
+        ...(dayChosenNum !== null ? { dayChosen: dayChosenNum } : {}),
+
+        // keep full map of submitted fields (including DOB and dayChosen string)
         fields: formData,
         files: uploadedFiles,
       });
@@ -346,13 +438,182 @@ export default function AddWalkInParticipantModal({
 
   if (!isOpen) return null;
 
+  // --- AUTO-FILL from Residents ---
+
+  const [autoFillLoading, setAutoFillLoading] = useState(false);
+
+  const getProgramCapacityNumber = (val: any): number | null => {
+    const n = Number(val);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+
+  const autoFillMissingForSelectedDay = async () => {
+    if (!programId) return;
+
+    // dayChosen is required to auto-fill for a specific day
+    const dayChosenStr = formData.dayChosen;
+    if (dayChosenStr === undefined || dayChosenStr === "") {
+      onError?.("Please select a day first.");
+      return;
+    }
+    const dayChosen = Number(dayChosenStr);
+
+    setAutoFillLoading(true);
+    try {
+      // 1) Program + caps
+      const progRef = doc(db, "Programs", programId);
+      const progSnap = await getDoc(progRef);
+      if (!progSnap.exists()) throw new Error("Program not found.");
+
+      const progData: any = progSnap.data() || {};
+      const statusNow = (progData?.progressStatus || "").toString().toLowerCase();
+      if (["rejected", "completed"].includes(statusNow)) {
+        throw new Error(`This program is ${progData?.progressStatus}. You can’t add participants.`);
+      }
+
+      // Per-day capacity (array), keep Day 1 = index 0
+      const dayCaps: any[] = Array.isArray(progData?.participantDays)
+        ? progData.participantDays
+        : [];
+      const rawDayCap = dayCaps?.[dayChosen];
+      const dayCap =
+        Number.isFinite(Number(rawDayCap)) && Number(rawDayCap) > 0
+          ? Number(rawDayCap)
+          : null;
+
+      // Optional global capacity
+      const globalCap =
+        Number.isFinite(Number(progData?.participants)) && Number(progData?.participants) > 0
+          ? Number(progData.participants)
+          : null;
+
+      // 2) Count current approved participants FOR THIS DAY
+      const approvedForDayQ = query(
+        collection(db, "ProgramsParticipants"),
+        where("programId", "==", programId),
+        where("approvalStatus", "==", "Approved"),
+        where("role", "==", "Participant"),
+        where("dayChosen", "==", dayChosen)
+      );
+      const approvedForDaySnap = await getCountFromServer(approvedForDayQ);
+      const currentApprovedForDay = approvedForDaySnap.data().count || 0;
+
+      // 3) Also count total approved (to respect global cap if present)
+      let currentApprovedTotal = 0;
+      if (globalCap !== null) {
+        const approvedTotalSnap = await getCountFromServer(
+          query(
+            collection(db, "ProgramsParticipants"),
+            where("programId", "==", programId),
+            where("approvalStatus", "==", "Approved"),
+            where("role", "==", "Participant")
+          )
+        );
+        currentApprovedTotal = approvedTotalSnap.data().count || 0;
+      }
+
+      // 4) Compute how many to add
+      let toAddFromDay = dayCap === null ? 10 : Math.max(0, dayCap - currentApprovedForDay);
+      if (toAddFromDay <= 0) {
+        onError?.("No remaining day slots to fill.");
+        return;
+      }
+      if (globalCap !== null) {
+        const globalRemaining = Math.max(0, globalCap - currentApprovedTotal);
+        if (globalRemaining <= 0) {
+          onError?.("No remaining global slots to fill.");
+          return;
+        }
+        toAddFromDay = Math.min(toAddFromDay, globalRemaining);
+      }
+
+      // 5) Build a set of residentIds already enlisted (any status/role) to avoid duplicates
+      const enlistedSnap = await getDocs(
+        query(collection(db, "ProgramsParticipants"), where("programId", "==", programId))
+      );
+      const alreadyInProgram = new Set<string>();
+      for (const d of enlistedSnap.docs) {
+        const rId = (d.data() as any).residentId;
+        if (rId) alreadyInProgram.add(rId);
+      }
+
+      // 6) Fetch Residents and pick eligible ones (not yet in this program)
+      const residentsSnap = await getDocs(collection(db, "Residents"));
+      const candidates: Resident[] = [];
+      for (const d of residentsSnap.docs) {
+        if (candidates.length >= toAddFromDay) break;
+        if (alreadyInProgram.has(d.id)) continue;
+        const r: any = { id: d.id, ...d.data() };
+        if (r.firstName || r.lastName) candidates.push(r as Resident);
+      }
+
+      if (candidates.length === 0) {
+        onError?.("No eligible residents found to auto-fill.");
+        return;
+      }
+
+      // 7) Insert participants as Approved for the selected day
+      const chosen = candidates.slice(0, toAddFromDay);
+      let successAdds = 0;
+
+      for (const r of chosen) {
+        const fullName = `${r.firstName || ""} ${
+          r.middleName ? r.middleName + " " : ""
+        }${r.lastName || ""}`
+          .replace(/\s+/g, " ")
+          .trim();
+
+        await addDoc(collection(db, "ProgramsParticipants"), {
+          programId,
+          programName: progData?.programName || programName || "",
+          residentId: r.id,
+          role: "Participant",
+          approvalStatus: "Approved",
+          addedVia: "auto-fill",
+          createdAt: serverTimestamp(),
+
+          fullName,
+          firstName: r.firstName || "",
+          lastName: r.lastName || "",
+          contactNumber: r.contactNumber || "",
+          emailAddress: r.emailAddress || "",
+          location: r.address || r.location || "",
+
+          dateOfBirth: r.dateOfBirth || "",
+          age: computeAgeFromDOB(r.dateOfBirth || "") ?? null,
+
+          dayChosen, // ✅ lock to selected day
+
+          fields: { autoFilled: "true", source: "Residents", dayChosen: String(dayChosen) },
+          files: {},
+        });
+
+        successAdds++;
+      }
+
+      onSaved?.(
+        `Auto-filled ${successAdds} participant${successAdds !== 1 ? "s" : ""} for Day ${
+          dayChosen + 1
+        }.`
+      );
+    } catch (e: any) {
+      onError?.(e?.message || "Failed to auto-fill participants.");
+    } finally {
+      setAutoFillLoading(false);
+    }
+  };
+
   return (
     <>
       <div className="program-popup-overlay">
         <div className="program-popup">
           <div className="walkin-participant-backbutton-container">
             <button onClick={onBack}>
-              <img src="/images/left-arrow.png" alt="Left Arrow" className="participant-back-btn-resident" />
+              <img
+                src="/images/left-arrow.png"
+                alt="Left Arrow"
+                className="participant-back-btn-resident"
+              />
             </button>
           </div>
 
@@ -367,7 +628,9 @@ export default function AddWalkInParticipantModal({
                     <button
                       key={section}
                       type="button"
-                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                      className={`info-toggle-btn ${
+                        activeSection === section ? "active" : ""
+                      }`}
                       onClick={() => setActiveSection(section as "details" | "reqs")}
                     >
                       {section === "details" && "Details"}
@@ -391,7 +654,8 @@ export default function AddWalkInParticipantModal({
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    {labelFor("dateOfBirth")}{" "}
+                                    <span className="required">*</span>
                                   </p>
                                   <input
                                     type="date"
@@ -399,14 +663,22 @@ export default function AddWalkInParticipantModal({
                                     required
                                     max={todayStr}
                                     value={formData.dateOfBirth || ""}
-                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    onChange={(e) =>
+                                      handleFormTextChange("dateOfBirth", e.target.value)
+                                    }
                                   />
                                   <div style={{ marginTop: 8 }}>
                                     <p>{labelFor("age")}</p>
                                     <input
                                       type="text"
                                       className="walkin-input-field"
-                                      value={formData.dateOfBirth ? (derivedAge != null ? String(derivedAge) : "") : ""}
+                                      value={
+                                        formData.dateOfBirth
+                                          ? derivedAge != null
+                                            ? String(derivedAge)
+                                            : ""
+                                          : ""
+                                      }
                                       readOnly
                                       placeholder="Will be computed"
                                     />
@@ -415,11 +687,66 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
+                            // Special handling for dayChosen → dropdown from program schedule
+                            if (name === "dayChosen") {
+                              const days = program?.participantDays ?? [];
+                              const start = program?.startDate
+                                ? new Date(program.startDate)
+                                : null;
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dayChosen")}{" "}
+                                    <span className="required">*</span>
+                                  </p>
+                                  <select
+                                    className="walkin-input-field"
+                                    required
+                                    // keep "0" using nullish coalescing (avoid falsy bug)
+                                    value={formData.dayChosen ?? ""}
+                                    onChange={(e) =>
+                                      handleFormTextChange("dayChosen", e.target.value)
+                                    }
+                                  >
+                                    <option value="" disabled>
+                                      Select a day
+                                    </option>
+                                    {days.map((_, idx) => {
+                                      let label = `Day ${idx + 1}`;
+                                      let disabled = false;
+                                      if (start) {
+                                        const optionDate = new Date(start);
+                                        optionDate.setDate(start.getDate() + idx);
+                                        label += ` (${optionDate.toDateString()})`;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        optionDate.setHours(0, 0, 0, 0);
+                                        if (optionDate < today) disabled = true; // disable past days
+                                      }
+                                      const isFull = !!dayFull[idx];
+                                      if (isFull) {
+                                        label += " — FULL";
+                                        disabled = true; // 🚫 cannot be chosen if cap is met
+                                      }
+                                      return (
+                                        <option key={idx} value={String(idx)} disabled={disabled}>
+                                          {label}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
-                              lower.includes("email") ? "email" :
-                              lower.includes("contact") || lower.includes("phone") ? "tel" :
-                              "text";
+                              lower.includes("email")
+                                ? "email"
+                                : lower.includes("contact") || lower.includes("phone")
+                                ? "tel"
+                                : "text";
 
                             const formattedLabel = name
                               .replace(/([A-Z])/g, " $1")
@@ -434,7 +761,7 @@ export default function AddWalkInParticipantModal({
                                   type={type}
                                   className="walkin-input-field"
                                   required
-                                  value={formData[name] || ""}
+                                  value={formData[name] ?? ""}
                                   onChange={(e) => handleFormTextChange(name, e.target.value)}
                                   placeholder={`Enter ${formattedLabel}`}
                                 />
@@ -454,7 +781,8 @@ export default function AddWalkInParticipantModal({
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    {labelFor("dateOfBirth")}{" "}
+                                    <span className="required">*</span>
                                   </p>
                                   <input
                                     type="date"
@@ -462,14 +790,22 @@ export default function AddWalkInParticipantModal({
                                     required
                                     max={todayStr}
                                     value={formData.dateOfBirth || ""}
-                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    onChange={(e) =>
+                                      handleFormTextChange("dateOfBirth", e.target.value)
+                                    }
                                   />
                                   <div style={{ marginTop: 8 }}>
                                     <p>{labelFor("age")}</p>
                                     <input
                                       type="text"
                                       className="walkin-input-field"
-                                      value={formData.dateOfBirth ? (derivedAge != null ? String(derivedAge) : "") : ""}
+                                      value={
+                                        formData.dateOfBirth
+                                          ? derivedAge != null
+                                            ? String(derivedAge)
+                                            : ""
+                                          : ""
+                                      }
                                       readOnly
                                       placeholder="Will be computed"
                                     />
@@ -478,11 +814,65 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
+                            // Duplicate dayChosen handling for right column
+                            if (name === "dayChosen") {
+                              const days = program?.participantDays ?? [];
+                              const start = program?.startDate
+                                ? new Date(program.startDate)
+                                : null;
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dayChosen")}{" "}
+                                    <span className="required">*</span>
+                                  </p>
+                                  <select
+                                    className="walkin-input-field"
+                                    required
+                                    value={formData.dayChosen ?? ""}
+                                    onChange={(e) =>
+                                      handleFormTextChange("dayChosen", e.target.value)
+                                    }
+                                  >
+                                    <option value="" disabled>
+                                      Select a day
+                                    </option>
+                                    {days.map((_, idx) => {
+                                      let label = `Day ${idx + 1}`;
+                                      let disabled = false;
+                                      if (start) {
+                                        const optionDate = new Date(start);
+                                        optionDate.setDate(start.getDate() + idx);
+                                        label += ` (${optionDate.toDateString()})`;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        optionDate.setHours(0, 0, 0, 0);
+                                        if (optionDate < today) disabled = true;
+                                      }
+                                      const isFull = !!dayFull[idx];
+                                      if (isFull) {
+                                        label += " — FULL";
+                                        disabled = true;
+                                      }
+                                      return (
+                                        <option key={idx} value={String(idx)} disabled={disabled}>
+                                          {label}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                </div>
+                              );
+                            }
+
                             const lower = name.toLowerCase();
                             const type =
-                              lower.includes("email") ? "email" :
-                              lower.includes("contact") || lower.includes("phone") ? "tel" :
-                              "text";
+                              lower.includes("email")
+                                ? "email"
+                                : lower.includes("contact") || lower.includes("phone")
+                                ? "tel"
+                                : "text";
                             const formattedLabel = name
                               .replace(/([A-Z])/g, " $1")
                               .replace(/^./, (s) => s.toUpperCase());
@@ -496,7 +886,7 @@ export default function AddWalkInParticipantModal({
                                   type={type}
                                   className="walkin-input-field"
                                   required
-                                  value={formData[name] || ""}
+                                  value={formData[name] ?? ""}
                                   onChange={(e) => handleFormTextChange(name, e.target.value)}
                                   placeholder={`Enter ${formattedLabel}`}
                                 />
@@ -532,9 +922,13 @@ export default function AddWalkInParticipantModal({
                             key={`ff-${name}`}
                             className="box-container-outer-photosprogram"
                             style={{
-                              flex: fileFieldsToRender.length === 1 ? "0 0 40%" : "0 0 calc(50% - 20px)",
+                              flex:
+                                fileFieldsToRender.length === 1
+                                  ? "0 0 40%"
+                                  : "0 0 calc(50% - 20px)",
                               display: "flex",
-                              justifyContent: fileFieldsToRender.length === 1 ? "center" : "flex-start",
+                              justifyContent:
+                                fileFieldsToRender.length === 1 ? "center" : "flex-start",
                             }}
                           >
                             <div className="title-walkin-requirements">{formattedLabel}</div>
@@ -550,12 +944,16 @@ export default function AddWalkInParticipantModal({
                                 </label>
 
                                 <input
-                                  ref={(el) => { fileInputRefs.current[name] = el; }}
+                                  ref={(el) => {
+                                    fileInputRefs.current[name] = el;
+                                  }}
                                   id={`file-${name}`}
                                   type="file"
                                   className="file-upload-input"
                                   accept="image/*,application/pdf,.pdf"
-                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
+                                  onChange={(e) =>
+                                    handleFormFileChange(name, e.currentTarget)
+                                  }
                                   style={{ display: "none" }}
                                 />
 
@@ -584,7 +982,13 @@ export default function AddWalkInParticipantModal({
                                               <img
                                                 src={preview.url}
                                                 alt={`${formattedLabel} preview`}
-                                                style={{ width: 50, height: 50, marginRight: 8, objectFit: "cover", borderRadius: 4 }}
+                                                style={{
+                                                  width: 50,
+                                                  height: 50,
+                                                  marginRight: 8,
+                                                  objectFit: "cover",
+                                                  borderRadius: 4,
+                                                }}
                                               />
                                             </a>
                                             <a
@@ -602,8 +1006,10 @@ export default function AddWalkInParticipantModal({
 
                                       <span style={{ marginLeft: 8 }}>
                                         {hasManual
-                                          ? (formFiles[name]?.name || "File selected")
-                                          : (isValidId ? "Auto-attached from resident" : "Preview")}
+                                          ? formFiles[name]?.name || "File selected"
+                                          : isValidId
+                                          ? "Auto-attached from resident"
+                                          : "Preview"}
                                       </span>
                                     </div>
                                   </div>
@@ -628,11 +1034,35 @@ export default function AddWalkInParticipantModal({
 
           <div className="action-btn-section-verify-section-participant">
             <div className="action-btn-section-verify">
-              <button className="participant-action-reject" onClick={onClose} disabled={saving}>
+              <button
+                className="participant-action-reject"
+                onClick={onClose}
+                disabled={saving || autoFillLoading}
+              >
                 Cancel
               </button>
-              <button className="participant-action-accept" onClick={submit} disabled={saving}>
+
+              <button
+                className="participant-action-accept"
+                onClick={submit}
+                disabled={saving || autoFillLoading}
+              >
                 {saving ? "Saving..." : "Save"}
+              </button>
+
+              {/* New: Auto-fill button */}
+              <button
+                className="participant-action-accept"
+                style={{ marginLeft: 8 }}
+                onClick={autoFillMissingForSelectedDay}
+                disabled={autoFillLoading || saving || !(formData.dayChosen ?? "")}
+                title={
+                  !formData.dayChosen
+                    ? "Select a day first"
+                    : "Auto-fill remaining slots for selected day"
+                }
+              >
+                {autoFillLoading ? "Auto-filling..." : "Auto-fill Remaining for Day"}
               </button>
             </div>
           </div>
