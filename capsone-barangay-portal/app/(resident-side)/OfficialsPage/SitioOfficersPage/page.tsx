@@ -76,9 +76,12 @@ export default function SitioOfficersPage() {
                 <p className="official-phonenumber-officials">
                   Email: {official.email || "N/A"}
                 </p>
-                <p className="official-phonenumber-officials">
+                <a href={official.facebook} 
+                 target="_blank" 
+                  rel="noopener noreferrer"
+                className="official-phonenumber-officials">
                   Facebook: {official.facebook || "N/A"}
-                </p>   
+                </a>
               </div>
             </div>
           ))}

@@ -8,20 +8,7 @@ import { ref, uploadBytes, getDownloadURL,deleteObject } from "firebase/storage"
 import { db,storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 
-interface Official {
-  id?: string;
-  name?: string;
-  position?: string;
-  term?: string;
-  contact?: string;
-  image?: string;
-  email?: string;
-  facebook?: string;
-  createdBy?: string;
-  createdAt?: string;
-  updatedBy?: string;
-  department?: string;
-}
+
 
 export default function EditOfficial() {
     const { data: session } = useSession();
@@ -30,14 +17,15 @@ export default function EditOfficial() {
     const officialId = searchParams.get("id");
     const router = useRouter();
 
-    const [selectedOfficial, setSelectedOfficial] = useState<Official>();
-    const [newOfficialData, setNewOfficialData] = useState<Official>();
+    const [selectedOfficial, setSelectedOfficial] = useState<any>();
+    const [newOfficialData, setNewOfficialData] = useState<any>();
     const [activeSection, setActiveSection] = useState("details");
     const [showDiscardPopup, setShowDiscardPopup] = useState(false);
     const [identificationFile, setIdentificationFile] = useState<File | null>(null);
     const [identificationPreview, setIdentificationPreview] = useState<string | null>(null);
     const [dataSet, setDataSet] = useState<boolean>(false);
     const [updateTerm, setUpdateTerm] = useState<string>("");
+    const [isOfficialIdSet, setIsOfficialIdSet] = useState<string>("");
     useEffect(()=>{
         if (!officialId) return;
         const docRef = doc(db, "DisplayedOfficials", officialId as string);
@@ -45,6 +33,9 @@ export default function EditOfficial() {
             if (doc.exists()) {
                 console.log("Document data:", doc.data());
                 setSelectedOfficial(doc.data());
+                if(doc.data().id){
+                  setIsOfficialIdSet(doc.data().id);
+                }
                 setDataSet(true);
             }
         });
@@ -63,6 +54,22 @@ export default function EditOfficial() {
     useEffect(() => {
       setNewOfficialData(selectedOfficial);
     },[dataSet]);
+
+    useEffect(() => {
+      if(!isOfficialIdSet) return;
+      const docRef = doc(db, "BarangayUsers", isOfficialIdSet as string);
+        const unsubscribe = onSnapshot(docRef, (doc) => {
+            if (doc.exists()) {
+                console.log("Document data:", doc.data());
+                setSelectedOfficial(doc.data());
+                setDataSet(true);
+            }
+        });
+
+        return () => unsubscribe();
+
+
+    },[isOfficialIdSet])
     
 
     console.log("selectef official",selectedOfficial);
@@ -72,6 +79,7 @@ export default function EditOfficial() {
       e.preventDefault();
       if (!officialId) return;
       const docRef = doc(db, "DisplayedOfficials", officialId as string);
+      const docRefBarangayUser = doc(db, "BarangayUsers", isOfficialIdSet as string);
       let termFormatted = "";
       if(updateTerm){
         const startYear = new Date(updateTerm).getFullYear();
@@ -99,7 +107,9 @@ export default function EditOfficial() {
         }
         
         await updateDoc(docRef, updateDate);
-    
+        if(isOfficialIdSet){
+          await updateDoc(docRefBarangayUser, updateDate);
+        }
         router.push("/dashboard/OfficialsModule");
       } catch (error) {
         console.log("Error uploading file:", error);
@@ -172,19 +182,26 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Full Name<span className="required">*</span></p>
                                                 <input type="text" 
-                                                value={selectedOfficial?.name || "N/A"}
+                                                value={
+                                                    selectedOfficial?.name ||
+                                                    [selectedOfficial?.firstName, selectedOfficial?.middleName, selectedOfficial?.lastName]
+                                                      .filter(Boolean) // remove undefined/null/empty
+                                                      .join(" ") || 
+                                                    "N/A"
+                                                  }
+
                                                 className="edit-official-input-field" 
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, name: e.target.value})}
-                                                disabled={selectedOfficial?.id ? true: false}
+                                                disabled={isOfficialIdSet ? true: false}
                                                 />
                                             </div>
                                             <div className="fields-section-official">
                                                 <p>Facebook<span className="required">*</span></p>
                                                 <input type="text" 
-                                                value={selectedOfficial?.facebook || "N/A"}
+                                                value={selectedOfficial?.facebook||selectedOfficial?.facebookLink || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, facebook: e.target.value})}
                                                 className="edit-official-input-field"
-                                                disabled={selectedOfficial?.id ? true: false}
+                                                disabled={isOfficialIdSet ? true: false}
 
                                                 />
                                                 
@@ -199,9 +216,9 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Contact Number<span className="required">*</span></p>
                                                 <input type="text" 
-                                                value={selectedOfficial?.contact || "N/A"}
+                                                value={selectedOfficial?.contact ||selectedOfficial?.phone || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, contact: e.target.value})}
-                                                disabled={selectedOfficial?.id ? true: false}
+                                                disabled={isOfficialIdSet ? true: false}
 
                                                 className="edit-official-input-field" />
                                                 
@@ -257,7 +274,7 @@ export default function EditOfficial() {
                                             <div className="fields-section-official">
                                                 <p>Email Address<span className="required">*</span></p>
                                                 <input type="text" 
-                                                disabled={selectedOfficial?.id ? true: false}
+                                                disabled={isOfficialIdSet ? true: false}
                                                 value={selectedOfficial?.email || "N/A"}
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, email: e.target.value})}
                                                 className="edit-official-input-field" />

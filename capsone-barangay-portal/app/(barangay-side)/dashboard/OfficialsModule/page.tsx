@@ -8,30 +8,16 @@ import { collection, onSnapshot, addDoc, deleteDoc, doc} from "firebase/firestor
 import { db, storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes, deleteObject } from "@firebase/storage";
-import { off } from "process";
 
-interface Official {
-  id: string;
-  name: string;
-  position: string;
-  term: string;
-  contact: string;
-  image?: string;
-  email?: string;
-  facebook?: string;
-  createdBy?: string;
-  createdAt?: string;
-  updatedBy?: string;
-  department?: string;
-}
+
 
 
 export default function OfficialsModule() {
-  const [officialsData, setOfficialsData] = useState<Official[]>([]);
-  const [filteredOfficials, setFilteredOfficials] = useState<Official[]>([]);
-  const [displayedOfficials, setDisplayedOfficials] = useState<Official[]>([]);
-  const [selectedNewOfficial, setSelectedNewOfficial] = useState<Official|null>();
-  const [manualNewOfficial, setManualNewOfficial] = useState<Official|null>();
+  const [officialsData, setOfficialsData] = useState<any[]>([]);
+  const [filteredOfficials, setFilteredOfficials] = useState<any[]>([]);
+  const [displayedOfficials, setDisplayedOfficials] = useState<any[]>([]);
+  const [selectedNewOfficial, setSelectedNewOfficial] = useState<any|null>();
+  const [manualNewOfficial, setManualNewOfficial] = useState<any|null>();
   const [takenPositions, setTakenPositions] = useState<Set<string>>(new Set());
   const { data: session } = useSession();
   const user = session?.user?.position;
@@ -98,7 +84,7 @@ export default function OfficialsModule() {
       const docRef = collection(db, "BarangayUsers");
       const unsubscribe = onSnapshot(docRef, (snapshot) => {
       
-        const data: Official[] = snapshot.docs.map((doc) => ({
+        const data: any[] = snapshot.docs.map((doc) => ({
           
           id: doc.id,
           name: [doc.data().firstName, doc.data().middleName, doc.data().lastName]
@@ -116,7 +102,7 @@ export default function OfficialsModule() {
           createdBy: doc.data().createdBy || "N/A",
           createdAt: doc.data().createdAt,
           updatedBy: doc.data().updatedBy || "N/A",
-          facebook: doc.data().facebook || "N/A",
+          facebook: doc.data().facebookLink || "N/A",
         }));
         setOfficialsData(data);
       });
@@ -155,7 +141,7 @@ export default function OfficialsModule() {
 useEffect(() => {
   const docRef = collection(db, "DisplayedOfficials");
   const unsubscribe = onSnapshot(docRef, (snapshot) => {
-    const data: Official[] = snapshot.docs.map((doc) => {
+    const data: any[] = snapshot.docs.map((doc) => {
       const rawPosition = doc.data().position || "N/A";
       return {
         id: doc.id,
@@ -306,7 +292,7 @@ const addNewOfficer = async () => {
 
     // ✅ Format the term into "YYYY - YYYY+3"
     let termFormatted = "N/A";
-    if (officialToAdd?.term) {
+    if (manualNewOfficial) {
       const startYear = new Date(officialToAdd.term).getFullYear();
       const endYear = startYear + 3;
       termFormatted = `${startYear} - ${endYear}`;
@@ -318,7 +304,7 @@ const addNewOfficer = async () => {
       }),
       name: officialToAdd?.name || "N/A",
       contact: officialToAdd?.contact || "N/A",
-      term: termFormatted,
+      ...(termFormatted !== "N/A" ? { term: termFormatted }:{term: selectedNewOfficial ? officialToAdd?.term : "N/A"}),
       email: officialToAdd?.email || "N/A",
       facebook: officialToAdd?.facebook || "N/A",
       position: position,
@@ -410,7 +396,7 @@ const deleteOfficer = async () => {
     const [currentPage, setCurrentPage] = useState(1);
     const UserPerPage = 10; 
 
-    const [selectedOfficial, setSelectedOfficial] = useState<Official | null>(null);
+    const [selectedOfficial, setSelectedOfficial] = useState<any | null>(null);
   // Open popup
     const openPopup = (i:any) => {
       setIsPopupOpen(true);
@@ -771,7 +757,7 @@ const deleteOfficer = async () => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, name: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, name: e.target.value } as Official);
+                                  setManualNewOfficial({ ...manualNewOfficial, name: e.target.value });
                                 }
                               }}
                             />
@@ -792,7 +778,7 @@ const deleteOfficer = async () => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, facebook: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, facebook: e.target.value } as Official);
+                                  setManualNewOfficial({ ...manualNewOfficial, facebook: e.target.value });
                                 }
                               }}
                             />
@@ -814,7 +800,7 @@ const deleteOfficer = async () => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, contact: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, contact: e.target.value } as Official);
+                                  setManualNewOfficial({ ...manualNewOfficial, contact: e.target.value });
                                 }
                               }}
                             />
@@ -849,7 +835,8 @@ const deleteOfficer = async () => {
                           <div className="fields-section">
                             <p>Term Duration<span className="required">*</span></p>
                             <input
-                              type="date"
+                              
+                              type={!!selectedNewOfficial ? "text" : "date"}
                               className={`add-official-input-field ${invalidFields.includes("term") ? "input-error" : ""}`}
                               name="term"
                               required
@@ -860,7 +847,7 @@ const deleteOfficer = async () => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, term: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, term: e.target.value } as Official);
+                                  setManualNewOfficial({ ...manualNewOfficial, term: e.target.value });
                                 }
                               }}
                             />
@@ -881,7 +868,7 @@ const deleteOfficer = async () => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, email: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, email: e.target.value } as Official);
+                                  setManualNewOfficial({ ...manualNewOfficial, email: e.target.value });
                                 }
                               }}
                             />
