@@ -442,23 +442,6 @@ export default function SpecificProgram() {
       } else if (program.eventType === "single") {
         // ✅ FIX: only mark as registered if there is actually a doc
         setAlreadyRegistered(!snap.empty);
-
-        // OPTIONAL: If you want to allow re-registering on single-day after event with attendance === false:
-        /*
-        if (!snap.empty) {
-          const startYMD = program.startDate || program.endDate || "";
-          if (startYMD) {
-            const day = ymdToDateLocal(startYMD);
-            const today = new Date();
-            day.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            const attended = participantData?.attendance === true;
-            if (!attended && day < today) {
-              setAlreadyRegistered(false);
-            }
-          }
-        }
-        */
       }
     };
     checkDup();
@@ -761,6 +744,25 @@ export default function SpecificProgram() {
       setPendingRole(null);
     }
   };
+
+  // 🔒 Derive which days are FULL (multi-day participants)
+  const dayFullList = useMemo<boolean[]>(() => {
+    if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
+    return program.participantDays.map((cap, idx) => {
+      const noLimit = !!(program.noParticipantLimitList && program.noParticipantLimitList[idx]);
+      if (noLimit) return false; // unlimited -> never full
+      const capNum = Number(cap);
+      if (!Number.isFinite(capNum) || capNum <= 0) return true; // invalid/zero cap -> treat as full
+      const approved = approvedParticipantCountList?.[idx] ?? 0;
+      return approved >= capNum;
+    });
+  }, [program?.eventType, program?.participantDays, program?.noParticipantLimitList, approvedParticipantCountList]);
+
+  // If the selected day becomes full (or is invalid), clear it
+  useEffect(() => {
+    if (dayChosen == null) return;
+    if (dayFullList[dayChosen]) setDayChosen(null);
+  }, [dayFullList, dayChosen]);
 
   if (!program) {
     return (
@@ -1125,9 +1127,15 @@ export default function SpecificProgram() {
                                       optionDate.setHours(0, 0, 0, 0);
                                       const isPast = optionDate < today;
 
+                                      // 🔒 Disable when FULL (unless no-limit for that day)
+                                      const isFull = !!dayFullList[idx];
+
+                                      let label = `Day ${idx + 1} (${optionDate.toDateString()})`;
+                                      if (isFull) label += " — FULL";
+
                                       return (
-                                        <option key={idx} value={idx} disabled={isPast}>
-                                          Day {idx + 1} ({optionDate.toDateString()})
+                                        <option key={idx} value={idx} disabled={isPast || isFull}>
+                                          {label}
                                         </option>
                                       );
                                     })}
