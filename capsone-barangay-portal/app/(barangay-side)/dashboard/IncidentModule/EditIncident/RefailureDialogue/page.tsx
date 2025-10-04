@@ -193,73 +193,76 @@ export default function Page() {
                         <h1> Refailure Meeting (Dialogue) </h1>
                     </div>
                     <div className="action-btn-section">
-  {!(reportData?.reasonForFailureToAppearDialogue?.trim()) && (
-    <button
-      type="button"
-      className={`
-        action-save-refailure 
-        w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
-      `}
-      onClick={() => {
-        if (
-          (toUpdate.refailureDialogueStatus === "Present" &&
-            (toUpdate.reasonForFailureToAppearDialogue === "" ||
-              !toUpdate.reasonForFailureToAppearDialogue))
-        ) {
-          setErrorPopup({
-            show: true,
-            message: "Please fill out the reason for failure to appear.",
-          });
-          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-          return;
-        }
+                      {!(reportData?.reasonForFailureToAppearDialogue?.trim()) && (
+                        <button
+                          type="button"
+                          className={`
+                            action-save-refailure 
+                            w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
+                          `}
+                          // onClick={handleSubmitRefailureDialogue}
+                          onClick={() => {
+                            if (
+                              (toUpdate.refailureDialogueStatus === "Present" &&
+                                (toUpdate.reasonForFailureToAppearDialogue === "" ||
+                                  !toUpdate.reasonForFailureToAppearDialogue))
+                            ) {
+                              setErrorPopup({
+                                show: true,
+                                message: "Please fill out the reason for failure to appear.",
+                              });
+                              setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                              return;
+                            }
 
-        if (!docId) return;
+                            if (!docId) return;
 
-        const docRef = doc(db, "IncidentReports", docId);
-        updateDoc(docRef, {
-          reasonForFailureToAppearDialogue:
-            toUpdate.reasonForFailureToAppearDialogue ||
-            reportData?.reasonForFailureToAppearDialogue ||
-            "",
-        });
+                            const docRef = doc(db, "IncidentReports", docId);
+                            updateDoc(docRef, {
+                              reasonForFailureToAppearDialogue:
+                                toUpdate.reasonForFailureToAppearDialogue ||
+                                reportData?.reasonForFailureToAppearDialogue ||
+                                "",
+                            });
 
-        setPopupMessage("Refailure Dialogue Updated Successfully");
-        setShowPopup(true);
-        setTimeout(() => setShowPopup(false), 3000);
-        setTimeout(() => {
-          router.push(
-            `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
-          );
-        }, 2000);
-      }}
-    >
-      Submit
-    </button>
-  )}
-</div> 
+                            setPopupMessage("Refailure Dialogue Updated Successfully");
+                            setShowPopup(true);
+                            setTimeout(() => setShowPopup(false), 3000);
+                            setTimeout(() => {
+                              router.push(
+                                `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+                              );
+                            }, 2000);
+                          }}
+                        >
+                          Submit
+                        </button>
+                      )}
+                    </div> 
                     
                 </div>
                 <div className="edit-incident-header-body-refailure-dialogue">
-                  <div className="dialogue-header-body-top-section">
-                        <div className="edit-incident-info-toggle-wrapper">
-                            {[ "meeting" ].map((section) => (
-                                <button
-                                key={section}
-                                type="button"
-                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
-                                onClick={() => setActiveSection(section)}
-                                >
-                                {section === "meeting" && "Refailure Meeting"}
-                                </button>
-                            ))}
-                        </div>
+
+                    <div className="dialogue-header-body-top-section">
+                      <div className="edit-incident-info-toggle-wrapper">
+                          {[ "meeting" ].map((section) => (
+                              <button
+                              key={section}
+                              type="button"
+                              className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                              onClick={() => setActiveSection(section)}
+                              >
+                              {section === "meeting" && "Refailure Meeting"}
+                              </button>
+                          ))}
+                      </div>
                     </div>
+
 
                     <div className="dialogue-header-body-bottom-section">
                       <div className="dialogue-info-main-container">
-                        <div className="dialogue-info-container-scrollable">
-                          <div className="edit-incident-info-main-content-dialogue">
+                        <div className="dialoguerefailure-info-container-scrollable">
+                          <div className="edit-incident-info-main-content-dialogue-refailure">
                             {activeSection === "meeting" && (
                               <>
                                 <div className="edit-incident-dialoguerefailure-content">

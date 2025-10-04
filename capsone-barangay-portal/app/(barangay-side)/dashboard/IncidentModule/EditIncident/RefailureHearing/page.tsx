@@ -20,6 +20,16 @@ export default function Page() {
     const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [activeSectionHearing, setActiveSectionHearing] = useState("firsthearing");
+    const [activeSection, setActiveSection] = useState("meeting");
+
+    const hearingIndex =
+    activeSectionHearing === "firsthearing"
+      ? 0
+      : activeSectionHearing === "secondhearing"
+      ? 1
+      : 2;
+
     const [toUpdate, setToUpdate] = useState<any|null>({
           complainant: {
             fname: "",
@@ -173,161 +183,179 @@ export default function Page() {
       
         fetchSummonLetterStatus();
       }, [docId]);
-      
 
+
+      const currentReason =
+      reportData?.refailureHearingDetails?.[hearingIndex]?.reason ||
+      reportData?.refailureHearingDetails?.[`${hearingIndex}`]?.reason;
+
+    const isAlreadySubmitted = typeof currentReason === "string" && currentReason.trim().length > 0;
+
+      
+      console.log("Refailure hearing details:", reportData?.refailureHearingDetails);
       console.log("reportData", reportData);
      return (
-        <main className="main-container-dialogue-hearing">
+        <main className="main-container-refailure-hearing">
           <MenuBar id = {docId||""} department={department ||  ""} />
-          <div className="edit-incident-main-content">
+          
+          <div className="edit-incident-main-content-refailure-hearing">
             <div className="edit-incident-main-section1">
                 <div className="edit-incident-main-section1-left">
                     <button onClick={() => router.back()} >
                     <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                     </button>
-                    <h1> Incident Details </h1>
+                    <h1> Refailure Meeting (Hearing) </h1>
                 </div>
             </div>
                 
-          <div className="edit-incident-header-body">
-           {reportData?.sentLetterOfFailureToAppearHearing && Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > 0 && (
-              <>
-                {Object.entries(reportData?.sentLetterOfFailureToAppearHearing).map(
-                  ([key, value]) => (
-                    <div key={key} className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-md mx-auto">
-                      <div className="text-lg font-semibold text-gray-800 mb-4 flex justify-center">
-                        Refailure Meeting ({Number(key) === 0 ? (<>First</>) : Number(key) === 1 ? (<>Second</>) : Number(key) === 2 && (<>Third</>)} Hearing)
+          <div className="edit-incident-header-body-refailure-hearing">
+            <div className="hearing-header-body-top-section-main-hearing">
+              {["firsthearing", "secondhearing", "thirdhearing"].map((section, index) => {
+                // Determine if this hearing exists yet
+                const hearingExists =
+                  reportData?.sentLetterOfFailureToAppearHearing &&
+                  Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > index;
+
+                const isDisabled = !hearingExists;
+
+                
+
+                return (
+                  <button
+                    key={section}
+                    type="button"
+                    className={`info-toggle-btn-main-hearing 
+                                ${activeSectionHearing === section ? "active" : ""} 
+                                ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                    onClick={() => {
+                      if (!isDisabled) setActiveSectionHearing(section);
+                    }}
+                    disabled={isDisabled}
+                  >
+                    {index === 0 && "First Hearing"}
+                    {index === 1 && "Second Hearing"}
+                    {index === 2 && "Third Hearing"}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="dialogue-header-body-bottom-section">
+              <div className="dialogue-info-main-container">
+                <div className="edit-incident-info-container-scrollable">
+                  <div className="edit-incident-info-main-content-hearing-refailure">
+                    <div className="hearing-edit-header-body-top-section">
+                      <div className="hearing-edit-first-section">
+                        <div className="edit-incident-info-toggle-wrapper">
+                                {[ "meeting" ].map((section) => (
+                                    <button
+                                    key={section}
+                                    type="button"
+                                    className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
+                                    onClick={() => setActiveSection(section)}
+                                    >
+                                    {section === "meeting" && "Refailure Meeting"}
+                                    </button>
+                                ))}
+                            </div>
+                          </div>
+                          <div className="hearing-edit-section-2">
+                            {!isAlreadySubmitted && (
+                              <button
+                                type="button"
+                                className={`
+                                  action-save-edit-hearing
+                                  w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
+                                `}
+                                onClick={() => {
+                                  if (
+                                    toUpdate[`refailureHearingStatus${hearingIndex}`] === "Present" &&
+                                    (!toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] ||
+                                      toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] === "")
+                                  ) {
+                                    setErrorPopup({ show: true, message: "Please fill out the reason for failure to appear." });
+                                    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                                    return;
+                                  }
+
+                                  if (!docId) return;
+                                  const docRef = doc(db, "IncidentReports", docId);
+                                  updateDoc(docRef, {
+                                    [`refailureHearingDetails.${hearingIndex}`]: {
+                                      reason:
+                                        toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] ||
+                                        reportData?.[`reasonForFailureToAppearHearing${hearingIndex}`],
+                                    },
+                                  });
+
+                                  const hearingLabel =
+                                    hearingIndex === 0 ? "First" : hearingIndex === 1 ? "Second" : "Third";
+
+                                  setPopupMessage(`${hearingLabel} Refailure Dialogue Updated Successfully`);
+                                  setShowPopup(true);
+                                  setTimeout(() => setShowPopup(false), 3000);
+                                  setTimeout(() => {
+                                    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
+                                  }, 2000);
+                                }}
+                              >
+                                Submit
+                              </button>
+                            )}
+
+
+                          </div>
                       </div>
-                      {/* <div className="flex items-center space-x-2 mb-4">
-                       <input
-                          type="checkbox"
-                          id={`refailureHearingStatus${key}`}
-                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          checked={
-                            //(toUpdate[`refailureHearingStatus${key}`] ?? reportData?.refailureHearingDetails?.[key]?.status) !== "Absent"
-                            toUpdate[`refailureHearingStatus${key}`] === "Present" ||
-                            (toUpdate[`refailureHearingStatus${key}`] === undefined && reportData?.refailureHearingDetails?.[key]?.resStatus === "Present")
-                          }                                          
-                          onChange={(e) =>
-                            setToUpdate((prev: any) => ({
-                              ...prev,
-                              [`refailureHearingStatus${key}`]: e.target.checked ? "Present" : "Absent",
-                              [`reasonForFailureToAppearHearing${key}`]: e.target.checked
-                                ? "" // 🔹 clear when switching back to Present
-                                : "Respondent Absent", // auto-set when Absent
-                            }))
-                          }
-                          disabled={
-                              !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
-                          }
-                        />
-                        <label
-                          htmlFor={`refailureHearingStatus${key}`}
-                          className="text-gray-700 font-medium"
-                        >
-                          Respondent Present
-                        </label>
-                        
-                        
-                      </div> */}
-                        
-                      {/* Textarea */}
-                      <div className="mb-4">
-                        <label
-                          htmlFor={`reasonForFailureToAppearHearing${key}`}
-                          className="block text-gray-600 font-medium mb-2"
-                        >
-                          Reason for Failure to Appear During Hearing Meeting
-                        </label>
-                        <textarea
-                          placeholder="Enter reason here..."
-                          name={`reasonForFailureToAppearHearing${key}`}
-                          id={`reasonForFailureToAppearHearing${key}`}
-                          value={
-                            // toUpdate[`reasonForFailureToAppearHearing${key}`] ||
-                            // reportData[`reasonForFailureToAppearHearing${key}`] ||""
-                            toUpdate[`reasonForFailureToAppearHearing${key}`] !== undefined
-                              ? toUpdate[`reasonForFailureToAppearHearing${key}`]
-                              : reportData?.refailureHearingDetails?.[key]?.reason || ""
-                          }
-                          disabled={
-            
-                              !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
-                          
-                          }
-                          onChange={(e) => {
                             
-                              handleFormChange(e); // only allow typing if Present
-                            
-                          }}
-                          className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
-                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700
-                            ${toUpdate[`refailureHearingStatus${key}`] === "Absent" ? "bg-gray-100 cursor-not-allowed" : ""}
-                            disabled:cursor-not-allowed disabled:bg-gray-100`}
-                        />
-                          
-                      </div>
-                          
-                      {/* Submit button */}
-                      <button
-                        type="button"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 
-                                   rounded-lg shadow-md transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        // onClick={handleSubmitRefailureDialogue}
-                        disabled={
-                          
-                          !!(typeof reportData?.refailureHearingDetails?.[key]?.reason === "string" && reportData?.refailureHearingDetails?.[key]?.reason.trim())
-                          
-                        }
+                    {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => (
                       
-                        onClick={() => {
-                          if (
-                             toUpdate[`refailureHearingStatus${key}`] === "Present" &&
-                            toUpdate[`reasonForFailureToAppearHearing${key}`] === "" ||
-                            !toUpdate[`reasonForFailureToAppearHearing${key}`]
-                          ) {
-                            
-                            setErrorPopup({ show: true, message: "Please fill out the reason for failure to appear." });
-                            setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                            return;
-                          }
-                          if(!docId) return;
-                          const docRef = doc(db, "IncidentReports", docId );
-                          updateDoc(docRef, {
-                            [`refailureHearingDetails.${key}`]: {
-                              //resStatus: toUpdate[`refailureHearingStatus${key}`] || "Absent",
-                              reason: toUpdate[`reasonForFailureToAppearHearing${key}`] 
-                                    || reportData?.[`reasonForFailureToAppearHearing${key}`] 
-                            }
-                          });
-                          const hearingLabel =
-                          Number(key) === 0
-                            ? "First"
-                            : Number(key) === 1
-                            ? "Second"
-                            : Number(key) === 2
-                            ? "Third"
-                            : "";
-                          
-                              setPopupMessage("Refailure Dialogue Updated Successfully");
-                              setShowPopup(true);
-                              setTimeout(() => setShowPopup(false), 3000);
-                              setTimeout(() => {
-                                router.push(
-                                  `/dashboard/IncidentModule/Department?id=Lupon`
-                                );
-                              }, 2000);
-                          
-                        }}
+                      activeSectionHearing === section && (
                         
-                      >
-                        Submit
-                      </button>
-                    </div>
-                  )
-                )}
-              </>
-            )} 
+                        <div key={section} className="edit-incident-dialoguerefailure-content">
+                          
+                          <div className="edit-incident-content-dialogue-refailure">
+                            <div className="view-incident-dialogue-remarks-container-update">
+                              <div className="box-container-outer-remarks-dialogue-update">
+                                
+                                <div className="title-remarks-dialogue-refailure-update">
+                                  Reason for Failure to Appear During{" "}
+                                  {i === 0 ? "First" : i === 1 ? "Second" : "Third"} Hearing Meeting
+                                </div>
+
+                                <div className="box-container-remarks-dialogue-update">
+                                  <span className="required-asterisk-incident-update">*</span>
+                                  <textarea
+                                    placeholder="Enter reason here..."
+                                    name={`reasonForFailureToAppearHearing${i}`}
+                                    id={`reasonForFailureToAppearHearing${i}`}
+                                    value={
+                                      toUpdate[`reasonForFailureToAppearHearing${i}`] !== undefined
+                                        ? toUpdate[`reasonForFailureToAppearHearing${i}`]
+                                        : reportData?.refailureHearingDetails?.[i]?.reason || ""
+                                    }
+                                    disabled={
+                                      !!(
+                                        typeof reportData?.refailureHearingDetails?.[i]?.reason === "string" &&
+                                        reportData?.refailureHearingDetails?.[i]?.reason.trim()
+                                      )
+                                    }
+                                    onChange={handleFormChange}
+                                    className={`
+                                      remarks-input-field-dialogue-update
+                                      disabled:cursor-not-allowed
+                                    `}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
