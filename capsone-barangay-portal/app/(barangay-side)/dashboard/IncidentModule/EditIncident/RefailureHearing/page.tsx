@@ -241,7 +241,7 @@ export default function Page() {
             </div>
 
             <div className="dialogue-header-body-bottom-section">
-              <div className="dialogue-info-main-container">
+              <div className="hearingrefailure-info-main-container">
                 <div className="edit-incident-info-container-scrollable">
                   <div className="edit-incident-info-main-content-hearing-refailure">
                     <div className="hearing-edit-header-body-top-section">
@@ -259,52 +259,50 @@ export default function Page() {
                                 ))}
                             </div>
                           </div>
-                          <div className="hearing-edit-section-2">
+
                             {!isAlreadySubmitted && (
+                              <div className="hearing-edit-section-2">
                               <button
                                 type="button"
                                 className={`
-                                  action-save-edit-hearing
+                                  action-save-edit-hearingrefailure
                                   w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
                                 `}
                                 onClick={() => {
-                                  if (
-                                    toUpdate[`refailureHearingStatus${hearingIndex}`] === "Present" &&
-                                    (!toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] ||
-                                      toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] === "")
-                                  ) {
-                                    setErrorPopup({ show: true, message: "Please fill out the reason for failure to appear." });
-                                    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                                    return;
-                                  }
+  const reason = toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`]?.trim();
 
-                                  if (!docId) return;
-                                  const docRef = doc(db, "IncidentReports", docId);
-                                  updateDoc(docRef, {
-                                    [`refailureHearingDetails.${hearingIndex}`]: {
-                                      reason:
-                                        toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`] ||
-                                        reportData?.[`reasonForFailureToAppearHearing${hearingIndex}`],
-                                    },
-                                  });
+  if (!reason) {
+    setErrorPopup({
+      show: true,
+      message: "Please fill out the reason for failure to appear before submitting.",
+    });
+    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+    return; 
+  }
 
-                                  const hearingLabel =
-                                    hearingIndex === 0 ? "First" : hearingIndex === 1 ? "Second" : "Third";
+  if (!docId) return;
+  const docRef = doc(db, "IncidentReports", docId);
 
-                                  setPopupMessage(`${hearingLabel} Refailure Dialogue Updated Successfully`);
-                                  setShowPopup(true);
-                                  setTimeout(() => setShowPopup(false), 3000);
-                                  setTimeout(() => {
-                                    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
-                                  }, 2000);
-                                }}
+  updateDoc(docRef, {
+    [`refailureHearingDetails.${hearingIndex}`]: { reason },
+  });
+
+  const hearingLabel =
+    hearingIndex === 0 ? "First" : hearingIndex === 1 ? "Second" : "Third";
+
+  setPopupMessage(`${hearingLabel} Refailure Dialogue Updated Successfully`);
+  setShowPopup(true);
+  setTimeout(() => setShowPopup(false), 3000);
+  setTimeout(() => {
+    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
+  }, 2000);
+}}
+
                               >
                                 Submit
                               </button>
+                              </div>
                             )}
-
-
-                          </div>
                       </div>
                             
                     {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => (
