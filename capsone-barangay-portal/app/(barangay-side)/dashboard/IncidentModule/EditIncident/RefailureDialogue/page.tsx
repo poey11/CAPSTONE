@@ -20,6 +20,7 @@ export default function Page() {
     // wala yung success pop up here!!!!
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
+    const [activeSection, setActiveSection] = useState("meeting");
 
     
     console.log(docId)
@@ -179,134 +180,136 @@ export default function Page() {
             });
         };
       return (
-        <main className="main-container-dialogue-hearing">
+        <main className="main-container-refailure-dialogue">
             <MenuBar id = {docId||""} department={department ||  ""} />
 
-            <div className="edit-incident-main-content">
+            <div className="edit-incident-main-content-refailure-dialogue">
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button onClick={() => router.back()} >
                         <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
-                        <h1> Incident Details </h1>
+                        <h1> Refailure Meeting (Dialogue) </h1>
+                    </div>
+                    <div className="action-btn-section">
+  {!(reportData?.reasonForFailureToAppearDialogue?.trim()) && (
+    <button
+      type="button"
+      className={`
+        action-save-refailure 
+        w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
+      `}
+      onClick={() => {
+        if (
+          (toUpdate.refailureDialogueStatus === "Present" &&
+            (toUpdate.reasonForFailureToAppearDialogue === "" ||
+              !toUpdate.reasonForFailureToAppearDialogue))
+        ) {
+          setErrorPopup({
+            show: true,
+            message: "Please fill out the reason for failure to appear.",
+          });
+          setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+          return;
+        }
+
+        if (!docId) return;
+
+        const docRef = doc(db, "IncidentReports", docId);
+        updateDoc(docRef, {
+          reasonForFailureToAppearDialogue:
+            toUpdate.reasonForFailureToAppearDialogue ||
+            reportData?.reasonForFailureToAppearDialogue ||
+            "",
+        });
+
+        setPopupMessage("Refailure Dialogue Updated Successfully");
+        setShowPopup(true);
+        setTimeout(() => setShowPopup(false), 3000);
+        setTimeout(() => {
+          router.push(
+            `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+          );
+        }, 2000);
+      }}
+    >
+      Submit
+    </button>
+  )}
+</div> 
+                    
+                </div>
+                <div className="edit-incident-header-body-refailure-dialogue">
+                  <div className="dialogue-header-body-top-section">
+                        <div className="edit-incident-info-toggle-wrapper">
+                            {[ "meeting" ].map((section) => (
+                                <button
+                                key={section}
+                                type="button"
+                                className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
+                                onClick={() => setActiveSection(section)}
+                                >
+                                {section === "meeting" && "Refailure Meeting"}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="dialogue-header-body-bottom-section">
+                      <div className="dialogue-info-main-container">
+                        <div className="dialogue-info-container-scrollable">
+                          <div className="edit-incident-info-main-content-dialogue">
+                            {activeSection === "meeting" && (
+                              <>
+                                <div className="edit-incident-dialoguerefailure-content">
+                                  <div className="edit-incident-content-dialogue-refailure">
+                                    <div className="view-incident-dialogue-remarks-container-update">
+                                      <div className="box-container-outer-remarks-dialogue-update">
+                                        <div className="title-remarks-dialogue-refailure-update">
+                                          Reason for Failure to Appear During Dialogue Meeting
+                                        </div>
+
+                                        <div className="box-container-remarks-dialogue-update">
+                                          <span className="required-asterisk-incident-update">*</span>    
+                                          <textarea
+                                            placeholder="Enter reason here..."
+                                            name="reasonForFailureToAppearDialogue"
+                                            id="reasonForFailureToAppearDialogue"
+                                            value={
+                                              toUpdate.reasonForFailureToAppearDialogue ||
+                                              reportData?.reasonForFailureToAppearDialogue ||
+                                              ""
+                                            }
+                                            disabled={
+                                              toUpdate.refailureDialogueStatus === "Absent" ||
+                                              !!reportData?.reasonForFailureToAppearDialogue?.trim()
+                                            }
+                                            onChange={(e) => {
+                                              if (toUpdate.refailureDialogueStatus === "Present") {
+                                                handleFormChange(e); // only allow typing if Present
+                                              }
+                                            }}
+                                            className={`
+                                              remarks-input-field-dialogue-update
+                                              ${toUpdate.refailureDialogueStatus === "Absent" ? "cursor-not-allowed" : ""}
+                                              disabled:cursor-not-allowed
+                                            `}
+                                          />
+                                        </div>
+                                      </div>
+
+                                      
+                                    </div>               
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                 </div>
-                <div className="edit-incident-header-body">
-                    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 max-w-md mx-auto">
-                        <div className="text-lg font-semibold text-gray-800 mb-4 flex justify-center">
-                          Refailure Meeting (Dialogue)
-                        </div>
-                        {/* <div className="flex items-center space-x-2 mb-4">
-                           <input
-                              type="checkbox"
-                              id="refailuredialoguepresent"
-                              className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                              //checked={reportData?.refailureDialogueStatus !== "Absent"||toUpdate.refailureDialogueStatus !== "Absent"} // default checked
-                              checked={
-                                toUpdate.refailureDialogueStatus === "Present" ||
-                                (toUpdate.refailureDialogueStatus === undefined && reportData?.refailureDialogueStatus === "Present")
-                              }
-                              onChange={(e) =>
-                                setToUpdate((prev: any) => ({
-                                  ...prev,
-                                  refailureDialogueStatus: e.target.checked ? "Present" : "Absent",
-                                  reasonForFailureToAppearDialogue: e.target.checked
-                                    ? "" // 🔹 clear when switching back to Present
-                                    : "Respondent Absent", // auto-set when Absent
-                                }))
-                              }
-                              disabled={!!reportData?.reasonForFailureToAppearDialogue?.trim()}
-                            />
-                            <label
-                              htmlFor="refailuredialoguepresent"
-                              className="text-gray-700 font-medium"
-                            >
-                              Respondent Present
-                            </label>
-                        </div> */}
-                            
-                          {/* Textarea */}
-                        <div className="mb-4">
-                            <label
-                              htmlFor="reasonForFailureToAppearDialogue"
-                              className="block text-gray-600 font-medium mb-2"
-                            >
-                              Reason for Failure to Appear During Dialogue Meeting
-                            </label>
-                            <textarea
-                              placeholder="Enter reason here..."
-                              name="reasonForFailureToAppearDialogue"
-                              id="reasonForFailureToAppearDialogue"
-                              value={
-                                toUpdate.reasonForFailureToAppearDialogue ||
-                                reportData?.reasonForFailureToAppearDialogue ||
-                                ""
-                              }
-                              disabled={
-                                toUpdate.refailureDialogueStatus === "Absent" ||
-                                !!reportData?.reasonForFailureToAppearDialogue?.trim()
-                              }
-                              onChange={(e) => {
-                                if (toUpdate.refailureDialogueStatus === "Present") {
-                                  handleFormChange(e); // only allow typing if Present
-                                }
-                              }}
-                              className={`w-full min-h-[100px] p-3 border border-gray-300 rounded-lg shadow-sm 
-                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-700
-                                ${toUpdate.refailureDialogueStatus === "Absent" ? "bg-gray-100 cursor-not-allowed" : ""}
-                                disabled:cursor-not-allowed disabled:bg-gray-100`}
-                            />
-
-
-                        </div>
-                            
-                          {/* Submit button */}
-                        <button
-                            type="button"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 
-                                       rounded-lg shadow-md transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                            // onClick={handleSubmitRefailureDialogue}
-                            disabled={
-                              !!(
-                                  reportData?.reasonForFailureToAppearDialogue?.trim()
-                                )
-                            }
-
-                            onClick={() => {
-                              if (
-                                toUpdate.refailureDialogueStatus === "Present" &&
-                                toUpdate.reasonForFailureToAppearDialogue === "" ||
-                                !toUpdate.reasonForFailureToAppearDialogue
-                              ) {
-                                
-                                setErrorPopup({ show: true, message: "Please fill out the reason for failure to appear." });
-                                setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                                return;
-                              }
-                              if(!docId) return;
-                              const docRef = doc(db, "IncidentReports", docId );
-                               updateDoc(docRef, {
-                                //refailureDialogueStatus: toUpdate.refailureDialogueStatus || "Absent",
-                                reasonForFailureToAppearDialogue: toUpdate.reasonForFailureToAppearDialogue || reportData?.reasonForFailureToAppearDialogue || "",
-                              })
-
-                              setPopupMessage("Refailure Dialogue Updated Successfully");
-                              setShowPopup(true);
-                              setTimeout(() => setShowPopup(false), 3000);
-                              setTimeout(() => {
-                                router.push(
-                                  `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
-                                );
-                              }, 2000);
-
-                            }}
-                          >
-                            Submit
-                        </button>
-                    </div>
-                </div>
-                
             </div>
 
            

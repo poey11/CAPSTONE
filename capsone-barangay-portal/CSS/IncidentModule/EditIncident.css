@@ -2742,3 +2742,84 @@ For hearing main (moderately smaller)
 .error-popup-overlay-settled.hide {
   animation: slideOut 0.5s ease-out;
 }
+
+
+/* refailure dialogue */
+
+.main-container-refailure-dialogue {
+  width: 100%;
+  height: 100vh;
+  background-color: #F0F2F8; 
+  margin-left: 1rem; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 180px;
+  padding-bottom: 3%;
+}
+
+.edit-incident-main-content-refailure-dialogue {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  border-radius: 1rem;
+  background-color: #ffffff;
+  overflow: hidden; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeSlideIn 0.5s ease-out;
+  height: 100%;
+}
+
+.edit-incident-header-body-refailure-dialogue {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.edit-incident-dialoguerefailure-content {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.edit-incident-content-dialogue-refailure{
+  width: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-remarks-dialogue-refailure-update {
+  position: absolute;
+  left: 50%; 
+  top: 30px; 
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 5;
+  width: 500px;
+  text-align: center;
+}
+
+.action-save-refailure{
+  border: none;
+  cursor: pointer;
+  padding: 10px 30px;
+  font-size: 13px;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+  background-color: #4caf50; /* Green */
+  color: white;
+}
+
+
+.action-save-refailure:hover {
+  background-color: #3e8f41; /* Green */
+}
