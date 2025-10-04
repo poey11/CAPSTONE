@@ -269,34 +269,34 @@ export default function Page() {
                                   w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
                                 `}
                                 onClick={() => {
-  const reason = toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`]?.trim();
+                                  const reason = toUpdate[`reasonForFailureToAppearHearing${hearingIndex}`]?.trim();
 
-  if (!reason) {
-    setErrorPopup({
-      show: true,
-      message: "Please fill out the reason for failure to appear before submitting.",
-    });
-    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-    return; 
-  }
+                                  if (!reason) {
+                                    setErrorPopup({
+                                      show: true,
+                                      message: "Please fill out the reason for failure to appear before submitting.",
+                                    });
+                                    setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+                                    return; 
+                                  }
 
-  if (!docId) return;
-  const docRef = doc(db, "IncidentReports", docId);
+                                  if (!docId) return;
+                                  const docRef = doc(db, "IncidentReports", docId);
 
-  updateDoc(docRef, {
-    [`refailureHearingDetails.${hearingIndex}`]: { reason },
-  });
+                                  updateDoc(docRef, {
+                                    [`refailureHearingDetails.${hearingIndex}`]: { reason },
+                                  });
 
-  const hearingLabel =
-    hearingIndex === 0 ? "First" : hearingIndex === 1 ? "Second" : "Third";
+                                  const hearingLabel =
+                                    hearingIndex === 0 ? "First" : hearingIndex === 1 ? "Second" : "Third";
 
-  setPopupMessage(`${hearingLabel} Refailure Dialogue Updated Successfully`);
-  setShowPopup(true);
-  setTimeout(() => setShowPopup(false), 3000);
-  setTimeout(() => {
-    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
-  }, 2000);
-}}
+                                  setPopupMessage(`${hearingLabel} Refailure Dialogue Updated Successfully`);
+                                  setShowPopup(true);
+                                  setTimeout(() => setShowPopup(false), 3000);
+                                  setTimeout(() => {
+                                    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
+                                  }, 2000);
+                                }}
 
                               >
                                 Submit
