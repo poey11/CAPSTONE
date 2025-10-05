@@ -314,8 +314,10 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-            // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-          //   router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            
+            if (details.Cstatus === "Absent" || (details.Cstatus === "Absent" && details.Rstatus === "Absent")) {
+              router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
+            }
           }, 3000);
 
 
@@ -357,7 +359,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
           setTimeout(() => {
             setShowPopup(false);
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
           }, 3000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
@@ -387,7 +390,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
                       if(department !== "Lupon"){
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
             }
             else{
               setShowSubmitPopupB(true);
@@ -873,7 +877,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                      setShowPopup(true);
                     setTimeout(() => {
                        setShowPopup(false);
-                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                      //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                      //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
+                      router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
                     }, 2000); 
                   }}
                   className="no-button-add"
