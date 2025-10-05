@@ -884,7 +884,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             }}
             className="no-button-add bg-gray-600"
           >
-            Refer to Government Agency
+            RGA
           </button>
         )}
 
@@ -906,6 +906,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
   </div>
 )}
 
+{/*
 
 {showGovAgencyPopup !== null && (
   <div className="confirmation-popup-overlay-add">
@@ -913,7 +914,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
       <p>Which Government Agency to Refer this to?</p>
 
-      {/* Quick-pick buttons that fill the same text field */}
+   
       <div className="settlement-options-modern-section">
         {[
           "Social Services Development Department (SSDD)",
@@ -938,7 +939,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         ))}
       </div>
 
-      {/* Single input used for any agency (preset or custom) */}
+
       <input
         type="text"
         className="edit-incident-input-field mt-3"
@@ -968,17 +969,16 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               return;
             }
 
-            // Persist the status + chosen agency
+           
             const mainDocRef = doc(db, "IncidentReports", id);
             await updateDoc(mainDocRef, {
               status: "Refer to Government Agency",
               statusPriority: 6,
-              referredAgency: agency, // <-- stored in one field
+              referredAgency: agency, 
             });
 
             setShowGovAgencyPopup(null);
-            // If you want to also leverage your existing confirmSubmitB flow, you can still call it:
-            // (this keeps the same success UX + redirect timing you already have)
+        
             confirmSubmitB();
           }}
         >
@@ -988,6 +988,74 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     </div>
   </div>
 )}
+
+
+*/}
+
+
+{showGovAgencyPopup !== null && (
+  <div className="confirmation-popup-overlay-add-rga">
+    <div className="confirmation-popup-add-rga">
+      <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup-rga" />
+      <p>Which Government Agency to Refer this to?</p>
+
+      {/* Dropdown instead of quick-pick + text input */}
+      <select
+        className="dropdown-rga mt-3"
+        value={showGovAgencyPopup ?? ""}
+        onChange={(e) => setShowGovAgencyPopup(e.target.value)}
+        autoFocus
+      >
+        <option value="" disabled>
+          Select Government Agency
+        </option>
+        <option value="Social Services Development Department (SSDD)">
+          Social Services Development Department (SSDD)
+        </option>
+        <option value="Department of Social Welfare and Development (DSWD)">
+          Department of Social Welfare and Development (DSWD)
+        </option>
+        <option value="Police Station">Police Station</option>
+      </select>
+
+      <div className="yesno-container-add-rga">
+        <button
+          className="no-button-add-rga"
+          onClick={() => setShowGovAgencyPopup(null)}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="yes-button-add-rga"
+          onClick={async () => {
+            const agency = (showGovAgencyPopup ?? "").trim();
+
+            if (!agency) {
+              setPopupErrorMessage("Please select a government agency before submitting.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+
+            const mainDocRef = doc(db, "IncidentReports", id);
+            await updateDoc(mainDocRef, {
+              status: "Refer to Government Agency",
+              statusPriority: 6,
+              referredAgency: agency,
+            });
+
+            setShowGovAgencyPopup(null);
+            confirmSubmitB();
+          }}
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
 {showSubmitPopupB && (
