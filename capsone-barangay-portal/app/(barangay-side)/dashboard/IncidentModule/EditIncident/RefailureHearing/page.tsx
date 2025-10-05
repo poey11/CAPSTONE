@@ -251,7 +251,7 @@ export default function Page() {
                                     <button
                                     key={section}
                                     type="button"
-                                    className={`info-toggle-btn-hearing ${activeSection === section ? "active" : ""}`}
+                                    className={`info-toggle-btn-hearingrefailure ${activeSection === section ? "active" : ""}`}
                                     onClick={() => setActiveSection(section)}
                                     >
                                     {section === "meeting" && "Refailure Meeting"}
@@ -259,9 +259,8 @@ export default function Page() {
                                 ))}
                             </div>
                           </div>
-
+                            <div className="hearing-edit-section-2">
                             {!isAlreadySubmitted && (
-                              <div className="hearing-edit-section-2">
                               <button
                                 type="button"
                                 className={`
@@ -294,15 +293,16 @@ export default function Page() {
                                   setShowPopup(true);
                                   setTimeout(() => setShowPopup(false), 3000);
                                   setTimeout(() => {
-                                    router.push(`/dashboard/IncidentModule/Department?id=Lupon`);
+                                    router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
                                   }, 2000);
                                 }}
 
                               >
                                 Submit
                               </button>
-                              </div>
+                              
                             )}
+                          </div>
                       </div>
                             
                     {["firsthearing", "secondhearing", "thirdhearing"].map((section, i) => (

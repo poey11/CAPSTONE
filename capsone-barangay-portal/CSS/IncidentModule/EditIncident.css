@@ -2430,6 +2430,25 @@ For hearing main (moderately smaller)
   border-bottom: 2px solid #ff6600; /* match thinner border */
 }
 
+.info-toggle-btn-hearingrefailure {
+  background-color: transparent;
+  border: none;
+  padding: 8px 16px; /* reduced from 12px 20px */
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px; /* reduced from 14px */
+  color: #333;
+  border-bottom: 2px solid #ccc; /* slightly thinner */
+  transition: all 0.3s ease;
+  margin-left: 100px;
+}
+
+.info-toggle-btn-hearingrefailure:hover,
+.info-toggle-btn-hearingrefailure.active {
+  color: #ff6600;
+  border-bottom: 2px solid #ff6600; /* match thinner border */
+}
+
 
 
 
