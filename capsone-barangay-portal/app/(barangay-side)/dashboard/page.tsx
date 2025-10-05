@@ -40,7 +40,8 @@ export default function Dashboard() {
   const [pendingIncidentReportsCount, setPendingIncidentReportsCount] = useState(0);
   const [CFAIncidentReportsCount, setCFAIncidentReportsCount] = useState(0);
   const [settledIncidentReportsCount, setSettledIncidentReportsCount] = useState(0);
-  const [archivedIncidentReportsCount, setArchivedIncidentReportsCount] = useState(0);
+  const [RGAIncidentReportsCount, setRGAIncidentReportsCount] = useState(0);
+  const [DismissedIncidentReportsCount, setDismissedIncidentReportsCount] = useState(0);
 
   // for online incidents
   const [onlineIncidentReportsPendingCount, setOnlineIncidentReportsPendingCount] = useState(0);
@@ -351,8 +352,9 @@ useEffect(() => {
   
           let pending = 0,
           settled = 0,
-          archived = 0,
+          RGA = 0,
           CFA = 0,
+          dismissed = 0,
           onlineInProgress = 0,
           onlinePending = 0,
           onlineSettled = 0;
@@ -372,8 +374,9 @@ useEffect(() => {
           // IN-BARANGAY INCIDENT REPORTS
           if (status === "pending") pending++;
           else if (status === "settled") settled++;
-          else if (status === "archived") archived++;
+          else if (status === "Refer to Government Agency") RGA++;
           else if (status === "CFA") CFA++;
+          else if (status === "dismissed") dismissed++;
         }
       });
 
@@ -381,8 +384,9 @@ useEffect(() => {
       // for in barangay
       setPendingIncidentReportsCount(pending);
       setSettledIncidentReportsCount(settled);
-      setArchivedIncidentReportsCount(archived);
+      setRGAIncidentReportsCount(RGA);
       setCFAIncidentReportsCount(CFA);
+      setDismissedIncidentReportsCount(dismissed);
 
       // for online
       setOnlineIncidentReportsInProgressCount(onlineInProgress);
@@ -583,14 +587,15 @@ if (data.appointmentDate) {
   const totalIncidentReportsChart = selectedIncidentType === 'inBarangay'
   ? {
       title: "Statuses of In-Barangay Incident Reports",
-      count: pendingIncidentReportsCount + CFAIncidentReportsCount+ settledIncidentReportsCount + archivedIncidentReportsCount,
+      count: pendingIncidentReportsCount + CFAIncidentReportsCount+ settledIncidentReportsCount + RGAIncidentReportsCount + DismissedIncidentReportsCount,
       data: [
         { name: "Pending", value: pendingIncidentReportsCount },
         { name: "Settled", value: settledIncidentReportsCount },
-        { name: "Archived", value: archivedIncidentReportsCount },
+        { name: "RGA", value: RGAIncidentReportsCount },
         { name: "CFA", value: CFAIncidentReportsCount },
+        { name: "Dismissed", value: DismissedIncidentReportsCount },        
       ],
-      colors: ["#d4d64f", "#1e5128", "#7f7f7f", "rgb(116, 16, 21)"],
+      colors: ["#d4d64f", "#1e5128", "#7f7f7f", "rgb(116, 16, 21)", "rgba(116, 16, 111, 1)"],
     }
   : {
       title: "Statuses of Online Incident Reports",
