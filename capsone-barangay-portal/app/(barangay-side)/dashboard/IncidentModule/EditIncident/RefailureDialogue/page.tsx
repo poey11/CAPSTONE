@@ -21,7 +21,7 @@ export default function Page() {
     const [showPopup, setShowPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState("");
     const [activeSection, setActiveSection] = useState("meeting");
-
+    const [showSubmitPopup, setShowSubmitPopup] = useState(false);
     
     console.log(docId)
     useEffect(() => {
@@ -70,6 +70,56 @@ export default function Page() {
     
       return () => unsubscribe();
     }, [docId]);
+
+
+
+    const confirmSubmit = async () => {
+      if (!docId) return;
+
+      try {
+        const docRef = doc(db, "IncidentReports", docId);
+        await updateDoc(docRef, {
+          reasonForFailureToAppearDialogue:
+            toUpdate.reasonForFailureToAppearDialogue ||
+            reportData?.reasonForFailureToAppearDialogue ||
+            "",
+        });
+
+        setPopupMessage("Refailure Dialogue Updated Successfully");
+        setShowPopup(true);
+        setShowSubmitPopup(false);
+
+        setTimeout(() => setShowPopup(false), 3000);
+        setTimeout(() => {
+          router.push(
+            `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+          );
+        }, 2000);
+      } catch (error) {
+        console.error(error);
+        setErrorPopup({ show: true, message: "Error submitting form!" });
+        setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+      }
+    };
+
+    // Function called when user clicks the Submit button
+    const handleSubmitClick = () => {
+      if (
+        toUpdate.refailureDialogueStatus === "Present" &&
+        (!toUpdate.reasonForFailureToAppearDialogue ||
+          !toUpdate.reasonForFailureToAppearDialogue.trim())
+      ) {
+        setErrorPopup({
+          show: true,
+          message: "Please fill out the reason for failure to appear.",
+        });
+        setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
+        return;
+      }
+
+      // Form is valid → show confirmation popup
+      setShowSubmitPopup(true);
+    };
     
       useEffect(() => {
         const fetchSummonLetterStatus = async () => {
@@ -200,40 +250,7 @@ export default function Page() {
                             action-save-refailure 
                             w-full font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200
                           `}
-                          // onClick={handleSubmitRefailureDialogue}
-                          onClick={() => {
-                            if (
-                              (toUpdate.refailureDialogueStatus === "Present" &&
-                                (toUpdate.reasonForFailureToAppearDialogue === "" ||
-                                  !toUpdate.reasonForFailureToAppearDialogue))
-                            ) {
-                              setErrorPopup({
-                                show: true,
-                                message: "Please fill out the reason for failure to appear.",
-                              });
-                              setTimeout(() => setErrorPopup({ show: false, message: "" }), 3000);
-                              return;
-                            }
-
-                            if (!docId) return;
-
-                            const docRef = doc(db, "IncidentReports", docId);
-                            updateDoc(docRef, {
-                              reasonForFailureToAppearDialogue:
-                                toUpdate.reasonForFailureToAppearDialogue ||
-                                reportData?.reasonForFailureToAppearDialogue ||
-                                "",
-                            });
-
-                            setPopupMessage("Refailure Dialogue Updated Successfully");
-                            setShowPopup(true);
-                            setTimeout(() => setShowPopup(false), 3000);
-                            setTimeout(() => {
-                              router.push(
-                                `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
-                              );
-                            }, 2000);
-                          }}
+                          onClick={handleSubmitClick}
                         >
                           Submit
                         </button>
@@ -334,6 +351,31 @@ export default function Page() {
                 </div>
             </div>
         )}
+
+
+        {showSubmitPopup && (
+          <div className="confirmation-popup-overlay-add">
+              <div className="confirmation-popup-add">
+                <img
+                  src="/Images/question.png"
+                  alt="warning icon"
+                  className="successful-icon-popup"
+                />
+                <p>Are you sure you want to submit?</p>
+                <div className="yesno-container-add">
+                  <button
+                    onClick={() => setShowSubmitPopup(false)}
+                    className="no-button-add"
+                  >
+                    No
+                  </button>
+                  <button onClick={confirmSubmit} className="yes-button-add">
+                    Yes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
             
 
 
