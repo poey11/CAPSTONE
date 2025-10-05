@@ -547,6 +547,133 @@ export default function Header() {
     }
   }
 
+  /* For refailure letter dialogue*/
+
+if (pathname === "/dashboard/IncidentModule/EditIncident/RefailureDialogue/RefailureInfo") {
+    
+  const department = searchParams.get("department");
+      if (department === "Lupon" ) {
+                return {
+          title: "Lupon Tagapamayapa: Lupon",
+          breadcrumb: ["Incident Management", "Lupon", "Incident Details", "Refailure Letter(Dialogue)"],
+        };
+      } else if (department === "VAWC") {
+         return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details", "Refailure Letter(Dialogue)"],
+        };
+      } else if (department === "BCPC")
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details","Refailure Letter(Dialogue)"],
+        }; else {
+            return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Refailure Letter(Dialogue)"],
+        };
+        }
+    }
+
+    /*For Refailure Sectionn Dialogue*/
+
+if (pathname === "/dashboard/IncidentModule/EditIncident/RefailureDialogue") {
+   const department = searchParams.get("department");
+
+         if (department === "Lupon" ) {
+                return {
+          title: "Lupon Tagapamayapa: Lupon",
+          breadcrumb: ["Incident Management", "Lupon", "Incident Details", "Refailure Section(Dialogue)"],
+        };
+      } else if (department === "VAWC") {
+         return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details", "Refailure Section(Dialogue)"],
+        };
+      } else if (department === "BCPC")
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details","Refailure Section(Dialogue)"],
+        }; else {
+            return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Refailure Section(Dialogue)"],
+        };
+        }
+
+}
+
+
+  /* For refailure letter hearing*/
+
+if (pathname === "/dashboard/IncidentModule/EditIncident/RefailureHearing/RefailureInfo") {
+    
+  const department = searchParams.get("department");
+      if (department === "Lupon" ) {
+                return {
+          title: "Lupon Tagapamayapa: Lupon",
+          breadcrumb: ["Incident Management", "Lupon", "Incident Details", "Refailure Letter(Hearing)"],
+        };
+      } else if (department === "VAWC") {
+         return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details", "Refailure Letter(Hearing)"],
+        };
+      } else if (department === "BCPC")
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details","Refailure Letter(Hearing)"],
+        }; else {
+            return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Refailure Letter(Hearing)"],
+        };
+        }
+    }
+
+
+ /*For Refailure Sectionn Hearing*/
+
+
+ 
+
+if (pathname === "/dashboard/IncidentModule/EditIncident/RefailureHearing") {
+   const department = searchParams.get("department");
+
+         if (department === "Lupon" ) {
+                return {
+          title: "Lupon Tagapamayapa: Lupon",
+          breadcrumb: ["Incident Management", "Lupon", "Incident Details", "Refailure Section(Hearing)"],
+        };
+      } else if (department === "VAWC") {
+         return {
+          title: "Lupon Tagapamayapa: VAWC",
+          breadcrumb: ["Incident Management", "VAWC", "Incident Details", "Refailure Section(Hearing)"],
+        };
+      } else if (department === "BCPC")
+        return {
+          title: "Lupon Tagapamayapa: BCPC",
+          breadcrumb: ["Incident Management", "BCPC", "Incident Details","Refailure Section(Hearing)"],
+        }; else {
+            return {
+          title: "Lupon Tagapamayapa: GAD",
+          breadcrumb: ["Incident Management", "GAD", "Incident Details", "Refailure Section(Hearing)"],
+        };
+        }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
   // Check if pathname is DialogueSection and look at 'department' query param
     if (pathname === "/dashboard/IncidentModule/EditIncident/DialogueSection") {
       const department = searchParams.get("department");
@@ -573,6 +700,28 @@ export default function Header() {
       }
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Check if pathname is HearingSection and look at 'department' query param
     if (pathname === "/dashboard/IncidentModule/EditIncident/HearingSection") {
       const department = searchParams.get("department");
@@ -598,6 +747,7 @@ export default function Header() {
         };
       }
     }
+
 
     // Fallback to static routes
     return staticMap[pathname] || {
