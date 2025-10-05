@@ -374,9 +374,18 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       // Only redirect if complainantAbsents is less than 2
       if ((latestData?.complainantAbsents || 0) < 2) {
         // Redirect to LetterAndInvitation page if complainant absent
-        if (details.Cstatus === "Absent" || (details.Cstatus === "Absent" && details.Rstatus === "Absent")) {
+        if (
+          (details.Cstatus === "Absent" || (details.Cstatus === "Absent" && details.Rstatus === "Absent")) &&
+          !["CFA", "Refer to Government Agency", "dismissed"].includes(latestData?.status)
+        ) {
           router.push(
             `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+          );
+        } 
+        // Redirect to Department page if status is one of the 3 specified
+        else if (["CFA", "Refer to Government Agency", "dismissed"].includes(latestData?.status)) {
+          router.push(
+            `/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`
           );
         }
       }
