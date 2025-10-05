@@ -218,6 +218,10 @@
   margin-top: 2rem;
 }
 
+.announcement-img {
+  width: 100px;
+}
+
 .recent-post-card {
   display: flex;
   gap: 0.8rem;

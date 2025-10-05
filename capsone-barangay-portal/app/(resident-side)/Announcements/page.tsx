@@ -170,7 +170,10 @@ export default function Announcement() {
             <h3>Recent Posts</h3>
             {recentPosts.map((post, idx) => (
               <div key={idx} className="recent-post-card">
-                <img src={post.image} alt={post.image}/>
+                <div className="announcement-img">
+                  <img src={post.image} alt={post.image}/>
+                </div>
+                
                 <div className="recent-post-content">
                   <p>{post.announcementHeadline}</p>
                   <span>{post.createdAt}</span>
