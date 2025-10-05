@@ -59,6 +59,8 @@ const Footer = () => {
         </div>
         <div className="footer-bottom">
           <p>© {year} Barangay Fairview. All rights reserved.</p>
+          <p className="footer-disclaimer">Disclaimer: This website is created solely for academic and capstone project purposes.
+        It is not an official website of Barangay Fairview.</p>
         </div>
       </div>
     </footer>
