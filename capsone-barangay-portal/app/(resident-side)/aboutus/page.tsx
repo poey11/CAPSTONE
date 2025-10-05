@@ -134,7 +134,7 @@ export default function AboutUs() {
         </div>
         <div className="aboutus-contactinfo-item">
           <img src="/images/phone1.png" alt="Phone" className="aboutus-contacticon" />
-          <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
+          <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
         </div>
         <div className="aboutus-contactinfo-item">
           <img src="/images/location1.png" alt="Location" className="aboutus-contacticon" />

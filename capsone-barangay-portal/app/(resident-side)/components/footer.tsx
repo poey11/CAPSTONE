@@ -46,7 +46,7 @@ const Footer = () => {
             </div>
             <div className="contactinfo-phone">
               <img src="/images/phone1.png" alt="Image 2" className="contacticon" />
-              <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
+               <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
             </div>
             <div className="contactinfo-loc">
               <img src="/images/location1.png" alt="Image 3" className="contacticon" />
