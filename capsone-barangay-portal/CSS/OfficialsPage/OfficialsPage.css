@@ -297,13 +297,21 @@
     font-size: 0.95rem;
   }
 
-  .official-phonenumber-punong-brgy {
+  .official-phonenumber-punong-brgy, .official-facebook-punonng-brgy, .officials-facebook-others   {
     font-size: 0.85rem;
   }
 
 }
 
 
+
+
+
+
+.official-facebook-punonng-brgy, .officials-facebook-others {
+    font-size: 0.9rem;
+  color: #1877f2;     
+}
 
 
 .officials-punong-brgy-details{
@@ -421,3 +429,13 @@
     background-position: center 50%;
   }
 }
+
+
+
+
+
+
+
+
+
+

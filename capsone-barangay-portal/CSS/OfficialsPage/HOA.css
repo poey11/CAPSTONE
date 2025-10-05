@@ -161,6 +161,11 @@
   .officials-title::after {
     display: none; /* hide side lines on mobile */
   }
+
+  .official-facebook-officials {
+   font-size: 0.85rem;
+
+  }
 }
 
 
