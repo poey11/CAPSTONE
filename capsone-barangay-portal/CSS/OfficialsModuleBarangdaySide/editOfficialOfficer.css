@@ -225,7 +225,23 @@ html, body {
     .edit-official-input-field option:disabled,
     .edit-officer-input-field option:disabled {
     color: grey;
+   cursor: not-allowed;
+    position: relative
   }
+
+.fields-section-official:has(.edit-official-input-field:disabled):hover::after {
+  content: "This field cannot be edited.";
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+
 
   .edit-official-input-field:focus,
   .edit-officer-input-field:focus {

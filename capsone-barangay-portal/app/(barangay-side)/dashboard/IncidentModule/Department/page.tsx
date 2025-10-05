@@ -1241,7 +1241,7 @@ const formatStatus = (status: string) => {
                               <div className="incident-date-section">
                               <div className="incident-date-topsection">
                                 <div className="incident-main-details-icons-section">
-                                  <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                                   <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
                                 </div>
                                 <div className="incident-main-details-title-section">
                                   <h1>Type of ncident</h1>
@@ -1273,6 +1273,27 @@ const formatStatus = (status: string) => {
                               </div>
                               <p>{selectedIncident?.nature || "N/A"}</p>
                             </div>
+
+                            {selectedIncident?.status === "Refer to Government Agency" &&
+                              ["VAWC", "BCPC", "GAD"].includes(selectedIncident?.department) && (
+                                <div className="incident-description-section">
+                                  <div className="incident-desc-topsection">
+                                    <div className="incident-main-details-icons-section">
+                                      <img
+                                        src="/Images/rga.png"
+                                        alt="description icon"
+                                        className="view-incident-description-icon-desc"
+                                      />
+                                    </div>
+                                    <div className="incident-main-details-title-section">
+                                      <h1>Referred Agency</h1>
+                                    </div>
+                                  </div>
+                                  <p>{selectedIncident?.referredAgency || "N/A"}</p>
+                                </div>
+                            )}
+
+                            
 
                                 {selectedIncident?.status === "settled" && selectedIncident.department === "Lupon" && (
                                   <div className="incident-description-section">

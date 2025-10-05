@@ -26,6 +26,23 @@ export default function EditOfficial() {
     const [dataSet, setDataSet] = useState<boolean>(false);
     const [updateTerm, setUpdateTerm] = useState<string>("");
     const [isOfficialIdSet, setIsOfficialIdSet] = useState<string>("");
+
+
+
+
+
+
+  // 🔹 new states for popups & validation
+  const [showSubmitPopup, setShowSubmitPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState("");
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+
+
+
     useEffect(()=>{
         if (!officialId) return;
         const docRef = doc(db, "DisplayedOfficials", officialId as string);
@@ -74,49 +91,113 @@ export default function EditOfficial() {
 
     console.log("selectef official",selectedOfficial);
 
+
+
+
+
+
+
+  // Validation function
+const validateAndConfirm = () => {
+  const newInvalidFields: string[] = [];
+
+  // Only validate fields that are editable
+  if (!isOfficialIdSet) {
+    if (!selectedOfficial?.name) newInvalidFields.push("name");
+    if (!selectedOfficial?.facebook) newInvalidFields.push("facebook");
+    if (!selectedOfficial?.contact) newInvalidFields.push("contact");
+    if (!selectedOfficial?.email) newInvalidFields.push("email");
+  }
+
+  if (newInvalidFields.length > 0) {
+    setInvalidFields(newInvalidFields);
+    setErrorMessage("Please fill in all required fields.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return false;
+  }
+
+  // skip phone/email validation if fields are disabled
+  if (!isOfficialIdSet) {
+    const phoneRegex = /^09\d{9}$/;
+    if (!phoneRegex.test(selectedOfficial.contact || "")) {
+      setInvalidFields(["contact"]);
+      setErrorMessage("Invalid contact number. Format: 0917XXXXXXX");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (selectedOfficial.email && !emailRegex.test(selectedOfficial.email)) {
+      setInvalidFields(["email"]);
+      setErrorMessage("Invalid email address. Format: example@domain.com");
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
+  }
+
+  setInvalidFields([]);
+  setShowSubmitPopup(true);
+  return true;
+};
+
+
+
     
     const handleUpload = async (e:any) => {
-      e.preventDefault();
-      if (!officialId) return;
-      let termFormatted = "";
-      if(updateTerm){
-        const startYear = new Date(updateTerm).getFullYear();
-          const endYear = startYear + 3;
-          termFormatted = `${startYear} - ${endYear}`;
-      }
-      let updateDate = {
-        ...selectedOfficial,
-          updatedBy: user?.fullName, // Replace with actual user
-          updatedAt: new Date().toLocaleString(),
-          term: termFormatted || selectedOfficial?.term,
-      }
-      try {
-        if(identificationFile && !(selectedOfficial?.image && selectedOfficial.image.includes(identificationFile.name))){
-          const imageRef = ref(storage, selectedOfficial?.image || "");
-          await deleteObject(imageRef);
-          const storageRef = ref(storage, `officialPictures/${officialId}/${identificationFile.name}`);
-          await uploadBytes(storageRef, identificationFile);
-          const downloadURL = await getDownloadURL(storageRef);
-          updateDate = {
-            ...updateDate,
-            image: downloadURL,
-          }
-          handleIdentificationFileDelete(); // clear state after successful upload
+         if (!officialId) return;
+    setShowSubmitPopup(false);
+
+    let termFormatted = "";
+    if (updateTerm) {
+      const startYear = new Date(updateTerm).getFullYear();
+      const endYear = startYear + 3;
+      termFormatted = `${startYear} - ${endYear}`;
+    }
+
+    let updateData = {
+      ...selectedOfficial,
+      updatedBy: user?.fullName || "Unknown",
+      updatedAt: new Date().toLocaleString(),
+      term: termFormatted || selectedOfficial?.term,
+    };
+
+    try {
+      if (
+        identificationFile &&
+        !(selectedOfficial?.image && selectedOfficial.image.includes(identificationFile.name))
+      ) {
+        if (selectedOfficial?.image) {
+          const imageRef = ref(storage, selectedOfficial.image);
+          await deleteObject(imageRef).catch(() => {});
         }
-        
-        if(isOfficialIdSet){
-          const docRefBarangayUser = doc(db, "BarangayUsers", isOfficialIdSet as string);
-          await updateDoc(docRefBarangayUser, updateDate);
-        }else{
-          const docRef = doc(db, "DisplayedOfficials", officialId as string);
-  
-          await updateDoc(docRef, updateDate);
-        }
+        const storageRef = ref(storage, `officialPictures/${officialId}/${identificationFile.name}`);
+        await uploadBytes(storageRef, identificationFile);
+        const downloadURL = await getDownloadURL(storageRef);
+        updateData = { ...updateData, image: downloadURL };
+      }
+
+      if (isOfficialIdSet) {
+        const docRef = doc(db, "BarangayUsers", isOfficialIdSet as string);
+        await updateDoc(docRef, updateData);
+      } else {
+        const docRef = doc(db, "DisplayedOfficials", officialId as string);
+        await updateDoc(docRef, updateData);
+      }
+
+      setPopupMessage("Official details updated successfully!");
+      setShowPopup(true);
+      setTimeout(() => {
+        setShowPopup(false);
         router.push("/dashboard/OfficialsModule");
-      } catch (error) {
-        console.log("Error uploading file:", error);
-        alert("Failed to upload file.");
-      }
+      }, 3000);
+    } catch (error) {
+      setErrorMessage("There was an error updating the official.");
+      setShowErrorPopup(true);
+      console.error(error);
+    }
     };
     
     console.log("isOfficialIdSet",isOfficialIdSet);
@@ -156,7 +237,7 @@ export default function EditOfficial() {
 
                     <div className="action-btn-section">
                         <button className="action-discard" onClick={handleDiscardClick}>Discard</button>
-                        <button className="action-save" type="button" onClick={handleUpload}>
+                        <button className="action-save" type="button" onClick={validateAndConfirm}>
                             Save
                         </button>
                     </div>
@@ -206,6 +287,7 @@ export default function EditOfficial() {
                                                 onChange={(e) => setSelectedOfficial({...selectedOfficial, facebook: e.target.value})}
                                                 className="edit-official-input-field"
                                                 disabled={isOfficialIdSet ? true: false}
+                                                
 
                                                 />
                                                 
@@ -237,7 +319,8 @@ export default function EditOfficial() {
                                                     className="edit-official-input-field"
                                                     name="position"
                                                     value={selectedOfficial?.position || "N/A"}
-                                                    readOnly
+                                                   readOnly
+                                                   disabled={isOfficialIdSet ? true: false}
                                                 />
                                                     
                                             </div>
@@ -248,6 +331,7 @@ export default function EditOfficial() {
                                                     <input type="text" 
                                                     value={selectedOfficial.department || "N/A"}
                                                     readOnly
+                                                   disabled={isOfficialIdSet ? true: false}
                                                     className="edit-official-input-field" />
                                                 </div>
                                             )}
@@ -260,11 +344,12 @@ export default function EditOfficial() {
                                                     className="edit-official-input-field"
                                                     name="term"
                                                     value={selectedOfficial?.term || "N/A"}
-                                                    readOnly
+                                                   readOnly
+                                                   disabled={isOfficialIdSet ? true: false}
                                                 />
                                             </div>
                                             <div className="fields-section-official">
-                                                <p>Update Term Duration<span className="required">*</span></p>
+                                                <p>Update Term Duration</p>
                                                 <input
                                                     type="date"
                                                     className="edit-official-input-field"
@@ -359,6 +444,42 @@ export default function EditOfficial() {
                 </div>
 
             </div>
+
+
+                        {showSubmitPopup && (
+                <div className="addbrgyofficial-confirmation-popup-overlay">
+                         <div className="addbrgyofficial-confirmation-popup">
+                          <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+                           <p>Are you sure you want to submit?</p>
+                             <div className="barangay-official-yesno-container">
+                              <button onClick={() => setShowSubmitPopup(false)} className="addbrgyofficial-no-button">No</button>
+                           <button onClick={handleUpload} className="addbrgyofficial-yes-button">Yes</button> 
+                       </div> 
+                    </div>
+               </div>
+           )}
+
+        
+            {showPopup && (
+                <div className={`barangay-official-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                     <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
+                     <p>{popupMessage}</p>
+                </div>
+            </div>
+            )}
+
+
+                    
+        {showErrorPopup && (
+                <div className={`addbrgyofficial-error-popup-overlay show`}>
+                    <div className="barangay-official-popup">
+                    <img src={ "/Images/warning-1.png"} alt="popup icon" className="icon-alert"/>
+                        <p>{errorMessage}</p>
+                    </div>
+                </div>
+                )}
+
 
             {showDiscardPopup && (
                         <div className="confirmation-popup-overlay-edit-official">
