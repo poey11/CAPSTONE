@@ -566,54 +566,11 @@ const [showTerms, setShowTerms] = useState(false);
                             <h2>Terms and Conditions</h2>
 
                             <div className="terms-content">
-                                <h3>1. Accuracy of Information</h3>
+                                <h3>Before proceeding with your document request, please read and agree to the following terms and conditions:</h3>
                                 <p>
-                                You must provide true, complete, and accurate information during
-                                registration. Any false or misleading details may result in suspension
-                                or cancellation of your account.
-                                </p>
-
-                                <h3>2. Use of the System</h3>
-                                <p>
-                                This account is for accessing official barangay services such as
-                                document requests, program registrations, and communication with
-                                barangay officials. You agree not to misuse the system for fraudulent
-                                or unlawful activities.
-                                </p>
-
-                                <h3>3. Privacy and Data Protection</h3>
-                                <p>
-                                Personal information you provide will be stored securely and used only
-                                for official barangay purposes. The barangay will not share your
-                                information with unauthorized third parties without your consent,
-                                unless required by law.
-                                </p>
-
-                                <h3>4. Account Security</h3>
-                                <p>
-                                You are responsible for keeping your login credentials safe and
-                                confidential. Any unauthorized use of your account must be reported
-                                immediately to the barangay office.
-                                </p>
-
-                                <h3>5. Barangay Communication</h3>
-                                <p>
-                                You agree to receive official notifications from the barangay through
-                                the system, SMS, or other approved communication channels.
-                                </p>
-
-                                <h3>6. System Availability</h3>
-                                <p>
-                                While the barangay strives to keep the system accessible at all times,
-                                there may be instances of downtime due to maintenance or technical
-                                issues.
-                                </p>
-
-                                <h3>7. Compliance</h3>
-                                <p>
-                                You agree to follow barangay rules, policies, and guidelines while
-                                using the system. Violation of these terms may lead to restriction,
-                                suspension, or termination of your account.
+                                    By using this system, you consent to the collection and storage of your personal data including but not limited to your name, address, birthday, and any other relevant details required to process your request;
+                                    Your data will be only shared and handled by authorized barangay staff for official purposes; and
+                                    The system is compliant with the Data Privacy Act of 2012, and your data will be securely stored and used solely for legitimate purposes.
                                 </p>
 
                                 <p className="terms-footer">

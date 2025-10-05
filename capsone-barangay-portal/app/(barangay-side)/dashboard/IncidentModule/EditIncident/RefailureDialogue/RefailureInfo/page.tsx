@@ -458,7 +458,7 @@ export default function RefailureInfo() {
                                                         type="text" 
                                                         className="generate-letter-input-field" 
                                                         placeholder={otherInfo.complainant.fname}
-                                                       value={otherInfo.complainant.fname}
+                                                        value={`${otherInfo.complainant.fname} ${otherInfo.complainant.lname}`}
                                                              id="complainant.fname"
                                                            name="complainant.fname"
                                                         disabled
@@ -531,7 +531,7 @@ export default function RefailureInfo() {
                                         type="text" 
                                         className="generate-letter-input-field" 
                                             placeholder={otherInfo.respondent.fname}
-                                            value={otherInfo.respondent.fname}
+                                            value={`${otherInfo.respondent.fname} ${otherInfo.respondent.lname}`}
                                             id="respondent.fname"
                                             name="respondent.fname"
                                         disabled

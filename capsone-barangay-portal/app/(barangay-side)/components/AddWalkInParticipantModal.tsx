@@ -370,6 +370,29 @@ export default function AddWalkInParticipantModal({
     const uploadedUrl = await getDownloadURL(sref);
     return { validIDjpg: uploadedUrl } as Record<string, string>;
   };
+  // Send SMS via ClickSend API
+  const sendApprovedSMS = async (contactNumber: string, fullName: string, programName: string, role: string) => {
+    try {
+      const response = await fetch("/api/clickSendApi", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            to: contactNumber,
+            message: `Hello ${fullName}, your Walk-In registration for the program "${programName}" as "${role}" has been approved. Thank you!`,
+        })
+      });   
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      } 
+
+      } catch (error) {
+        console.error("Error sending SMS:", error);
+
+    }
+  }
+
 
   const submit = async () => {
     if (!programId) return;
@@ -624,6 +647,7 @@ export default function AddWalkInParticipantModal({
       setAutoFillLoading(false);
     }
   };
+  
 
   return (
     <>
@@ -1066,7 +1090,11 @@ export default function AddWalkInParticipantModal({
 
               <button
                 className="participant-action-accept"
-                onClick={submit}
+                onClick={()=>{
+                  //sendApprovedSMS(programName,formData.contactNumber ?? "", formData.firstName ?? "", "Participant");
+                  submit();
+
+                }}
                 disabled={saving || autoFillLoading}
               >
                 {saving ? "Saving..." : "Save"}

@@ -2,6 +2,7 @@
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 // Firestore
 import {
@@ -99,7 +100,8 @@ export default function ParticipantsList() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const programId = searchParams.get("programId") || "";
-
+  const { data: session } = useSession();
+  const user = session?.user;
   // UI state
   const [loading, setLoading] = useState(true);
 
@@ -693,26 +695,31 @@ const canEditAttendanceByTime = (p: Participant) => {
             onChange={(e) => setSearchName(e.target.value)}
             className="programs-module-filter-participants"
           />
-          <button
-            type="button"
-            title={
-              isProgramClosed
-                ? `This program is ${programStatus}`
-                : isAtCapacity
-                ? "Program capacity reached"
-                : "Add participant"
-            }
-            onClick={openAddPopup}
-            disabled={isProgramClosed || isAtCapacity}
-            style={{
-              background: "transparent",
-              border: "none",
-              cursor: isProgramClosed || isAtCapacity ? "not-allowed" : "pointer",
-              opacity: isProgramClosed || isAtCapacity ? 0.5 : 1,
-            }}
-          >
-            <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
-          </button>
+          {(user?.position === "Secretary" || user?.position === "Assistant Secretary" ||user?.position === "Admin Staff" )  && (
+            <>
+              <button
+                type="button"
+                title={
+                  isProgramClosed
+                    ? `This program is ${programStatus}`
+                    : isAtCapacity
+                    ? "Program capacity reached"
+                    : "Add participant"
+                }
+                onClick={openAddPopup}
+                disabled={isProgramClosed || isAtCapacity}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: isProgramClosed || isAtCapacity ? "not-allowed" : "pointer",
+                  opacity: isProgramClosed || isAtCapacity ? 0.5 : 1,
+                }}
+              >
+                <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
+              </button>  
+            </>
+          )}
+          
         </div>
 
         <div className="edit-program-bottom-section-participants">
