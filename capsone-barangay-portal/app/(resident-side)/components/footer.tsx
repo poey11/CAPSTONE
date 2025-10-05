@@ -9,11 +9,8 @@ import { usePathname } from "next/navigation";
 
 const Footer = () => {
 
-  const [year, setYear] = useState("");
 
-  useEffect(() => {
-    setYear(new Date().getFullYear().toString());
-  }, []);
+  const year = new Date().getFullYear();
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages

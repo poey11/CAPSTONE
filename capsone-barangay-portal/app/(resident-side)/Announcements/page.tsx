@@ -94,11 +94,13 @@ export default function Announcement() {
         <div className="left-section-announcement" ref={sectionRef}>
           {currentAnnouncements.map((item, index) => (
             <div key={startIndex + index} className="announcement-card-announcement">
-              <img
-                src={item.image}
-                alt={item.image}
-                className="announcement-image-announcement"
-              />
+              <div className="announcement-image-container">
+                <img
+                  src={item.image}
+                  alt={item.announcementHeadline}
+                  className="announcement-image-announcement"
+                />
+              </div>
               <div className="announcement-content-announcement">
                 <h2 className="announcement-title-announcement">
                   {item.announcementHeadline} ({item.category})
