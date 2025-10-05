@@ -9,11 +9,8 @@ import { usePathname } from "next/navigation";
 
 const Footer = () => {
 
-  const [year, setYear] = useState("");
 
-  useEffect(() => {
-    setYear(new Date().getFullYear().toString());
-  }, []);
+  const year = new Date().getFullYear();
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
@@ -59,6 +56,8 @@ const Footer = () => {
         </div>
         <div className="footer-bottom">
           <p>© {year} Barangay Fairview. All rights reserved.</p>
+          <p className="footer-disclaimer">Disclaimer: This website is created solely for academic and capstone project purposes.
+        It is not an official website of Barangay Fairview.</p>
         </div>
       </div>
     </footer>
