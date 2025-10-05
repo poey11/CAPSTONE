@@ -262,6 +262,9 @@ const confirmSubmit = async () => {
     
     const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
+
+
+         console.log(e.target.checked);
     };
 
     const handleToken = (token: string | null) => {
@@ -300,7 +303,7 @@ const confirmSubmit = async () => {
     }
   };
 
-
+const [showTerms, setShowTerms] = useState(false);
 
 
 
@@ -530,10 +533,105 @@ const confirmSubmit = async () => {
                     </div>
 
 
-                    <div className="form-checkbox-section">
-                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions <span className="required">*</span></label>
-                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" required/>
+                <div className="form-checkbox-section">
+                        <label htmlFor="terms" className="form-label-register-form">
+                        I agree to the{" "}
+                        <span 
+                            className="terms-link" 
+                            onClick={() => setShowTerms(true)}
+                        >
+                            Terms and Conditions
+                        </span>{" "}
+                        <span className="required">*</span>
+                        </label>
+                        <input 
+                        id="terms" 
+                        onChange={handleCheckBox} 
+                        type="checkbox" 
+                        name="terms" 
+                        className="form-checkbox" 
+                        required 
+                        />
                     </div>
+
+
+
+                        {/* MALCOLM ITO YUNG POPUP FOR TERMS AND CONDITION. EDT MO NALAN TERMS 
+                        WAG  MO NA CHANGE CSS CLASSNAMES IF OKS NA SAYO DESIGN RESPONSIVE NARIN TO
+                        FOR OTHER DEVICES
+                        */}
+                        {showTerms && (
+                        <div className="terms-modal-overlay">
+                            <div className="terms-modal">
+                            <h2>Terms and Conditions</h2>
+
+                            <div className="terms-content">
+                                <h3>1. Accuracy of Information</h3>
+                                <p>
+                                You must provide true, complete, and accurate information during
+                                registration. Any false or misleading details may result in suspension
+                                or cancellation of your account.
+                                </p>
+
+                                <h3>2. Use of the System</h3>
+                                <p>
+                                This account is for accessing official barangay services such as
+                                document requests, program registrations, and communication with
+                                barangay officials. You agree not to misuse the system for fraudulent
+                                or unlawful activities.
+                                </p>
+
+                                <h3>3. Privacy and Data Protection</h3>
+                                <p>
+                                Personal information you provide will be stored securely and used only
+                                for official barangay purposes. The barangay will not share your
+                                information with unauthorized third parties without your consent,
+                                unless required by law.
+                                </p>
+
+                                <h3>4. Account Security</h3>
+                                <p>
+                                You are responsible for keeping your login credentials safe and
+                                confidential. Any unauthorized use of your account must be reported
+                                immediately to the barangay office.
+                                </p>
+
+                                <h3>5. Barangay Communication</h3>
+                                <p>
+                                You agree to receive official notifications from the barangay through
+                                the system, SMS, or other approved communication channels.
+                                </p>
+
+                                <h3>6. System Availability</h3>
+                                <p>
+                                While the barangay strives to keep the system accessible at all times,
+                                there may be instances of downtime due to maintenance or technical
+                                issues.
+                                </p>
+
+                                <h3>7. Compliance</h3>
+                                <p>
+                                You agree to follow barangay rules, policies, and guidelines while
+                                using the system. Violation of these terms may lead to restriction,
+                                suspension, or termination of your account.
+                                </p>
+
+                                <p className="terms-footer">
+                                By registering, you acknowledge that you have read, understood, and
+                                agreed to these Terms and Conditions.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => setShowTerms(false)}
+                                className="close-terms-btn"
+                            >
+                                Close
+                            </button>
+                            </div>
+                        </div>
+                        )}
+
 
                     <div className="form-captcha">
                         <ReCAPTCHA sitekey={captchaSiteKey} onChange={handleToken} />
