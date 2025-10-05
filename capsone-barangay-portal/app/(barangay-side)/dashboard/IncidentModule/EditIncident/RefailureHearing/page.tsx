@@ -130,6 +130,33 @@ export default function Page() {
               };
             });
         };
+
+
+        useEffect(() => {
+          if (!reportData?.sentLetterOfFailureToAppearHearing) return;
+
+          const hearingStatuses = [0, 1, 2].map((i) => {
+              const letterSent = reportData.sentLetterOfFailureToAppearHearing?.[i];
+              return {
+                  index: i,
+                  needsRefailure: !!letterSent, // Only hearings with refailure letter
+              };
+          });
+
+          const nextHearing = hearingStatuses.find(h => h.needsRefailure);
+
+          if (nextHearing) {
+              setActiveSectionHearing(
+                  nextHearing.index === 0
+                      ? "firsthearing"
+                      : nextHearing.index === 1
+                          ? "secondhearing"
+                          : "thirdhearing"
+              );
+          } else {
+              setActiveSectionHearing("firsthearing"); // fallback
+          }
+      }, [reportData]);
     
     useEffect(()=>{
             if (!docId) return;
@@ -212,29 +239,28 @@ export default function Page() {
             <div className="hearing-header-body-top-section-main-hearing">
               {["firsthearing", "secondhearing", "thirdhearing"].map((section, index) => {
                 // Determine if this hearing exists yet
-                const hearingExists =
-                  reportData?.sentLetterOfFailureToAppearHearing &&
-                  Object.keys(reportData.sentLetterOfFailureToAppearHearing).length > index;
+                
 
+                const hearingExists = !!reportData?.sentLetterOfFailureToAppearHearing?.[index];
                 const isDisabled = !hearingExists;
 
                 
 
                 return (
                   <button
-                    key={section}
-                    type="button"
-                    className={`info-toggle-btn-main-hearing 
-                                ${activeSectionHearing === section ? "active" : ""} 
-                                ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                    onClick={() => {
-                      if (!isDisabled) setActiveSectionHearing(section);
-                    }}
-                    disabled={isDisabled}
+                      key={section}
+                      type="button"
+                      className={`info-toggle-btn-main-hearing 
+                                  ${activeSectionHearing === section ? "active" : ""} 
+                                  ${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      onClick={() => {
+                          if (!isDisabled) setActiveSectionHearing(section);
+                      }}
+                      disabled={isDisabled}
                   >
-                    {index === 0 && "First Hearing"}
-                    {index === 1 && "Second Hearing"}
-                    {index === 2 && "Third Hearing"}
+                      {index === 0 && "First Hearing"}
+                      {index === 1 && "Second Hearing"}
+                      {index === 2 && "Third Hearing"}
                   </button>
                 );
               })}
@@ -332,11 +358,9 @@ export default function Page() {
                                         : reportData?.refailureHearingDetails?.[i]?.reason || ""
                                     }
                                     disabled={
-                                      !!(
-                                        typeof reportData?.refailureHearingDetails?.[i]?.reason === "string" &&
-                                        reportData?.refailureHearingDetails?.[i]?.reason.trim()
-                                      )
+                                        !reportData?.sentLetterOfFailureToAppearHearing?.[i]
                                     }
+
                                     onChange={handleFormChange}
                                     className={`
                                       remarks-input-field-dialogue-update
