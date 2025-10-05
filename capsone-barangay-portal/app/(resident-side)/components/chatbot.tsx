@@ -509,7 +509,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
 
               <div className="quick-chips">
                 {/* public chips */}
-                {["hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
+                {["Hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
                   <button key={q} className="quick-chip" onClick={() => sendToBot(q)}>
                     {q}
                   </button>
