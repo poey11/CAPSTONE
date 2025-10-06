@@ -103,7 +103,7 @@ const IncidentHeatmap:React.FC<props> = ({incidents}) => {
     // 5. Init map
     map.current = new maplibregl.Map({
       container: mapContainer.current as HTMLElement,
-style: "https://demotiles.maplibre.org/style.json",
+style: "https://api.maptiler.com/maps/openstreetmap/style.json?key=xUOXeynXd9QpejpUXHHn",
       center: [121.069322, 14.702139],
       zoom: 14,
       interactive: false,
