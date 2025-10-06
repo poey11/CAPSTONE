@@ -416,6 +416,14 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     invalidFields.push("otherConcern");
   }
 
+
+    //check if no file uploaded
+  if (filesContainer1.length === 0 && !incidentReport.file) {
+    invalidFields.push("file");
+  }
+
+
+
   if (invalidFields.length > 0) {
     setInvalidFields(invalidFields);
     setErrorPopup({
@@ -833,9 +841,9 @@ const confirmSubmit = async () => {
                     <div className="incident-report-form-container">
 
                        <div className="signatureprintedname-container">
-                          <label className="form-label-incident-report-file">Upload Proof of Incident</label>
+                          <label className="form-label-incident-report-file">Upload Proof of Incident<span className="required">*</span></label>
                     
-                          <div className="file-upload-container-incident-report">
+                          <div className={`file-upload-container-incident-report ${invalidFields.includes("file") ? "input-error" : ""}`}>
                             <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
                             <input
                               id="file-upload1"
