@@ -3984,24 +3984,20 @@ const handleFileChange = (
                         </>
                       )}
                     
-                      <div className="file-upload-container-required-documents">
-                        {/* Only show upload button if no uploaded file exists */}
-                        {!userData?.upload && (
-                          <>
-                            <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
-                            <input
-                              id="file-upload3"
-                              name="validIDjpg"
-                              type="file"
-                              accept=".jpg,.jpeg,.png"
-                              //required={(docB === "Temporary Business Permit" || docB === "Business Permit")}
-                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                handleFileChange(e, setFiles3, 'validIDjpg');
-                              }}
-                              style={{ display: "none" }}
-                            />
-                          </>
-                        )}
+<div className="file-upload-container-required-documents">
+  {files3.length === 0 && (
+    <>
+      <label htmlFor="file-upload3" className="upload-link">Click to Upload File</label>
+      <input
+        id="file-upload3"
+        name="validIDjpg"
+        type="file"
+        accept=".jpg,.jpeg,.png"
+        onChange={(e) => handleFileChange(e, setFiles3, 'validIDjpg')}
+        style={{ display: "none" }}
+      />
+    </>
+  )}
 
                         {/* Always show file preview if exists */}
                         {files3.length > 0 && (
@@ -4039,7 +4035,28 @@ const handleFileChange = (
                             </ul>
                           </div>
                         )}
-                      </div>
+
+  {files3.length === 0 && storedUploadURL && (
+    <div className="file-name-image-display">
+      <ul>
+        <div className="file-name-image-display-indiv">
+          <li>
+            <div className="filename-image-container">
+              <img
+                src={storedUploadURL}
+                alt="Valid ID on file"
+                style={{ width: 50, height: 50, marginRight: 5 }}
+              />
+            </div>
+            <div className="file-name-truncated">Existing Valid ID</div>
+            {/* no delete button for fallback; user can click upload to replace */}
+          </li>
+        </div>
+      </ul>
+    </div>
+  )}
+</div>
+
                     </div>
                    
 
