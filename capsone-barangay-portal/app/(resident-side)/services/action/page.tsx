@@ -4036,27 +4036,26 @@ const handleFileChange = (
                           </div>
                         )}
 
-  {files3.length === 0 && storedUploadURL && (
-    <div className="file-name-image-display">
-      <ul>
-        <div className="file-name-image-display-indiv">
-          <li>
-            <div className="filename-image-container">
-              <img
-                src={storedUploadURL}
-                alt="Valid ID on file"
-                style={{ width: 50, height: 50, marginRight: 5 }}
-              />
-            </div>
-            <div className="file-name-truncated">Existing Valid ID</div>
-            {/* no delete button for fallback; user can click upload to replace */}
-          </li>
-        </div>
-      </ul>
-    </div>
-  )}
-</div>
-
+                        {files3.length === 0 && storedUploadURL && (
+                          <div className="file-name-image-display">
+                            <ul>
+                              <div className="file-name-image-display-indiv">
+                                <li>
+                                  <div className="filename-image-container">
+                                    <img
+                                      src={storedUploadURL}
+                                      alt="Valid ID on file"
+                                      style={{ width: 50, height: 50, marginRight: 5 }}
+                                    />
+                                  </div>
+                                  <div className="file-name-truncated">Existing Valid ID</div>
+                                  {/* no delete button for fallback; user can click upload to replace */}
+                                </li>
+                              </div>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
                    
 
