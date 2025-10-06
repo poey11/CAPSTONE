@@ -5,7 +5,7 @@ import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 // import {useSearchParams } from "next/navigation";
 import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, query, where} from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
-import { ref, uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/navigation";
 import {getLocalDateString,formatDateMMDDYYYY} from "@/app/helpers/helpers";
 import {customAlphabet} from "nanoid";
@@ -386,56 +386,62 @@ useEffect(() => {
  
   const isVerified = userData?.status === "Verified";
   const isReadOnly = isVerified;
+
+  // Put near your other helpers
+const resolveStoredUploadURL = async (val: string): Promise<string | null> => {
+  try {
+    if (!val) return null;
+
+    // Already an https download URL
+    if (val.startsWith("http")) return val;
+
+    // Accept gs://bucket/path OR a bucket-relative path like "ResidentUsers/uid/file.jpg"
+    const r = ref(storage, val); // ref() accepts both "gs://…" and relative paths
+    return await getDownloadURL(r);
+  } catch (e) {
+    console.error("Failed to resolve stored upload URL:", e);
+    return null;
+  }
+};
+
+const [storedUploadURL, setStoredUploadURL] = useState<string | null>(null);
+
+
+
   useEffect(() => {
-    const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch file");
-      const blob = await response.blob();
-      return new File([blob], newFilename, { type: blob.type });
-    };
+  const fetchAndCloneFile = async (url: string, newFilename: string): Promise<File> => {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`Fetch failed: ${resp.status}`);
+    const blob = await resp.blob();
+    return new File([blob], newFilename, { type: blob.type || "image/jpeg" });
+  };
 
+  const cloneUploadIfExists = async () => {
+    if (!user?.uid || !userData?.upload) return;
 
-    // for users that are verified and have an existing upload for verification
-  
-    const cloneUploadIfExists = async () => {
-      if (
-        userData?.upload &&
-        typeof userData.upload === "string" &&
-        userData.upload.includes("firebasestorage.googleapis.com") &&
-        user?.uid
-      ) {
-        const timestamp = Date.now();
-        const userUID = user.uid;
-        const newFilename = `service_request_${userUID}.validIDjpg.${timestamp}.jpg`;
-  
-        try {
-          const clonedFile = await fetchAndCloneFile(userData.upload, newFilename);
-          const previewUrl = URL.createObjectURL(clonedFile);
-  
-          // Set preview for UI display
-          setFiles3([
-            {
-              name: newFilename,
-              preview: previewUrl,
-            },
-          ]);
-  
-          // Set file to clearanceInput
-          setClearanceInput((prev: any) => ({
-            ...prev,
-            validIDjpg: clonedFile,
-          }));
-  
-          // Cleanup object URL after some time
-          setTimeout(() => URL.revokeObjectURL(previewUrl), 10000);
-        } catch (error) {
-          console.error("Error cloning uploaded file:", error);
-        }
-      }
-    };
-  
-    cloneUploadIfExists();
-  }, [userData, user]);
+    try {
+      const url = await resolveStoredUploadURL(userData.upload);
+      setStoredUploadURL(url);              // keep for fallback display
+      if (!url) return;                     // can't fetch -> fallback will use storedUploadURL
+
+      const newFilename = `service_request_${user.uid}.validIDjpg.${Date.now()}.jpg`;
+      const clonedFile = await fetchAndCloneFile(url, newFilename);
+      const previewUrl = URL.createObjectURL(clonedFile);
+
+      setFiles3([{ name: newFilename, preview: previewUrl }]);
+      setClearanceInput((prev: any) => ({ ...prev, validIDjpg: clonedFile }));
+
+      // free preview URL later
+      setTimeout(() => URL.revokeObjectURL(previewUrl), 10000);
+    } catch (err) {
+      console.error("Error cloning uploaded file:", err);
+      // storedUploadURL will still let us show a preview image even if clone fails
+    }
+  };
+
+  cloneUploadIfExists();
+}, [userData?.upload, user?.uid]);
+
   
 
   function getAgeFromBirthday(birthday: string | Date): number {
