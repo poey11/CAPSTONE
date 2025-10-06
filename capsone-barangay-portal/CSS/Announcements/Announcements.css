@@ -222,18 +222,29 @@
   width: 100px;
 }
 
+
 .recent-post-card {
+  cursor: pointer;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
   display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1rem;
-  align-items: center;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 
 .recent-post-card img {
   width: 130px;
   height: 60px;
   object-fit: cover;
   border-radius: 5px;
+}
+
+
+.recent-post-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .recent-post-content{
@@ -251,6 +262,12 @@
   color: gray;
 }
 
+
+.recent-post-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block; /* makes the whole card clickable */
+}
 
 /* Announcement Cards */
 .announcement-card-announcement {
@@ -364,6 +381,9 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+
+
 
 /* Tablets (portrait & small landscape) */
 @media (max-width: 1024px) and (min-width: 769px) {

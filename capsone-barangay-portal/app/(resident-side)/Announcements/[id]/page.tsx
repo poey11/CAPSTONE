@@ -48,11 +48,13 @@ export default function AnnouncementDetails() {
                   </span>
               </div>
 
-              <img
-                src={image}
-                alt={title}
-                className="announcement-image-specificannouncement"
-              />
+              <div className="announcement-image-container">
+                <img
+                  src={image}
+                  alt={title}
+                  className="announcement-image-announcement"
+                />
+              </div>
 
               <div className="announcement-content-specificannouncement">
                 <p className="announcement-description-specificannouncement">

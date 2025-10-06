@@ -169,20 +169,34 @@ export default function Announcement() {
         
         <div className="right-section-announcement">
           <div className="recent-posts-announcement">
-            <h3>Recent Posts</h3>
-            {recentPosts.map((post, idx) => (
-              <div key={idx} className="recent-post-card">
-                <div className="announcement-img">
-                  <img src={post.image} alt={post.image}/>
-                </div>
-                
-                <div className="recent-post-content">
-                  <p>{post.announcementHeadline}</p>
-                  <span>{post.createdAt}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+  <h3>Recent Posts</h3>
+  {recentPosts.map((post, idx) => (
+    <Link
+      key={idx}
+      href={{
+        pathname: `/Announcements/${idx}`,
+        query: {
+          title: post.announcementHeadline,
+          description: post.content,
+          date: post.createdAt,
+          image: post.image,
+        },
+      }}
+      className="recent-post-card-link"
+    >
+      <div className="recent-post-card">
+        <div className="announcement-img">
+          <img src={post.image} alt={post.announcementHeadline} />
+        </div>
+
+        <div className="recent-post-content">
+          <p>{post.announcementHeadline}</p>
+          <span>{post.createdAt}</span>
+        </div>
+      </div>
+    </Link>
+  ))}
+</div>
         </div>
       </div>
     </main>
