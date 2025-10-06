@@ -750,6 +750,28 @@ LALA
   .terms-content h3 {
     font-size: 17px;
   }
+
+ .popup-register-error, .confirmation-popup-register {
+      height: 180px;
+    width: 300px;
+    font-size: 16px;
+ }
+
+ .close-button {
+      font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+ }
+
+   .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
+
+
+  
 }
 
 /* Phones (portrait & small landscape) */
@@ -818,6 +840,26 @@ LALA
     font-size: 14px;
     padding: 8px 16px;
   }
+
+ .popup-register-error, .confirmation-popup-register {
+    height: 180px;
+    width: 300px;
+    font-size: 16px;
+ }
+
+  .close-button {
+      font-size: 16px;
+    width: 100px;
+    margin-top: 10px;
+ }
+
+   .yes-button-add,
+  .no-button-add {
+    width: 70px;
+    height: 35px;
+    padding: 0%;
+  }
+
 }
 
 /* fix date input */

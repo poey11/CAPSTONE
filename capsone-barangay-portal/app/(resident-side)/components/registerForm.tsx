@@ -236,6 +236,7 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
 //  if (!isTermChecked) invalidFields.push("terms");
 
+/*
     if (invalidFields.length > 0) {
       setInvalidFields(invalidFields);
     setPopupErrorMessage("Please fill up all required fields.");
@@ -245,6 +246,15 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
       }, 3000);
       return;
     }
+      */
+
+    if (invalidFields.length > 0) {
+  setInvalidFields(invalidFields);
+  setErrorPopup({ show: true, message: "Please fill up all required fields." });
+  setTimeout(() => {}, 3000);
+  return;
+}
+
 
   setInvalidFields([]);
  setShowSubmitPopup(true);
@@ -640,6 +650,8 @@ const [showTerms, setShowTerms] = useState(false);
                 </div>
             )}
 
+
+            {/*}
             {showErrorPopup && (
                 <div className={`error-popup-overlay-register show`}>
                     <div className="popup-ad-register">
@@ -648,6 +660,8 @@ const [showTerms, setShowTerms] = useState(false);
                     </div>
                 </div>
                 )}
+            */}
+
         </main>
 
         
