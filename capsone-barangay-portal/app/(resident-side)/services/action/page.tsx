@@ -13,7 +13,13 @@ import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
-;
+
+import { getApp } from "firebase/app";
+import { getStorage } from "firebase/storage";
+
+console.log("projectId:", getApp().options.projectId);
+console.log("storageBucket:", getApp().options.storageBucket); // should be "<project-id>.appspot.com"
+
 
 interface EmergencyDetails {
   fullName: string;
