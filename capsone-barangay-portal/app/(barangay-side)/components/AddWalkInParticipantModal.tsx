@@ -1101,7 +1101,7 @@ export default function AddWalkInParticipantModal({
               </button>
 
               {/* New: Auto-fill button */}
-              <button
+              {/* <button
                 className="participant-action-accept"
                 style={{ marginLeft: 8 }}
                 onClick={autoFillMissingForSelectedDay}
@@ -1113,7 +1113,7 @@ export default function AddWalkInParticipantModal({
                 }
               >
                 {autoFillLoading ? "Auto-filling..." : "Auto-fill Remaining for Day"}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
