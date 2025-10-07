@@ -340,10 +340,10 @@ useEffect(() => {
 
     <div className="captain-info fade-slide-up" ref={thirdSectionRef}>
       <span className="captain-role">Barangay Captain</span>
-      <h2 className="captain-name">Jonell L. Quebal</h2>
+      <h2 className="captain-name">Jose Arnel L. Quebal</h2>
       <p className="captain-quote">
         “Great leaders inspire unity, progress, and hope within their community” 
-        <br /><em>- Jonell</em>
+        <br /><em>- Jose Arnel L. Quebal</em>
       </p>
       <p className="captain-description">
         Barangay Captain Jonel Quebal, a dedicated public servant and a true 

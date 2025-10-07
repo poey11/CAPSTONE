@@ -50,7 +50,7 @@ const Footer = () => {
             </div>
             <div className="contactinfo-loc">
               <img src="/images/location1.png" alt="Image 3" className="contacticon" />
-              <p>West Fairview, 9 A Dahlia Ave, West Fairview, Quezon City, 1118 Metro Manila</p>
+              <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
             </div>
           </div>
         </div>
