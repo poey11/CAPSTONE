@@ -94,10 +94,9 @@
 
 .captain-photo {
   width: 350px;             /* bigger width for rectangle */
-  height: 500px;             /* keeps aspect ratio */
+  height: 450px;             /* keeps aspect ratio */
   border-radius: 10px;      /* slight rounding, optional */
   object-fit: cover;
-  object-position: 60% center;
   background: #fff;
 }
 
