@@ -29,7 +29,7 @@ const Footer = () => {
         <div className="footer-top">
           <div className="footer-section1">
             <img
-              src="/Images/brgylogo.png"
+              src="/Images/updatedlogo.png"
               alt="Barangay Logo"
               className="footer-logo"
             />
@@ -50,14 +50,13 @@ const Footer = () => {
             </div>
             <div className="contactinfo-loc">
               <img src="/images/location1.png" alt="Image 3" className="contacticon" />
-              <p>West Fairview, 9 A Dahlia Ave, West Fairview, Quezon City, 1118 Metro Manila</p>
+              <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
           <p>© {year} Barangay Fairview. All rights reserved.</p>
-          <p className="footer-disclaimer">Disclaimer: This website is created solely for academic and capstone project purposes.
-            It is not an official website of Barangay Fairview.</p>
+          <p className="footer-disclaimer">Disclaimer: This website, including all text, images, and other content, is created solely for academic and capstone project purposes. It is not an official website of Barangay Fairview.</p>
         </div>
       </div>
     </footer>

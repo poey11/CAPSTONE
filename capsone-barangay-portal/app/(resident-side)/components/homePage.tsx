@@ -340,17 +340,17 @@ useEffect(() => {
 
     <div className="captain-info fade-slide-up" ref={thirdSectionRef}>
       <span className="captain-role">Barangay Captain</span>
-      <h2 className="captain-name">Jonell L. Quebal</h2>
+      <h2 className="captain-name">Jose Arnel L. Quebal</h2>
       <p className="captain-quote">
         “Great leaders inspire unity, progress, and hope within their community” 
-        <br /><em>- Jonell</em>
+        <br /><em>- Jose Arnel L. Quebal</em>
       </p>
       <p className="captain-description">
         Barangay Captain Jonel Quebal, a dedicated public servant and a true 
                             advocate for the well-being of Barangay Fairview.
-                            A proud product of our barangay, Captain Jonel Quebal has been serving 
+                            A proud product of our barangay, Captain Jose Arnel L. Quebal has been serving 
                             the community with passion and commitment since 2013. Learn more about Barangay 
-                            Captain Jonel Quebal and his vision for Barangay Fairview. Read his blog to stay
+                            Jose Arnel L. Quebal and his vision for Barangay Fairview. Read his blog to stay
                             connected and inspired!
       </p>
       
