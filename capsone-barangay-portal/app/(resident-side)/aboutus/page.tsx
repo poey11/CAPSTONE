@@ -111,7 +111,7 @@ export default function AboutUs() {
   <h2 className="section-title">Meet Our Leader</h2>
   <div className="leader-card">
     <div className="leader-photo-wrapper">
-      <img src="/images/brgyKap.png" alt="Barangay Captain" className="captain-photo"/>
+      <img src="/Images/brgyKap.png" alt="Barangay Captain" className="captain-photo"/>
     </div>
     <div className="leader-info">
       <h3>Jose Arnel L. Quebal</h3>
