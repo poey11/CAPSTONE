@@ -287,13 +287,23 @@ const formRef = useRef<HTMLFormElement>(null);
           await uploadBytes(storageRef, incidentReport.file);
         }
         
+      // const residentNotificationRef = collection(db, "Notifications");
+      // await addDoc(residentNotificationRef, {
+      //   incidentID: incidentID,
+      //   isRead: true, // or false if you prefer unread by default
+      //   message: `Your incident report (${updates.caseNumber}) has been updated to "pending".`,
+      //   residentID: currentUser !== "Guest" ? currentUser : "Guest",
+      //   timestamp: new Date(),
+      //   transactionType: "Online Incident",
+      // });
+
         // Create a notification for LF Staff
         const notificationRef = collection(db, "BarangayNotifications");
         await addDoc(notificationRef, {
           message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
           timestamp: new Date(),
           isRead: false,
-          transactionType: "IncidentReport",
+          transactionType: "Online Incident",
           recipientRole: "LF Staff",
           incidentID: incidentID,
           ...(currentUser !== "Guest" && { reportID: currentUser }), 

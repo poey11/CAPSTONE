@@ -379,7 +379,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
       incidentID: formData.id,
       message: `Your incident report (${formData.caseNumber}) has been updated to "${formData.status}".`,
       timestamp: new Date(),
-      transactionType: "IncidentReport",
+      transactionType: "Online Incident",
       isRead: false,
     });
 
@@ -390,7 +390,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
         incidentID: formData.id,
         message: `Respondent information for your incident report (${formData.caseNumber}) has been updated.`,
         timestamp: new Date(),
-        transactionType: "IncidentReport",
+        transactionType: "Online Incident",
         isRead: false,
       });
     }
@@ -404,7 +404,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement> | null = null): 
         timestamp: new Date(),
         isRead: false,
         incidentID: formData.id,
-        transactionType: "IncidentReport"
+        transactionType: "Online Incident"
       });
     }
 
