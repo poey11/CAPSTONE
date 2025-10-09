@@ -507,7 +507,7 @@ useEffect(() => {
 
             <div className={`add-announcements-profile-container ${invalidFields.includes("image") ? "input-error" : ""}`}>
               <img
-                src={announcementPreview || "/Images/thumbnail.png"} 
+                src={announcementPreview || "/images/thumbnail.png"} 
                 alt="Announcement"
                 className="add-announcements-photo"
               />
