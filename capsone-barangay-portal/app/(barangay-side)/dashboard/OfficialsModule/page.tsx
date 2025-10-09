@@ -97,7 +97,7 @@ export default function OfficialsModule() {
           ...(doc.data().position === "LF Staff" && { department: doc.data().department || "N/A" }),
           term: doc.data().term || "N/A",
           contact: doc.data().phone,
-          image: doc.data().image || "/images/default-profile.png",
+          image: doc.data().image || "/Images/default-profile.png",
           email: doc.data().email || "N/A",
           createdBy: doc.data().createdBy || "N/A",
           createdAt: doc.data().createdAt,
@@ -151,7 +151,7 @@ useEffect(() => {
           : rawPosition,
         term: doc.data().term || "N/A",
         contact: doc.data().contact,
-        image: doc.data().image || "/images/default-profile.png",
+        image: doc.data().image || "/Images/default-profile.png",
         email: doc.data().email || "N/A",
         createdBy: doc.data().createdBy || "N/A",
         createdAt: doc.data().createdAt,
@@ -308,7 +308,7 @@ const addNewOfficer = async () => {
       email: officialToAdd?.email || "",
       facebook: officialToAdd?.facebook || "N/A",
       position: position,
-      image: imageUrl || "/images/default-profile.png",
+      image: imageUrl || "/Images/default-profile.png",
       createdBy: session?.user.fullName || "Unknown",
       createdAt: new Date().toLocaleString(),
     };
@@ -525,7 +525,7 @@ const deleteOfficer = async () => {
       <div className="brgy-officials-main-section">
         {currentUser.length === 0 ? (
           <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
             <p className="no-results-department">No Results Found</p>
           </div>
         ) : (

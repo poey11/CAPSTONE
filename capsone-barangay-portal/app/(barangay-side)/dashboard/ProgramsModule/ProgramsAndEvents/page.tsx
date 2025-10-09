@@ -849,7 +849,7 @@ export default function ProgramsModule() {
             ) : currentPrograms.length === 0 ? (
               <div className="no-result-card-programs">
                 <img
-                  src="/images/no-results.png"
+                  src="/Images/no-results.png"
                   alt="No results icon"
                   className="no-result-icon-programs"
                 />
@@ -1005,7 +1005,7 @@ export default function ProgramsModule() {
               ) : currentParticipants.length === 0 ? (
                 <div className="no-result-card-programs">
                   <img
-                    src="/images/no-results.png"
+                    src="/Images/no-results.png"
                     alt="No results icon"
                     className="no-result-icon-programs"
                   />
@@ -1168,7 +1168,7 @@ export default function ProgramsModule() {
             ) : currentPendingPrograms.length === 0 ? (
               <div className="no-result-card-programs">
                 <img
-                  src="/images/no-results.png"
+                  src="/Images/no-results.png"
                   alt="No results icon"
                   className="no-result-icon-programs"
                 />

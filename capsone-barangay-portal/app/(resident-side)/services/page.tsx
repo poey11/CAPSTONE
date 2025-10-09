@@ -108,7 +108,7 @@ export default function Services() {
             id="Barangay Certificate"
           >
             <div className="card-content-up">
-              <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+              <img src="/Images/document.png" alt="Document Icon" className="document-icon" />
               <h1>Barangay Certificate</h1>
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function Services() {
             id="Barangay Indigency"
           >
             <div className="card-content-up">
-              <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+              <img src="/Images/document.png" alt="Document Icon" className="document-icon" />
               <h1>Barangay Indigency</h1>
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function Services() {
             id="Barangay Clearance"
           >
               <div className="card-content-up">
-                <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+                <img src="/Images/document.png" alt="Document Icon" className="document-icon" />
                 <h1>Barangay Clearance</h1>
               </div>
           </div>
@@ -165,7 +165,7 @@ export default function Services() {
       <div className={`button-column button-right`}>
         <div className="documents-card dropdown-container">
           <div className="card-content-up">
-            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <img src="/Images/document.png" alt="Document Icon" className="document-icon" />
             <h1>Barangay Permits</h1>
           </div>
           <div className="dropdown">
@@ -182,7 +182,7 @@ export default function Services() {
         
         <div className="documents-card" onClick={goToServices} id="Other Documents">
           <div className="card-content-up">
-            <img src="/images/document.png" alt="Document Icon" className="document-icon" />
+            <img src="/Images/document.png" alt="Document Icon" className="document-icon" />
             <h1>Other Documents</h1>
           </div>
         </div>

@@ -694,7 +694,7 @@ useEffect(() => {
                   <p className="error">{error}</p>
                 ) : currentInBarangayRequests.length === 0 ? (
                     <div className="no-task-card-inbrgy">
-                      <img src="/images/customer-service.png" alt="No results icon" className="no-task-icon-inbrgy" />
+                      <img src="/Images/customer-service.png" alt="No results icon" className="no-task-icon-inbrgy" />
                       <p className="no-task-department-inbrgy">You have No Tasks For Today!</p>
                     </div>
                 ) : (
