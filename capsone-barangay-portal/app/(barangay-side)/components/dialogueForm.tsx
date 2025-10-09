@@ -411,7 +411,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button type="button" onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> Dialogue Section  </h1>

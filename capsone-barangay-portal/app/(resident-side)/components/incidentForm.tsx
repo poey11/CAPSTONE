@@ -287,15 +287,15 @@ const formRef = useRef<HTMLFormElement>(null);
           await uploadBytes(storageRef, incidentReport.file);
         }
         
-      // const residentNotificationRef = collection(db, "Notifications");
-      // await addDoc(residentNotificationRef, {
-      //   incidentID: incidentID,
-      //   isRead: true, // or false if you prefer unread by default
-      //   message: `Your incident report (${updates.caseNumber}) has been updated to "pending".`,
-      //   residentID: currentUser !== "Guest" ? currentUser : "Guest",
-      //   timestamp: new Date(),
-      //   transactionType: "Online Incident",
-      // });
+      const residentNotificationRef = collection(db, "Notifications");
+      await addDoc(residentNotificationRef, {
+        incidentID: incidentID,
+        isRead: true, // or false if you prefer unread by default
+        message: `Your incident report (${updates.caseNumber}) has been updated to "pending".`,
+        residentID: currentUser !== "Guest" ? currentUser : "Guest",
+        timestamp: new Date(),
+        transactionType: "Online Incident",
+      });
 
         // Create a notification for LF Staff
         const notificationRef = collection(db, "BarangayNotifications");
@@ -888,7 +888,7 @@ const confirmSubmit = async () => {
                                               className="delete-button-incident-report"
                                             >
                                               <img
-                                                src="/images/trash.png"
+                                                src="/Images/trash.png"
                                                 alt="Delete"
                                                 className="delete-icon-incident-report"
                                               />

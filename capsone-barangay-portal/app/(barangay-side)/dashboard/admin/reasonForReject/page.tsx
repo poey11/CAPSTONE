@@ -136,7 +136,7 @@ export default function reasonForRejection() {
             <div className="add-barangayuser-main-section1">
                 <div className="add-barangayuser-main-section1-left">
                     <button onClick={handleBack}>
-                        <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                        <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                     </button>
 
                     <h1> Reason For Rejection </h1>
@@ -195,7 +195,7 @@ export default function reasonForRejection() {
         <div className="add-barangayuser-main-section1">
             <div className="add-barangayuser-main-section1-left">
             <button onClick={handleBack}>
-                <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" /> 
+                <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" /> 
             </button>
 
             <h1> Reason For Rejection </h1>

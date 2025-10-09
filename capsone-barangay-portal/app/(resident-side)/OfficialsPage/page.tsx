@@ -56,7 +56,7 @@ export default function Official() {
         position: getPositionLabel(doc.data().position, doc.data().department),
         term: doc.data().term || "N/A",
         contact: doc.data().contact,
-        image: doc.data().image || "/images/default-profile.png",
+        image: doc.data().image || "/Images/default-profile.png",
         email: doc.data().email || "N/A",
         createdBy: doc.data().createdBy || "N/A",
         createdAt: doc.data().createdAt,

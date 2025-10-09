@@ -3619,7 +3619,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                               className="delete-button"
                                             >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -3680,7 +3680,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                     className="delete-button"
                                                   >
                                                   <img
-                                                    src="/images/trash.png"  
+                                                    src="/Images/trash.png"  
                                                     alt="Delete"
                                                     className="delete-icon"
                                                   />
@@ -3745,7 +3745,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -3819,7 +3819,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                       className="delete-button"
                                                     >
                                                     <img
-                                                      src="/images/trash.png"  
+                                                      src="/Images/trash.png"  
                                                       alt="Delete"
                                                       className="delete-icon"
                                                     />
@@ -3883,7 +3883,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                               className="delete-button"
                                             >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -3945,7 +3945,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4005,7 +4005,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4065,7 +4065,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4129,7 +4129,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4189,7 +4189,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4249,7 +4249,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4313,7 +4313,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                                   className="delete-button"
                                                 >
                                                 <img
-                                                  src="/images/trash.png"  
+                                                  src="/Images/trash.png"  
                                                   alt="Delete"
                                                   className="delete-icon"
                                                 />
@@ -4380,7 +4380,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                               onClick={() => handleDynamicImageDelete(fieldName, file.name)}
                                             >
                                               <img
-                                                src="/images/trash.png"
+                                                src="/Images/trash.png"
                                                 alt="Delete"
                                                 className="delete-icon"
                                               />

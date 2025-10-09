@@ -526,7 +526,7 @@ const [showTerms, setShowTerms] = useState(false);
                                             className="delete-button-register"
                                             >
                                             <img
-                                                src="/images/trash.png"
+                                                src="/Images/trash.png"
                                                 alt="Delete"
                                                 className="delete-icon-register"
                                             />

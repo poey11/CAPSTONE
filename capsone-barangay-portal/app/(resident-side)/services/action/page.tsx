@@ -3735,7 +3735,7 @@ const handleFileChange = (
                                         className="delete-button"
                                       >
                                         <img
-                                          src="/images/trash.png"  
+                                          src="/Images/trash.png"  
                                           alt="Delete"
                                           className="delete-icon"
                                         />
@@ -3794,7 +3794,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -3866,7 +3866,7 @@ const handleFileChange = (
                                       onClick={() => handleDynamicImageDelete(fieldName, file.name)}
                                     >
                                       <img
-                                        src="/images/trash.png"
+                                        src="/Images/trash.png"
                                         alt="Delete"
                                         className="delete-icon"
                                       />
@@ -3941,7 +3941,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -4028,7 +4028,7 @@ const handleFileChange = (
                                           className="delete-button"
                                         >
                                           <img
-                                            src="/images/trash.png"
+                                            src="/Images/trash.png"
                                             alt="Delete"
                                             className="delete-icon"
                                           />
@@ -4116,7 +4116,7 @@ const handleFileChange = (
                                           className="delete-button"
                                         >
                                           <img
-                                            src="/images/trash.png"  
+                                            src="/Images/trash.png"  
                                             alt="Delete"
                                             className="delete-icon"
                                           />
@@ -4182,7 +4182,7 @@ const handleFileChange = (
                                               className="delete-button"
                                             >
                                               <img
-                                                src="/images/trash.png"  
+                                                src="/Images/trash.png"  
                                                 alt="Delete"
                                                 className="delete-icon"
                                               />
@@ -4246,7 +4246,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -4306,7 +4306,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -4369,7 +4369,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -4428,7 +4428,7 @@ const handleFileChange = (
                                             className="delete-button"
                                           >
                                             <img
-                                              src="/images/trash.png"  
+                                              src="/Images/trash.png"  
                                               alt="Delete"
                                               className="delete-icon"
                                             />
@@ -4495,7 +4495,7 @@ const handleFileChange = (
                                           className="delete-button"
                                         >
                                           <img
-                                            src="/images/trash.png"  
+                                            src="/Images/trash.png"  
                                             alt="Delete"
                                             className="delete-icon"
                                           />
