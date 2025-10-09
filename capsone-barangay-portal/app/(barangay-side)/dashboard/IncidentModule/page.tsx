@@ -206,7 +206,7 @@ export default function MainPageIncident() {
           {filteredIncidents.length === 0 ? (
             <div className="no-result-card">
               <img
-                src="/images/no-results.png"
+                src="/Images/no-results.png"
                 alt="No results icon"
                 className="no-result-icon"
               />

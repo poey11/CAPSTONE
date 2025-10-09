@@ -61,7 +61,7 @@ export default function OnlineRequests() {
                 <div className="addAnnouncement-main-section1">
                     <div className="addAnnouncement-main-section1-left">
                         <button onClick={handleBackToOnlineRequests}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn" />
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn" />
                         </button>
                         <h1>Send SMS</h1>
                     </div>

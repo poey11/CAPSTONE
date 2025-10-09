@@ -1033,7 +1033,7 @@ const formatStatus = (status: string) => {
             >
         {currentIncidents.length === 0 ? (
           <div className="no-result-card-departments" /* edited this class */>
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
             <p className="no-results-departments" /* edited this class */>No Results Found</p>
           </div>
         ) : (

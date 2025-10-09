@@ -898,7 +898,7 @@ export default function EditKasambahay() {
                                   disabled={!canEditField("identificationFile")}
                                   style={disabledStyle("identificationFile")}
                                 >
-                                  <img src="/images/trash.png" alt="Delete" className="delete-icon" />
+                                  <img src="/Images/trash.png" alt="Delete" className="delete-icon" />
                                 </button>
                               </div>
                             )}

@@ -261,7 +261,7 @@ export default function ViewUser() {
                     <div className="view-user-header-body-top-section">
                         <div className="view-user-backbutton-container">
                             <button onClick={handleBack}>
-                                <img src="/images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
+                                <img src="/Images/left-arrow.png" alt="Left Arrow" className="user-back-btn-resident"/> 
                             </button>
                         </div>
 
