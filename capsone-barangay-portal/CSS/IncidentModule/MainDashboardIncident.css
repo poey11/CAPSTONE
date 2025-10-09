@@ -757,11 +757,37 @@ SCROLL FOR CHROME ETC
 
 .view-incident-user-info-toggle-wrapper {
   display: flex;
-  justify-content: center; 
+  justify-content: flex-start; 
   gap: 30px;
-  width: 50%;
+  width: 60%;
   align-items: center;
+
+  /* scrollable */
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+
+  /* fix clipping */
+  padding-left: 10px;  
+  padding-right: 10px;
+  box-sizing: border-box;
+
+
 }
+
+.view-incident-user-info-toggle-wrapper::-webkit-scrollbar {
+  height: 6px; 
+}
+
+.view-incident-user-info-toggle-wrapper::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.view-incident-user-info-toggle-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
 
 /* changed this */
 .incident-info-toggle-btn {
@@ -774,6 +800,9 @@ SCROLL FOR CHROME ETC
   color: #333;
   border-bottom: 3px solid #ccc;
   transition: all 0.3s ease;
+
+   flex: 0 0 auto;
+  
 }
 
 .incident-info-toggle-btn:hover,

@@ -1,5 +1,5 @@
 import {  use, useEffect, useState } from "react";
-import { collection, addDoc, doc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
+import { collection, addDoc, doc, getDoc, onSnapshot,updateDoc,query, orderBy, where } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -139,7 +139,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           status: "dismissed",
           statusPriority: 5,
         })
-        router.push(`/dashboard/IncidentModule/Department?id=${data?.department}`);
+        router.push(`/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`);
       }
     }, [data]);
 
@@ -346,7 +346,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               setShowDoneIncidentPopup(true);
               return;
             }    
-            router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${id}&department=${department}`);
+            router.push(`/dashboard/IncidentModule/EditIncident/RefailureHearing?id=${docId}&action=summon&department=${department}}`);
 
 
         } catch (error:any) {
@@ -354,29 +354,52 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         }
     };
 
-          const confirmSubmit = async () => {
-            setShowSubmitPopup(false);
-          
-            try {
-              await saveSummon(); 
-          
-              setPopupMessage("Summon Successfully Saved!");
-              setShowPopup(true);
-          
-              setTimeout(() => {
-                setShowPopup(false);
-                if(index === 2) {
-                    //window.location.reload(); // Reload the page to reflect changes
-                }
-            }, 3000);
-            //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-            } catch (error) {
-              console.error("Error during confirmation submit:", error);
-              setPopupErrorMessage("Error saving summon. Please try again.");
-              setShowErrorPopup(true);
-              setTimeout(() => setShowErrorPopup(false), 3000);
-            }
-          };
+    const confirmSubmit = async () => {
+  setShowSubmitPopup(false);
+
+  try {
+    await saveSummon();
+
+    setPopupMessage("Summon Successfully Saved!");
+    setShowPopup(true);
+
+    // Fetch latest data from Firestore
+    const docRef = doc(db, "IncidentReports", id);
+    const latestDoc = await getDoc(docRef);
+    const latestData = latestDoc.exists() ? latestDoc.data() : {};
+
+    setTimeout(() => {
+      setShowPopup(false);
+
+      // Only redirect if complainantAbsents is less than 2
+      if ((latestData?.complainantAbsents || 0) < 2) {
+        // Redirect to LetterAndInvitation page if complainant absent
+        if (
+          (details.Cstatus === "Absent" || (details.Cstatus === "Absent" && details.Rstatus === "Absent")) &&
+          !["CFA", "Refer to Government Agency", "dismissed"].includes(latestData?.status)
+        ) {
+          router.push(
+            `/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`
+          );
+        } 
+        // Redirect to Department page if status is one of the 3 specified
+        else if (["CFA", "Refer to Government Agency", "dismissed"].includes(latestData?.status)) {
+          router.push(
+            `/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`
+          );
+        }
+      }
+      // If complainantAbsents >= 2, do nothing — let the useEffect handle dismissed redirect
+    }, 3000);
+
+  } catch (error) {
+    console.error("Error during confirmation submit:", error);
+    setPopupErrorMessage("Error saving summon. Please try again.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+  }
+};
+
 
 
     const usersAbsent = () => details.Cstatus === "Absent" || details.Rstatus === "Absent";
@@ -459,7 +482,9 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
       setTimeout(() => {
         setShowPopup(false);
-        router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+        //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+        //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
+        router.push(`/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`);
       }, 3000);
     } catch (error) {
       console.error("Error during confirmation submit:", error);
@@ -492,7 +517,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
           setTimeout(() => {
             setShowPopup(false);
             if (department !== "Lupon") {
-              router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+              //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+              router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
             } else {
               // Lupon: ask how it was settled (same as dialogueForm)
               setShowSubmitPopupB(true);
@@ -510,7 +536,8 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
 
           setTimeout(() => {
             setShowPopup(false);
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`);
           }, 2000);
         }
       };
@@ -861,7 +888,14 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               setShowDoneIncidentPopup(false);
               setPopupMessage("Incident has been updated successfully.");
               setShowPopup(true);
-              setTimeout(() => setShowPopup(false), 3000);            }}
+              setTimeout(() => {
+                  setShowPopup(false);
+                //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
+                router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
+              }, 2000);            
+            
+            }}
             className="no-button-add"
           >
             No
@@ -884,7 +918,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
             }}
             className="no-button-add bg-gray-600"
           >
-            Refer to Government Agency
+            RGA
           </button>
         )}
 
@@ -906,6 +940,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
   </div>
 )}
 
+{/*
 
 {showGovAgencyPopup !== null && (
   <div className="confirmation-popup-overlay-add">
@@ -913,7 +948,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
       <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup" />
       <p>Which Government Agency to Refer this to?</p>
 
-      {/* Quick-pick buttons that fill the same text field */}
+   
       <div className="settlement-options-modern-section">
         {[
           "Social Services Development Department (SSDD)",
@@ -938,7 +973,7 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
         ))}
       </div>
 
-      {/* Single input used for any agency (preset or custom) */}
+
       <input
         type="text"
         className="edit-incident-input-field mt-3"
@@ -968,17 +1003,16 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
               return;
             }
 
-            // Persist the status + chosen agency
+           
             const mainDocRef = doc(db, "IncidentReports", id);
             await updateDoc(mainDocRef, {
               status: "Refer to Government Agency",
               statusPriority: 6,
-              referredAgency: agency, // <-- stored in one field
+              referredAgency: agency, 
             });
 
             setShowGovAgencyPopup(null);
-            // If you want to also leverage your existing confirmSubmitB flow, you can still call it:
-            // (this keeps the same success UX + redirect timing you already have)
+        
             confirmSubmitB();
           }}
         >
@@ -988,6 +1022,74 @@ const HearingForm: React.FC<HearingFormProps> = ({ index, id, hearing, status })
     </div>
   </div>
 )}
+
+
+*/}
+
+
+{showGovAgencyPopup !== null && (
+  <div className="confirmation-popup-overlay-add-rga">
+    <div className="confirmation-popup-add-rga">
+      <img src="/Images/question.png" alt="icon alert" className="successful-icon-popup-rga" />
+      <p>Which Government Agency to Refer this to?</p>
+
+      {/* Dropdown instead of quick-pick + text input */}
+      <select
+        className="dropdown-rga mt-3"
+        value={showGovAgencyPopup ?? ""}
+        onChange={(e) => setShowGovAgencyPopup(e.target.value)}
+        autoFocus
+      >
+        <option value="" disabled>
+          Select Government Agency
+        </option>
+        <option value="Social Services Development Department (SSDD)">
+          Social Services Development Department (SSDD)
+        </option>
+        <option value="Department of Social Welfare and Development (DSWD)">
+          Department of Social Welfare and Development (DSWD)
+        </option>
+        <option value="Police Station">Police Station</option>
+      </select>
+
+      <div className="yesno-container-add-rga">
+        <button
+          className="no-button-add-rga"
+          onClick={() => setShowGovAgencyPopup(null)}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="yes-button-add-rga"
+          onClick={async () => {
+            const agency = (showGovAgencyPopup ?? "").trim();
+
+            if (!agency) {
+              setPopupErrorMessage("Please select a government agency before submitting.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+
+            const mainDocRef = doc(db, "IncidentReports", id);
+            await updateDoc(mainDocRef, {
+              status: "Refer to Government Agency",
+              statusPriority: 6,
+              referredAgency: agency,
+            });
+
+            setShowGovAgencyPopup(null);
+            confirmSubmitB();
+          }}
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
 {showSubmitPopupB && (

@@ -94,6 +94,27 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
   const [summaryLoaded, setSummaryLoaded] = useState(false);
   const [introPushed, setIntroPushed] = useState(false);
 
+  const botRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (botRef.current && !botRef.current.contains(event.target as Node)) {
+      setBotOpen(false);
+    }
+  }
+
+  if (botOpen) {
+    document.addEventListener("mousedown", handleClickOutside);
+  } else {
+    document.removeEventListener("mousedown", handleClickOutside);
+  }
+
+  // Cleanup when component unmounts or when botOpen changes
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [botOpen]);
+
   const sessionId =
     (effectiveUser?.uid ?? "") ||
     ("guest-" +
@@ -475,7 +496,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
         </button>
 
         {botOpen && (
-          <div className="bot-messenger">
+          <div className="bot-messenger" ref={botRef}>
             <div className="chat-header">
               <div>
                 Barangay Assistant
@@ -509,7 +530,7 @@ export default function Chatbot({ user: userProp }: { user?: { uid?: string } })
 
               <div className="quick-chips">
                 {/* public chips */}
-                {["hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
+                {["Hello", "Services", "Request Document", "File an Incident", "Programs", "Announcements"].map((q) => (
                   <button key={q} className="quick-chip" onClick={() => sendToBot(q)}>
                     {q}
                   </button>

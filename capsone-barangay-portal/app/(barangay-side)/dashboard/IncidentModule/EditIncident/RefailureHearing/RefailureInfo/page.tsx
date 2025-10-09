@@ -16,10 +16,17 @@ interface otherInfoType {
     LuponStaff?: string;
     LuponStaffId?: string;
     DateFiled?: string;
+    complainant?: {
+        fname?: string;
+        lname?: string;
+        contact?: string;
+        address?: string;
+    };
     respondent?: {
         fname?: string;
         lname?: string;
         contact?: string;
+        address?: string;
     };
 }
 
@@ -48,8 +55,23 @@ export default function Page() {
             DateTimeOfMeeting: "",
             LuponStaff: "",
             DateFiled: today,
+
+             complainant: {
+                fname: "",
+                lname: "",
+                contact: "",
+                address: ""
+            },
+            respondent: {
+                fname: "",
+                lname: "",
+                contact: "",
+                address: ""
+  }
         }
     );
+
+    
     const [dateFiled, setDateFiled] = useState(today);
     const [listOfStaffs, setListOfStaffs] = useState<any[]>([]);
     useEffect(() => {
@@ -72,6 +94,30 @@ export default function Page() {
 
     const [isLoading, setIsLoading] = useState(false);
     const [reportData, setReportData] = useState<any>(null);
+
+
+
+useEffect(() => {
+  if (!reportData) return;
+
+  setOtherInfo((prev) => ({
+    ...prev,
+    complainant: {
+      fname: reportData?.complainant?.fname || "",
+      lname: reportData?.complainant?.lname || "",
+      contact: reportData?.complainant?.contact || "",
+      address: reportData?.complainant?.address || ""
+    },
+    respondent: {
+      fname: reportData?.respondent?.fname || "",
+      lname: reportData?.respondent?.lname || "",
+      contact: reportData?.respondent?.contact || "",
+      address: reportData?.respondent?.address || ""
+    }
+  }));
+}, [reportData]);
+
+
     useEffect(() => {
       if(!docId) return;
         const docRef = doc(db, "IncidentReports", docId);
@@ -425,6 +471,159 @@ export default function Page() {
 
                    <div className="scroll-letter">
                         <div className="section-2-letter">
+
+                                                    <div className="section-2-letter-upper">
+                            <div className="section-2-letter-left-side">
+                                <div className="section-2-information-section">
+                                    <div className="section-2-information-top">
+                                        <div className="section-title-letter">
+                                                <h1>Complainant’s Information</h1>
+                                        </div>
+                                    </div>
+
+                                    <div className="section-2-information-bottom-upper">
+                                        <div className="information-bottom-first-section">
+                                            <div className="fields-section-letter">
+                                                    <p>Name</p>
+                                                        <input 
+                                                        type="text" 
+                                                        className="generate-letter-input-field" 
+                                                        placeholder={otherInfo.complainant?.fname}
+                                                        value={`${otherInfo.complainant?.fname} ${otherInfo.complainant?.lname}`}
+                                                        id="complainant.fname"
+                                                           name="complainant.fname"
+                                                        disabled
+                                                    />
+                                            </div>
+
+                                            <div className="fields-section-letter">
+                                                    <p>Contact Nos</p>
+                                                    <input 
+                                                    type="text" 
+                                                    className="generate-letter-input-field" 
+                                                    placeholder= {otherInfo.complainant?.contact}
+                                                    value={otherInfo.complainant?.contact}
+                                                    id="complainant.contact"
+                                                  name="complainant.contact"
+                                                    disabled
+                                                    />
+
+                                                </div>
+
+                                        </div>
+
+                                        <div className="information-bottom-second-section">
+
+                                            <div className="fields-section-letter-address">
+                                                <p>Address</p>
+                                                    <input 
+                                                    type="text" 
+                                                    className="generate-letter-input-field-address" 
+                                                        placeholder= {otherInfo.complainant?.address}
+                                                        value={otherInfo.complainant?.address}
+                                                        id="complainant.address"
+                                                        name="complainant.address"
+                                                    disabled
+                                                    />
+                                            </div>
+                                            
+                                        </div>
+
+
+
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                     <div className="section-2-letter-right-side">
+
+                        <div className="section-2-information-section">
+
+                                <div className="section-2-information-top">
+
+                                    <div className="section-title-letter">
+                                            <h1>Respondent’s Information</h1>
+                                    </div>
+                                </div>
+
+                            <div className="section-2-information-bottom-upper">
+
+
+                                <div className="information-bottom-first-section ">
+                                
+                                    <div className="fields-section-letter">
+                                    <p>Name</p>
+                                        
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                            placeholder={otherInfo.respondent?.fname}
+                                            value={`${otherInfo.respondent?.fname} ${otherInfo.respondent?.lname}`}
+                                            id="respondent.fname"
+                                            name="respondent.fname"
+                                        disabled
+                                        />
+
+                                    </div>
+
+                                    
+                                    <div className="fields-section-letter">
+                                        <p>Contact Nos</p>
+                                        <input 
+                                        type="text" 
+                                        className="generate-letter-input-field" 
+                                        placeholder= {otherInfo.respondent?.contact}
+                                        value={otherInfo.respondent?.contact}
+                                    id="respondent.contact"
+                                        name="respondent.contact"
+                                        disabled
+                                        />
+
+                                    </div>
+
+                                </div>
+
+                                <div className="information-bottom-second-section ">
+
+                                <div className="fields-section-letter-address">
+                                        <p>Address</p>
+                                            <input 
+                                            type="text" 
+                                            className="generate-letter-input-field-address" 
+                                        placeholder= {otherInfo.respondent?.address}
+                                         value={otherInfo.respondent?.address}
+                                        id="respondent.address"
+                                         name="respondent.address"
+                                            disabled
+                                            />
+                            
+                                    </div>
+                                    
+                                </div>
+
+
+
+                            
+                            </div>       
+                        
+
+                        
+                            </div>
+
+                                </div>
+
+
+
+
+                            
+                        </div>
+
+
+                            
                             <div className="section-2-letter-lower">
 
                                     <div className="section-2-letter-lower">

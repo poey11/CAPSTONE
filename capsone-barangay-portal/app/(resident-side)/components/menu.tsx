@@ -435,7 +435,7 @@ const handleDeleteNotification = async (notificationId: string) => {
   <div className="navbar-container">
     <div className="navbar-card">
       <Link href="/">
-        <img src="/Images/brgylogo.png" alt="Barangay Logo" className="header-brgylogo" />
+        <img src="/Images/updatedlogo.png" alt="Barangay Logo" className="header-brgylogo" />
       </Link>
 
       {/* ====== DESKTOP NAV LINKS ====== */}

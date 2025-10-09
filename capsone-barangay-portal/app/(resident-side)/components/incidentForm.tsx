@@ -287,13 +287,23 @@ const formRef = useRef<HTMLFormElement>(null);
           await uploadBytes(storageRef, incidentReport.file);
         }
         
+      // const residentNotificationRef = collection(db, "Notifications");
+      // await addDoc(residentNotificationRef, {
+      //   incidentID: incidentID,
+      //   isRead: true, // or false if you prefer unread by default
+      //   message: `Your incident report (${updates.caseNumber}) has been updated to "pending".`,
+      //   residentID: currentUser !== "Guest" ? currentUser : "Guest",
+      //   timestamp: new Date(),
+      //   transactionType: "Online Incident",
+      // });
+
         // Create a notification for LF Staff
         const notificationRef = collection(db, "BarangayNotifications");
         await addDoc(notificationRef, {
           message: `New incident report filed by ${key[0].firstname} ${key[0].lastname}.`,
           timestamp: new Date(),
           isRead: false,
-          transactionType: "IncidentReport",
+          transactionType: "Online Incident",
           recipientRole: "LF Staff",
           incidentID: incidentID,
           ...(currentUser !== "Guest" && { reportID: currentUser }), 
@@ -415,6 +425,14 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
   if (incidentReport.concerns === "Other" && !incidentReport.otherConcern.trim()) {
     invalidFields.push("otherConcern");
   }
+
+
+    //check if no file uploaded
+  if (filesContainer1.length === 0 && !incidentReport.file) {
+    invalidFields.push("file");
+  }
+
+
 
   if (invalidFields.length > 0) {
     setInvalidFields(invalidFields);
@@ -833,9 +851,9 @@ const confirmSubmit = async () => {
                     <div className="incident-report-form-container">
 
                        <div className="signatureprintedname-container">
-                          <label className="form-label-incident-report-file">Upload Proof of Incident</label>
+                          <label className="form-label-incident-report-file">Upload Proof of Incident<span className="required">*</span></label>
                     
-                          <div className="file-upload-container-incident-report">
+                          <div className={`file-upload-container-incident-report ${invalidFields.includes("file") ? "input-error" : ""}`}>
                             <label htmlFor="file-upload1" className="upload-link-incident-report">Click to Upload File</label>
                             <input
                               id="file-upload1"

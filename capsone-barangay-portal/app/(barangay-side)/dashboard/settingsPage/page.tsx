@@ -37,6 +37,9 @@ export default function SettingsPage() {
         position:"",
         department: "",
         userid: "",
+        term: "",
+        facebookLink: "",
+        email: "",
     });
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -61,6 +64,9 @@ export default function SettingsPage() {
                     profileImage: docSnap.data().profileImage || "/Images/user.png",
                     department: docSnap.data().department || "",
                     userid: docSnap.data().userid || "",
+                    term: docSnap.data().term || "",
+                    facebookLink: docSnap.data().facebookLink || "",
+                    email: docSnap.data().email || "",
                 });
 
                 setPreview(docSnap.data().fileURL || null);
@@ -75,6 +81,7 @@ export default function SettingsPage() {
         router.push("/dashboard");
     };
 
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setUserData((prevData) => ({
@@ -145,6 +152,13 @@ export default function SettingsPage() {
     const [error, setError] = useState("");
 
    
+    const [chosenTerm, setChosenTerm] = useState("");
+    const [formattedTerm, setFormattedTerm] = useState("");
+
+    useEffect(() => {
+        const currentYear = new Date(chosenTerm).getFullYear();
+        setFormattedTerm(`${currentYear} - ${currentYear + 3}`);
+    }, [chosenTerm]);
 
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -204,7 +218,9 @@ export default function SettingsPage() {
             }
           }
       
-          await updateDoc(docRef, { ...userData });
+          await updateDoc(docRef, { ...userData,
+            term: formattedTerm
+           });
           setPopupMessage("Barangay User Updated Successfully!");
           setShowPopup(true);
       
@@ -313,12 +329,46 @@ export default function SettingsPage() {
                                      value={userData.address} 
                                      onChange={handleChange} />
                                 </div>
+                                <div className="fields-section-settings">
+                                    <p>Email</p>
+                                    <input 
+                                    id="email"
+                                    name="email"
+                                    type="text" 
+                                    className="input-field-settings"
+                                     value={userData.email} 
+                                     onChange={handleChange} />
+                                </div>
+                                <div className="fields-section-settings">
+                                    <p>Facebook</p>
+                                    <input 
+                                    id="facebookLink"
+                                    name="facebookLink"
+                                    type="text" 
+                                    className="input-field-settings"
+                                     value={userData.facebookLink} 
+                                     onChange={handleChange} />
+                                </div>
                             </div>
                         </div>
 
                         <div className="main-fields-container-section1-settings">
                             <div className="section-left-settings">
                                 <div className="fields-container-settings">
+                                    <div className="fields-section-settings">
+                                        <p>Update Term Duration</p>
+                                        <input 
+                                        id="chooseTerm"
+                                        name="birthDate"
+                                        type="date"
+                                        min={new Date().toISOString().split("T")[0]}
+                                         className="input-field-settings" 
+                                         value={chosenTerm} 
+                                         onChange={()=>{ 
+                                            const input = document.getElementById("chooseTerm") as HTMLInputElement;
+                                            setChosenTerm(input.value);
+                                         }} />
+                                    </div>
                                     <div className="fields-section-settings">
                                         <p>Birthday</p>
                                         <input 
@@ -364,6 +414,18 @@ export default function SettingsPage() {
                                     </div>
                             </div>
                             <div className="section-right-settings">
+                                <div className="fields-section-settings">
+                                    <p>Current Term</p>
+                                    <input
+                                    id="term"
+                                    name="term"
+                                    type="Text"
+                                    className="input-field-settings"   
+                                    value={userData.term || "N/A"}
+                                    readOnly
+                                    />
+
+                                </div>
                                 <div className="fields-section-settings">
                                     <p>Contact Number</p>
                                     <input

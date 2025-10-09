@@ -26,6 +26,9 @@ interface dbBarangayUser{
     birthDate: string;
     sex: string;
     department: string;
+    term: string;
+    facebookLink: string;
+    email: string;
 }
 
 
@@ -302,47 +305,76 @@ useEffect(() => {
     }
   }, [showAddUserPopup]);
 
+  // rank for custom position ordering
+const POSITION_ORDER: Record<string, number> = {
+  "Punong Barangay": 0,
+  "Secretary": 1,
+  "Assistant Secretary": 2,
+  "Admin Staff": 3,
+  "LF Staff": 4,
+};
+
+// safe fallback for unknown/blank positions (goes to bottom)
+const getPositionRank = (pos?: string) =>
+  POSITION_ORDER[pos ?? ""] ?? Number.MAX_SAFE_INTEGER;
+
+const getFullName = (u: any) =>
+  [u.firstName, u.middleName, u.lastName].filter(Boolean).join(" ").trim();
+
+
 useEffect(() => {
-    let filtered = [...barangayUsers];
-  
-    // Filter by name (partial match)
-    if (nameSearch.trim()) {
+  let filtered = [...barangayUsers];
+
+  // Filter by name (partial match)
+  if (nameSearch.trim()) {
     const searchTerm = nameSearch.toLowerCase().trim();
     filtered = filtered.filter((user) => {
-        const fullName = [
-        user.firstName,
-        user.middleName,
-        user.lastName
-        ]
-        .filter(Boolean) // remove undefined/null
+      const fullName = [user.firstName, user.middleName, user.lastName]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase();
-        
-        return fullName.includes(searchTerm);
+      return fullName.includes(searchTerm);
     });
+  }
+
+  // Filter by User ID (partial match)
+  if (userIdSearch.trim()) {
+    filtered = filtered.filter((user) =>
+      user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
+    );
+  }
+
+  // Filter by position dropdown
+  if (positionDropdown) {
+    filtered = filtered.filter((user) => user.position === positionDropdown);
+  }
+
+  // 🔹 Sort by custom position order, then by User ID (asc/desc), then by name
+  filtered.sort((a, b) => {
+    const rankA = getPositionRank(a.position);
+    const rankB = getPositionRank(b.position);
+    if (rankA !== rankB) return rankA - rankB;
+
+    // within the same position, use User ID asc/desc
+    const ua = (a.userid ?? "").toString();
+    const ub = (b.userid ?? "").toString();
+    if (ua !== ub) {
+      return sortOrder === "asc" ? ua.localeCompare(ub) : ub.localeCompare(ua);
     }
-  
-    // Filter by User ID (partial match)
-    if (userIdSearch.trim()) {
-      filtered = filtered.filter((user) =>
-        user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
-      );
-    }
-  
-    // Filter by position dropdown
-    if (positionDropdown) {
-      filtered = filtered.filter(
-        (user) => user.position === positionDropdown
-      );
-    }
-  
-    // Limit the number of results
-    if (showCount > 0) {
-      filtered = filtered.slice(0, showCount);
-    }
-  
-    setFilteredUser(filtered);
-  }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
+
+    // final tiebreaker: full name
+    return getFullName(a).localeCompare(getFullName(b));
+  });
+
+  // Limit the number of results
+  if (showCount > 0) {
+    filtered = filtered.slice(0, showCount);
+  }
+
+  setFilteredUser(filtered);
+  setCurrentPage(1); // reset to first page when filters/order change
+}, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers, sortOrder]);
+
   
 
 
@@ -510,7 +542,8 @@ useEffect(() => {
         setShowSubmitPopup(true);
     };
 
-
+        const todayYear = new Date().getFullYear();
+        const next3year = todayYear + 3;
       const confirmSubmit = async () => {
         setShowSubmitPopup(false);
         setShowAddUserPopup(false);
@@ -526,6 +559,7 @@ useEffect(() => {
           firstName: "User",
           lastName: "",
           createdBy: user?.fullName || user?.name || "Unknown",
+          term: `${todayYear} - ${next3year}`,
 
         });
     
@@ -929,6 +963,10 @@ useEffect(() => {
                                                 <p>Birthday</p>
                                                 <input type="date" className="view-user-input-field" name="birthDate" value={viewUser.birthDate} readOnly/>
                                             </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Term</p>
+                                                <input type="text" className="view-user-input-field" name="term" value={viewUser.term} readOnly/>
+                                            </div>
                                         </div>
                                         <div className="view-userrole-content-right-side">
                                             <div className="view-user-fields-section">
@@ -961,6 +999,14 @@ useEffect(() => {
                                             <div className="view-user-fields-section">
                                                 <p>Address</p>
                                                 <input type="input" className="view-user-input-field" name="address" value={viewUser.address || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Email</p>
+                                                <input type="input" className="view-user-input-field" name="email" value={viewUser.email || "N/A"} readOnly/>
+                                            </div>
+                                            <div className="view-user-fields-section">
+                                                <p>Facebook</p>
+                                                <input type="input" className="view-user-input-field" name="facebookLink" value={viewUser.facebookLink || "N/A"} readOnly/>
                                             </div>
                                         </div>
                                     </>

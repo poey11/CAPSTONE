@@ -94,11 +94,13 @@ export default function Announcement() {
         <div className="left-section-announcement" ref={sectionRef}>
           {currentAnnouncements.map((item, index) => (
             <div key={startIndex + index} className="announcement-card-announcement">
-              <img
-                src={item.image}
-                alt={item.image}
-                className="announcement-image-announcement"
-              />
+              <div className="announcement-image-container">
+                <img
+                  src={item.image}
+                  alt={item.announcementHeadline}
+                  className="announcement-image-announcement"
+                />
+              </div>
               <div className="announcement-content-announcement">
                 <h2 className="announcement-title-announcement">
                   {item.announcementHeadline} ({item.category})
@@ -167,17 +169,34 @@ export default function Announcement() {
         
         <div className="right-section-announcement">
           <div className="recent-posts-announcement">
-            <h3>Recent Posts</h3>
-            {recentPosts.map((post, idx) => (
-              <div key={idx} className="recent-post-card">
-                <img src={post.image} alt={post.image}/>
-                <div className="recent-post-content">
-                  <p>{post.announcementHeadline}</p>
-                  <span>{post.createdAt}</span>
-                </div>
-              </div>
-            ))}
-          </div>
+  <h3>Recent Posts</h3>
+  {recentPosts.map((post, idx) => (
+    <Link
+      key={idx}
+      href={{
+        pathname: `/Announcements/${idx}`,
+        query: {
+          title: post.announcementHeadline,
+          description: post.content,
+          date: post.createdAt,
+          image: post.image,
+        },
+      }}
+      className="recent-post-card-link"
+    >
+      <div className="recent-post-card">
+        <div className="announcement-img">
+          <img src={post.image} alt={post.announcementHeadline} />
+        </div>
+
+        <div className="recent-post-content">
+          <p>{post.announcementHeadline}</p>
+          <span>{post.createdAt}</span>
+        </div>
+      </div>
+    </Link>
+  ))}
+</div>
         </div>
       </div>
     </main>

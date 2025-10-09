@@ -236,6 +236,7 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
 
 //  if (!isTermChecked) invalidFields.push("terms");
 
+/*
     if (invalidFields.length > 0) {
       setInvalidFields(invalidFields);
     setPopupErrorMessage("Please fill up all required fields.");
@@ -245,6 +246,15 @@ const handleSubmitClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
       }, 3000);
       return;
     }
+      */
+
+    if (invalidFields.length > 0) {
+  setInvalidFields(invalidFields);
+  setErrorPopup({ show: true, message: "Please fill up all required fields." });
+  setTimeout(() => {}, 3000);
+  return;
+}
+
 
   setInvalidFields([]);
  setShowSubmitPopup(true);
@@ -262,6 +272,9 @@ const confirmSubmit = async () => {
     
     const handleCheckBox = (e: ChangeEvent<HTMLInputElement>) => {
         setIsTermChecked(e.target.checked);
+
+
+         console.log(e.target.checked);
     };
 
     const handleToken = (token: string | null) => {
@@ -300,7 +313,7 @@ const confirmSubmit = async () => {
     }
   };
 
-
+const [showTerms, setShowTerms] = useState(false);
 
 
 
@@ -530,10 +543,62 @@ const confirmSubmit = async () => {
                     </div>
 
 
-                    <div className="form-checkbox-section">
-                        <label htmlFor="terms" className="form-label-register-form">I agree to the terms and conditions <span className="required">*</span></label>
-                        <input id="terms" onChange={handleCheckBox} type="checkbox" name="terms" className="form-checkbox" required/>
+                <div className="form-checkbox-section">
+                        <label htmlFor="terms" className="form-label-register-form">
+                        I agree to the{" "}
+                        <span 
+                            className="terms-link" 
+                            onClick={() => setShowTerms(true)}
+                        >
+                            Terms and Conditions
+                        </span>{" "}
+                        <span className="required">*</span>
+                        </label>
+                        <input 
+                        id="terms" 
+                        onChange={handleCheckBox} 
+                        type="checkbox" 
+                        name="terms" 
+                        className="form-checkbox" 
+                        required 
+                        />
                     </div>
+
+
+
+                        {/* MALCOLM ITO YUNG POPUP FOR TERMS AND CONDITION. EDT MO NALAN TERMS 
+                        WAG  MO NA CHANGE CSS CLASSNAMES IF OKS NA SAYO DESIGN RESPONSIVE NARIN TO
+                        FOR OTHER DEVICES
+                        */}
+                        {showTerms && (
+                        <div className="terms-modal-overlay">
+                            <div className="terms-modal">
+                            <h2>Terms and Conditions</h2>
+
+                            <div className="terms-content">
+                                <h3>Before proceeding with your document request, please read and agree to the following terms and conditions:</h3>
+                                <p>
+                                    By using this system, you consent to the collection and storage of your personal data including but not limited to your name, address, birthday, and any other relevant details required to process your request;
+                                    Your data will be only shared and handled by authorized barangay staff for official purposes; and
+                                    The system is compliant with the Data Privacy Act of 2012, and your data will be securely stored and used solely for legitimate purposes.
+                                </p>
+
+                                <p className="terms-footer">
+                                By registering, you acknowledge that you have read, understood, and
+                                agreed to these Terms and Conditions.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => setShowTerms(false)}
+                                className="close-terms-btn"
+                            >
+                                Close
+                            </button>
+                            </div>
+                        </div>
+                        )}
+
 
                     <div className="form-captcha">
                         <ReCAPTCHA sitekey={captchaSiteKey} onChange={handleToken} />
@@ -585,6 +650,8 @@ const confirmSubmit = async () => {
                 </div>
             )}
 
+
+            {/*}
             {showErrorPopup && (
                 <div className={`error-popup-overlay-register show`}>
                     <div className="popup-ad-register">
@@ -593,6 +660,8 @@ const confirmSubmit = async () => {
                     </div>
                 </div>
                 )}
+            */}
+
         </main>
 
         

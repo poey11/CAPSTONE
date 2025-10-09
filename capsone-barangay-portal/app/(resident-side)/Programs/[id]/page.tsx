@@ -957,7 +957,6 @@ export default function SpecificProgram() {
 
       <section className="get-involved">
         <h2 className="section-title">Get Involved</h2>
-        <div className="programs-underline-specific"></div>
 
         {isVerifiedResident && alreadyRegistered ? (
           <div className="program-detail-card-specific">

@@ -4796,7 +4796,7 @@ const generateDepartmentalReport = async (
         row.getCell(7).value = item.dismissed;
   
         // Style
-        for (let col = 1; col <= 6; col++) {
+        for (let col = 1; col <= 7; col++) {
           const cell = row.getCell(col);
           cell.font = { name: "Calibri", size: 12 };
           cell.alignment = { horizontal: "center", vertical: "middle" };

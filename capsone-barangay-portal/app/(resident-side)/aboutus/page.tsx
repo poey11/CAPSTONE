@@ -111,10 +111,10 @@ export default function AboutUs() {
   <h2 className="section-title">Meet Our Leader</h2>
   <div className="leader-card">
     <div className="leader-photo-wrapper">
-      <img src="/images/kap.jpg" alt="Barangay Captain" className="captain-photo"/>
+      <img src="/Images/brgy-kap.png" alt="Barangay Captain" className="captain-photo"/>
     </div>
     <div className="leader-info">
-      <h3>Hon. Jonell Quebal</h3>
+      <h3>Jose Arnel L. Quebal</h3>
       <p>
         To my fellow barangay residents, as your public servant, your active 
         participation in the open governance of our barangay is very 
@@ -130,15 +130,15 @@ export default function AboutUs() {
 
         <div className="aboutus-contactinfo-item">
           <img src="/images/email1.png" alt="Email" className="aboutus-contacticon" />
-          <p>barangayfairviewpark@gmail.com</p>
+            <p>barangayfairviewpark@gmail.com</p>
         </div>
         <div className="aboutus-contactinfo-item">
           <img src="/images/phone1.png" alt="Phone" className="aboutus-contacticon" />
-          <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
+          <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
         </div>
         <div className="aboutus-contactinfo-item">
           <img src="/images/location1.png" alt="Location" className="aboutus-contacticon" />
-          <p>West Fairview, 9 A Dahlia Ave, West Fairview,<br/>Quezon City, 1118 Metro Manila</p>
+          <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
         </div>
       </div>
     </div>
