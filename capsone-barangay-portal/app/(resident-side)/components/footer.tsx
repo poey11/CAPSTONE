@@ -41,15 +41,15 @@ const Footer = () => {
             <h1>Contact Us</h1>
 
             <div className="contactinfo-email">
-              <img src="/Images/email1.png" alt="Image 1" className="contacticon" />
+              <img src="/images/email1.png" alt="Image 1" className="contacticon" />
               <p>barangayfairviewpark@gmail.com</p>
             </div>
             <div className="contactinfo-phone">
-              <img src="/Images/phone1.png" alt="Image 2" className="contacticon" />
+              <img src="/images/phone1.png" alt="Image 2" className="contacticon" />
                <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
             </div>
             <div className="contactinfo-loc">
-              <img src="/Images/location1.png" alt="Image 3" className="contacticon" />
+              <img src="/images/location1.png" alt="Image 3" className="contacticon" />
               <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
             </div>
           </div>
