@@ -895,14 +895,13 @@ export default function AddResident() {
                       <div className="add-main-resident-section-2-cluster">
                         <div className="fields-section">
                           <p>
-                            Cluster/Section<span className="required">*</span>
+                            Cluster/Section
                           </p>
                           <select
                             name="cluster"
                             className={`add-resident-input-field ${invalidFields.includes("cluster") ? "input-error" : ""}`}
                             value={formData.cluster || ""}
                             onChange={handleChange}
-                            required
                             disabled={!formData.generalLocation}
                           >
                             <option value="" disabled>
