@@ -1,12 +1,15 @@
 import React from "react";
 import "@/CSS/ReportsModule/reports.css";
+import { MonthYearRangePicker } from "./MonthYearRangePicker";
 
 interface DepartmentalReportModalProps {
   show: boolean;
   onClose: () => void;
   onGenerate: (
-    month: number,
-    year: number,
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number,
     allTime: boolean,
     department: string,
     status: string
@@ -24,20 +27,31 @@ export const DepartmentalReportModal: React.FC<DepartmentalReportModalProps> = (
   title = "Generate Departmental Incident Report",
   allowedDepartments,
 }) => {
-  const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
+  const now = new Date();
+  const CUR_M = now.getMonth();
+  const CUR_Y = now.getFullYear();
 
-  const [month, setMonth] = React.useState(currentMonth);
-  const [year, setYear] = React.useState(currentYear);
+  const [range, setRange] = React.useState({
+    startMonth: CUR_M,
+    startYear: CUR_Y,
+    endMonth: CUR_M,
+    endYear: CUR_Y,
+  });
+
   const [allTime, setAllTime] = React.useState(false);
-  const [department, setDepartment] = React.useState<string>(
-    allowedDepartments[0] || "ALL"
-  );
+  const [department, setDepartment] = React.useState<string>(allowedDepartments[0] || "ALL");
   const [status, setStatus] = React.useState<string>("ALL");
 
   const handleSubmit = () => {
-    onGenerate(month, year, allTime, department, status);
+    onGenerate(
+      range.startMonth,
+      range.startYear,
+      range.endMonth,
+      range.endYear,
+      allTime,
+      department,
+      status
+    );
     onClose();
   };
 
@@ -52,50 +66,15 @@ export const DepartmentalReportModal: React.FC<DepartmentalReportModalProps> = (
           <input
             type="checkbox"
             checked={allTime}
-            onChange={() => setAllTime((prev) => !prev)}
+            onChange={() => setAllTime((v) => !v)}
           />
-          Include All Time Data (Ignore Month and Year)
+          Include All Time Data (Ignore Month/Year Range)
         </label>
 
-        <label>Month:</label>
-        <select
-          value={month}
-          onChange={(e) => setMonth(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 12 }, (_, i) => {
-            const isFuture =
-              year > currentYear || (year === currentYear && i > currentMonth);
-            return (
-              <option key={i} value={i} disabled={isFuture}>
-                {new Date(0, i).toLocaleString("default", { month: "long" })}
-              </option>
-            );
-          })}
-        </select>
-
-        <label>Year:</label>
-        <select
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 6 }, (_, i) => {
-            const y = currentYear - i;
-            const isFutureYear = y > currentYear;
-            return (
-              <option key={y} value={y} disabled={isFutureYear}>
-                {y}
-              </option>
-            );
-          })}
-        </select>
+        <MonthYearRangePicker value={range} onChange={setRange} disabled={allTime} />
 
         <label>Department:</label>
-        <select
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-        >
+        <select value={department} onChange={(e) => setDepartment(e.target.value)}>
           {allowedDepartments.map((dept) => (
             <option key={dept} value={dept}>
               {dept}
@@ -104,19 +83,14 @@ export const DepartmentalReportModal: React.FC<DepartmentalReportModalProps> = (
         </select>
 
         <label>Status:</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="ALL">ALL</option>
           <option value="pending">Pending</option>
           <option value="settled">Settled</option>
           <option value="archived">Archived</option>
           <option value="In - Progress">In - Progress</option>
           <option value="CFA">CFA</option>
-          <option value="Refer to Government Agency">
-            Refer to Government Agency
-          </option>
+          <option value="Refer to Government Agency">Refer to Government Agency</option>
           <option value="Dismissed">Dismissed</option>
         </select>
 

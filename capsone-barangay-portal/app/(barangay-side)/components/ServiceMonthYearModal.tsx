@@ -1,12 +1,15 @@
 import React from "react";
 import "@/CSS/ReportsModule/reports.css";
+import { MonthYearRangePicker } from "./MonthYearRangePicker";
 
 interface ServiceMonthYearModalProps {
   show: boolean;
   onClose: () => void;
   onGenerate: (
-    month: number,
-    year: number,
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number,
     allTime?: boolean,
     docType?: string,
     status?: string
@@ -23,17 +26,30 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
   title = "Generate Service Report",
 }) => {
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
+  const CUR_M = now.getMonth();
+  const CUR_Y = now.getFullYear();
 
-  const [month, setMonth] = React.useState(currentMonth);
-  const [year, setYear] = React.useState(currentYear);
+  const [range, setRange] = React.useState({
+    startMonth: CUR_M,
+    startYear: CUR_Y,
+    endMonth: CUR_M,
+    endYear: CUR_Y,
+  });
+
   const [allTime, setAllTime] = React.useState(false);
   const [docType, setDocType] = React.useState<string>("All");
   const [status, setStatus] = React.useState<string>("All");
 
   const handleSubmit = () => {
-    onGenerate(month, year, allTime, docType, status);
+    onGenerate(
+      range.startMonth,
+      range.startYear,
+      range.endMonth,
+      range.endYear,
+      allTime,
+      docType,
+      status
+    );
   };
 
   if (!show) return null;
@@ -47,42 +63,12 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
           <input
             type="checkbox"
             checked={allTime}
-            onChange={() => setAllTime((prev) => !prev)}
+            onChange={() => setAllTime((v) => !v)}
           />
-          Include All Time Data (Ignore Month and Year)
+          Include All Time Data (Ignore Month/Year Range)
         </label>
 
-        <label>Month:</label>
-        <select
-          value={month}
-          onChange={(e) => setMonth(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 12 }, (_, i) => {
-            const isFuture = year > currentYear || (year === currentYear && i > currentMonth);
-            return (
-              <option key={i} value={i} disabled={isFuture}>
-                {new Date(0, i).toLocaleString("default", { month: "long" })}
-              </option>
-            );
-          })}
-        </select>
-
-        <label>Year:</label>
-        <select
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 6 }, (_, i) => {
-            const y = currentYear - i; // never goes into the future
-            return (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            );
-          })}
-        </select>
+        <MonthYearRangePicker value={range} onChange={setRange} disabled={allTime} />
 
         <label>Document Type:</label>
         <select value={docType} onChange={(e) => setDocType(e.target.value)}>
