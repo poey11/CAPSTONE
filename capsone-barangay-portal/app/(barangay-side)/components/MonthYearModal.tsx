@@ -16,8 +16,12 @@ export const MonthYearModal: React.FC<MonthYearModalProps> = ({
   loading = false,
   title = "Generate Monthly Report",
 }) => {
-  const [month, setMonth] = React.useState(new Date().getMonth());
-  const [year, setYear] = React.useState(new Date().getFullYear());
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  const currentYear = currentDate.getFullYear();
+
+  const [month, setMonth] = React.useState(currentMonth);
+  const [year, setYear] = React.useState(currentYear);
   const [allTime, setAllTime] = React.useState(false);
 
   const handleSubmit = () => {
@@ -46,11 +50,15 @@ export const MonthYearModal: React.FC<MonthYearModalProps> = ({
           onChange={(e) => setMonth(Number(e.target.value))}
           disabled={allTime}
         >
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i} value={i}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
-            </option>
-          ))}
+          {Array.from({ length: 12 }, (_, i) => {
+            const isFuture =
+              year > currentYear || (year === currentYear && i > currentMonth);
+            return (
+              <option key={i} value={i} disabled={isFuture}>
+                {new Date(0, i).toLocaleString("default", { month: "long" })}
+              </option>
+            );
+          })}
         </select>
 
         <label>Year:</label>
@@ -60,9 +68,10 @@ export const MonthYearModal: React.FC<MonthYearModalProps> = ({
           disabled={allTime}
         >
           {Array.from({ length: 6 }, (_, i) => {
-            const y = new Date().getFullYear() - i;
+            const y = currentYear - i;
+            const isFutureYear = y > currentYear;
             return (
-              <option key={y} value={y}>
+              <option key={y} value={y} disabled={isFutureYear}>
                 {y}
               </option>
             );

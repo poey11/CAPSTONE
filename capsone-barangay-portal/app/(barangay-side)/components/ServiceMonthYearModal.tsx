@@ -22,8 +22,12 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
   loading = false,
   title = "Generate Service Report",
 }) => {
-  const [month, setMonth] = React.useState(new Date().getMonth());
-  const [year, setYear] = React.useState(new Date().getFullYear());
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const [month, setMonth] = React.useState(currentMonth);
+  const [year, setYear] = React.useState(currentYear);
   const [allTime, setAllTime] = React.useState(false);
   const [docType, setDocType] = React.useState<string>("All");
   const [status, setStatus] = React.useState<string>("All");
@@ -54,11 +58,14 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
           onChange={(e) => setMonth(Number(e.target.value))}
           disabled={allTime}
         >
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i} value={i}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
-            </option>
-          ))}
+          {Array.from({ length: 12 }, (_, i) => {
+            const isFuture = year > currentYear || (year === currentYear && i > currentMonth);
+            return (
+              <option key={i} value={i} disabled={isFuture}>
+                {new Date(0, i).toLocaleString("default", { month: "long" })}
+              </option>
+            );
+          })}
         </select>
 
         <label>Year:</label>
@@ -68,7 +75,7 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
           disabled={allTime}
         >
           {Array.from({ length: 6 }, (_, i) => {
-            const y = new Date().getFullYear() - i;
+            const y = currentYear - i; // never goes into the future
             return (
               <option key={y} value={y}>
                 {y}
@@ -78,10 +85,7 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
         </select>
 
         <label>Document Type:</label>
-        <select
-          value={docType}
-          onChange={(e) => setDocType(e.target.value)}
-        >
+        <select value={docType} onChange={(e) => setDocType(e.target.value)}>
           <option value="All">All</option>
           <option value="Barangay Certificate">Barangay Certificate</option>
           <option value="Barangay Clearance">Barangay Clearance</option>
@@ -92,10 +96,7 @@ export const ServiceMonthYearModal: React.FC<ServiceMonthYearModalProps> = ({
         </select>
 
         <label>Status:</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-        >
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="All">All</option>
           <option value="Pending">Pending</option>
           <option value="In - Progress">In - Progress</option>
