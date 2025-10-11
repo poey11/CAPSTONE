@@ -3474,6 +3474,13 @@ const generateIncidentSummaryReport = async (
   setLoadingIncidentSummary(true);
   setIsGenerating(true);
 
+  // local formatter for "YYYY-MM-DD HH:MM" (24h)
+  const formatYMDHM = (d: Date | null) => {
+    if (!d || isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   try {
     const reportLabel = buildReportLabel(startMonth, startYear, endMonth, endYear, allTime);
     const reportTitle = `BARANGAY FAIRVIEW INCIDENT REPORTS - ${reportLabel}`;
@@ -3608,10 +3615,21 @@ const generateIncidentSummaryReport = async (
         const complainantFullName = `${(complainant.fname || report.firstname || "")} ${(complainant.lname || report.lastname || "")}`.trim();
         const respondentFullName = `${respondent.fname || ""} ${respondent.lname || ""}`.trim();
 
+        // NEW: build the Received datetime cell with Online-specific handling
+        let receivedDisplay = "";
+        if (report.department === "Online") {
+          // Use createdAt formatted as "YYYY-MM-DD HH:MM"
+          receivedDisplay = formatYMDHM(toJSDate(report.createdAt));
+        } else {
+          // Keep existing behavior; if missing, fall back to createdAt formatted
+          const combined = `${report.dateReceived || ""} ${report.timeReceived || ""}`.trim();
+          receivedDisplay = combined || formatYMDHM(toJSDate(report.createdAt));
+        }
+
         const cells = [
           report.caseNumber,
           ` C- ${complainantFullName}\n\n R- ${respondentFullName}`,
-          `${report.dateReceived || ""} ${report.timeReceived || ""}`,
+          receivedDisplay,
           report.nature || report.concerns || "",
           report.status || "",
         ];
@@ -3723,6 +3741,7 @@ const generateIncidentSummaryReport = async (
     setShowIncidentSummaryModal(false);
   }
 };
+
 
 const handleGenerateIncidentSummaryPDF = async (
   startMonth: number,
@@ -5700,7 +5719,6 @@ const handleGenerateServiceRequestPDF = async (
                           </p>
                         </button>
 
-                        // --- usage update (range-enabled) ---
                         <ServiceMonthYearModal
                           show={showCertMonthlyModal}
                           onClose={() => setShowCertMonthlyModal(false)}
