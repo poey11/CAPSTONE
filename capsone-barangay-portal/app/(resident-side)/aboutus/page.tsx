@@ -129,15 +129,15 @@ export default function AboutUs() {
         
 
         <div className="aboutus-contactinfo-item">
-          <img src="/Images/email1.png" alt="Email" className="aboutus-contacticon" />
+          <img src="/images/email1.png" alt="Email" className="aboutus-contacticon" />
             <p>barangayfairviewpark@gmail.com</p>
         </div>
         <div className="aboutus-contactinfo-item">
-          <img src="/Images/phone1.png" alt="Phone" className="aboutus-contacticon" />
+          <img src="/images/phone1.png" alt="Phone" className="aboutus-contacticon" />
           <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
         </div>
         <div className="aboutus-contactinfo-item">
-          <img src="/Images/location1.png" alt="Location" className="aboutus-contacticon" />
+          <img src="/images/location1.png" alt="Location" className="aboutus-contacticon" />
           <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
         </div>
       </div>
