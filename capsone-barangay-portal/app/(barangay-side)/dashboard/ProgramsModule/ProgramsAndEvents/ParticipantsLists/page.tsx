@@ -35,8 +35,8 @@ type Participant = {
   residentId?: string;
   role?: string; // "Participant" | "Volunteer"
   approvalStatus?: string;
-  attendance?: boolean; // new field
-  dayChosen?: number; // new field (0-based)
+  attendance?: boolean;
+  dayChosen?: number; // 0-based
 };
 
 type Resident = {
@@ -102,6 +102,7 @@ export default function ParticipantsList() {
   const programId = searchParams.get("programId") || "";
   const { data: session } = useSession();
   const user = session?.user;
+
   // UI state
   const [loading, setLoading] = useState(true);
 
@@ -126,18 +127,17 @@ export default function ParticipantsList() {
   const [reqTextFields, setReqTextFields] = useState<SimpleField[]>([]);
   const [reqFileFields, setReqFileFields] = useState<SimpleField[]>([]);
 
-  // NEW: schedule fields to decide editability by time
+  // Schedule fields
   const [eventType, setEventType] = useState<string>("single");
-  const [startDate, setStartDate] = useState<string>(""); // "YYYY-MM-DD"
-  const [endDate, setEndDate] = useState<string>("");     // "YYYY-MM-DD"
-  const [timeEnd, setTimeEnd] = useState<string>("");     // "HH:mm"
+  const [startDate, setStartDate] = useState<string>(""); // YYYY-MM-DD
+  const [endDate, setEndDate] = useState<string>("");     // YYYY-MM-DD
+  const [timeEnd, setTimeEnd] = useState<string>("");     // HH:mm
   const [timeStart, setTimeStart] = useState<string>("");
 
-
   // Participants/day config
-  const [noParticipantLimit, setNoParticipantLimit] = useState<boolean>(false);
-  const [participantDays, setParticipantDays] = useState<number[]>([]);
-  const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
+  const [noParticipantLimit, setNoParticipantLimit] = useState<boolean>(false); // global no-limit for single-day OR whole program
+  const [participantDays, setParticipantDays] = useState<number[]>([]); // per-day caps
+  const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]); // per-day no-limit flags for multi-day
 
   // Residents picker
   const [showResidentsPopup, setShowResidentsPopup] = useState(false);
@@ -171,7 +171,7 @@ export default function ParticipantsList() {
     }
   };
 
-  // Load program meta (including dates and timeEnd)
+  // Load program meta (including dates and caps)
   useEffect(() => {
     let cancelled = false;
     const loadProgram = async () => {
@@ -187,6 +187,9 @@ export default function ParticipantsList() {
         setEndDate("");
         setTimeEnd("");
         setTimeStart("");
+        setNoParticipantLimit(false);
+        setParticipantDays([]);
+        setNoParticipantLimitList([]);
         return;
       }
       try {
@@ -194,6 +197,7 @@ export default function ParticipantsList() {
         const snap = await getDoc(refDoc);
         if (!cancelled && snap.exists()) {
           const d = snap.data() as any;
+
           const capParticipants = Number(d?.participants);
           const capVolunteers = Number(d?.volunteers);
           const noLimit = Boolean(d?.noParticipantLimit);
@@ -201,14 +205,21 @@ export default function ParticipantsList() {
           setNoParticipantLimit(noLimit);
           setParticipantDays(Array.isArray(d?.participantDays) ? d.participantDays : []);
           setNoParticipantLimitList(Array.isArray(d?.noParticipantLimitList) ? d.noParticipantLimitList : []);
-          setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
+
+          // 🔧 IMPORTANT: null-out capacity when there's a global "no limit"
+          if (noLimit) {
+            setProgramCapacity(null);
+          } else {
+            setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
+          }
+
           setProgramVolunteerCapacity(Number.isFinite(capVolunteers) ? capVolunteers : null);
           setProgramTitle(d?.programName || "");
           setProgramStatus((d?.progressStatus || "").toString());
           setEventType(d?.eventType || "single");
           setStartDate(d?.startDate || "");
           setEndDate(d?.endDate || "");
-          setTimeEnd(d?.timeEnd || ""); // e.g., "17:00"
+          setTimeEnd(d?.timeEnd || "");
           setTimeStart(d?.timeStart || "");
 
           const tfs: SimpleField[] = Array.isArray(d?.requirements?.textFields)
@@ -230,6 +241,10 @@ export default function ParticipantsList() {
           setStartDate("");
           setEndDate("");
           setTimeEnd("");
+          setTimeStart("");
+          setNoParticipantLimit(false);
+          setParticipantDays([]);
+          setNoParticipantLimitList([]);
         }
       } catch {
         if (!cancelled) {
@@ -243,6 +258,10 @@ export default function ParticipantsList() {
           setStartDate("");
           setEndDate("");
           setTimeEnd("");
+          setTimeStart("");
+          setNoParticipantLimit(false);
+          setParticipantDays([]);
+          setNoParticipantLimitList([]);
         }
       }
     };
@@ -319,6 +338,17 @@ export default function ParticipantsList() {
 
   const [dayChosen, setDayChosen] = useState<number>(0);
 
+  // Safety: default a day if multi-day
+  useEffect(() => {
+    if (
+      eventType === "multiple" &&
+      participantDays?.length > 0 &&
+      (dayChosen === undefined || dayChosen === null || Number.isNaN(dayChosen))
+    ) {
+      setDayChosen(0);
+    }
+  }, [eventType, participantDays, dayChosen]);
+
   // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
@@ -373,24 +403,29 @@ export default function ParticipantsList() {
   );
 
   const badgeParticipantsText = useMemo(() => {
-    if (!noParticipantLimit && eventType === "single") {
+    if (eventType === "single") {
+      if (noParticipantLimit) {
+        return `Participants: ${participantCount}`;
+      }
       return `Participants: ${participantCount} / ${programCapacity ?? "—"}`;
-    } else if (noParticipantLimit === true && eventType === "single") {
-      return `Participants: ${participantCount}`;
-    } else if (noParticipantLimitList[dayChosen] === false && eventType === "multiple") {
-      return `Participants: ${multipleDayParticipantCount} / ${participantDays[dayChosen] ?? "—"}`;
-    } else if (noParticipantLimitList[dayChosen] === true && eventType === "multiple") {
-      return `Participants: ${multipleDayParticipantCount}`;
+    } else {
+      const idx = Number.isInteger(dayChosen) ? dayChosen : 0;
+      const noLimitForDay = Boolean(noParticipantLimitList?.[idx]);
+      if (noLimitForDay) {
+        return `Participants: ${multipleDayParticipantCount}`;
+      }
+      const dayCap = participantDays?.[idx];
+      return `Participants: ${multipleDayParticipantCount} / ${Number.isFinite(dayCap) ? dayCap : "—"}`;
     }
   }, [
+    eventType,
     noParticipantLimit,
     participantCount,
     programCapacity,
-    participantDays,
+    multipleDayParticipantCount,
     dayChosen,
     noParticipantLimitList,
-    eventType,
-    multipleDayParticipantCount,
+    participantDays,
   ]);
 
   const badgeVolunteersText = useMemo(
@@ -403,11 +438,28 @@ export default function ParticipantsList() {
     [programStatus]
   );
 
-  // Capacity check for Add
-  const isAtCapacity = useMemo(
-    () => programCapacity !== null && participantCount >= programCapacity && eventType === "single",
-    [programCapacity, participantCount, eventType]
-  );
+  // ✅ Capacity check for Add (respects global and per-day no-limits)
+  const isAtCapacity = useMemo(() => {
+    if (eventType === "single") {
+      if (noParticipantLimit) return false;
+      return programCapacity !== null && participantCount >= programCapacity;
+    }
+    // multiple-day
+    const idx = Number.isInteger(dayChosen) ? dayChosen : 0;
+    const noLimitForDay = Boolean(noParticipantLimitList?.[idx]);
+    if (noLimitForDay) return false;
+    const dayCap = participantDays?.[idx];
+    return Number.isFinite(dayCap) && multipleDayParticipantCount >= (dayCap as number);
+  }, [
+    eventType,
+    noParticipantLimit,
+    programCapacity,
+    participantCount,
+    dayChosen,
+    noParticipantLimitList,
+    participantDays,
+    multipleDayParticipantCount,
+  ]);
 
   const showVolunteerBadge = useMemo(
     () => typeof programVolunteerCapacity === "number" && programVolunteerCapacity > 0,
@@ -420,29 +472,28 @@ export default function ParticipantsList() {
     [programStatus]
   );
 
-  // NEW: additional guard — once the day is DONE (past timeEnd) disable checkbox
-const canEditAttendanceByTime = (p: Participant) => {
-  const now = new Date();
+  // Time window guard for attendance checkbox
+  const canEditAttendanceByTime = (p: Participant) => {
+    const now = new Date();
 
-  if (eventType === "single") {
-    if (!startDate) return false;
-    const startDT = combineYMDAndTime(startDate, timeStart || "00:00");
-    const endDT   = combineYMDAndTime(startDate, timeEnd   || "23:59");
-    return now >= startDT && now <= endDT;
-  } else {
-    if (!startDate) return false;
-    const idx = typeof p.dayChosen === "number" ? p.dayChosen : 0;
-    const start = ymdToDateLocal(startDate);
-    const theDay = new Date(start);
-    theDay.setDate(start.getDate() + idx);
+    if (eventType === "single") {
+      if (!startDate) return false;
+      const startDT = combineYMDAndTime(startDate, timeStart || "00:00");
+      const endDT = combineYMDAndTime(startDate, timeEnd || "23:59");
+      return now >= startDT && now <= endDT;
+    } else {
+      if (!startDate) return false;
+      const idx = typeof p.dayChosen === "number" ? p.dayChosen : 0;
+      const start = ymdToDateLocal(startDate);
+      const theDay = new Date(start);
+      theDay.setDate(start.getDate() + idx);
 
-    const theDayYMD = formatYMD(theDay);
-    const startDT = combineYMDAndTime(theDayYMD, timeStart || "00:00");
-    const endDT   = combineYMDAndTime(theDayYMD, timeEnd   || "23:59");
-    return now >= startDT && now <= endDT;
-  }
-};
-
+      const theDayYMD = formatYMD(theDay);
+      const startDT = combineYMDAndTime(theDayYMD, timeStart || "00:00");
+      const endDT = combineYMDAndTime(theDayYMD, timeEnd || "23:59");
+      return now >= startDT && now <= endDT;
+    }
+  };
 
   const openAddPopup = async () => {
     if (!programId) {
@@ -591,14 +642,12 @@ const canEditAttendanceByTime = (p: Participant) => {
 
   // Toggle attendance with optimistic UI (only if allowed right now)
   const handleToggleAttendance = async (p: Participant) => {
-    // still keep overall program status gate
     if (!isAttendanceEditable) {
       setErrorToastMsg(`Attendance can only be updated when the program is Ongoing.`);
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 2500);
       return;
     }
-    // NEW: time-based lock
     if (!canEditAttendanceByTime(p)) {
       setErrorToastMsg(`Attendance can’t be modified after the event day has ended.`);
       setShowErrorToast(true);
@@ -658,11 +707,11 @@ const canEditAttendanceByTime = (p: Participant) => {
               <div className="participants-count">
                 <p>Select A Day:</p>
                 <select
-                  value={dayChosen ?? ""}
+                  value={Number.isInteger(dayChosen) ? dayChosen : ""}
                   onChange={(e) => setDayChosen(Number(e.target.value))}
                 >
                   <option value="" disabled hidden></option>
-                  {participantDays.map((day, index) => (
+                  {participantDays.map((_, index) => (
                     <option value={index} key={index}>
                       {`Day ${index + 1}`}
                     </option>
@@ -695,31 +744,31 @@ const canEditAttendanceByTime = (p: Participant) => {
             onChange={(e) => setSearchName(e.target.value)}
             className="programs-module-filter-participants"
           />
-          {(user?.position === "Secretary" || user?.position === "Assistant Secretary" ||user?.position === "Admin Staff" )  && (
-            <>
-              <button
-                type="button"
-                title={
-                  isProgramClosed
-                    ? `This program is ${programStatus}`
-                    : isAtCapacity
-                    ? "Program capacity reached"
-                    : "Add participant"
-                }
-                onClick={openAddPopup}
-                disabled={isProgramClosed || isAtCapacity}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: isProgramClosed || isAtCapacity ? "not-allowed" : "pointer",
-                  opacity: isProgramClosed || isAtCapacity ? 0.5 : 1,
-                }}
-              >
-                <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
-              </button>  
-            </>
+
+          {(user?.position === "Secretary" ||
+            user?.position === "Assistant Secretary" ||
+            user?.position === "Admin Staff") && (
+            <button
+              type="button"
+              title={
+                isProgramClosed
+                  ? `This program is ${programStatus}`
+                  : isAtCapacity
+                  ? "Program capacity reached"
+                  : "Add participant"
+              }
+              onClick={openAddPopup}
+              disabled={isProgramClosed || isAtCapacity}
+              style={{
+                background: "transparent",
+                border: "none",
+                cursor: isProgramClosed || isAtCapacity ? "not-allowed" : "pointer",
+                opacity: isProgramClosed || isAtCapacity ? 0.5 : 1,
+              }}
+            >
+              <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
+            </button>
           )}
-          
         </div>
 
         <div className="edit-program-bottom-section-participants">

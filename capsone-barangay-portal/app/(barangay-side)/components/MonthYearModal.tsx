@@ -1,10 +1,17 @@
 import React from "react";
 import "@/CSS/ReportsModule/reports.css";
+import { MonthYearRangePicker } from "./MonthYearRangePicker";
 
 interface MonthYearModalProps {
   show: boolean;
   onClose: () => void;
-  onGenerate: (month: number, year: number, allTime?: boolean) => void;
+  onGenerate: (
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number,
+    allTime?: boolean
+  ) => void;
   loading?: boolean;
   title?: string;
 }
@@ -16,12 +23,20 @@ export const MonthYearModal: React.FC<MonthYearModalProps> = ({
   loading = false,
   title = "Generate Monthly Report",
 }) => {
-  const [month, setMonth] = React.useState(new Date().getMonth());
-  const [year, setYear] = React.useState(new Date().getFullYear());
+  const now = new Date();
+  const CUR_M = now.getMonth();
+  const CUR_Y = now.getFullYear();
+
+  const [range, setRange] = React.useState({
+    startMonth: CUR_M,
+    startYear: CUR_Y,
+    endMonth: CUR_M,
+    endYear: CUR_Y,
+  });
   const [allTime, setAllTime] = React.useState(false);
 
   const handleSubmit = () => {
-    onGenerate(month, year, allTime);
+    onGenerate(range.startMonth, range.startYear, range.endMonth, range.endYear, allTime);
   };
 
   if (!show) return null;
@@ -35,39 +50,12 @@ export const MonthYearModal: React.FC<MonthYearModalProps> = ({
           <input
             type="checkbox"
             checked={allTime}
-            onChange={() => setAllTime((prev) => !prev)}
+            onChange={() => setAllTime((v) => !v)}
           />
-          Include All Time Data (Ignore Month and Year)
+          Include All Time Data (Ignore Month/Year Range)
         </label>
 
-        <label>Month:</label>
-        <select
-          value={month}
-          onChange={(e) => setMonth(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 12 }, (_, i) => (
-            <option key={i} value={i}>
-              {new Date(0, i).toLocaleString("default", { month: "long" })}
-            </option>
-          ))}
-        </select>
-
-        <label>Year:</label>
-        <select
-          value={year}
-          onChange={(e) => setYear(Number(e.target.value))}
-          disabled={allTime}
-        >
-          {Array.from({ length: 6 }, (_, i) => {
-            const y = new Date().getFullYear() - i;
-            return (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            );
-          })}
-        </select>
+        <MonthYearRangePicker value={range} onChange={setRange} disabled={allTime} />
 
         <div className="modal-actions">
           <button onClick={handleSubmit} disabled={loading}>

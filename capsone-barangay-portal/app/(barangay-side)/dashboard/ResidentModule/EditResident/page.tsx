@@ -1019,14 +1019,13 @@ export default function EditResident() {
 
                       <div className="fields-section">
                         <p>
-                          Cluster/Section<span className="required">*</span>
+                          Cluster/Section
                         </p>
                         <select
                           name="cluster"
                           className="add-resident-input-field"
                           value={formData.cluster || ""}
                           onChange={handleChange}
-                          required
                           disabled={!formData.generalLocation}
                         >
                           <option value="" disabled>
