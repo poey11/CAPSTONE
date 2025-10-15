@@ -218,6 +218,13 @@ export default function AddWalkInParticipantModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dayFull, selectedRole]);
 
+  // --- Clear dayChosen if program is single-day (to avoid accidental submission) ---
+  useEffect(() => {
+    if (program?.eventType === "single" && formData.dayChosen) {
+      setFormData((prev) => ({ ...prev, dayChosen: "" }));
+    }
+  }, [program?.eventType]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // --- File previews ---
   const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
   const [filePreviews, setFilePreviews] = useState<Record<string, Preview>>({});
@@ -265,22 +272,21 @@ export default function AddWalkInParticipantModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formFiles, residentValidIdUrl, fileFields]);
 
-  // ------- Role-aware field sets (show/require only defaults for Volunteers) -------
+  // ------- Role-aware field sets -------
   const isDefaultField = (name: string) => Object.prototype.hasOwnProperty.call(DEFAULT_LABELS, name);
 
   const visibleTextFields = useMemo<SimpleField[]>(() => {
     const base = textFields?.length ? textFields : [];
+    // We will render dayChosen ALWAYS as a standalone block, so filter it out from the columns.
     if (selectedRole === "Volunteer") {
-      // Hide any non-default text fields for volunteers
-      return base.filter((f) => isDefaultField(f.name) && f.name !== "dayChosen"); // dayChosen handled separately
+      return base.filter((f) => isDefaultField(f.name) && f.name !== "dayChosen");
     }
-    return base;
+    return base.filter((f) => f.name !== "dayChosen");
   }, [textFields, selectedRole]);
 
   const visibleFileFields = useMemo<SimpleField[]>(() => {
     const base = fileFields?.length ? fileFields : [];
     if (selectedRole === "Volunteer") {
-      // Hide non-default file fields for volunteers
       return base.filter((f) => isDefaultField(f.name));
     }
     return base;
@@ -323,7 +329,6 @@ export default function AddWalkInParticipantModal({
     // Text fields
     for (const f of visibleTextFields) {
       const name = f.name;
-      if (name === "dayChosen") continue; // handled separately
       const val = (formData[name] ?? "").toString().trim();
       if (!val) throw new Error(`Please fill out: ${labelFor(name)}`);
     }
@@ -337,7 +342,7 @@ export default function AddWalkInParticipantModal({
       }
     }
 
-    // If multi-day & Participant, dayChosen required
+    // Require dayChosen only for multi-day + Participant
     if (program?.eventType === "multiple" && selectedRole === "Participant") {
       const v = formData.dayChosen;
       if (v === undefined || v === "") {
@@ -482,9 +487,12 @@ export default function AddWalkInParticipantModal({
       }
 
       // Day chosen parse (keep 0 as Day 1)
+      const disabledSingle = program?.eventType === "single";
       const dayChosenStr = formData.dayChosen;
       const dayChosenNum =
-        dayChosenStr !== undefined && dayChosenStr !== "" ? Number(dayChosenStr) : null;
+        !disabledSingle && dayChosenStr !== undefined && dayChosenStr !== ""
+          ? Number(dayChosenStr)
+          : null;
 
       // Capacity checks
       const p = await recheckCapacityServer(selectedRole, dayChosenNum);
@@ -525,8 +533,15 @@ export default function AddWalkInParticipantModal({
         dateOfBirth: dateOfBirth || "",
         age: computedAge ?? null,
 
-        // Only participants in multi-day will have dayChosen
-        ...(selectedRole === "Participant" && dayChosenNum !== null ? { dayChosen: dayChosenNum } : {}),
+        // Only include dayChosen if:
+        // - program is multi-day AND
+        // - a day was selected AND
+        // - role is Participant
+        ...(program?.eventType === "multiple" &&
+        dayChosenNum !== null &&
+        selectedRole === "Participant"
+          ? { dayChosen: dayChosenNum }
+          : {}),
 
         fields: { ...formData, role: selectedRole },
         files: uploadedFiles,
@@ -545,6 +560,11 @@ export default function AddWalkInParticipantModal({
 
   // --- Auto-fill kept (participants only). Leave disabled in UI by default. ---
   const [autoFillLoading, setAutoFillLoading] = useState(false);
+
+  // Helpers for day selector UI
+  const disabledSingle = program?.eventType === "single";
+  const days = program?.participantDays ?? [];
+  const start = program?.startDate ? new Date(program.startDate) : null;
 
   return (
     <>
@@ -612,19 +632,77 @@ export default function AddWalkInParticipantModal({
                         </div>
                         <small style={{ opacity: 0.8 }}>
                           {program?.eventType === "multiple"
-                            ? selectedRole === "Participant"
-                              ? "Participants must pick a day."
-                              : "Volunteers don't need a day. (Hidden)"
+                            ? "Multi-day program."
                             : "Single-day program."}
                         </small>
                       </div>
+                    </div>
+
+                    {/* Day selector — ALWAYS visible; disabled for single-day */}
+                    <div className="fields-section-walkin" key="tf-dayChosen" style={{ marginBottom: 12 }}>
+                      <p>
+                        {labelFor("dayChosen")}{" "}
+                        {program?.eventType === "multiple" && selectedRole === "Participant" && (
+                          <span className="required">*</span>
+                        )}
+                      </p>
+
+                      <select
+                        className="walkin-input-field"
+                        value={formData.dayChosen ?? ""}
+                        onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
+                        disabled={disabledSingle}
+                        title={disabledSingle ? "One-day event only" : undefined}
+                      >
+                        <option value="">
+                          {disabledSingle ? "One-day event only" : "Select a day"}
+                        </option>
+
+                        {/* For single-day we still render choices (purely visual),
+                            but disabled state prevents selection */}
+                        {(days.length ? days : [null]).map((_, idx) => {
+                          // If we truly have no days array, show a single "Day 1" placeholder
+                          const dIdx = days.length ? idx : 0;
+                          let label = `Day ${dIdx + 1}`;
+                          let optionDisabled = disabledSingle;
+
+                          if (start) {
+                            const optionDate = new Date(start);
+                            optionDate.setDate(start.getDate() + dIdx);
+                            label += ` (${optionDate.toDateString()})`;
+
+                            // Disable past dates (same logic as before)
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            optionDate.setHours(0, 0, 0, 0);
+                            if (optionDate < today) optionDisabled = true;
+                          }
+
+                          // FULL mark (only matters for multi-day)
+                          if (!disabledSingle && dayFull[dIdx]) {
+                            label += " — FULL";
+                            optionDisabled = true;
+                          }
+
+                          return (
+                            <option key={dIdx} value={String(dIdx)} disabled={optionDisabled}>
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+
+                      {disabledSingle && (
+                        <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
+                          One-day event only
+                        </small>
+                      )}
                     </div>
 
                     <div className="walkin-details-section">
                       {/* Left column */}
                       <div className="walkin-content-left-side">
                         {visibleTextFields
-                          .filter((f) => f.name !== "dayChosen") // handled separately / hidden for Volunteer
                           .filter((_, idx) => idx % 2 === 0)
                           .map((f) => {
                             const name = f.name;
@@ -663,55 +741,6 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
-                            // Day picker (Participants only & multi-day)
-                            if (
-                              name === "dayChosen" &&
-                              program?.eventType === "multiple" &&
-                              selectedRole === "Participant"
-                            ) {
-                              const days = program?.participantDays ?? [];
-                              const start = program?.startDate ? new Date(program.startDate) : null;
-
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {labelFor("dayChosen")} <span className="required">*</span>
-                                  </p>
-                                  <select
-                                    className="walkin-input-field"
-                                    required
-                                    value={formData.dayChosen ?? ""}
-                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
-                                  >
-                                    <option value="">Select a day</option>
-                                    {days.map((_, idx) => {
-                                      let label = `Day ${idx + 1}`;
-                                      let disabled = false;
-                                      if (start) {
-                                        const optionDate = new Date(start);
-                                        optionDate.setDate(start.getDate() + idx);
-                                        label += ` (${optionDate.toDateString()})`;
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        optionDate.setHours(0, 0, 0, 0);
-                                        if (optionDate < today) disabled = true;
-                                      }
-                                      const isFull = !!dayFull[idx];
-                                      if (isFull) {
-                                        label += " — FULL";
-                                        disabled = true;
-                                      }
-                                      return (
-                                        <option key={idx} value={String(idx)} disabled={disabled}>
-                                          {label}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                </div>
-                              );
-                            }
-
                             const lower = name.toLowerCase();
                             const type =
                               lower.includes("email")
@@ -743,7 +772,6 @@ export default function AddWalkInParticipantModal({
                       {/* Right column */}
                       <div className="walkin-content-right-side">
                         {visibleTextFields
-                          .filter((f) => f.name !== "dayChosen")
                           .filter((_, idx) => idx % 2 !== 0)
                           .map((f) => {
                             const name = f.name;
@@ -778,54 +806,6 @@ export default function AddWalkInParticipantModal({
                                       placeholder="Will be computed"
                                     />
                                   </div>
-                                </div>
-                              );
-                            }
-
-                            if (
-                              name === "dayChosen" &&
-                              program?.eventType === "multiple" &&
-                              selectedRole === "Participant"
-                            ) {
-                              const days = program?.participantDays ?? [];
-                              const start = program?.startDate ? new Date(program.startDate) : null;
-
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {labelFor("dayChosen")} <span className="required">*</span>
-                                  </p>
-                                  <select
-                                    className="walkin-input-field"
-                                    required
-                                    value={formData.dayChosen ?? ""}
-                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
-                                  >
-                                    <option value="">Select a day</option>
-                                    {days.map((_, idx) => {
-                                      let label = `Day ${idx + 1}`;
-                                      let disabled = false;
-                                      if (start) {
-                                        const optionDate = new Date(start);
-                                        optionDate.setDate(start.getDate() + idx);
-                                        label += ` (${optionDate.toDateString()})`;
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        optionDate.setHours(0, 0, 0, 0);
-                                        if (optionDate < today) disabled = true;
-                                      }
-                                      const isFull = !!dayFull[idx];
-                                      if (isFull) {
-                                        label += " — FULL";
-                                        disabled = true;
-                                      }
-                                      return (
-                                        <option key={idx} value={String(idx)} disabled={disabled}>
-                                          {label}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
                                 </div>
                               );
                             }

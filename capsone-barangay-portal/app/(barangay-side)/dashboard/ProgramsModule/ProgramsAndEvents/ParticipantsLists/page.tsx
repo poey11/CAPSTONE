@@ -467,11 +467,16 @@ export default function ParticipantsList() {
   );
 
   // Editable only when program is Ongoing
-  const isAttendanceEditable = useMemo(
-    () => (programStatus || "").toLowerCase() === "ongoing",
-    [programStatus]
-  );
+const showAttendanceColumn = useMemo(
+  () => ["ongoing", "completed"].includes((programStatus || "").toLowerCase()),
+  [programStatus]
+);
 
+// Editable only when Ongoing (keep your rule)
+const isAttendanceEditable = useMemo(
+  () => (programStatus || "").toLowerCase() === "ongoing",
+  [programStatus]
+);
   // Time window guard for attendance checkbox
   const canEditAttendanceByTime = (p: Participant) => {
     const now = new Date();
@@ -795,14 +800,15 @@ export default function ParticipantsList() {
                     <th>Email Address</th>
                     <th>Location</th>
                     <th>Role</th>
-                    {isAttendanceEditable && <th>Attendance</th>}
+                    {showAttendanceColumn && <th>Attendance</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredParticipants.map((p) => {
                     const name = p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim();
                     const timeGate = canEditAttendanceByTime(p);
-                    const canEditNow = isAttendanceEditable && timeGate;
+                    const canEditNow = isAttendanceEditable && timeGate; // still only editable when Ongoing + within time window
+
                     return (
                       <tr
                         key={p.id}
@@ -815,19 +821,19 @@ export default function ParticipantsList() {
                         <td className="td-truncate">{p.emailAddress || ""}</td>
                         <td className="td-truncate">{p.location || p.address || ""}</td>
                         <td className="td-truncate">{p.role || "Participant"}</td>
-                        {isAttendanceEditable && (
-                          <td
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ textAlign: "center" }}
-                          >
+
+                        {showAttendanceColumn && (
+                          <td onClick={(e) => e.stopPropagation()} style={{ textAlign: "center" }}>
                             <input
                               type="checkbox"
                               checked={!!p.attendance}
-                              disabled={!canEditNow}
-                              onChange={() => handleToggleAttendance(p)}
+                              disabled={!canEditNow}   // Completed ⇒ visible but read-only
+                              onChange={() => canEditNow && handleToggleAttendance(p)}
                               title={
                                 canEditNow
                                   ? "Mark attendance"
+                                  : (programStatus || "").toLowerCase() === "completed"
+                                  ? "Read-only (program completed)"
                                   : !timeGate
                                   ? "Attendance locked — day has ended/not yet started"
                                   : `Attendance disabled — program is ${programStatus || "not ongoing"}`

@@ -3,8 +3,21 @@ import "@/CSS/ResidentModule/module.css";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { db } from "../../../../db/firebase";
-import { collection, getDocs, doc, deleteDoc, addDoc, query, where, updateDoc } from "firebase/firestore";
+import { db, storage } from "../../../../db/firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  deleteDoc,
+  addDoc,
+  orderBy,
+  serverTimestamp,
+  updateDoc
+} from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import * as XLSX from 'xlsx';
@@ -48,6 +61,27 @@ export default function RegisteredVotersModule() {
 
   const [searchPrecinct, setSearchPrecinct] = useState<string>("");
 
+  const [showEditJustificationPopup, setShowEditJustificationPopup] = useState(false);
+  const [editVoter, setEditVoter] = useState<any | null>(null);
+  const [justificationFile, setJustificationFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [voterEditJustifications, setVoterEditJustifications] = useState<any[]>([]);
+
+  const formatTS = (ts: any) => {
+  try {
+    if (!ts) return "N/A";
+    if (typeof ts?.toDate === "function") return ts.toDate().toLocaleString();
+    const d = new Date(ts);
+    if (!isNaN(d as any)) return d.toLocaleString();
+    return String(ts);
+  } catch {
+    return String(ts ?? "N/A");
+  }
+};
+
+
+
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [viewActiveSection, setViewActiveSection] = useState("full");
@@ -69,6 +103,27 @@ export default function RegisteredVotersModule() {
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     router.replace(newUrl, { scroll: false });
   };
+
+  useEffect(() => {
+  const fetchJustifications = async () => {
+    try {
+      if (!isPopupOpen || !selectedUser?.id) {
+        setVoterEditJustifications([]);
+        return;
+      }
+      const justRef = collection(db, "VotersList", selectedUser.id, "EditJustifications");
+      const qy = query(justRef, orderBy("createdAt", "desc"));
+      const snap = await getDocs(qy);
+      const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      setVoterEditJustifications(items);
+    } catch (e) {
+      console.error("Error fetching voter edit justifications:", e);
+      setVoterEditJustifications([]);
+    }
+  };
+  fetchJustifications();
+}, [isPopupOpen, selectedUser?.id]);
+
 
   useEffect(() => {
     // Animate filters only once on initial page load
@@ -427,12 +482,17 @@ export default function RegisteredVotersModule() {
   
 
   const handleEditClick = (id: string) => {
-    if (isAuthorized) {
-      router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${id}`);
-    } else {
+    if (!isAuthorized) {
       alert("You are not authorized to edit a voter.");
+      return;
     }
+    const target = residents.find((r) => r.id === id);
+    setEditVoter(target || { id });
+    setJustificationFile(null);
+    setUploadProgress(0);
+    setShowEditJustificationPopup(true);
   };
+
 
   const handleDeleteClick = (id: string, voterNumber: string) => {
     if (isAuthorized) {
@@ -462,6 +522,72 @@ export default function RegisteredVotersModule() {
       }
     }
   };
+
+const handleUploadAndContinue = async () => {
+  if (!editVoter) return;
+
+  if (!isAuthorized) {
+    setPopupMessage("Only the Secretary or Assistant Secretary may proceed.");
+    setshowAlertPopup(true);
+    return;
+  }
+
+  if (!justificationFile) {
+    setPopupMessage("Please select a justification letter file to upload.");
+    setshowAlertPopup(true);
+    return;
+  }
+
+  try {
+    setUploading(true);
+
+    const path = `VoterEditJustifications/${editVoter.id}/${Date.now()}_${justificationFile.name}`;
+    const storageRef = ref(storage, path);
+    const uploadTask = uploadBytesResumable(storageRef, justificationFile);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(Math.round(progress));
+      },
+      (err) => {
+        console.error("Upload error:", err);
+        setUploading(false);
+        setPopupMessage("Upload failed. Please try again.");
+        setshowAlertPopup(true);
+      },
+      async () => {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+
+        // Save metadata under subcollection "EditJustifications" of the voter
+        await addDoc(collection(db, "VotersList", editVoter.id, "EditJustifications"), {
+          url,
+          originalFilename: justificationFile.name,
+          storagePath: path,
+          voterId: editVoter.id,
+          uploadedBy: (session?.user as any)?.fullName || (session?.user as any)?.name || "Unknown",
+          uploadedByUid: (session?.user as any)?.id || (session?.user as any)?.uid || null,
+          uploadedByPosition: session?.user?.position || "-",
+          createdAt: serverTimestamp(),
+        });
+
+        setUploading(false);
+        setShowEditJustificationPopup(false);
+        setJustificationFile(null);
+
+        // Proceed to your existing Edit page
+        router.push(`/dashboard/ResidentModule/registeredVoters/EditVoter?id=${editVoter.id}`);
+      }
+    );
+  } catch (e) {
+    console.error("Upload exception:", e);
+    setUploading(false);
+    setPopupMessage("Something went wrong while uploading.");
+    setshowAlertPopup(true);
+  }
+};
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const residentsPerPage = 10;
@@ -630,8 +756,9 @@ export default function RegisteredVotersModule() {
                             <button
                               className="residentmodule-action-edit"
                               onClick={() => handleEditClick(resident.id)}
+                              title="Upload justification letter to edit"
                             >
-                              <img src="/Images/edit.png" alt="View" />
+                              <img src="/Images/edit.png" alt="Edit" />
                             </button>
                             <button
                               className="residentmodule-action-delete"
@@ -778,7 +905,7 @@ export default function RegisteredVotersModule() {
                     </button>
                   </div>
                   <div className="view-resident-user-info-toggle-wrapper">
-                    {[ "full"].map((section) => (
+                    {[ "full", "history"].map((section) => (
                       <button
                         key={section}
                         type="button"
@@ -786,6 +913,7 @@ export default function RegisteredVotersModule() {
                         onClick={() => setViewActiveSection(section)}
                       >
                         {section === "full" && "Voter Details"}
+                        {section === "history" && "History"}
                       </button>
                     ))}
                   </div>
@@ -865,6 +993,83 @@ export default function RegisteredVotersModule() {
                           </div>
                         </>
                       )}
+                      {viewActiveSection === "history" && (
+                        <>
+                          <div className="view-mainresident-main-section-history">
+                            <div className="view-mainresident-upper-section">
+                              <div className="view-mainresident-content-left-side">
+                                <div className="view-user-fields-section">
+                                  <p>Created By</p>
+                                  <input
+                                    type="text"
+                                    className="view-user-input-field"
+                                    value={selectedUser.createdBy || "N/A"}
+                                    readOnly
+                                  />
+                                </div>
+                                <div className="view-user-fields-section">
+                                  <p>Created At</p>
+                                  <input
+                                    type="text"
+                                    className="view-user-input-field"
+                                    value={selectedUser.createdAt || "N/A"}
+                                    readOnly
+                                  />
+                                </div>
+                              </div>
+                              <div className="view-mainresident-content-right-side">
+                                <div className="view-user-fields-section">
+                                  <p>Updated By</p>
+                                  <input
+                                    type="text"
+                                    className="view-user-input-field"
+                                    value={selectedUser.updatedBy || "N/A"}
+                                    readOnly
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="view-mainresident-lower-section">
+                              <div className="view-user-fields-section">
+                                {voterEditJustifications.length === 0 ? (
+                                  <div className="no-verification-files-text">
+                                    <p>No justification letters uploaded yet.</p>
+                                  </div>
+                                ) : (
+                                  <div className="records-table-wrapper">
+                                    <table className="records-table">
+                                      <thead>
+                                        <tr>
+                                          <th className="add-new-col-case">File</th>
+                                          <th className="add-new-col-concern">Uploaded By</th>
+                                          <th className="add-new-col-date">Position</th>
+                                          <th className="add-new-col-status">Uploaded At</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {voterEditJustifications.map((j, idx) => (
+                                          <tr key={j.id}>
+                                            <td>
+                                              <a href={j.url} target="_blank" rel="noopener noreferrer">
+                                                {j.originalFilename || `Justification ${idx + 1}`}
+                                              </a>
+                                            </td>
+                                            <td>{j.uploadedBy || "N/A"}</td>
+                                            <td>{j.uploadedByPosition || "-"}</td>
+                                            <td>{formatTS(j.createdAt)}</td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
                     </div>
                   </div>
                 </div>
@@ -872,6 +1077,54 @@ export default function RegisteredVotersModule() {
           </div>
         </div>
       )}
+
+      {showEditJustificationPopup && editVoter && (
+        <div className="confirmation-popup-overlay-module-voters">
+          <div className="confirmation-popup-module-voters">
+            <img src="/Images/letter.png" alt="upload icon" className="letter-icon-popup" />
+            <h2>Upload Justification Letter</h2>
+            <p>
+              A signed justification letter from the Barangay Chairman/Punong Barangay is required before editing this voter’s data.
+            </p>
+            <h4>
+              Voter: {(editVoter?.lastName || "")}, {(editVoter?.firstName || "")} {(editVoter?.middleName || "")}
+            </h4>
+
+            <div style={{ marginTop: 10 }}>
+              <input
+                type="file"
+                accept=".pdf,image/*"
+                onChange={(e) => setJustificationFile(e.target.files?.[0] || null)}
+              />
+              {uploading && <p>Uploading… {uploadProgress}%</p>}
+            </div>
+
+            <div className="yesno-container-module">
+              <button
+                onClick={() => {
+                  if (!uploading) {
+                    setShowEditJustificationPopup(false);
+                    setJustificationFile(null);
+                  }
+                }}
+                className="no-button-module"
+                disabled={uploading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUploadAndContinue}
+                className="yes-button-module"
+                disabled={!justificationFile || uploading}
+                title={!justificationFile ? "Select a file first" : "Upload & continue"}
+              >
+                {uploading ? `Uploading ${uploadProgress}%` : "Submit"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 }

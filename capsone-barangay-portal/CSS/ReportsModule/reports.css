@@ -1553,6 +1553,16 @@ tinangal
   animation: fadeIn 0.3s ease-in-out;
 }
 
+.modal-box-program-participant {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px; /* ⬅️ wider than the 400px default */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
 .modal-box h3 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
@@ -1694,4 +1704,95 @@ tinangal
   100% {
     transform: rotate(360deg);
   }
+}
+
+.form-input {
+  width: 450px;
+  height: 40px;
+  padding: 12px 40px 12px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 6px;
+  transition: 0.3s ease all;
+  color: #000;
+  background-color: #fdfdfd;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.modal-box-program-participant {
+  background-color: #fff;
+  padding: 2.5rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 650px; /* wider than normal modal */
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-box-program-participant h3 {
+  font-size: 1.35rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: #222;
+}
+
+.modal-box-program-participant label {
+  display: block;
+  margin: 1rem 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.modal-box-program-participant input[type="text"],
+.modal-box-program-participant select {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fafafa;
+  transition: border-color 0.2s ease;
+}
+
+.modal-box-program-participant input[type="text"]:focus,
+.modal-box-program-participant select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.modal-box-program-participant .hint {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.3rem;
+}
+
+.modal-box-program-participant .hint.error {
+  color: #b00020;
+}
+
+.modal-box-program-participant .modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.modal-box-program-participant .btn-primary,
+.modal-box-program-participant .btn-secondary {
+  font-size: 0.95rem;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.modal-box-program-participant .btn-primary:hover {
+  background: #0b5ed7;
+}
+
+.modal-box-program-participant .btn-secondary:hover {
+  background: #e6e6e6;
 }
