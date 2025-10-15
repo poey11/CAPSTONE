@@ -5,22 +5,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import AddNewProgramModal from "@/app/(barangay-side)/components/AddNewProgramModal";
 import EditParticipantModal from "@/app/(barangay-side)/components/EditParticipantModal";
-
-// Firestore
 import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  Timestamp,
-  updateDoc,
-  where,
-  writeBatch,
-  serverTimestamp,
-} from "firebase/firestore";
+  collection, deleteDoc, doc, onSnapshot, orderBy, query, Timestamp, updateDoc, where, writeBatch, serverTimestamp } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
+
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "@/app/db/firebase";
+import { getDoc, getDocs, addDoc } from "firebase/firestore";
+
 
 type Program = {
   id: string;
@@ -49,6 +43,27 @@ type Participant = {
   idImageUrl?: string;
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 };
+
+type ParticipantRecord = {
+  id: string;
+  programId?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  contactNumber?: string;
+  contact?: string;
+  emailAddress?: string;
+  email?: string;
+  role?: "Participant" | "Volunteer" | string;
+  location?: string;
+  address?: string;
+  approvalStatus?: "Pending" | "Approved" | "Rejected";
+  // Attendance fields (use whatever you store)
+  attended?: boolean;
+  attendanceCount?: number;
+  attendance?: { present?: boolean };
+};
+
 
 //  helpers: safe date parsing & single status decider
 const parseYMD = (s?: string | null): Date | null => {
@@ -725,6 +740,283 @@ export default function ProgramsModule() {
   ]);
   // ===== END AUTO-REJECT =====
 
+
+  // participant report
+
+  const didAttend = (rec: ParticipantRecord) => {
+  if (typeof rec.attended === "boolean") return rec.attended;
+  if (typeof rec.attendanceCount === "number") return rec.attendanceCount > 0;
+  if (rec.attendance && typeof rec.attendance.present === "boolean") return rec.attendance.present;
+  return false;
+};
+
+const safeFullName = (rec: ParticipantRecord) => {
+  if (rec.fullName && rec.fullName.trim()) return rec.fullName;
+  const f = rec.firstName || "";
+  const l = rec.lastName || "";
+  const s = `${f} ${l}`.trim();
+  return s || "—";
+};
+
+const fmtDate = (iso?: string | null) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+};
+
+const fetchProgramParticipants = async (programId: string): Promise<ParticipantRecord[]> => {
+  // ProgramsParticipants
+  const snap1 = await getDocs(
+    query(collection(db, "ProgramsParticipants"), where("programId", "==", programId))
+  );
+  const a: ParticipantRecord[] = snap1.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+
+  // ProgramParticipants (singular "Program")
+  const snap2 = await getDocs(
+    query(collection(db, "ProgramParticipants"), where("programId", "==", programId))
+  );
+  const b: ParticipantRecord[] = snap2.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+
+  // Merge by id
+  const map = new Map<string, ParticipantRecord>();
+  [...a, ...b].forEach(rec => map.set(rec.id, rec));
+  return Array.from(map.values());
+};
+
+
+const generateProgramCaseXlsx = async (programId: string, fallbackName?: string): Promise<string | null> => {
+  try {
+    // Load program
+    const progSnap = await getDoc(doc(db, "Programs", programId));
+    if (!progSnap.exists()) {
+      showToast("error", "Program not found.");
+      return null;
+    }
+    const p: any = { id: programId, ...progSnap.data() };
+
+    // Only allow when Completed
+    const progress: string = p.progressStatus || "";
+    if (progress !== "Completed") {
+      showToast("error", "Report is only available for Completed programs.");
+      return null;
+    }
+
+    // Build workbook with 2 sheets
+    const wb = new ExcelJS.Workbook();
+    const wsInfo = wb.addWorksheet("Program Info");
+    const wsList = wb.addWorksheet("Participants & Volunteers");
+
+    // === Sheet 1: Program Info ===
+    const title = "BARANGAY FAIRVIEW\nPROGRAM CASE REPORT";
+    wsInfo.mergeCells("A1:F1");
+    wsInfo.getCell("A1").value = title;
+    wsInfo.getCell("A1").font = { name: "Calibri", size: 16, bold: true };
+    wsInfo.getCell("A1").alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    wsInfo.getRow(1).height = 36;
+
+    const programName = p.programName || fallbackName || programId;
+    const eventType = p.eventType || "single";
+    const sDate = fmtDate(p.startDate);
+    const eDate = p.endDate ? fmtDate(p.endDate) : "";
+    const tStart = p.timeStart || "";
+    const tEnd = p.timeEnd || "";
+    const location = p.location || "—";
+    const approval = p.approvalStatus || "—";
+    const progressStatus = p.progressStatus || "—";
+    const description = p.description || p.programDescription || "";
+
+    // display date/time range
+    const dateRange = eDate ? `${sDate} — ${eDate}` : sDate;
+    const timeRange = tStart && tEnd ? `${tStart} — ${tEnd}` : (tStart || tEnd || "");
+
+    // capacity
+    const capParticipants = Number(p.participants || 0) || 0;
+    const capVolunteers = Number(p.volunteers || 0) || 0;
+
+    // participantDays (for multiple)
+    const participantDays: number[] = Array.isArray(p.participantDays) ? p.participantDays : [];
+
+    // Info table
+    wsInfo.columns = [
+      { header: "", width: 26 },
+      { header: "", width: 50 },
+      { header: "", width: 18 },
+      { header: "", width: 18 },
+      { header: "", width: 18 },
+      { header: "", width: 18 }
+    ];
+
+    const addInfo = (label: string, value: string) => {
+      const r = wsInfo.addRow([label, value]);
+      r.getCell(1).font = { bold: true };
+      r.alignment = { vertical: "middle", wrapText: true };
+    };
+
+    wsInfo.addRow([]);
+    addInfo("Program Name", programName);
+    addInfo("Approval Status", approval);
+    addInfo("Progress Status", progressStatus);
+    addInfo("Event Type", String(eventType).toUpperCase());
+    addInfo("Location", location);
+    addInfo("Date Range", dateRange);
+    if (timeRange) addInfo("Time", timeRange);
+
+    if (eventType === "multiple" && participantDays.length) {
+      wsInfo.addRow([]);
+      wsInfo.addRow(["Per-day Max Participants"]);
+      wsInfo.getRow(wsInfo.lastRow!.number).font = { bold: true };
+      const header = wsInfo.addRow(["Day", "Max Participants"]);
+      header.font = { bold: true };
+      participantDays.forEach((n, i) => {
+        wsInfo.addRow([`Day ${i + 1}`, Number(n) || 0]);
+      });
+    } else {
+      addInfo("Max Participants", capParticipants ? String(capParticipants) : "—");
+    }
+    addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
+
+    if (description) {
+      wsInfo.addRow([]);
+      const header = wsInfo.addRow(["Description"]);
+      header.font = { bold: true };
+      const drow = wsInfo.addRow([description]);
+      drow.getCell(1).alignment = { wrapText: true };
+      drow.height = 40;
+    }
+
+    // style basics
+    wsInfo.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.font = cell.font || { name: "Calibri", size: 12 };
+      });
+    });
+    wsInfo.pageSetup = {
+      orientation: "portrait",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9,
+      margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+    };
+
+    // === Sheet 2: Participants & Volunteers ===
+    wsList.columns = [
+      { header: "#", width: 6 },
+      { header: "Full Name", width: 32 },
+      { header: "Address", width: 34 },
+      { header: "Contact", width: 18 },
+      { header: "Role", width: 16 },
+      { header: "Attendance", width: 14 },
+    ];
+
+    const title2 = wsList.addRow(["Participants / Volunteers (Approved Only)"]);
+    wsList.mergeCells(`A${title2.number}:F${title2.number}`);
+    wsList.getCell(`A${title2.number}`).font = { name: "Calibri", size: 14, bold: true };
+    wsList.getCell(`A${title2.number}`).alignment = { horizontal: "center", vertical: "middle" };
+    wsList.addRow([]);
+
+    const header2 = wsList.addRow(wsList.columns.map(c => c.header));
+    header2.eachCell((c) => {
+      c.font = { name: "Calibri", size: 12, bold: true };
+      c.alignment = { horizontal: "center", vertical: "middle" };
+      c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+    });
+
+    // Load participants (Approved only)
+    const all = await fetchProgramParticipants(programId);
+    const approved = all.filter(r => String(r.approvalStatus || "").toLowerCase() === "approved");
+
+    // Sort: participants first, then alpha by last name
+    const roleOrder = (r: ParticipantRecord) =>
+      (String(r.role || "").toLowerCase() === "participant" ? 0 : 1);
+    const nameKey = (r: ParticipantRecord) =>
+      `${(r.lastName || "").toString().toUpperCase()}|${(r.firstName || "").toString().toUpperCase()}`;
+    approved.sort((a, b) => roleOrder(a) - roleOrder(b) || nameKey(a).localeCompare(nameKey(b)));
+
+    approved.forEach((rec, i) => {
+      const addr = rec.address || rec.location || "—";
+      const contact = rec.contactNumber || rec.contact || "—";
+      const role = rec.role || "—";
+      const attendance = didAttend(rec) ? "Yes" : "No";
+
+      const r = wsList.addRow([i + 1, safeFullName(rec), addr, contact, role, attendance]);
+      r.height = 22;
+      r.eachCell((c) => {
+        c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        c.font = { name: "Calibri", size: 12 };
+        c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+      });
+    });
+
+    wsList.pageSetup = {
+      orientation: "portrait",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9,
+      margins: {
+        left: 0.3,
+        right: 0.3,
+        top: 0.4,
+        bottom: 0.4,
+        header: 0.2,
+        footer: 0.2,
+      },
+    };
+
+    // Upload XLSX
+    const safeName = String(programName || programId).replace(/[^\w.-]/g, "_");
+    const xlsxRef = ref(storage, `GeneratedReports/Program_Case_${safeName}.xlsx`);
+    const buf = await wb.xlsx.writeBuffer();
+    await uploadBytes(xlsxRef, new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    const xlsxUrl = await getDownloadURL(xlsxRef);
+
+    return xlsxUrl;
+  } catch (err) {
+    console.error("generateProgramCaseXlsx error:", err);
+    showToast("error", "Failed to generate Program Case XLSX.");
+    return null;
+  }
+};
+
+
+const handleGenerateProgramCasePDF = async (programId: string, programName?: string) => {
+  try {
+    const url = await generateProgramCaseXlsx(programId, programName);
+    if (!url) return;
+
+    // Convert to PDF (server API)
+    const resp = await fetch("/api/convertPDF", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fileUrl: url }),
+    });
+    if (!resp.ok) throw new Error("PDF conversion failed");
+
+    const pdf = await resp.blob();
+    const nameSafe = (programName || programId).replace(/[^\w.-]/g, "_");
+    saveAs(pdf, `Program_Case_${nameSafe}.pdf`);
+
+    // optional: notify
+    try {
+      await addDoc(collection(db, "BarangayNotifications"), {
+        message: `A report (Program Case: ${programName || programId}) was generated by ${user?.fullName || user?.name || "Unknown"}.`,
+        timestamp: new Date(),
+        isRead: false,
+        recipientRole: "Punong Barangay",
+        transactionType: "System Report",
+      });
+    } catch {}
+    showToast("success", "Program Case PDF generated.");
+  } catch (e) {
+    console.error(e);
+    showToast("error", "Failed to generate Program Case PDF.");
+  }
+};
+
+
+
   return (
     <main className="programs-module-main-container">
       <div className="programs-module-section-1">
@@ -1210,6 +1502,18 @@ export default function ProgramsModule() {
                               className="action-programs-edit"
                             />
                           </button>
+                          {program.progressStatus === "Completed" && (
+                            <button
+                              className="action-print-departments-main"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleGenerateProgramCasePDF(program.id, program.programName);
+                              }}
+                              title="Print Program Case Report"
+                            >
+                              <img src="/Images/printer.png" alt="Print" />
+                            </button>
+                          )}
                           {canDelete && (
                             <button
                               className="action-programs-button"
