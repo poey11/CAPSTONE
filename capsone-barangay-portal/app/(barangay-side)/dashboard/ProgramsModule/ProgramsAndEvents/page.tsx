@@ -1323,7 +1323,7 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                               />
                             </button>
                           )}
-                          {program.progressStatus === "Completed" && (
+                          { canDelete && program.progressStatus === "Completed" && (
                             <button
                               className="action-programs-button"
                               onClick={(e) => {
