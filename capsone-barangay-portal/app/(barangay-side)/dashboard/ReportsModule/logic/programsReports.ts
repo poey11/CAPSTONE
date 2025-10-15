@@ -1,6 +1,6 @@
 // app/(barangay-side)/dashboard/ReportsModule/logic/programsReports.ts
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Firestore, collection, getDocs, query, addDoc } from "firebase/firestore"; // addDoc not used here; keep/remove as you prefer
+import { Firestore, collection, getDocs, query, addDoc, where, orderBy, getDoc, doc } from "firebase/firestore"; // addDoc not used here; keep/remove as you prefer
 import { FirebaseStorage, ref, getDownloadURL, uploadBytes } from "firebase/storage";
 import ExcelJS from "exceljs";
 
@@ -268,4 +268,267 @@ export async function generateProgramsMonthlyXlsx(params: {
   const fileName = `Monthly_Programs_Report_${labelFile}.xlsx`;
   const fileUrl = await uploadXlsx(storage, wb, fileName);
   return { fileUrl, labelFile };
+}
+
+
+
+// ---------- Shared helpers ----------
+const fmtDateLong = (iso?: string | null) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+};
+const safe = (s?: string) => String(s || "");
+
+// ---------- Export: for the modal dropdown ----------
+export type ProgramPick = {
+  id: string;
+  programName: string;
+  startDate?: string;
+  endDate?: string;
+  progressStatus?: string;
+};
+
+export async function fetchApprovedPrograms(db: any) {
+  try {
+    const q = query(
+      collection(db, "Programs"),
+      where("approvalStatus", "==", "Approved"),
+      orderBy("startDate", "desc")
+    );
+    const snap = await getDocs(q);
+
+    const list = snap.docs.map((d) => {
+      const data = d.data() as any;
+      return {
+        id: d.id,
+        programName: data.programName || "(Unnamed Program)",
+        startDate: data.startDate || "",
+        endDate: data.endDate || "",
+        progressStatus: data.progressStatus || "",
+      };
+    });
+
+    return list;
+  } catch (err) {
+    console.error("fetchApprovedPrograms error:", err);
+    throw new Error("Failed to load Approved programs.");
+  }
+}
+
+// ---------- Internal: load participants from both collections ----------
+type ParticipantRecord = {
+  id: string;
+  programId?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  contactNumber?: string;
+  contact?: string;
+  role?: string;
+  location?: string;
+  address?: string;
+  approvalStatus?: "Pending" | "Approved" | "Rejected";
+  attendance?: boolean; // <- your boolean field
+};
+
+const safeFullName = (rec: ParticipantRecord) => {
+  if (rec.fullName && rec.fullName.trim()) return rec.fullName;
+  const f = rec.firstName || "";
+  const l = rec.lastName || "";
+  const s = `${f} ${l}`.trim();
+  return s || "—";
+};
+
+async function fetchProgramParticipants(db: Firestore, programId: string): Promise<ParticipantRecord[]> {
+  const snap1 = await getDocs(
+    query(collection(db, "ProgramsParticipants"), where("programId", "==", programId))
+  );
+  const a: ParticipantRecord[] = snap1.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+
+  const snap2 = await getDocs(
+    query(collection(db, "ProgramParticipants"), where("programId", "==", programId))
+  );
+  const b: ParticipantRecord[] = snap2.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+
+  const map = new Map<string, ParticipantRecord>();
+  [...a, ...b].forEach((r) => map.set(r.id, r));
+  return Array.from(map.values());
+}
+
+// ---------- Export: Program Participation/Summary XLSX (returns fileUrl & name) ----------
+export async function generateProgramParticipationXlsx(args: {
+  db: Firestore;
+  storage: FirebaseStorage;
+  programId: string;
+}): Promise<{ fileUrl: string; programName: string }> {
+  const { db, storage, programId } = args;
+
+  // Load program
+  const progSnap = await getDoc(doc(db, "Programs", programId));
+  if (!progSnap.exists()) throw new Error("NOT_FOUND");
+  const p: any = { id: programId, ...progSnap.data() };
+
+  const programName = p.programName || programId;
+  const eventType: string = p.eventType || "single";
+  const sDate = fmtDateLong(p.startDate);
+  const eDate = p.endDate ? fmtDateLong(p.endDate) : "";
+  const timeRange =
+    p.timeStart && p.timeEnd ? `${p.timeStart} — ${p.timeEnd}` : p.timeStart || p.timeEnd || "";
+  const dateRange = eDate ? `${sDate} — ${eDate}` : sDate;
+  const capParticipants = Number(p.participants || 0) || 0;
+  const capVolunteers = Number(p.volunteers || 0) || 0;
+  const participantDays: number[] = Array.isArray(p.participantDays) ? p.participantDays : [];
+
+  // Workbook + sheets
+  const wb = new ExcelJS.Workbook();
+  const wsInfo = wb.addWorksheet("Program Info");
+  const wsList = wb.addWorksheet("Participants & Volunteers");
+
+  // ======= Sheet 1: Top centered header (3 lines) =======
+  wsInfo.mergeCells("A1:F1");
+  wsInfo.getCell("A1").value = "BARANGAY FAIRVIEW";
+  wsInfo.getCell("A1").font = { name: "Calibri", size: 16, bold: true };
+  wsInfo.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
+
+  wsInfo.mergeCells("A2:F2");
+  wsInfo.getCell("A2").value = "PROGRAM SUMMARY REPORT";
+  wsInfo.getCell("A2").font = { name: "Calibri", size: 14, bold: true };
+  wsInfo.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
+
+  wsInfo.mergeCells("A3:F3");
+  wsInfo.getCell("A3").value = programName;
+  wsInfo.getCell("A3").font = { name: "Calibri", size: 13, bold: true };
+  wsInfo.getCell("A3").alignment = { horizontal: "center", vertical: "middle" };
+
+  wsInfo.getRow(1).height = 22;
+  wsInfo.getRow(2).height = 20;
+  wsInfo.getRow(3).height = 18;
+  wsInfo.addRow([]); // spacer
+
+  // Details (wider columns so numbers/labels align nicely)
+  wsInfo.columns = [
+    { header: "", width: 26 },
+    { header: "", width: 64 },
+    { header: "", width: 12 },
+    { header: "", width: 12 },
+    { header: "", width: 12 },
+    { header: "", width: 12 },
+  ];
+  const addInfo = (label: string, value: string) => {
+    const r = wsInfo.addRow([label, value]);
+    r.getCell(1).font = { bold: true };
+    r.alignment = { vertical: "middle", wrapText: true };
+  };
+
+  addInfo("Program Name", programName);
+  addInfo("Approval Status", safe(p.approvalStatus));
+  addInfo("Progress Status", safe(p.progressStatus));
+  addInfo("Event Type", String(eventType).toUpperCase());
+  addInfo("Location", safe(p.location) || "—");
+  addInfo("Date Range", dateRange);
+  if (timeRange) addInfo("Time", timeRange);
+
+  // Per-day block or single-day cap
+  if (eventType === "multiple" && participantDays.length) {
+    wsInfo.addRow([]);
+    const hdr = wsInfo.addRow(["Per-day Max Participants"]);
+    hdr.font = { bold: true };
+    const tableHdr = wsInfo.addRow(["Day", "Max Participants"]);
+    tableHdr.font = { bold: true };
+    participantDays.forEach((n, i) => {
+      wsInfo.addRow([`Day ${i + 1}`, Number(n) || 0]);
+    });
+  } else {
+    addInfo("Max Participants", capParticipants ? String(capParticipants) : "—");
+  }
+  addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
+
+  // Description (full-width, extra height)
+  const description = p.description || p.programDescription || "";
+  if (description) {
+    wsInfo.addRow([]);
+    const dh = wsInfo.addRow(["Description"]);
+    dh.font = { bold: true };
+    const drow = wsInfo.addRow([description]);
+    const rn = drow.number;
+    wsInfo.mergeCells(`A${rn}:F${rn}`);
+    wsInfo.getCell(`A${rn}`).alignment = { wrapText: true, vertical: "top" };
+    drow.height = 80;
+  }
+
+  wsInfo.pageSetup = {
+    orientation: "portrait",
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    paperSize: 9,
+    margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+  };
+
+  // ======= Sheet 2: Participants table (centered headers & cells) =======
+  wsList.columns = [
+    { header: "#", width: 6 },
+    { header: "Full Name", width: 32 },
+    { header: "Address", width: 34 },
+    { header: "Contact", width: 18 },
+    { header: "Role", width: 16 },
+    { header: "Attendance", width: 14 },
+  ];
+
+  const title2 = wsList.addRow(["Participants / Volunteers (Approved Only)"]);
+  wsList.mergeCells(`A${title2.number}:F${title2.number}`);
+  wsList.getCell(`A${title2.number}`).font = { name: "Calibri", size: 14, bold: true };
+  wsList.getCell(`A${title2.number}`).alignment = { horizontal: "center", vertical: "middle" };
+  wsList.addRow([]);
+
+  const header2 = wsList.addRow(wsList.columns.map((c) => c.header));
+  header2.eachCell((c) => {
+    c.font = { name: "Calibri", size: 12, bold: true };
+    c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+  });
+  header2.height = 22;
+
+  const all = await fetchProgramParticipants(db, programId);
+  const approved = all.filter((r) => String(r.approvalStatus || "").toLowerCase() === "approved");
+
+  const roleOrder = (r: ParticipantRecord) =>
+    (String(r.role || "").toLowerCase() === "participant" ? 0 : 1);
+  const nameKey = (r: ParticipantRecord) =>
+    `${(r.lastName || "").toString().toUpperCase()}|${(r.firstName || "").toString().toUpperCase()}`;
+  approved.sort((a, b) => roleOrder(a) - roleOrder(b) || nameKey(a).localeCompare(nameKey(b)));
+
+  approved.forEach((rec, i) => {
+    const addr = rec.address || rec.location || "—";
+    const contact = rec.contactNumber || rec.contact || "—";
+    const role = rec.role || "—";
+    const attendance = rec.attendance ? "Yes" : "No";
+    const r = wsList.addRow([i + 1, safeFullName(rec), addr, contact, role, attendance]);
+    r.height = 22;
+    r.eachCell((c) => {
+      c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+      c.font = { name: "Calibri", size: 12 };
+      c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+    });
+  });
+
+  wsList.pageSetup = {
+    orientation: "portrait",
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 0,
+    paperSize: 9,
+    margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+  };
+
+  // Upload XLSX → return URL
+  const safeName = String(programName || programId).replace(/[^\w.-]/g, "_");
+  const xlsxRef = ref(storage, `GeneratedReports/Program_Summary_${safeName}.xlsx`);
+  const buf = await wb.xlsx.writeBuffer();
+  await uploadBytes(xlsxRef, new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  const fileUrl = await getDownloadURL(xlsxRef);
+
+  return { fileUrl, programName };
 }
