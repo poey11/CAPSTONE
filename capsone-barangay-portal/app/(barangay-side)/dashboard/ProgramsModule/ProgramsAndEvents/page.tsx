@@ -58,9 +58,6 @@ type ParticipantRecord = {
   location?: string;
   address?: string;
   approvalStatus?: "Pending" | "Approved" | "Rejected";
-  // Attendance fields (use whatever you store)
-  attended?: boolean;
-  attendanceCount?: number;
   attendance?: { present?: boolean };
 };
 
@@ -748,11 +745,8 @@ export default function ProgramsModule() {
 
   // participant report
 
-  const didAttend = (rec: ParticipantRecord) => {
-  if (typeof rec.attended === "boolean") return rec.attended;
-  if (typeof rec.attendanceCount === "number") return rec.attendanceCount > 0;
-  if (rec.attendance && typeof rec.attendance.present === "boolean") return rec.attendance.present;
-  return false;
+const didAttend = (rec: ParticipantRecord) => {
+  return Boolean(rec.attendance);
 };
 
 const safeFullName = (rec: ParticipantRecord) => {
@@ -820,15 +814,20 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
     const wsInfo = wb.addWorksheet("Program Info");
     const wsList = wb.addWorksheet("Participants & Volunteers");
 
-    // === Sheet 1: Program Info ===
-    const title = "BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT";
-    wsInfo.mergeCells("A1:F1");
-    wsInfo.getCell("A1").value = title;
-    wsInfo.getCell("A1").font = { name: "Calibri", size: 16, bold: true };
-    wsInfo.getCell("A1").alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-    wsInfo.getRow(1).height = 36;
+// === Sheet 1: Program Info ===
+const programName = p.programName || fallbackName || programId;
 
-    const programName = p.programName || fallbackName || programId;
+// 1) In-sheet visible title (shows in Excel UI)
+const headerTitle = `BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n(${programName})`;
+wsInfo.mergeCells("A1:F1");
+const headerCell = wsInfo.getCell("A1");
+headerCell.value = headerTitle;
+headerCell.font = { name: "Calibri", size: 16, bold: true };
+headerCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+wsInfo.getRow(1).height = 60;
+
+wsInfo.addRow([]);
+
     const eventType = p.eventType || "single";
     const sDate = fmtDate(p.startDate);
     const eDate = p.endDate ? fmtDate(p.endDate) : "";
@@ -850,15 +849,42 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
     // participantDays (for multiple)
     const participantDays: number[] = Array.isArray(p.participantDays) ? p.participantDays : [];
 
+    // 2) Printed header/footer (this is what PDF converters use)
+wsInfo.headerFooter = {
+  // Centered (&C), bold (&B), font size 16 (&16) for the first two lines
+  // Program name smaller (&10). Escape & as && to avoid Excel header tokens.
+  oddHeader:
+    '&C&B&16BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&10(' +
+    String(programName).replace(/&/g, '&&') +
+    ')',
+};
+
+// Page setup with generous top/header margins so the header prints in PDF
+wsInfo.pageSetup = {
+  orientation: "portrait",
+  fitToPage: true,
+  fitToWidth: 1,
+  fitToHeight: 0,
+  paperSize: 9, // A4
+  margins: {
+    left: 0.4,
+    right: 0.4,
+    top: 1.0,     // more top so header area is clear in PDF
+    bottom: 0.5,
+    header: 0.5,  // header margin area
+    footer: 0.3,
+  },
+};
+
     // Info table
-    wsInfo.columns = [
-      { header: "", width: 26 },
-      { header: "", width: 50 },
-      { header: "", width: 18 },
-      { header: "", width: 18 },
-      { header: "", width: 18 },
-      { header: "", width: 18 }
-    ];
+      wsInfo.columns = [
+        { header: "", width: 26 }, // labels
+        { header: "", width: 64 }, // values (wider so text doesn't clip)
+        { header: "", width: 12 },
+        { header: "", width: 12 },
+        { header: "", width: 12 },
+        { header: "", width: 12 },
+      ];
 
     const addInfo = (label: string, value: string) => {
       const r = wsInfo.addRow([label, value]);
@@ -866,7 +892,7 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
       r.alignment = { vertical: "middle", wrapText: true };
     };
 
-    wsInfo.addRow([]);
+    wsInfo.addRow([]); // spacer above main details
     addInfo("Program Name", programName);
     addInfo("Approval Status", approval);
     addInfo("Progress Status", progressStatus);
@@ -875,27 +901,56 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
     addInfo("Date Range", dateRange);
     if (timeRange) addInfo("Time", timeRange);
 
+
+    // ── Capacity section (cleaner table layout)
     if (eventType === "multiple" && participantDays.length) {
-      wsInfo.addRow([]);
-      wsInfo.addRow(["Per-day Max Participants"]);
-      wsInfo.getRow(wsInfo.lastRow!.number).font = { bold: true };
-      const header = wsInfo.addRow(["Day", "Max Participants"]);
-      header.font = { bold: true };
+      wsInfo.addRow([]); // spacer
+
+      // Section title
+      const sectionHeader = wsInfo.addRow(["Per-day Max Participants"]);
+      sectionHeader.getCell(1).font = { bold: true };
+      sectionHeader.getCell(1).alignment = { horizontal: "left" };
+
+      // Table header
+      const tblHeader = wsInfo.addRow(["Day", "Max Participants"]);
+      tblHeader.getCell(1).font = { bold: true };
+      tblHeader.getCell(2).font = { bold: true };
+      tblHeader.getCell(1).alignment = { horizontal: "left" };
+      tblHeader.getCell(2).alignment = { horizontal: "right" };
+
+      // Table rows (Day / Value)
       participantDays.forEach((n, i) => {
-        wsInfo.addRow([`Day ${i + 1}`, Number(n) || 0]);
+        const row = wsInfo.addRow([`Day ${i + 1}`, Number(n) || 0]);
+        row.getCell(1).alignment = { horizontal: "left" };
+        row.getCell(2).alignment = { horizontal: "right" };
       });
+
+      // Blank line, then Max Volunteers in same format
+      wsInfo.addRow([]);
+      const mv = wsInfo.addRow(["Max Volunteers", capVolunteers ? String(capVolunteers) : "—"]);
+      mv.getCell(1).font = { bold: true };
+      mv.getCell(2).alignment = { horizontal: "right" };
     } else {
       addInfo("Max Participants", capParticipants ? String(capParticipants) : "—");
+      addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
     }
-    addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
 
     if (description) {
+      // add a little vertical space before description
       wsInfo.addRow([]);
-      const header = wsInfo.addRow(["Description"]);
-      header.font = { bold: true };
-      const drow = wsInfo.addRow([description]);
-      drow.getCell(1).alignment = { wrapText: true };
-      drow.height = 40;
+      const descHeader = wsInfo.addRow(["Description"]);
+      descHeader.font = { bold: true };
+
+      // Create a single long, merged row for the description across A..F
+      const descRow = wsInfo.addRow([description]);
+      const rowNum = descRow.number;
+      wsInfo.mergeCells(`A${rowNum}:F${rowNum}`);
+
+      const cell = wsInfo.getCell(`A${rowNum}`);
+      cell.alignment = { wrapText: true, vertical: "top" };
+
+      // give it generous height
+      descRow.height = 80; // adjust as you like
     }
 
     // style basics
@@ -932,9 +987,24 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
     const header2 = wsList.addRow(wsList.columns.map(c => c.header));
     header2.eachCell((c) => {
       c.font = { name: "Calibri", size: 12, bold: true };
-      c.alignment = { horizontal: "center", vertical: "middle" };
-      c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+      c.alignment = {
+        horizontal: "center",
+        vertical: "middle",
+        wrapText: true,
+      };
+      c.border = {
+        top: { style: "thin" },
+        bottom: { style: "thin" },
+        left: { style: "thin" },
+        right: { style: "thin" },
+      };
+      c.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFF2F2F2" }, // optional: light gray header background
+      };
     });
+    header2.height = 22; // optional — more vertical padding for header row
 
     // Load participants (Approved only)
     const all = await fetchProgramParticipants(programId);
@@ -951,7 +1021,7 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
       const addr = rec.address || rec.location || "—";
       const contact = rec.contactNumber || rec.contact || "—";
       const role = rec.role || "—";
-      const attendance = didAttend(rec) ? "Yes" : "No";
+      const attendance = rec.attendance ? "Yes" : "No";
 
       const r = wsList.addRow([i + 1, safeFullName(rec), addr, contact, role, attendance]);
       r.height = 22;
@@ -980,7 +1050,7 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
 
     // Upload XLSX
     const safeName = String(programName || programId).replace(/[^\w.-]/g, "_");
-    const xlsxRef = ref(storage, `GeneratedReports/Program_Case_${safeName}.xlsx`);
+    const xlsxRef = ref(storage, `GeneratedReports/Program_Summary_${safeName}.xlsx`);
     const buf = await wb.xlsx.writeBuffer();
     await uploadBytes(xlsxRef, new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
     const xlsxUrl = await getDownloadURL(xlsxRef);
