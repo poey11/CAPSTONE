@@ -9,11 +9,8 @@ import { usePathname } from "next/navigation";
 
 const Footer = () => {
 
-  const [year, setYear] = useState("");
 
-  useEffect(() => {
-    setYear(new Date().getFullYear().toString());
-  }, []);
+  const year = new Date().getFullYear();
 
   const pathname = usePathname();
   const noTopNavPages = ['/dashboard'];// this is the list of pages that should not have the top nav aka the barangay user pages
@@ -49,16 +46,17 @@ const Footer = () => {
             </div>
             <div className="contactinfo-phone">
               <img src="/images/phone1.png" alt="Image 2" className="contacticon" />
-              <p>893-00040 | 0943-675-5020 | 0916-530-0593</p>
+               <p>893-00040 | 0917-700-5486 | 0917-710-5238</p>
             </div>
             <div className="contactinfo-loc">
               <img src="/images/location1.png" alt="Image 3" className="contacticon" />
-              <p>West Fairview, 9 A Dahlia Ave, West Fairview, Quezon City, 1118 Metro Manila</p>
+              <p>Barangay Complex, Dahlia Ave., Fairview Q.C.</p>
             </div>
           </div>
         </div>
         <div className="footer-bottom">
           <p>© {year} Barangay Fairview. All rights reserved.</p>
+          <p className="footer-disclaimer">Disclaimer: This website, including all text, images, and other content, is created solely for academic and capstone project purposes. It is not an official website of Barangay Fairview.</p>
         </div>
       </div>
     </footer>

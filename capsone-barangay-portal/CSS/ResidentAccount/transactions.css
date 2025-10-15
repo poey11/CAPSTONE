@@ -398,6 +398,7 @@
   font-size: 0.875rem; /* ~14px */
   display: inline-block;
   margin-left: auto;
+  text-transform: capitalize;
   }
   
   .pending {

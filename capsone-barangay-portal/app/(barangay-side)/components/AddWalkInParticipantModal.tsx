@@ -49,6 +49,7 @@ type Props = {
 };
 
 const DEFAULT_LABELS: Record<string, string> = {
+  role: "Role",
   dayChosen: "Day Chosen",
   firstName: "First Name",
   lastName: "Last Name",
@@ -62,12 +63,17 @@ const DEFAULT_LABELS: Record<string, string> = {
 
 type Preview = { url: string; isPdf: boolean; isObjectUrl: boolean };
 
-// Minimal program shape for schedule/day options
 type ProgramLite = {
   id: string;
+  programName?: string;
   eventType?: "single" | "multiple";
-  startDate?: string; // "YYYY-MM-DD"
-  participantDays?: number[]; // array length = number of days
+  startDate?: string;
+  participantDays?: number[];
+  noParticipantLimit?: boolean;
+  noParticipantLimitList?: boolean[];
+  participants?: number | null;
+  volunteers?: number | null;
+  progressStatus?: string;
 };
 
 // Compute age from YYYY-MM-DD
@@ -98,6 +104,9 @@ export default function AddWalkInParticipantModal({
 }: Props) {
   const LABELS = prettyLabels || DEFAULT_LABELS;
 
+  // ------- Role selection -------
+  const [selectedRole, setSelectedRole] = useState<"Participant" | "Volunteer">("Participant");
+
   // Prefill from resident (if any)
   const [formData, setFormData] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
@@ -109,6 +118,7 @@ export default function AddWalkInParticipantModal({
       }${resident.lastName || ""}`
         .replace(/\s+/g, " ")
         .trim();
+
       for (const f of textFields || []) {
         if (f.name === "firstName") init[f.name] = resident.firstName || "";
         else if (f.name === "lastName") init[f.name] = resident.lastName || "";
@@ -124,10 +134,9 @@ export default function AddWalkInParticipantModal({
 
   const [formFiles, setFormFiles] = useState<Record<string, File | null>>({});
   const [saving, setSaving] = useState(false);
-
   const [activeSection, setActiveSection] = useState<"details" | "reqs">("details");
 
-  // --- Load program to power dayChosen select ---
+  // --- Load program for day picker + caps ---
   const [program, setProgram] = useState<ProgramLite | null>(null);
   useEffect(() => {
     let isMounted = true;
@@ -139,9 +148,15 @@ export default function AddWalkInParticipantModal({
       if (isMounted) {
         setProgram({
           id: snap.id,
+          programName: p.programName,
           eventType: p.eventType,
           startDate: p.startDate,
           participantDays: Array.isArray(p.participantDays) ? p.participantDays : [],
+          noParticipantLimit: Boolean(p.noParticipantLimit),
+          noParticipantLimitList: Array.isArray(p.noParticipantLimitList) ? p.noParticipantLimitList : [],
+          participants: Number.isFinite(Number(p.participants)) ? Number(p.participants) : null,
+          volunteers: Number.isFinite(Number(p.volunteers)) ? Number(p.volunteers) : null,
+          progressStatus: (p.progressStatus || "").toString(),
         });
       }
     })();
@@ -150,7 +165,7 @@ export default function AddWalkInParticipantModal({
     };
   }, [programId]);
 
-  // --- Determine which days are already FULL (Approved >= cap) ---
+  // --- Which days are FULL (participants only) ---
   const [dayFull, setDayFull] = useState<boolean[]>([]);
   useEffect(() => {
     let isMounted = true;
@@ -159,14 +174,16 @@ export default function AddWalkInParticipantModal({
 
       const progSnap = await getDoc(doc(db, "Programs", programId));
       if (!progSnap.exists()) return;
-
-      const pd: number[] = Array.isArray((progSnap.data() as any)?.participantDays)
-        ? (progSnap.data() as any).participantDays
+      const data: any = progSnap.data() || {};
+      const pd: number[] = Array.isArray(data?.participantDays) ? data.participantDays : [];
+      const noLimitList: boolean[] = Array.isArray(data?.noParticipantLimitList)
+        ? data.noParticipantLimitList
         : [];
 
       const checks = pd.map(async (rawCap: any, idx: number) => {
+        if (noLimitList?.[idx]) return false; // no-limit day cannot be full
         const cap = Number(rawCap);
-        if (!Number.isFinite(cap) || cap <= 0) return false; // no/invalid cap => never "full"
+        if (!Number.isFinite(cap) || cap <= 0) return false;
 
         const qDay = query(
           collection(db, "ProgramsParticipants"),
@@ -189,8 +206,9 @@ export default function AddWalkInParticipantModal({
     };
   }, [programId]);
 
-  // If current selection becomes FULL after the effect above, clear it.
+  // If current selection becomes FULL after effect, clear (participants only).
   useEffect(() => {
+    if (selectedRole !== "Participant") return;
     const v = formData.dayChosen;
     if (v === undefined || v === "") return;
     const idx = Number(v);
@@ -198,13 +216,13 @@ export default function AddWalkInParticipantModal({
       setFormData((prev) => ({ ...prev, dayChosen: "" }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayFull]);
+  }, [dayFull, selectedRole]);
 
-  // --- Previews for ALL file fields ---
+  // --- File previews ---
   const residentValidIdUrl = resident?.verificationFilesURLs?.[0] || "";
   const [filePreviews, setFilePreviews] = useState<Record<string, Preview>>({});
   const previewsRef = useRef<Record<string, Preview>>({});
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({}); // custom trigger targets
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => {
     setFilePreviews((old) => {
@@ -228,7 +246,6 @@ export default function AddWalkInParticipantModal({
         }
       }
 
-      // cleanup stale object URLs
       for (const [k, pv] of Object.entries(old)) {
         const nxt = next[k];
         if (pv.isObjectUrl && (!nxt || nxt.url !== pv.url)) {
@@ -248,37 +265,38 @@ export default function AddWalkInParticipantModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formFiles, residentValidIdUrl, fileFields]);
 
-  const textFieldsToRender = useMemo<SimpleField[]>(
-    () => (textFields?.length ? textFields : []),
-    [textFields]
-  );
-  const fileFieldsToRender = useMemo<SimpleField[]>(
-    () => (fileFields?.length ? fileFields : []),
-    [fileFields]
-  );
+  // ------- Role-aware field sets (show/require only defaults for Volunteers) -------
+  const isDefaultField = (name: string) => Object.prototype.hasOwnProperty.call(DEFAULT_LABELS, name);
+
+  const visibleTextFields = useMemo<SimpleField[]>(() => {
+    const base = textFields?.length ? textFields : [];
+    if (selectedRole === "Volunteer") {
+      // Hide any non-default text fields for volunteers
+      return base.filter((f) => isDefaultField(f.name) && f.name !== "dayChosen"); // dayChosen handled separately
+    }
+    return base;
+  }, [textFields, selectedRole]);
+
+  const visibleFileFields = useMemo<SimpleField[]>(() => {
+    const base = fileFields?.length ? fileFields : [];
+    if (selectedRole === "Volunteer") {
+      // Hide non-default file fields for volunteers
+      return base.filter((f) => isDefaultField(f.name));
+    }
+    return base;
+  }, [fileFields, selectedRole]);
 
   function prettifyFieldName(name: string, prettyLabels?: Record<string, string>): string {
-  // 1. Check overrides
-  if (prettyLabels?.[name]) return prettyLabels[name];
-  if (DEFAULT_LABELS[name]) return DEFAULT_LABELS[name];
+    if (prettyLabels?.[name]) return prettyLabels[name];
+    if (DEFAULT_LABELS[name]) return DEFAULT_LABELS[name];
+    let label = name.replace(/\.(jpg|jpeg|png|pdf)$/i, "");
+    label = label.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    label = label.replace(/\bId\b/g, "ID");
+    return label;
+  }
 
-  // 2. Clean file extensions
-  let label = name.replace(/\.(jpg|jpeg|png|pdf)$/i, "");
-
-  // 3. Insert spaces before capital letters
-  label = label.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
-
-  // 4. Uppercase first letter
-  label = label.charAt(0).toUpperCase() + label.slice(1);
-
-  // 5. Fix common cases
-  label = label.replace(/\bId\b/g, "ID");
-
-  return label;
-}
-
-
-  const needsValidId = fileFieldsToRender.some((f) => f.name === "validIDjpg");
+  const needsValidId = visibleFileFields.some((f) => f.name === "validIDjpg");
   const labelFor = (name: string) => prettifyFieldName(name, prettyLabels);
 
   const handleFormTextChange = (field: string, value: string) =>
@@ -297,41 +315,112 @@ export default function AddWalkInParticipantModal({
     return `${y}-${m}-${d}`;
   }, []);
 
-  // Derived age from formData.dateOfBirth (if present)
   const dobInForm = formData["dateOfBirth"] || "";
   const derivedAge = useMemo(() => computeAgeFromDOB(dobInForm), [dobInForm]);
 
+  // ------- Validation -------
   const validateReqForm = () => {
-    for (const f of textFieldsToRender) {
-      const val = (formData[f.name] ?? "").toString().trim();
-      if (!val) throw new Error(`Please fill out: ${labelFor(f.name)}`);
+    // Text fields
+    for (const f of visibleTextFields) {
+      const name = f.name;
+      if (name === "dayChosen") continue; // handled separately
+      const val = (formData[name] ?? "").toString().trim();
+      if (!val) throw new Error(`Please fill out: ${labelFor(name)}`);
     }
-    for (const f of fileFieldsToRender) {
+
+    // File fields
+    for (const f of visibleFileFields) {
       const hasManual = !!formFiles[f.name];
       if (!hasManual) {
         if (f.name === "validIDjpg" && residentValidIdUrl) continue; // allow auto-attach
         throw new Error(`Please upload: ${labelFor(f.name)}`);
       }
     }
+
+    // If multi-day & Participant, dayChosen required
+    if (program?.eventType === "multiple" && selectedRole === "Participant") {
+      const v = formData.dayChosen;
+      if (v === undefined || v === "") {
+        throw new Error("Please select a day for participants.");
+      }
+    }
   };
 
-  // Capacity check (Approved + role: 'Participant')
-  const recheckCapacityServer = async () => {
-    const partQ = query(
-      collection(db, "ProgramsParticipants"),
-      where("programId", "==", programId),
-      where("approvalStatus", "==", "Approved"),
-      where("role", "==", "Participant")
-    );
-    const countSnap = await getCountFromServer(partQ);
-    const currentCount = countSnap.data().count || 0;
-
+  // ------- Capacity checks (server) -------
+  const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChosenNum: number | null) => {
     const progSnap = await getDoc(doc(db, "Programs", programId));
-    const capacity = Number((progSnap.data() as any)?.participants);
-    if (Number.isFinite(capacity) && currentCount >= capacity) {
-      throw new Error("Program capacity reached. Cannot add more participants.");
+    if (!progSnap.exists()) throw new Error("Program not found.");
+    const p: any = progSnap.data() || {};
+
+    const statusNow = (p?.progressStatus || "").toString().toLowerCase();
+    if (["rejected", "completed"].includes(statusNow)) {
+      throw new Error(`This program is ${p?.progressStatus}. You can’t add entries.`);
     }
-    return progSnap.data() as any;
+
+    // Volunteers: check volunteer cap only
+    if (role === "Volunteer") {
+      const volCap = Number(p?.volunteers);
+      if (Number.isFinite(volCap) && volCap > 0) {
+        const qVol = query(
+          collection(db, "ProgramsParticipants"),
+          where("programId", "==", programId),
+          where("approvalStatus", "==", "Approved"),
+          where("role", "==", "Volunteer")
+        );
+        const volCountSnap = await getCountFromServer(qVol);
+        const volCount = volCountSnap.data().count || 0;
+        if (volCount >= volCap) {
+          throw new Error("Volunteer capacity reached. Cannot add more volunteers.");
+        }
+      }
+      return p;
+    }
+
+    // Participants: global cap unless no-limit
+    const globalNoLimit = Boolean(p?.noParticipantLimit);
+    const globalCap = Number(p?.participants);
+    if (!globalNoLimit && Number.isFinite(globalCap) && globalCap > 0) {
+      const partQ = query(
+        collection(db, "ProgramsParticipants"),
+        where("programId", "==", programId),
+        where("approvalStatus", "==", "Approved"),
+        where("role", "==", "Participant")
+      );
+      const countSnap = await getCountFromServer(partQ);
+      const currentCount = countSnap.data().count || 0;
+      if (currentCount >= globalCap) {
+        throw new Error("Program capacity reached. Cannot add more participants.");
+      }
+    }
+
+    // Per-day cap if multi-day and day chosen
+    if (p?.eventType === "multiple" && dayChosenNum !== null) {
+      const noLimitList: boolean[] = Array.isArray(p?.noParticipantLimitList)
+        ? p.noParticipantLimitList
+        : [];
+      const perDayNoLimit = Boolean(noLimitList?.[dayChosenNum]);
+      if (!perDayNoLimit) {
+        const dayCaps: any[] = Array.isArray(p?.participantDays) ? p.participantDays : [];
+        const rawDayCap = dayCaps?.[dayChosenNum];
+        const dayCap = Number(rawDayCap);
+        if (Number.isFinite(dayCap) && dayCap > 0) {
+          const qDay = query(
+            collection(db, "ProgramsParticipants"),
+            where("programId", "==", programId),
+            where("approvalStatus", "==", "Approved"),
+            where("role", "==", "Participant"),
+            where("dayChosen", "==", dayChosenNum)
+          );
+          const dayCountSnap = await getCountFromServer(qDay);
+          const dayCount = dayCountSnap.data().count || 0;
+          if (dayCount >= dayCap) {
+            throw new Error("Selected day is already full. Choose another day.");
+          }
+        }
+      }
+    }
+
+    return p;
   };
 
   const uploadAllFiles = async (uidTag: string) => {
@@ -380,11 +469,8 @@ export default function AddWalkInParticipantModal({
       const progRef = doc(db, "Programs", programId);
       const progSnap = await getDoc(progRef);
       if (!progSnap.exists()) throw new Error("Program not found.");
-      const statusNow = (progSnap.data()?.progressStatus || "").toString().toLowerCase();
-      if (["rejected", "completed"].includes(statusNow)) {
-        throw new Error(`This program is ${progSnap.data()?.progressStatus}. You can’t add participants.`);
-      }
 
+      // Resident duplicate guard (any role)
       if (resident?.id) {
         const dupQ = query(
           collection(db, "ProgramsParticipants"),
@@ -395,7 +481,13 @@ export default function AddWalkInParticipantModal({
         if (!dupSnap.empty) throw new Error("This resident is already enlisted in this program.");
       }
 
-      await recheckCapacityServer();
+      // Day chosen parse (keep 0 as Day 1)
+      const dayChosenStr = formData.dayChosen;
+      const dayChosenNum =
+        dayChosenStr !== undefined && dayChosenStr !== "" ? Number(dayChosenStr) : null;
+
+      // Capacity checks
+      const p = await recheckCapacityServer(selectedRole, dayChosenNum);
 
       const firstName = formData.firstName ?? (resident ? resident.firstName || "" : "");
       const lastName = formData.lastName ?? (resident ? resident.lastName || "" : "");
@@ -404,18 +496,11 @@ export default function AddWalkInParticipantModal({
       const location = formData.location ?? (resident ? resident.address || resident.location || "" : "");
       const fullName = (formData.fullName || `${firstName || ""} ${lastName || ""}`.trim()) || "";
 
-      // DOB + Age for saving
       const dateOfBirth = formData.dateOfBirth || "";
       const computedAge = computeAgeFromDOB(dateOfBirth);
 
-      // dayChosen: keep 0 as Day 1
-      const dayChosenStr = formData.dayChosen; // "0" | "1" | "2" | undefined
-      const dayChosenNum =
-        dayChosenStr !== undefined && dayChosenStr !== "" ? Number(dayChosenStr) : null;
-
       const uidTag = resident?.id ? `resident-${resident.id}` : "manual";
       let uploadedFiles = await uploadAllFiles(uidTag);
-
       if (needsValidId && !uploadedFiles.validIDjpg && residentValidIdUrl) {
         const autoFiles = await maybeUploadResidentValidID(uidTag);
         uploadedFiles = { ...uploadedFiles, ...autoFiles };
@@ -423,9 +508,9 @@ export default function AddWalkInParticipantModal({
 
       await addDoc(collection(db, "ProgramsParticipants"), {
         programId,
-        programName: progSnap.data()?.programName || programName || "",
+        programName: p?.programName || programName || "",
         residentId: resident?.id || null,
-        role: "Participant",
+        role: selectedRole,
         approvalStatus: "Approved",
         addedVia: resident?.id ? "walk-in-resident" : "walk-in-manual",
         createdAt: serverTimestamp(),
@@ -437,22 +522,20 @@ export default function AddWalkInParticipantModal({
         emailAddress: emailAddress || "",
         location: location || "",
 
-        // store DOB & derived age top-level for convenience in reviews
         dateOfBirth: dateOfBirth || "",
         age: computedAge ?? null,
 
-        // ✅ include selected day when provided (keeps Day 1 = 0)
-        ...(dayChosenNum !== null ? { dayChosen: dayChosenNum } : {}),
+        // Only participants in multi-day will have dayChosen
+        ...(selectedRole === "Participant" && dayChosenNum !== null ? { dayChosen: dayChosenNum } : {}),
 
-        // keep full map of submitted fields (including DOB and dayChosen string)
-        fields: formData,
+        fields: { ...formData, role: selectedRole },
         files: uploadedFiles,
       });
 
-      onSaved?.("Participant added successfully!");
+      onSaved?.(`${selectedRole} added successfully!`);
       onClose();
     } catch (e: any) {
-      onError?.(e?.message || "Failed to add participant. Please try again.");
+      onError?.(e?.message || "Failed to add entry. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -460,170 +543,8 @@ export default function AddWalkInParticipantModal({
 
   if (!isOpen) return null;
 
-  // --- AUTO-FILL from Residents ---
-
+  // --- Auto-fill kept (participants only). Leave disabled in UI by default. ---
   const [autoFillLoading, setAutoFillLoading] = useState(false);
-
-  const getProgramCapacityNumber = (val: any): number | null => {
-    const n = Number(val);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  };
-
-  const autoFillMissingForSelectedDay = async () => {
-    if (!programId) return;
-
-    // dayChosen is required to auto-fill for a specific day
-    const dayChosenStr = formData.dayChosen;
-    if (dayChosenStr === undefined || dayChosenStr === "") {
-      onError?.("Please select a day first.");
-      return;
-    }
-    const dayChosen = Number(dayChosenStr);
-
-    setAutoFillLoading(true);
-    try {
-      // 1) Program + caps
-      const progRef = doc(db, "Programs", programId);
-      const progSnap = await getDoc(progRef);
-      if (!progSnap.exists()) throw new Error("Program not found.");
-
-      const progData: any = progSnap.data() || {};
-      const statusNow = (progData?.progressStatus || "").toString().toLowerCase();
-      if (["rejected", "completed"].includes(statusNow)) {
-        throw new Error(`This program is ${progData?.progressStatus}. You can’t add participants.`);
-      }
-
-      // Per-day capacity (array), keep Day 1 = index 0
-      const dayCaps: any[] = Array.isArray(progData?.participantDays)
-        ? progData.participantDays
-        : [];
-      const rawDayCap = dayCaps?.[dayChosen];
-      const dayCap =
-        Number.isFinite(Number(rawDayCap)) && Number(rawDayCap) > 0
-          ? Number(rawDayCap)
-          : null;
-
-      // Optional global capacity
-      const globalCap =
-        Number.isFinite(Number(progData?.participants)) && Number(progData?.participants) > 0
-          ? Number(progData.participants)
-          : null;
-
-      // 2) Count current approved participants FOR THIS DAY
-      const approvedForDayQ = query(
-        collection(db, "ProgramsParticipants"),
-        where("programId", "==", programId),
-        where("approvalStatus", "==", "Approved"),
-        where("role", "==", "Participant"),
-        where("dayChosen", "==", dayChosen)
-      );
-      const approvedForDaySnap = await getCountFromServer(approvedForDayQ);
-      const currentApprovedForDay = approvedForDaySnap.data().count || 0;
-
-      // 3) Also count total approved (to respect global cap if present)
-      let currentApprovedTotal = 0;
-      if (globalCap !== null) {
-        const approvedTotalSnap = await getCountFromServer(
-          query(
-            collection(db, "ProgramsParticipants"),
-            where("programId", "==", programId),
-            where("approvalStatus", "==", "Approved"),
-            where("role", "==", "Participant")
-          )
-        );
-        currentApprovedTotal = approvedTotalSnap.data().count || 0;
-      }
-
-      // 4) Compute how many to add
-      let toAddFromDay = dayCap === null ? 10 : Math.max(0, dayCap - currentApprovedForDay);
-      if (toAddFromDay <= 0) {
-        onError?.("No remaining day slots to fill.");
-        return;
-      }
-      if (globalCap !== null) {
-        const globalRemaining = Math.max(0, globalCap - currentApprovedTotal);
-        if (globalRemaining <= 0) {
-          onError?.("No remaining global slots to fill.");
-          return;
-        }
-        toAddFromDay = Math.min(toAddFromDay, globalRemaining);
-      }
-
-      // 5) Build a set of residentIds already enlisted (any status/role) to avoid duplicates
-      const enlistedSnap = await getDocs(
-        query(collection(db, "ProgramsParticipants"), where("programId", "==", programId))
-      );
-      const alreadyInProgram = new Set<string>();
-      for (const d of enlistedSnap.docs) {
-        const rId = (d.data() as any).residentId;
-        if (rId) alreadyInProgram.add(rId);
-      }
-
-      // 6) Fetch Residents and pick eligible ones (not yet in this program)
-      const residentsSnap = await getDocs(collection(db, "Residents"));
-      const candidates: Resident[] = [];
-      for (const d of residentsSnap.docs) {
-        if (candidates.length >= toAddFromDay) break;
-        if (alreadyInProgram.has(d.id)) continue;
-        const r: any = { id: d.id, ...d.data() };
-        if (r.firstName || r.lastName) candidates.push(r as Resident);
-      }
-
-      if (candidates.length === 0) {
-        onError?.("No eligible residents found to auto-fill.");
-        return;
-      }
-
-      // 7) Insert participants as Approved for the selected day
-      const chosen = candidates.slice(0, toAddFromDay);
-      let successAdds = 0;
-
-      for (const r of chosen) {
-        const fullName = `${r.firstName || ""} ${
-          r.middleName ? r.middleName + " " : ""
-        }${r.lastName || ""}`
-          .replace(/\s+/g, " ")
-          .trim();
-
-        await addDoc(collection(db, "ProgramsParticipants"), {
-          programId,
-          programName: progData?.programName || programName || "",
-          residentId: r.id,
-          role: "Participant",
-          approvalStatus: "Approved",
-          addedVia: "auto-fill",
-          createdAt: serverTimestamp(),
-
-          fullName,
-          firstName: r.firstName || "",
-          lastName: r.lastName || "",
-          contactNumber: r.contactNumber || "",
-          emailAddress: r.emailAddress || "",
-          location: r.address || r.location || "",
-
-          dateOfBirth: r.dateOfBirth || "",
-          age: computeAgeFromDOB(r.dateOfBirth || "") ?? null,
-
-          dayChosen, // ✅ lock to selected day
-
-          fields: { autoFilled: "true", source: "Residents", dayChosen: String(dayChosen) },
-          files: {},
-        });
-
-        successAdds++;
-      }
-
-      onSaved?.(
-        `Auto-filled ${successAdds} participant${successAdds !== 1 ? "s" : ""} for Day ${
-          dayChosen + 1
-        }.`
-      );
-    } catch (e: any) {
-      onError?.(e?.message || "Failed to auto-fill participants.");
-    } finally {
-      setAutoFillLoading(false);
-    }
-  };
 
   return (
     <>
@@ -632,27 +553,26 @@ export default function AddWalkInParticipantModal({
           <div className="walkin-participant-backbutton-container">
             <button onClick={onBack}>
               <img
-                src="/images/left-arrow.png"
+                src="/Images/left-arrow.png"
                 alt="Left Arrow"
                 className="participant-back-btn-resident"
               />
             </button>
           </div>
 
-          <h2> {resident ? "Complete Requirements" : "Manual Entry"} </h2>
-          <h1>* Walk-in Participant Application *</h1>
+          <h2>{resident ? "Complete Requirements" : "Manual Entry"}</h2>
+          <h1>* Walk-in Application *</h1>
 
           <div className="walkin-participant-header-body-bottom-section">
             <div className="walkin-participant-user-info-main-container">
               <div className="walkin-participant-info-main-content">
+                {/* Tabs */}
                 <nav className="walkin-info-toggle-wrapper">
                   {["details", "reqs"].map((section) => (
                     <button
                       key={section}
                       type="button"
-                      className={`info-toggle-btn ${
-                        activeSection === section ? "active" : ""
-                      }`}
+                      className={`info-toggle-btn ${activeSection === section ? "active" : ""}`}
                       onClick={() => setActiveSection(section as "details" | "reqs")}
                     >
                       {section === "details" && "Details"}
@@ -661,23 +581,59 @@ export default function AddWalkInParticipantModal({
                   ))}
                 </nav>
 
+                {/* ------- DETAILS ------- */}
                 {activeSection === "details" && (
                   <>
+                    {/* Role selector */}
+                    <div style={{ display: "flex", gap: 16, margin: "8px 0 16px" }}>
+                      <div>
+                        <p style={{ marginBottom: 6 }}>{LABELS.role}</p>
+                        <div style={{ display: "flex", gap: 16 }}>
+                          <label style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                            <input
+                              type="radio"
+                              name="walkin-role"
+                              value="Participant"
+                              checked={selectedRole === "Participant"}
+                              onChange={() => setSelectedRole("Participant")}
+                            />
+                            Participant
+                          </label>
+                          <label style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                            <input
+                              type="radio"
+                              name="walkin-role"
+                              value="Volunteer"
+                              checked={selectedRole === "Volunteer"}
+                              onChange={() => setSelectedRole("Volunteer")}
+                            />
+                            Volunteer
+                          </label>
+                        </div>
+                        <small style={{ opacity: 0.8 }}>
+                          {program?.eventType === "multiple"
+                            ? selectedRole === "Participant"
+                              ? "Participants must pick a day."
+                              : "Volunteers don't need a day. (Hidden)"
+                            : "Single-day program."}
+                        </small>
+                      </div>
+                    </div>
+
                     <div className="walkin-details-section">
                       {/* Left column */}
                       <div className="walkin-content-left-side">
-                        {textFieldsToRender
-                          .filter((_, idx) => idx % 2 === 0) // even indexes go left
+                        {visibleTextFields
+                          .filter((f) => f.name !== "dayChosen") // handled separately / hidden for Volunteer
+                          .filter((_, idx) => idx % 2 === 0)
                           .map((f) => {
                             const name = f.name;
 
-                            // Special handling for dateOfBirth → date input + Age field
                             if (name === "dateOfBirth") {
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dateOfBirth")}{" "}
-                                    <span className="required">*</span>
+                                    {labelFor("dateOfBirth")} <span className="required">*</span>
                                   </p>
                                   <input
                                     type="date"
@@ -685,9 +641,7 @@ export default function AddWalkInParticipantModal({
                                     required
                                     max={todayStr}
                                     value={formData.dateOfBirth || ""}
-                                    onChange={(e) =>
-                                      handleFormTextChange("dateOfBirth", e.target.value)
-                                    }
+                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
                                   />
                                   <div style={{ marginTop: 8 }}>
                                     <p>{labelFor("age")}</p>
@@ -709,157 +663,27 @@ export default function AddWalkInParticipantModal({
                               );
                             }
 
-                            // Special handling for dayChosen → dropdown from program schedule
-                            if (name === "dayChosen") {
+                            // Day picker (Participants only & multi-day)
+                            if (
+                              name === "dayChosen" &&
+                              program?.eventType === "multiple" &&
+                              selectedRole === "Participant"
+                            ) {
                               const days = program?.participantDays ?? [];
-                              const start = program?.startDate
-                                ? new Date(program.startDate)
-                                : null;
+                              const start = program?.startDate ? new Date(program.startDate) : null;
 
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dayChosen")}{" "}
-                                    <span className="required">*</span>
-                                  </p>
-                                  <select
-                                    className="walkin-input-field"
-                                    required
-                                    // keep "0" using nullish coalescing (avoid falsy bug)
-                                    value={formData.dayChosen ?? ""}
-                                    onChange={(e) =>
-                                      handleFormTextChange("dayChosen", e.target.value)
-                                    }
-                                  >
-                                    <option value="" disabled>
-                                      Select a day
-                                    </option>
-                                    {days.map((_, idx) => {
-                                      let label = `Day ${idx + 1}`;
-                                      let disabled = false;
-                                      if (start) {
-                                        const optionDate = new Date(start);
-                                        optionDate.setDate(start.getDate() + idx);
-                                        label += ` (${optionDate.toDateString()})`;
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        optionDate.setHours(0, 0, 0, 0);
-                                        if (optionDate < today) disabled = true; // disable past days
-                                      }
-                                      const isFull = !!dayFull[idx];
-                                      if (isFull) {
-                                        label += " — FULL";
-                                        disabled = true; // 🚫 cannot be chosen if cap is met
-                                      }
-                                      return (
-                                        <option key={idx} value={String(idx)} disabled={disabled}>
-                                          {label}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                </div>
-                              );
-                            }
-
-                            const lower = name.toLowerCase();
-                            const type =
-                              lower.includes("email")
-                                ? "email"
-                                : lower.includes("contact") || lower.includes("phone")
-                                ? "tel"
-                                : "text";
-
-                            const formattedLabel = name
-                              .replace(/([A-Z])/g, " $1")
-                              .replace(/^./, (s) => s.toUpperCase());
-
-                            return (
-                              <div className="fields-section-walkin" key={`tf-${name}`}>
-                                <p>
-                                  {formattedLabel} <span className="required">*</span>
-                                </p>
-                                <input
-                                  type={type}
-                                  className="walkin-input-field"
-                                  required
-                                  value={formData[name] ?? ""}
-                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
-                                  placeholder={`Enter ${formattedLabel}`}
-                                />
-                              </div>
-                            );
-                          })}
-                      </div>
-
-                      {/* Right column */}
-                      <div className="walkin-content-right-side">
-                        {textFieldsToRender
-                          .filter((_, idx) => idx % 2 !== 0) // odd indexes go right
-                          .map((f) => {
-                            const name = f.name;
-
-                            if (name === "dateOfBirth") {
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {labelFor("dateOfBirth")}{" "}
-                                    <span className="required">*</span>
-                                  </p>
-                                  <input
-                                    type="date"
-                                    className="walkin-input-field"
-                                    required
-                                    max={todayStr}
-                                    value={formData.dateOfBirth || ""}
-                                    onChange={(e) =>
-                                      handleFormTextChange("dateOfBirth", e.target.value)
-                                    }
-                                  />
-                                  <div style={{ marginTop: 8 }}>
-                                    <p>{labelFor("age")}</p>
-                                    <input
-                                      type="text"
-                                      className="walkin-input-field"
-                                      value={
-                                        formData.dateOfBirth
-                                          ? derivedAge != null
-                                            ? String(derivedAge)
-                                            : ""
-                                          : ""
-                                      }
-                                      readOnly
-                                      placeholder="Will be computed"
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            }
-
-                            // Duplicate dayChosen handling for right column
-                            if (name === "dayChosen") {
-                              const days = program?.participantDays ?? [];
-                              const start = program?.startDate
-                                ? new Date(program.startDate)
-                                : null;
-
-                              return (
-                                <div className="fields-section-walkin" key={`tf-${name}`}>
-                                  <p>
-                                    {labelFor("dayChosen")}{" "}
-                                    <span className="required">*</span>
+                                    {labelFor("dayChosen")} <span className="required">*</span>
                                   </p>
                                   <select
                                     className="walkin-input-field"
                                     required
                                     value={formData.dayChosen ?? ""}
-                                    onChange={(e) =>
-                                      handleFormTextChange("dayChosen", e.target.value)
-                                    }
+                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
                                   >
-                                    <option value="" disabled>
-                                      Select a day
-                                    </option>
+                                    <option value="">Select a day</option>
                                     {days.map((_, idx) => {
                                       let label = `Day ${idx + 1}`;
                                       let disabled = false;
@@ -895,9 +719,125 @@ export default function AddWalkInParticipantModal({
                                 : lower.includes("contact") || lower.includes("phone")
                                 ? "tel"
                                 : "text";
-                            const formattedLabel = name
-                              .replace(/([A-Z])/g, " $1")
-                              .replace(/^./, (s) => s.toUpperCase());
+
+                            const formattedLabel = labelFor(name);
+
+                            return (
+                              <div className="fields-section-walkin" key={`tf-${name}`}>
+                                <p>
+                                  {formattedLabel} <span className="required">*</span>
+                                </p>
+                                <input
+                                  type={type}
+                                  className="walkin-input-field"
+                                  required
+                                  value={formData[name] ?? ""}
+                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                  placeholder={`Enter ${formattedLabel}`}
+                                />
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {/* Right column */}
+                      <div className="walkin-content-right-side">
+                        {visibleTextFields
+                          .filter((f) => f.name !== "dayChosen")
+                          .filter((_, idx) => idx % 2 !== 0)
+                          .map((f) => {
+                            const name = f.name;
+
+                            if (name === "dateOfBirth") {
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                  </p>
+                                  <input
+                                    type="date"
+                                    className="walkin-input-field"
+                                    required
+                                    max={todayStr}
+                                    value={formData.dateOfBirth || ""}
+                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                  />
+                                  <div style={{ marginTop: 8 }}>
+                                    <p>{labelFor("age")}</p>
+                                    <input
+                                      type="text"
+                                      className="walkin-input-field"
+                                      value={
+                                        formData.dateOfBirth
+                                          ? derivedAge != null
+                                            ? String(derivedAge)
+                                            : ""
+                                          : ""
+                                      }
+                                      readOnly
+                                      placeholder="Will be computed"
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            if (
+                              name === "dayChosen" &&
+                              program?.eventType === "multiple" &&
+                              selectedRole === "Participant"
+                            ) {
+                              const days = program?.participantDays ?? [];
+                              const start = program?.startDate ? new Date(program.startDate) : null;
+
+                              return (
+                                <div className="fields-section-walkin" key={`tf-${name}`}>
+                                  <p>
+                                    {labelFor("dayChosen")} <span className="required">*</span>
+                                  </p>
+                                  <select
+                                    className="walkin-input-field"
+                                    required
+                                    value={formData.dayChosen ?? ""}
+                                    onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
+                                  >
+                                    <option value="">Select a day</option>
+                                    {days.map((_, idx) => {
+                                      let label = `Day ${idx + 1}`;
+                                      let disabled = false;
+                                      if (start) {
+                                        const optionDate = new Date(start);
+                                        optionDate.setDate(start.getDate() + idx);
+                                        label += ` (${optionDate.toDateString()})`;
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        optionDate.setHours(0, 0, 0, 0);
+                                        if (optionDate < today) disabled = true;
+                                      }
+                                      const isFull = !!dayFull[idx];
+                                      if (isFull) {
+                                        label += " — FULL";
+                                        disabled = true;
+                                      }
+                                      return (
+                                        <option key={idx} value={String(idx)} disabled={disabled}>
+                                          {label}
+                                        </option>
+                                      );
+                                    })}
+                                  </select>
+                                </div>
+                              );
+                            }
+
+                            const lower = name.toLowerCase();
+                            const type =
+                              lower.includes("email")
+                                ? "email"
+                                : lower.includes("contact") || lower.includes("phone")
+                                ? "tel"
+                                : "text";
+                            const formattedLabel = labelFor(name);
 
                             return (
                               <div className="fields-section-walkin" key={`tf-${name}`}>
@@ -920,21 +860,14 @@ export default function AddWalkInParticipantModal({
                   </>
                 )}
 
+                {/* ------- REQUIREMENTS ------- */}
                 {activeSection === "reqs" && (
                   <>
                     <div className="walkin-requirements-section">
-                      {fileFieldsToRender.map((f) => {
+                      {visibleFileFields.map((f) => {
                         const name = f.name;
                         const isValidId = name === "validIDjpg";
-                        const formattedLabel = name
-                          .replace(/jpg$/i, "")
-                          .replace(/jpeg$/i, "")
-                          .replace(/png$/i, "")
-                          .replace(/pdf$/i, "")
-                          .replace(/([a-z])([A-Z])/g, "$1 $2")
-                          .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
-                          .replace(/^./, (s) => s.toUpperCase())
-                          .replace(/\bId\b/g, "ID");
+                        const formattedLabel = prettifyFieldName(name, prettyLabels);
 
                         const preview = filePreviews[name];
                         const hasManual = !!formFiles[name];
@@ -944,24 +877,16 @@ export default function AddWalkInParticipantModal({
                             key={`ff-${name}`}
                             className="box-container-outer-photosprogram"
                             style={{
-                              flex:
-                                fileFieldsToRender.length === 1
-                                  ? "0 0 40%"
-                                  : "0 0 calc(50% - 20px)",
+                              flex: visibleFileFields.length === 1 ? "0 0 40%" : "0 0 calc(50% - 20px)",
                               display: "flex",
-                              justifyContent:
-                                fileFieldsToRender.length === 1 ? "center" : "flex-start",
+                              justifyContent: visibleFileFields.length === 1 ? "center" : "flex-start",
                             }}
                           >
                             <div className="title-walkin-requirements">{formattedLabel}</div>
 
                             <div className="box-container-resindentificationpic">
                               <div className="file-upload-container">
-                                <label
-                                  htmlFor={`file-${name}`}
-                                  className="upload-link"
-                                  style={{ cursor: "pointer" }}
-                                >
+                                <label htmlFor={`file-${name}`} className="upload-link" style={{ cursor: "pointer" }}>
                                   {hasManual ? "Replace File" : "Click to Upload File"}
                                 </label>
 
@@ -973,9 +898,7 @@ export default function AddWalkInParticipantModal({
                                   type="file"
                                   className="file-upload-input"
                                   accept="image/*,application/pdf,.pdf"
-                                  onChange={(e) =>
-                                    handleFormFileChange(name, e.currentTarget)
-                                  }
+                                  onChange={(e) => handleFormFileChange(name, e.currentTarget)}
                                   style={{ display: "none" }}
                                 />
 
@@ -1056,11 +979,7 @@ export default function AddWalkInParticipantModal({
 
           <div className="action-btn-section-verify-section-participant">
             <div className="action-btn-section-verify">
-              <button
-                className="participant-action-reject"
-                onClick={onClose}
-                disabled={saving || autoFillLoading}
-              >
+              <button className="participant-action-reject" onClick={onClose} disabled={saving || autoFillLoading}>
                 Cancel
               </button>
 
@@ -1072,20 +991,22 @@ export default function AddWalkInParticipantModal({
                 {saving ? "Saving..." : "Save"}
               </button>
 
-              {/* New: Auto-fill button */}
-              <button
+              {/* Optional auto-fill for participants only (kept commented) */}
+              {/* <button
                 className="participant-action-accept"
                 style={{ marginLeft: 8 }}
                 onClick={autoFillMissingForSelectedDay}
-                disabled={autoFillLoading || saving || !(formData.dayChosen ?? "")}
+                disabled={autoFillLoading || saving || !(formData.dayChosen ?? "") || selectedRole !== "Participant"}
                 title={
-                  !formData.dayChosen
+                  selectedRole !== "Participant"
+                    ? "Auto-fill is for participants only"
+                    : !formData.dayChosen
                     ? "Select a day first"
                     : "Auto-fill remaining slots for selected day"
                 }
               >
                 {autoFillLoading ? "Auto-filling..." : "Auto-fill Remaining for Day"}
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

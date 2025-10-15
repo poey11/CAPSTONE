@@ -788,7 +788,7 @@ export default function ProgramDetails() {
             }
           >
             <div className="program-redirection-icons-section">
-              <img src="/images/team.png" alt="user info" className="program-redirection-icons-info" />
+              <img src="/Images/team.png" alt="user info" className="program-redirection-icons-info" />
             </div>
             <h1>Participants</h1>
           </button>

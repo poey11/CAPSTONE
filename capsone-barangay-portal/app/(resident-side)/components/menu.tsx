@@ -581,7 +581,7 @@ const handleDeleteNotification = async (notificationId: string) => {
                   {resident?.userIcon ? (
                     <img src={resident.userIcon} alt="User Icon" className="header-usericon" />
                   ) : (
-                    <img src="/images/user.png" alt="Default User" className="header-usericon" />
+                    <img src="/Images/user.png" alt="Default User" className="header-usericon" />
                   )}
                 </p>
                 {/*

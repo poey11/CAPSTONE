@@ -97,7 +97,7 @@ export default function OfficialsModule() {
           ...(doc.data().position === "LF Staff" && { department: doc.data().department || "N/A" }),
           term: doc.data().term || "N/A",
           contact: doc.data().phone,
-          image: doc.data().image || "/images/default-profile.png",
+          image: doc.data().image || "/Images/default-profile.png",
           email: doc.data().email || "N/A",
           createdBy: doc.data().createdBy || "N/A",
           createdAt: doc.data().createdAt,
@@ -151,7 +151,7 @@ useEffect(() => {
           : rawPosition,
         term: doc.data().term || "N/A",
         contact: doc.data().contact,
-        image: doc.data().image || "/images/default-profile.png",
+        image: doc.data().image || "/Images/default-profile.png",
         email: doc.data().email || "N/A",
         createdBy: doc.data().createdBy || "N/A",
         createdAt: doc.data().createdAt,
@@ -305,10 +305,10 @@ const addNewOfficer = async () => {
       name: officialToAdd?.name || "N/A",
       contact: officialToAdd?.contact || "N/A",
       ...(termFormatted !== "N/A" ? { term: termFormatted }:{term: selectedNewOfficial ? officialToAdd?.term : "N/A"}),
-      email: officialToAdd?.email || "N/A",
+      email: officialToAdd?.email || "",
       facebook: officialToAdd?.facebook || "N/A",
       position: position,
-      image: imageUrl || "/images/default-profile.png",
+      image: imageUrl || "/Images/default-profile.png",
       createdBy: session?.user.fullName || "Unknown",
       createdAt: new Date().toLocaleString(),
     };
@@ -501,7 +501,7 @@ const deleteOfficer = async () => {
                     <option value="Assistant Secretary">Assistant Secretary</option> 
                     <option value="Barangay Treasurer">Barangay Treasurer</option>
                     <option value="Barangay Administrator">Barangay Administrator</option>
-                    <option value="Kasamabahay Assistance Desk">Kasamabahay Assistance Desk</option>
+                    <option value="Kasambahay Assistance Desk">Kasambahay Assistance Desk</option>
                     <option value="Solo Parent Desk">Solo Parent Desk</option>
                     <option value="BDRRMO">BDRRMO</option>
                     <option value="BADAC Focal Person">BADAC Focal Person</option>
@@ -510,7 +510,7 @@ const deleteOfficer = async () => {
                     <option value="BCPC Focal Person">BCPC Focal Person</option>
                     <option value="Medical Assistance">Medical Assistance</option>
                     <option value="ASH Desk">ASH Desk </option>
-                    <option value="ASH Desk">PWD Massage & Therapeutic Center</option>
+                    <option value="PWD Massage & Therapeutic Center">PWD Massage & Therapeutic Center</option>
                     <option value="BHERT">BHERT</option>
                     <option value="BSPO, EX-O">BSPO, EX-O</option>
                     <option value="Clean & Green Department">Clean & Green Department</option>
@@ -525,7 +525,7 @@ const deleteOfficer = async () => {
       <div className="brgy-officials-main-section">
         {currentUser.length === 0 ? (
           <div className="no-result-card">
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon" />
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon" />
             <p className="no-results-department">No Results Found</p>
           </div>
         ) : (
@@ -859,20 +859,23 @@ const deleteOfficer = async () => {
                             <input
                               type="text"
                               className={`add-official-input-field ${invalidFields.includes("email") ? "input-error" : ""}`}
-                              placeholder="Enter Email Address"
+                              placeholder="example@domain.com"        // 👈 now a placeholder
                               name="email"
                               required
-                              value={selectedNewOfficial?.email || manualNewOfficial?.email || "example@domain.com"}
+                              value={
+                                (selectedNewOfficial?.email ?? manualNewOfficial?.email ?? "")
+                              }                                        // 👈 default to blank, not example text
                               readOnly={!!selectedNewOfficial}
                               onChange={(e) => {
                                 if (selectedNewOfficial) {
                                   setSelectedNewOfficial({ ...selectedNewOfficial, email: e.target.value });
                                 } else {
-                                  setManualNewOfficial({ ...manualNewOfficial, email: e.target.value });
+                                  setManualNewOfficial({ ...(manualNewOfficial ?? {}), email: e.target.value });
                                 }
                               }}
                             />
                           </div>
+
                         </div>
                       </div>
                     </div>

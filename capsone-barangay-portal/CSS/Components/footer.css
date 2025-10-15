@@ -3,7 +3,7 @@
   color: white;
   padding: 10px 40px;
   font-size:16px;
-  height: 18vh;
+  height: 20vh;
 }
 
 
@@ -20,10 +20,13 @@
 }
 
 .footer-bottom {
-  height: 10%;
+  height: 20%;
   display: flex;
   justify-content: center;
   align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .footer-bottom p{
@@ -90,6 +93,11 @@
 }
 
 
+.footer-disclaimer {
+  font-size: 0.85rem;
+  color: #f35454;
+  text-align: center;
+}
 
 /* 📱 Mobile Responsive Footer */
 @media (max-width: 768px) {

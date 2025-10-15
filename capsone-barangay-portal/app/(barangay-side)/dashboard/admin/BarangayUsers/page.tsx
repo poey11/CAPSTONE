@@ -305,47 +305,76 @@ useEffect(() => {
     }
   }, [showAddUserPopup]);
 
+  // rank for custom position ordering
+const POSITION_ORDER: Record<string, number> = {
+  "Punong Barangay": 0,
+  "Secretary": 1,
+  "Assistant Secretary": 2,
+  "Admin Staff": 3,
+  "LF Staff": 4,
+};
+
+// safe fallback for unknown/blank positions (goes to bottom)
+const getPositionRank = (pos?: string) =>
+  POSITION_ORDER[pos ?? ""] ?? Number.MAX_SAFE_INTEGER;
+
+const getFullName = (u: any) =>
+  [u.firstName, u.middleName, u.lastName].filter(Boolean).join(" ").trim();
+
+
 useEffect(() => {
-    let filtered = [...barangayUsers];
-  
-    // Filter by name (partial match)
-    if (nameSearch.trim()) {
+  let filtered = [...barangayUsers];
+
+  // Filter by name (partial match)
+  if (nameSearch.trim()) {
     const searchTerm = nameSearch.toLowerCase().trim();
     filtered = filtered.filter((user) => {
-        const fullName = [
-        user.firstName,
-        user.middleName,
-        user.lastName
-        ]
-        .filter(Boolean) // remove undefined/null
+      const fullName = [user.firstName, user.middleName, user.lastName]
+        .filter(Boolean)
         .join(" ")
         .toLowerCase();
-        
-        return fullName.includes(searchTerm);
+      return fullName.includes(searchTerm);
     });
+  }
+
+  // Filter by User ID (partial match)
+  if (userIdSearch.trim()) {
+    filtered = filtered.filter((user) =>
+      user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
+    );
+  }
+
+  // Filter by position dropdown
+  if (positionDropdown) {
+    filtered = filtered.filter((user) => user.position === positionDropdown);
+  }
+
+  // 🔹 Sort by custom position order, then by User ID (asc/desc), then by name
+  filtered.sort((a, b) => {
+    const rankA = getPositionRank(a.position);
+    const rankB = getPositionRank(b.position);
+    if (rankA !== rankB) return rankA - rankB;
+
+    // within the same position, use User ID asc/desc
+    const ua = (a.userid ?? "").toString();
+    const ub = (b.userid ?? "").toString();
+    if (ua !== ub) {
+      return sortOrder === "asc" ? ua.localeCompare(ub) : ub.localeCompare(ua);
     }
-  
-    // Filter by User ID (partial match)
-    if (userIdSearch.trim()) {
-      filtered = filtered.filter((user) =>
-        user.userid?.toLowerCase().includes(userIdSearch.toLowerCase())
-      );
-    }
-  
-    // Filter by position dropdown
-    if (positionDropdown) {
-      filtered = filtered.filter(
-        (user) => user.position === positionDropdown
-      );
-    }
-  
-    // Limit the number of results
-    if (showCount > 0) {
-      filtered = filtered.slice(0, showCount);
-    }
-  
-    setFilteredUser(filtered);
-  }, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers]);
+
+    // final tiebreaker: full name
+    return getFullName(a).localeCompare(getFullName(b));
+  });
+
+  // Limit the number of results
+  if (showCount > 0) {
+    filtered = filtered.slice(0, showCount);
+  }
+
+  setFilteredUser(filtered);
+  setCurrentPage(1); // reset to first page when filters/order change
+}, [nameSearch, userIdSearch, positionDropdown, showCount, barangayUsers, sortOrder]);
+
   
 
 

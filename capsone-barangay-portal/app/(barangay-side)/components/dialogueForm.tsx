@@ -314,8 +314,10 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
       
           setTimeout(() => {
             setShowPopup(false);
-            // router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}`);
-          //   router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            
+            if (details.Cstatus === "Absent" || (details.Cstatus === "Absent" && details.Rstatus === "Absent")) {
+              router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
+            }
           }, 3000);
 
 
@@ -357,7 +359,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
 
           setTimeout(() => {
             setShowPopup(false);
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
+            router.push(`/dashboard/IncidentModule/Department?id=${department}&highlight=${docId}`);
           }, 3000);
         } catch (error) {
           console.error("Error during confirmation submit:", error);
@@ -387,7 +391,8 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
           setTimeout(() => {
             setShowPopup(false);
                       if(department !== "Lupon"){
-            router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+            router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
             }
             else{
               setShowSubmitPopupB(true);
@@ -406,7 +411,7 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                 <div className="edit-incident-main-section1">
                     <div className="edit-incident-main-section1-left">
                         <button type="button" onClick={handleBack}>
-                            <img src="/images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
                         </button>
 
                         <h1> Dialogue Section  </h1>
@@ -873,7 +878,9 @@ const dialogueForm: React.FC<DialogueFormProps> = ({id, complainantName, respond
                      setShowPopup(true);
                     setTimeout(() => {
                        setShowPopup(false);
-                      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                      //router.push(`/dashboard/IncidentModule/Department?id=${department}`);
+                      //router.push(`/dashboard/IncidentModule/EditIncident?id=${docId}&department=${department}`);
+                      router.push(`/dashboard/IncidentModule/EditIncident/LetterAndInvitation?id=${docId}&action=summon&department=${department}`);
                     }, 2000); 
                   }}
                   className="no-button-add"

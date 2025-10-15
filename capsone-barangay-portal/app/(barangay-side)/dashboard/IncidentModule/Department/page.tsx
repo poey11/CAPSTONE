@@ -265,7 +265,6 @@ const toggleOpen = (index: number) => {
 
 
 
-
   const confirmDelete = async () => {
     if (deleteUserId) {
       try {
@@ -1034,7 +1033,7 @@ const formatStatus = (status: string) => {
             >
         {currentIncidents.length === 0 ? (
           <div className="no-result-card-departments" /* edited this class */>
-            <img src="/images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
+            <img src="/Images/no-results.png" alt="No results icon" className="no-result-icon-departments" /* edited this class *//>
             <p className="no-results-departments" /* edited this class */>No Results Found</p>
           </div>
         ) : (
@@ -1182,6 +1181,8 @@ const formatStatus = (status: string) => {
                     {["complainant", "respondent", "incident", "deskofficer"]
                       .concat(hasDialogue ? ["dialogue"] : [])
                       .concat(hasHearing ? ["hearing"] : [])
+                      .concat(selectedIncident?.respondentAbsentInDialogue ? ["refailuredialogue"] : [])
+                      .concat(selectedIncident?.refailureHearingDetails ? ["refailurehearing"] : [])
                       .map((section) => (
                         <button
                           key={section}
@@ -1195,6 +1196,8 @@ const formatStatus = (status: string) => {
                           {section === "deskofficer" && "Officer"}
                           {section === "dialogue" && "Dialogue"}
                           {section === "hearing" && "Hearing"}
+                          {section === "refailuredialogue" && "Refailure Meeting (Dialougue)"}
+                          {section === "refailurehearing" && "Refailure Meeting (Hearing)"}
                         </button>
                     ))}
                   </div>
@@ -1241,7 +1244,7 @@ const formatStatus = (status: string) => {
                               <div className="incident-date-section">
                               <div className="incident-date-topsection">
                                 <div className="incident-main-details-icons-section">
-                                  <img src="/Images/calendar.png" alt="calendar icon" className="view-incident-description-icon-calendar" />
+                                   <img src="/Images/description.png" alt="description icon" className="view-incident-description-icon-desc" />
                                 </div>
                                 <div className="incident-main-details-title-section">
                                   <h1>Type of ncident</h1>
@@ -1273,6 +1276,27 @@ const formatStatus = (status: string) => {
                               </div>
                               <p>{selectedIncident?.nature || "N/A"}</p>
                             </div>
+
+                            {selectedIncident?.status === "Refer to Government Agency" &&
+                              ["VAWC", "BCPC", "GAD"].includes(selectedIncident?.department) && (
+                                <div className="incident-description-section">
+                                  <div className="incident-desc-topsection">
+                                    <div className="incident-main-details-icons-section">
+                                      <img
+                                        src="/Images/rga.png"
+                                        alt="description icon"
+                                        className="view-incident-description-icon-desc"
+                                      />
+                                    </div>
+                                    <div className="incident-main-details-title-section">
+                                      <h1>Referred Agency</h1>
+                                    </div>
+                                  </div>
+                                  <p>{selectedIncident?.referredAgency || "N/A"}</p>
+                                </div>
+                            )}
+
+                            
 
                                 {selectedIncident?.status === "settled" && selectedIncident.department === "Lupon" && (
                                   <div className="incident-description-section">
@@ -1815,6 +1839,140 @@ const formatStatus = (status: string) => {
                                       );
                                     })
                                 )}
+                              </div>
+                            </>
+                          )}
+
+                          {viewActiveSection  === "refailuredialogue" && (
+                             <>
+                              <div className="incident-main-section">
+                                <div className="incident-top-section">  
+                                  <div className="view-main-user-content-left-side">
+                                    <div className="view-user-fields-section">
+                                      <p>Meeting Date and Time of Refailure</p>
+                                      <input
+                                        type="text"
+                                        className="view-user-input-field"
+                                        value={
+                                          selectedIncident?.refailureExplainationMeetingDialogue
+                                            ? formatDateTime(selectedIncident?.refailureExplainationMeetingDialogue)
+                                            : "Not Yet Investigated"
+                                        }
+                                        readOnly
+                                      /> 
+                                    </div>
+                                  </div>
+                                  <div className="view-main-user-content-right-side">
+                                    <div className="view-user-fields-section">
+                                      <p>Respondent</p>
+                                      <input
+                                        type="text"
+                                        className="view-user-input-field"
+                                        value={`${selectedIncident?.respondent?.fname} ${selectedIncident?.respondent?.lname}` || "No Respondent Assigned"}
+                                        readOnly
+                                      /> 
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="incident-bottom-section">
+                                  <div className="view-incident-partyA-container">
+                                    <div className="box-container-outer-natureoffacts">
+                                      <div className="title-remarks-partyA">
+                                        Reason For Absence
+                                      </div>
+                                      <div className="box-container-partyA">
+                                        <textarea className="natureoffacts-input-field" name="concern" value={selectedIncident?.reasonForFailureToAppearDialogue || "No Excuses Given"} readOnly/>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                </div>
+                              </div>
+                            </>
+                          )}
+
+                          {viewActiveSection  === "refailurehearing" && (
+                            <>
+                              <div className="hearing-main-section">
+                                {viewActiveSection === "refailurehearing" && Object.keys(selectedIncident?.refailureHearingDetails).length > 0 && (
+                                  <>
+                                    {Object.entries(selectedIncident?.refailureHearingDetails).map(([key, item], index) => {
+                                      return(
+                                        <div className="view-incident-dialogue-content" key={index}>
+                                          <div className="hearing-fullinfo-container">
+                                            <div
+                                              className="hearing-title-container"
+                                              style={{ cursor: "pointer" }}
+                                              onClick={() => toggleOpen(index)}
+                                            >
+                                              <div className="hearing-title">
+                                                <h1> Refailure Meeting ({Number(key) === 0 ? (<>First</>) : Number(key) === 1 ? (<>Second</>) : Number(key) === 2 && (<>Third</>)} Hearing)</h1>
+                                              </div>
+                                              <div className="hearing-button-section">
+                                                <button
+                                                  className="toggle-btn-hearing"
+                                                  aria-label={openIndices[index] ? "Hide details" : "Show details"}
+                                                >
+                                                  <img
+                                                    src={openIndices[index] ? "/Images/up.png" : "/Images/down.png"}
+                                                    alt={openIndices[index] ? "Hide details" : "Show details"}
+                                                    style={{ width: "16px", height: "16px" }}
+                                                  />
+                                                </button>
+                                              </div>
+                                            </div>
+                                            <div className="view-incident-content-topsection">
+                                              <div className="view-incident-content-left-side">
+                                                <div className="view-incident-fields-section">
+                                                  <p>Meeting Date & Time of Refailure </p>
+                                                  <input
+                                                    type="text"
+                                                    className="view-incident-input-field"
+                                                    name="hearingMeetingDateTime"
+                                                    value={formatDateTime(selectedIncident[`refailureExplainationMeetingHearing${key}`])|| "N/A"}
+                                                    readOnly
+                                                  />
+                                                </div>
+                                              </div>
+
+                                              <div className="view-incident-content-right-side">
+                                                <div className="view-incident-fields-section">
+                                                  <p>Respondent</p>
+                                                  <input
+                                                    type="text"
+                                                    className="view-incident-input-field"
+                                                    value={`${selectedIncident?.respondent?.fname} ${selectedIncident?.respondent?.lname}` || "No Respondent Assigned"}
+                                                    readOnly
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                            {openIndices[index] && (
+                                              <div className="view-incident-content-bottomsection">
+                                                <div className="view-incident-partyA-container">
+                                                    <div className="box-container-outer-natureoffacts">
+                                                      <div className="title-remarks-partyA">Reason For Absence</div>
+                                                      <div className="box-container-partyA">
+                                                        <textarea
+                                                          className="partyA-input-field"
+                                                          name="partyA"
+                                                          value={selectedIncident?.refailureHearingDetails[key]?.reason || "No Reason Provided"}
+                                                          readOnly
+                                                        />
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                              </div>
+                                            )}
+
+                                          </div>
+                                        </div>
+                                      )
+                                    })}
+                                  </>
+                                )}
+                                 
+                                     
                               </div>
                             </>
                           )}

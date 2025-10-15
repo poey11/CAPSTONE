@@ -1,6 +1,11 @@
   [
     {
-      "origin": ["http://localhost:3000"],
+      "origin": [
+      "https://barangayfairview-kqst.onrender.com",
+      "https://barangayfairview.site",
+      "https://www.barangayfairview.site",
+      "http://localhost:3000"
+    ],
       "method": ["GET", "HEAD", "PUT", "POST", "DELETE"], 
       "responseHeader": ["Content-Type"],
       "maxAgeSeconds": 3600

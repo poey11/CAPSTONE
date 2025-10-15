@@ -161,6 +161,11 @@
   .officials-title::after {
     display: none; /* hide side lines on mobile */
   }
+
+  .official-facebook-officials {
+   font-size: 0.85rem;
+
+  }
 }
 
 
@@ -254,6 +259,11 @@
 .official-phonenumber-officials{
   font-size: 0.9rem;
   color: #434343;
+}
+
+.official-facebook-officials{
+  font-size: 0.9rem;
+  color: #1877f2;                                                                                                                     
 }
 
 

@@ -305,7 +305,7 @@ export default function EditLuponIncident() {
 
 
     const handleBack = () => {
-      router.back();
+      router.push(`/dashboard/IncidentModule/Department?id=${department}`);
     };
     
 

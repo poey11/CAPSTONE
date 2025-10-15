@@ -55,8 +55,8 @@ export default function Official() {
         name: doc.data().name,
         position: getPositionLabel(doc.data().position, doc.data().department),
         term: doc.data().term || "N/A",
-        contact: doc.data().phone,
-        image: doc.data().image || "/images/default-profile.png",
+        contact: doc.data().contact,
+        image: doc.data().image || "/Images/default-profile.png",
         email: doc.data().email || "N/A",
         createdBy: doc.data().createdBy || "N/A",
         createdAt: doc.data().createdAt,
@@ -144,9 +144,14 @@ export default function Official() {
               <p className="official-role-punong-brgy">{captain?.position}</p>
               <h2 className="official-name-punong-brgy">{captain?.name}</h2>
               <p className="official-phonenumber-punong-brgy">Term Duration: {captain?.term || "N/A"}</p>
-              <p className="official-phonenumber-punong-brgy">Facebook: {captain?.facebook || "N/A"}</p>
               <p className="official-phonenumber-punong-brgy">Email: {captain?.email || "N/A"}</p>
               <p className="official-phonenumber-punong-brgy">Contact Information: {captain?.contact}</p>
+                 <a href={captain?.facebook} 
+                 target="_blank" 
+                  rel="noopener noreferrer"
+                className="officials-facebook-others">
+                  Facebook: {captain?.facebook || "N/A"}
+                </a>
             </div>
           </div>
         </div>
@@ -168,18 +173,18 @@ export default function Official() {
                 <p className="official-phonenumber-officials">
                   Term Duration: {official.term}
                 </p>
-                <a href={official.facebook} 
-                 target="_blank" 
-                  rel="noopener noreferrer"
-                className="official-phonenumber-officials">
-                  Facebook: {official.facebook || "N/A"}
-                </a>
                 <p className="official-phonenumber-officials">
                   Email: {official.email || "N/A"}
                 </p>
                 <p className="official-phonenumber-officials">
                   Contact Information: {official.contact}
                 </p>
+               <a href={official.facebook} 
+                 target="_blank" 
+                  rel="noopener noreferrer"
+                className="officials-facebook-others">
+                  Facebook: {official.facebook || "N/A"}
+                </a>
               </div>
             </div>
           ))}

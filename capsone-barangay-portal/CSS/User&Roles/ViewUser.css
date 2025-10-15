@@ -668,13 +668,12 @@ html, body {
 
 
 .view-user-header-second-section {
-  background-color: #214666;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
   padding-right: 50px;
   text-align: center;
   color: white;
   font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
   }
   
 .view-user-header-second-section h2 {

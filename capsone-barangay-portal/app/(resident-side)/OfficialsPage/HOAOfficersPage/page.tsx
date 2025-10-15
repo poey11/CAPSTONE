@@ -1,3 +1,4 @@
+
 "use client";
 
 import "@/CSS/OfficialsPage/HOA.css";
@@ -82,7 +83,7 @@ export default function HOAOfficersPage() {
                 <a href={official.facebook} 
                  target="_blank" 
                   rel="noopener noreferrer"
-                className="official-phonenumber-officials">
+                className="official-facebook-officials">
                   Facebook: {official.facebook || "N/A"}
                 </a>
                     

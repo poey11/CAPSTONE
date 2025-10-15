@@ -241,7 +241,7 @@ export default function EditParticipantModal({
           {/* Header */}
           <div className="view-user-main-section1">
             <div className="view-user-header-first-section">
-              <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+              <img src="/images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
             </div>
             <div className="view-user-header-second-section">
               <h2 className="gov-info">Republic of the Philippines</h2>
@@ -260,7 +260,7 @@ export default function EditParticipantModal({
               <div className="view-participant-backbutton-container">
                 <button onClick={onClose}>
                   <img
-                    src="/images/left-arrow.png"
+                    src="/Images/left-arrow.png"
                     alt="Left Arrow"
                     className="participant-back-btn-resident"
                   />
@@ -433,7 +433,7 @@ export default function EditParticipantModal({
                       {loadingFull ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
-                            src="/images/no-results.png"
+                            src="/Images/no-results.png"
                             alt="Loading"
                             className="no-result-icon-programs"
                           />
@@ -442,7 +442,7 @@ export default function EditParticipantModal({
                       ) : fileEntries.length === 0 ? (
                         <div className="no-result-card-programs" style={{ padding: 16 }}>
                           <img
-                            src="/images/no-results.png"
+                            src="/Images/no-results.png"
                             alt="No results icon"
                             className="no-result-icon-programs"
                           />

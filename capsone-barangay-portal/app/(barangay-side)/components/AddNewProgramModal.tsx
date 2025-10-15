@@ -17,7 +17,7 @@ type Props = {
   onProgramSaved?: (msg: string) => void;
 };
 
-const AUTO_POSITIONS = ["Secretary", "Assistant Secretary", "Punong Barangay"];
+const AUTO_POSITIONS = ["Punong Barangay"];
 
 type SimpleField = { name: string; description?: string };
 
