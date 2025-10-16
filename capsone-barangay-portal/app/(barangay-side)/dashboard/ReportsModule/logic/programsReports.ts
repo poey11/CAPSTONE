@@ -99,11 +99,11 @@ export async function generateProgramsMonthlyXlsx(params: {
   const ws = wb.worksheets[0];
 
   try {
-    ws.getCell("A1").value = "MONTHLY PROGRAMS REPORT";
+    ws.getCell("A1").value = "BARANGAY FAIRVIEW\nMONTHLY PROGRAMS REPORT";
     ws.getCell("A1").alignment = { wrapText: true, horizontal: "center", vertical: "middle" };
-    ws.getCell("A1").font = { name: "Calibri", size: 14, bold: true };
+    ws.getCell("A1").font = { name: "Calibri", size: 18, bold: true };
   } catch {}
-  ws.getCell("A2").value = `BARANGAY FAIRVIEW — ${allTime ? "AS OF ALL TIME" : `AS OF ${reportLabel}`}`;
+  ws.getCell("A2").value = `${allTime ? "AS OF ALL TIME" : `AS OF ${reportLabel}`}`;
 
   // Fetch programs within range + filters
   const rangeStart = startOfMonth(startYear, startMonth);
