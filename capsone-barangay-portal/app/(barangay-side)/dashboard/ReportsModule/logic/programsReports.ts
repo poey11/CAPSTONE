@@ -322,6 +322,7 @@ type ParticipantRecord = {
   address?: string;
   approvalStatus?: "Pending" | "Approved" | "Rejected";
   attendance?: boolean; // <- your boolean field
+  dayChosen?: number | string; // <- for multiple-event programs
 };
 
 const safeFullName = (rec: ParticipantRecord) => {
@@ -378,25 +379,26 @@ export async function generateProgramParticipationXlsx(args: {
   const wsList = wb.addWorksheet("Participants & Volunteers");
 
   // ======= Sheet 1: Top centered header (3 lines) =======
-  wsInfo.mergeCells("A1:F1");
-  wsInfo.getCell("A1").value = "BARANGAY FAIRVIEW";
-  wsInfo.getCell("A1").font = { name: "Calibri", size: 16, bold: true };
-  wsInfo.getCell("A1").alignment = { horizontal: "center", vertical: "middle" };
-
   wsInfo.mergeCells("A2:F2");
-  wsInfo.getCell("A2").value = "PROGRAM SUMMARY REPORT";
-  wsInfo.getCell("A2").font = { name: "Calibri", size: 14, bold: true };
+  wsInfo.getCell("A2").value = "BARANGAY FAIRVIEW";
+  wsInfo.getCell("A2").font = { name: "Calibri", size: 16, bold: true };
   wsInfo.getCell("A2").alignment = { horizontal: "center", vertical: "middle" };
 
   wsInfo.mergeCells("A3:F3");
-  wsInfo.getCell("A3").value = programName;
-  wsInfo.getCell("A3").font = { name: "Calibri", size: 13, bold: true };
+  wsInfo.getCell("A3").value = "PROGRAM SUMMARY REPORT";
+  wsInfo.getCell("A3").font = { name: "Calibri", size: 14, bold: true };
   wsInfo.getCell("A3").alignment = { horizontal: "center", vertical: "middle" };
 
-  wsInfo.getRow(1).height = 22;
-  wsInfo.getRow(2).height = 20;
-  wsInfo.getRow(3).height = 18;
-  wsInfo.addRow([]); // spacer
+  wsInfo.mergeCells("A4:F4");
+  wsInfo.getCell("A4").value = programName;
+  wsInfo.getCell("A4").font = { name: "Calibri", size: 13, bold: true };
+  wsInfo.getCell("A4").alignment = { horizontal: "center", vertical: "middle" };
+
+  wsInfo.getRow(2).height = 22;
+  wsInfo.getRow(3).height = 20;
+  wsInfo.getRow(4).height = 18;
+  wsInfo.addRow([]);
+  wsInfo.addRow([]);
 
   // Details (wider columns so numbers/labels align nicely)
   wsInfo.columns = [
@@ -436,7 +438,6 @@ export async function generateProgramParticipationXlsx(args: {
   }
   addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
 
-  // Description (full-width, extra height)
   const description = p.description || p.programDescription || "";
   if (description) {
     wsInfo.addRow([]);
@@ -458,29 +459,55 @@ export async function generateProgramParticipationXlsx(args: {
     margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
   };
 
-  // ======= Sheet 2: Participants table (centered headers & cells) =======
-  wsList.columns = [
-    { header: "#", width: 6 },
-    { header: "Full Name", width: 32 },
-    { header: "Address", width: 34 },
-    { header: "Contact", width: 18 },
-    { header: "Role", width: 16 },
-    { header: "Attendance", width: 14 },
-  ];
+  // Sheet 2: Participants table (centered headers & cells)
+  const isMultiple = String(eventType).toLowerCase() === "multiple";
 
+  const lastCol = isMultiple ? "G" : "F";
+
+  // === Title row FIRST (merged, centered, bordered) ===
   const title2 = wsList.addRow(["Participants / Volunteers (Approved Only)"]);
-  wsList.mergeCells(`A${title2.number}:F${title2.number}`);
-  wsList.getCell(`A${title2.number}`).font = { name: "Calibri", size: 14, bold: true };
-  wsList.getCell(`A${title2.number}`).alignment = { horizontal: "center", vertical: "middle" };
-  wsList.addRow([]);
+  wsList.mergeCells(`A${title2.number}:${lastCol}${title2.number}`);
+  const tCell = wsList.getCell(`A${title2.number}`);
+  tCell.font = { name: "Calibri", size: 14, bold: true };
+  tCell.alignment = { horizontal: "center", vertical: "middle" };
+  title2.height = 24;
 
+    wsList.columns = isMultiple
+    ? [
+        { header: "#", width: 6 },
+        { header: "Full Name", width: 32 },
+        { header: "Address", width: 34 },
+        { header: "Contact", width: 18 },
+        { header: "Role", width: 16 },
+        { header: "Day Chosen", width: 14 },   // multiple only
+        { header: "Attendance", width: 14 },
+      ]
+    : [
+        { header: "#", width: 6 },
+        { header: "Full Name", width: 32 },
+        { header: "Address", width: 34 },
+        { header: "Contact", width: 18 },
+        { header: "Role", width: 16 },
+        { header: "Attendance", width: 14 },
+      ];
+
+  const thinBorders = {
+    top: { style: "thin" as const },
+    bottom: { style: "thin" as const },
+    left: { style: "thin" as const },
+    right: { style: "thin" as const },
+  };
+
+  // === Header row SECOND (same borders as data rows) ===
   const header2 = wsList.addRow(wsList.columns.map((c) => c.header));
+  header2.height = 22;
   header2.eachCell((c) => {
     c.font = { name: "Calibri", size: 12, bold: true };
     c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-    c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+    c.border = thinBorders; // <-- matches data rows
   });
-  header2.height = 22;
+
+
 
   const all = await fetchProgramParticipants(db, programId);
   const approved = all.filter((r) => String(r.approvalStatus || "").toLowerCase() === "approved");
@@ -491,19 +518,41 @@ export async function generateProgramParticipationXlsx(args: {
     `${(r.lastName || "").toString().toUpperCase()}|${(r.firstName || "").toString().toUpperCase()}`;
   approved.sort((a, b) => roleOrder(a) - roleOrder(b) || nameKey(a).localeCompare(nameKey(b)));
 
-  approved.forEach((rec, i) => {
-    const addr = rec.address || rec.location || "—";
-    const contact = rec.contactNumber || rec.contact || "—";
-    const role = rec.role || "—";
-    const attendance = rec.attendance ? "Yes" : "No";
-    const r = wsList.addRow([i + 1, safeFullName(rec), addr, contact, role, attendance]);
-    r.height = 22;
-    r.eachCell((c) => {
-      c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-      c.font = { name: "Calibri", size: 12 };
-      c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
-    });
+approved.forEach((rec, i) => {
+  const addr = rec.address || rec.location || "—";
+  const contact = rec.contactNumber || rec.contact || "—";
+  const role = rec.role || "—";
+  const attendance = rec.attendance ? "Yes" : "No";
+
+  // Only show Day Chosen for multiple-event programs
+  const dayChosenDisplay = isMultiple
+    ? (rec.dayChosen) // try a few common keys
+    : undefined;
+
+  const dayChosenText = isMultiple
+    ? (dayChosenDisplay === 0 || typeof dayChosenDisplay === "number"
+        ? `Day ${Number(dayChosenDisplay) + 1}`
+        : (dayChosenDisplay ? `Day ${Number(dayChosenDisplay) + 1}` : "—"))
+    : undefined;
+
+  const rowValues = isMultiple
+    ? [i + 1, safeFullName(rec), addr, contact, role, dayChosenText, attendance]
+    : [i + 1, safeFullName(rec), addr, contact, role, attendance];
+
+  const r = wsList.addRow(rowValues);
+  r.height = 22;
+  r.eachCell((c) => {
+    c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    c.font = { name: "Calibri", size: 12 };
+    c.border = {
+      top: { style: "thin" },
+      bottom: { style: "thin" },
+      left: { style: "thin" },
+      right: { style: "thin" },
+    };
   });
+});
+
 
   wsList.pageSetup = {
     orientation: "portrait",
@@ -514,44 +563,43 @@ export async function generateProgramParticipationXlsx(args: {
     margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
   };
 
-// === Attendance Summary (Participants only) ===
-const approvedParticipantsOnly = approved.filter(
-  (r) => String(r.role || "").toLowerCase() === "participant"
-);
-const attendedCount = approvedParticipantsOnly.filter((r) => r.attendance === true).length;
-const totalApprovedParticipants = approvedParticipantsOnly.length;
-const attendancePercent =
-  totalApprovedParticipants > 0
-    ? `${((attendedCount / totalApprovedParticipants) * 100).toFixed(1)}%`
-    : "0%";
+  // === Attendance Summary (Participants only) ===
+  const approvedParticipantsOnly = approved.filter(
+    (r) => String(r.role || "").toLowerCase() === "participant"
+  );
+  const attendedCount = approvedParticipantsOnly.filter((r) => r.attendance === true).length;
+  const totalApprovedParticipants = approvedParticipantsOnly.length;
+  const attendancePercent =
+    totalApprovedParticipants > 0
+      ? `${((attendedCount / totalApprovedParticipants) * 100).toFixed(1)}%`
+      : "0%";
 
-// Spacer
-wsList.addRow([]);
+  // Spacer
+  wsList.addRow([]);
 
-// Put the 3 summary cells in the CENTER columns: C, D, E
-const summaryRow = wsList.addRow([
-  "", 
-  "", 
-  "Total Participants",
-  `${attendedCount} / ${totalApprovedParticipants}`,
-  attendancePercent,
-  "", 
-]);
+  const centerCols = isMultiple ? ["D", "E", "F"] : ["C", "D", "E"]; // center block
 
-// Styles
-const thin = { style: "thin" as const };
-["C", "D", "E"].forEach((col) => {
-  const cell = wsList.getCell(`${col}${summaryRow.number}`);
-  cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-  cell.font = { name: "Calibri", size: 12, bold: col === "C" };
-  cell.border = { top: thin, bottom: thin, left: thin, right: thin };
-});
-summaryRow.height = 22;
+  const summaryRowValues = isMultiple
+    ? ["", "", "", "Total Participants", `${attendedCount} / ${totalApprovedParticipants}`, attendancePercent, ""]
+    : ["", "", "Total Participants", `${attendedCount} / ${totalApprovedParticipants}`, attendancePercent, ""];
 
-["A", "B", "F"].forEach((col) => {
-  const cell = wsList.getCell(`${col}${summaryRow.number}`);
-  cell.border = {};
-});
+  const summaryRow = wsList.addRow(summaryRowValues);
+
+  // Styles
+  const thin = { style: "thin" as const };
+  centerCols.forEach((col) => {
+    const cell = wsList.getCell(`${col}${summaryRow.number}`);
+    cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+    cell.font = { name: "Calibri", size: 12, bold: col === centerCols[0] };
+    cell.border = { top: thin, bottom: thin, left: thin, right: thin };
+  });
+  summaryRow.height = 22;
+
+  // Remove borders on the blank cells so only the center block looks like a mini-table
+  const allCols = isMultiple ? ["A","B","C","D","E","F","G"] : ["A","B","C","D","E","F"];
+  allCols
+    .filter((c) => !centerCols.includes(c))
+    .forEach((col) => { wsList.getCell(`${col}${summaryRow.number}`).border = {}; });
 
 
   // Upload XLSX → return URL
