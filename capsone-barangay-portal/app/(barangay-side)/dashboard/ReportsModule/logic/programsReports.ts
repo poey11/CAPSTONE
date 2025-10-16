@@ -285,6 +285,7 @@ export async function fetchApprovedPrograms(db: any) {
     const q = query(
       collection(db, "Programs"),
       where("approvalStatus", "==", "Approved"),
+      where("progressStatus", "==", "Completed"),
       orderBy("startDate", "desc")
     );
     const snap = await getDocs(q);
