@@ -145,12 +145,6 @@ export async function generateProgramsMonthlyXlsx(params: {
   const people = ppSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
 
   // Flexible attendance check
-  const didAttend = (rec: any) => {
-    if (typeof rec.attended === "boolean") return rec.attended;
-    if (typeof rec.attendanceCount === "number") return rec.attendanceCount > 0;
-    if (rec.attendance && typeof rec.attendance.present === "boolean") return rec.attendance.present;
-    return false;
-  };
 
   type Row = [string, string, string, string, string, string, string];
   const rows: Row[] = [];
@@ -177,30 +171,26 @@ export async function generateProgramsMonthlyXlsx(params: {
       r => r.programId === p.id && r.approvalStatus === "Approved" && r.role === "Volunteer"
     );
 
-    let participantsApproved = 0;
+    // Capacity/maximum still respects per-day config for "multiple" events
     let participantsMax = 0;
-
     if ((p.eventType || "").toLowerCase() === "multiple" && Array.isArray(p.participantDays)) {
       participantsMax = (p.participantDays as number[]).reduce((a, b) => a + (Number(b) || 0), 0);
-      const perDay: Record<string, number> = {};
-      for (const rec of approvedParticipants) {
-        const day = String(rec.dayChosen ?? "");
-        perDay[day] = (perDay[day] || 0) + 1;
-      }
-      participantsApproved = Object.values(perDay).reduce((a, b) => a + b, 0);
     } else {
       participantsMax = Number(p.participants || 0) || 0;
-      participantsApproved = approvedParticipants.length;
     }
+
+    const participantsApproved = approvedParticipants.length;
+    const attended = approvedParticipants.filter((rec: any) => rec?.attendance === true).length;
 
     const volunteersMax = Number(p.volunteers || 0) || 0;
     const volunteersApproved = approvedVolunteers.length;
 
     let attendancePct = "—";
     if ((p.progressStatus || "") === "Completed") {
-      const attended = approvedParticipants.filter(didAttend).length;
       attendancePct =
-        participantsApproved > 0 ? `${((attended / participantsApproved) * 100).toFixed(1)}%` : "0%";
+        participantsApproved > 0
+          ? `${((attended / participantsApproved) * 100).toFixed(1)}%`
+          : "0%";
     }
 
     const participantsCell =
