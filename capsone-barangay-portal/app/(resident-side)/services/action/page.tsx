@@ -1703,7 +1703,17 @@ const handleFileChange = (
           else if (key === "requestorFname") message = "Requestor's First Name";
           else if (key === "requestorMrMs") message = "Requestor's Mr/Ms";
           else if (key === "address") message = "Address";
-          else if (key === "dateOfResidency") message = "Date of Residency";
+          else if (
+            key === "dateOfResidency" &&
+            (
+              userData?.status === "Verified" ||
+              (isGuest === false || isGuest === undefined|| !isGuest)
+            )
+          ) {
+            message = "Date of Residency";
+          } else if (key === "dateOfResidency") {
+            continue; // skip this field entirely for guests
+          }
           else if (key=== "birthday") message = "Birthday";
           else if (key === "age") message = "Age";
           else if(key === "birthplace") message = "Place of Birth";
@@ -2048,22 +2058,24 @@ const handleFileChange = (
                       <option value="female">Female</option>
                     </select>
                   </div>
-
-                  <div className="form-group-document-req">
-                    <label htmlFor="dateOfResidency" className="form-label-document-req">Requestor's Date of Residency<span className="required">*</span></label>
-                    <input 
-                      type="date" 
-                      id="dateOfResidency" 
-                      name="dateOfResidency" 
-                      value={clearanceInput.dateOfResidency}
-                      onChange={handleChange}
-                      className="form-input-document-req" 
-                      onKeyDown={(e) => e.preventDefault()} // Prevent manual input
-                      disabled={isReadOnly}
-                      required 
-                      max={getLocalDateString(new Date())}
-                    />
-                  </div>
+                  {(userData?.status === "Verified" || !isGuest) && (
+                      <div className="form-group-document-req">
+                        <label htmlFor="dateOfResidency" className="form-label-document-req">Requestor's Date of Residency<span className="required">*</span></label>
+                        <input 
+                          type="date" 
+                          id="dateOfResidency" 
+                          name="dateOfResidency" 
+                          value={clearanceInput.dateOfResidency}
+                          onChange={handleChange}
+                          className="form-input-document-req" 
+                          onKeyDown={(e) => e.preventDefault()} // Prevent manual input
+                          disabled={isReadOnly}
+                          required 
+                          max={getLocalDateString(new Date())}
+                        />
+                      </div>
+                  )}
+                  
 
                   <div className="form-group-document-req">
                     <label htmlFor="address" className="form-label-document-req">Requestor's Address<span className="required">*</span></label>
