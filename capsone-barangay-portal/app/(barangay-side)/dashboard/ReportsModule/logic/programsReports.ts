@@ -514,6 +514,46 @@ export async function generateProgramParticipationXlsx(args: {
     margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
   };
 
+// === Attendance Summary (Participants only) ===
+const approvedParticipantsOnly = approved.filter(
+  (r) => String(r.role || "").toLowerCase() === "participant"
+);
+const attendedCount = approvedParticipantsOnly.filter((r) => r.attendance === true).length;
+const totalApprovedParticipants = approvedParticipantsOnly.length;
+const attendancePercent =
+  totalApprovedParticipants > 0
+    ? `${((attendedCount / totalApprovedParticipants) * 100).toFixed(1)}%`
+    : "0%";
+
+// Spacer
+wsList.addRow([]);
+
+// Put the 3 summary cells in the CENTER columns: C, D, E
+const summaryRow = wsList.addRow([
+  "", 
+  "", 
+  "Total Participants",
+  `${attendedCount} / ${totalApprovedParticipants}`,
+  attendancePercent,
+  "", 
+]);
+
+// Styles
+const thin = { style: "thin" as const };
+["C", "D", "E"].forEach((col) => {
+  const cell = wsList.getCell(`${col}${summaryRow.number}`);
+  cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+  cell.font = { name: "Calibri", size: 12, bold: col === "C" };
+  cell.border = { top: thin, bottom: thin, left: thin, right: thin };
+});
+summaryRow.height = 22;
+
+["A", "B", "F"].forEach((col) => {
+  const cell = wsList.getCell(`${col}${summaryRow.number}`);
+  cell.border = {};
+});
+
+
   // Upload XLSX → return URL
   const safeName = String(programName || programId).replace(/[^\w.-]/g, "_");
   const xlsxRef = ref(storage, `GeneratedReports/Program_Summary_${safeName}.xlsx`);
