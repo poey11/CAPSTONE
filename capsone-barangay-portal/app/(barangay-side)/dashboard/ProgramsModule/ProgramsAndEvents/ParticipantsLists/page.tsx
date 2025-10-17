@@ -707,8 +707,9 @@ const isAttendanceEditable = useMemo(
             </button>
             <h1>{programTitle}</h1>
           </div>
-          {eventType === "multiple" && (
-            <div className="action-btn-section-program">
+          
+          <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
+            {eventType === "multiple" && (
               <div className="participants-count">
                 <p>Select A Day:</p>
                 <select
@@ -723,9 +724,8 @@ const isAttendanceEditable = useMemo(
                   ))}
                 </select>
               </div>
-            </div>
           )}
-          <div className="action-btn-section-program" style={{ display: "flex", gap: 8 }}>
+
             <div className="participants-count">{badgeParticipantsText}</div>
             {showVolunteerBadge && <div className="participants-count">{badgeVolunteersText}</div>}
           </div>
