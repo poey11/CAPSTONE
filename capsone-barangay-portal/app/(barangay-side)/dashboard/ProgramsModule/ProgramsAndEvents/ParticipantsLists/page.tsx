@@ -781,7 +781,9 @@ const isAttendanceEditable = useMemo(
             {loading ? (
               <div style={{ padding: 16, opacity: 0.8 }}>Loading participants…</div>
             ) : filteredParticipants.length === 0 ? (
-              <div style={{ padding: 16, opacity: 0.8 }}>No participants found.</div>
+              <div style={{ padding: 16, opacity: 0.8 }}>
+                {roleFilter === "volunteer" ? "No volunteers found." : "No participants found."}
+              </div>
             ) : (
               <table className="participants-table fixed-columns">
                 <colgroup>
