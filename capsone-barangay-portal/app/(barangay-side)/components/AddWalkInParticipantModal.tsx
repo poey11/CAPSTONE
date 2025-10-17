@@ -604,237 +604,240 @@ export default function AddWalkInParticipantModal({
                 {/* ------- DETAILS ------- */}
                 {activeSection === "details" && (
                   <>
-                    {/* Role selector */}
-                    <div style={{ display: "flex", gap: 16, margin: "8px 0 16px" }}>
-                      <div>
-                        <p style={{ marginBottom: 6 }}>{LABELS.role}</p>
-                        <div style={{ display: "flex", gap: 16 }}>
-                          <label style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                            <input
-                              type="radio"
-                              name="walkin-role"
-                              value="Participant"
-                              checked={selectedRole === "Participant"}
-                              onChange={() => setSelectedRole("Participant")}
-                            />
-                            Participant
-                          </label>
-                          <label style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                            <input
-                              type="radio"
-                              name="walkin-role"
-                              value="Volunteer"
-                              checked={selectedRole === "Volunteer"}
-                              onChange={() => setSelectedRole("Volunteer")}
-                            />
-                            Volunteer
-                          </label>
+                    
+                    <div className="walkin-details-section">
+                      <div className="walkin-details-top">
+
+                        {/* Day selector — ALWAYS visible; disabled for single-day */}
+                        <div className="fields-section-walkin" key="tf-dayChosen" style={{ marginBottom: 12 }}>
+                          <p>
+                            {labelFor("dayChosen")}{" "}
+                            {program?.eventType === "multiple" && selectedRole === "Participant" && (
+                              <span className="required">*</span>
+                            )}
+                          </p>
+
+                          <select
+                            className="walkin-input-field-day-chosen"
+                            value={formData.dayChosen ?? ""}
+                            onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
+                            disabled={disabledSingle}
+                            title={disabledSingle ? "One-day event only" : undefined}
+                          >
+                            <option value="">
+                              {disabledSingle ? "One-day event only" : "Select a day"}
+                            </option>
+
+                            {/* For single-day we still render choices (purely visual),
+                                but disabled state prevents selection */}
+                            {(days.length ? days : [null]).map((_, idx) => {
+                              // If we truly have no days array, show a single "Day 1" placeholder
+                              const dIdx = days.length ? idx : 0;
+                              let label = `Day ${dIdx + 1}`;
+                              let optionDisabled = disabledSingle;
+
+                              if (start) {
+                                const optionDate = new Date(start);
+                                optionDate.setDate(start.getDate() + dIdx);
+                                label += ` (${optionDate.toDateString()})`;
+
+                                // Disable past dates (same logic as before)
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0);
+                                optionDate.setHours(0, 0, 0, 0);
+                                if (optionDate < today) optionDisabled = true;
+                              }
+
+                              // FULL mark (only matters for multi-day)
+                              if (!disabledSingle && dayFull[dIdx]) {
+                                label += " — FULL";
+                                optionDisabled = true;
+                              }
+
+                              return (
+                                <option key={dIdx} value={String(dIdx)} disabled={optionDisabled}>
+                                  {label}
+                                </option>
+                              );
+                            })}
+                          </select>
                         </div>
-                        <small style={{ opacity: 0.8 }}>
+
+                        <p className="program-type-info">
                           {program?.eventType === "multiple"
                             ? "Multi-day program."
                             : "Single-day program."}
-                        </small>
+                        </p>
+
+                        {/* Role selector */}
+                        <div className="role-selection-section">
+                          <p className="program-role-label"> Role <span className="required">*</span></p>
+                            <p className="role-label">{LABELS.role}</p>
+                            <div className="role-options">
+                              <label className="role-option">
+                                <div className="orange-radio">
+                                  <input
+                                    type="radio"
+                                    name="walkin-role"
+                                    value="Participant"
+                                    checked={selectedRole === "Participant"}
+                                    onChange={() => setSelectedRole("Participant")}
+                                  />
+                                </div>
+                                Participant
+                              </label>
+                              <label className="role-option">
+                                <div className="orange-radio">
+                                  <input
+                                    type="radio"
+                                    name="walkin-role"
+                                    value="Volunteer"
+                                    checked={selectedRole === "Volunteer"}
+                                    onChange={() => setSelectedRole("Volunteer")}
+                                  />
+                                </div>  
+                                Volunteer
+                              </label>
+                            </div>
+                        </div>
+
+                      
                       </div>
-                    </div>
+                      <div className="walkin-details-bottom">
+                        <div className="walkin-content-left-side">
+                          {visibleTextFields
+                            .filter((_, idx) => idx % 2 === 0)
+                            .map((f) => {
+                              const name = f.name;
 
-                    {/* Day selector — ALWAYS visible; disabled for single-day */}
-                    <div className="fields-section-walkin" key="tf-dayChosen" style={{ marginBottom: 12 }}>
-                      <p>
-                        {labelFor("dayChosen")}{" "}
-                        {program?.eventType === "multiple" && selectedRole === "Participant" && (
-                          <span className="required">*</span>
-                        )}
-                      </p>
+                              if (name === "dateOfBirth") {
+                                return (
+                                  <div className="fields-section-walkin" key={`tf-${name}`}>
+                                    <p>
+                                      {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    </p>
+                                    <input
+                                      type="date"
+                                      className="walkin-input-field"
+                                      required
+                                      max={todayStr}
+                                      value={formData.dateOfBirth || ""}
+                                      onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    />
+                                    <div style={{ marginTop: 8 }}>
+                                      <p>{labelFor("age")}</p>
+                                      <input
+                                        type="text"
+                                        className="walkin-input-field"
+                                        value={
+                                          formData.dateOfBirth
+                                            ? derivedAge != null
+                                              ? String(derivedAge)
+                                              : ""
+                                            : ""
+                                        }
+                                        readOnly
+                                        placeholder="Will be computed"
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              }
 
-                      <select
-                        className="walkin-input-field"
-                        value={formData.dayChosen ?? ""}
-                        onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
-                        disabled={disabledSingle}
-                        title={disabledSingle ? "One-day event only" : undefined}
-                      >
-                        <option value="">
-                          {disabledSingle ? "One-day event only" : "Select a day"}
-                        </option>
+                              const lower = name.toLowerCase();
+                              const type =
+                                lower.includes("email")
+                                  ? "email"
+                                  : lower.includes("contact") || lower.includes("phone")
+                                  ? "tel"
+                                  : "text";
 
-                        {/* For single-day we still render choices (purely visual),
-                            but disabled state prevents selection */}
-                        {(days.length ? days : [null]).map((_, idx) => {
-                          // If we truly have no days array, show a single "Day 1" placeholder
-                          const dIdx = days.length ? idx : 0;
-                          let label = `Day ${dIdx + 1}`;
-                          let optionDisabled = disabledSingle;
+                              const formattedLabel = labelFor(name);
 
-                          if (start) {
-                            const optionDate = new Date(start);
-                            optionDate.setDate(start.getDate() + dIdx);
-                            label += ` (${optionDate.toDateString()})`;
-
-                            // Disable past dates (same logic as before)
-                            const today = new Date();
-                            today.setHours(0, 0, 0, 0);
-                            optionDate.setHours(0, 0, 0, 0);
-                            if (optionDate < today) optionDisabled = true;
-                          }
-
-                          // FULL mark (only matters for multi-day)
-                          if (!disabledSingle && dayFull[dIdx]) {
-                            label += " — FULL";
-                            optionDisabled = true;
-                          }
-
-                          return (
-                            <option key={dIdx} value={String(dIdx)} disabled={optionDisabled}>
-                              {label}
-                            </option>
-                          );
-                        })}
-                      </select>
-
-                      {disabledSingle && (
-                        <small style={{ display: "block", marginTop: 6, opacity: 0.8 }}>
-                          One-day event only
-                        </small>
-                      )}
-                    </div>
-
-                    <div className="walkin-details-section">
-                      {/* Left column */}
-                      <div className="walkin-content-left-side">
-                        {visibleTextFields
-                          .filter((_, idx) => idx % 2 === 0)
-                          .map((f) => {
-                            const name = f.name;
-
-                            if (name === "dateOfBirth") {
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    {formattedLabel} <span className="required">*</span>
                                   </p>
                                   <input
-                                    type="date"
+                                    type={type}
                                     className="walkin-input-field"
                                     required
-                                    max={todayStr}
-                                    value={formData.dateOfBirth || ""}
-                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    value={formData[name] ?? ""}
+                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                    placeholder={`Enter ${formattedLabel}`}
                                   />
-                                  <div style={{ marginTop: 8 }}>
-                                    <p>{labelFor("age")}</p>
-                                    <input
-                                      type="text"
-                                      className="walkin-input-field"
-                                      value={
-                                        formData.dateOfBirth
-                                          ? derivedAge != null
-                                            ? String(derivedAge)
-                                            : ""
-                                          : ""
-                                      }
-                                      readOnly
-                                      placeholder="Will be computed"
-                                    />
-                                  </div>
                                 </div>
                               );
-                            }
+                            })}
+                        </div>
 
-                            const lower = name.toLowerCase();
-                            const type =
-                              lower.includes("email")
-                                ? "email"
-                                : lower.includes("contact") || lower.includes("phone")
-                                ? "tel"
-                                : "text";
+                        <div className="walkin-content-right-side">
+                          {visibleTextFields
+                            .filter((_, idx) => idx % 2 !== 0)
+                            .map((f) => {
+                              const name = f.name;
 
-                            const formattedLabel = labelFor(name);
+                              if (name === "dateOfBirth") {
+                                return (
+                                  <div className="fields-section-walkin" key={`tf-${name}`}>
+                                    <p>
+                                      {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    </p>
+                                    <input
+                                      type="date"
+                                      className="walkin-input-field"
+                                      required
+                                      max={todayStr}
+                                      value={formData.dateOfBirth || ""}
+                                      onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    />
+                                    <div style={{ marginTop: 8 }}>
+                                      <p>{labelFor("age")}</p>
+                                      <input
+                                        type="text"
+                                        className="walkin-input-field"
+                                        value={
+                                          formData.dateOfBirth
+                                            ? derivedAge != null
+                                              ? String(derivedAge)
+                                              : ""
+                                            : ""
+                                        }
+                                        readOnly
+                                        placeholder="Will be computed"
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              }
 
-                            return (
-                              <div className="fields-section-walkin" key={`tf-${name}`}>
-                                <p>
-                                  {formattedLabel} <span className="required">*</span>
-                                </p>
-                                <input
-                                  type={type}
-                                  className="walkin-input-field"
-                                  required
-                                  value={formData[name] ?? ""}
-                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
-                                  placeholder={`Enter ${formattedLabel}`}
-                                />
-                              </div>
-                            );
-                          })}
-                      </div>
+                              const lower = name.toLowerCase();
+                              const type =
+                                lower.includes("email")
+                                  ? "email"
+                                  : lower.includes("contact") || lower.includes("phone")
+                                  ? "tel"
+                                  : "text";
+                              const formattedLabel = labelFor(name);
 
-                      {/* Right column */}
-                      <div className="walkin-content-right-side">
-                        {visibleTextFields
-                          .filter((_, idx) => idx % 2 !== 0)
-                          .map((f) => {
-                            const name = f.name;
-
-                            if (name === "dateOfBirth") {
                               return (
                                 <div className="fields-section-walkin" key={`tf-${name}`}>
                                   <p>
-                                    {labelFor("dateOfBirth")} <span className="required">*</span>
+                                    {formattedLabel} <span className="required">*</span>
                                   </p>
                                   <input
-                                    type="date"
+                                    type={type}
                                     className="walkin-input-field"
                                     required
-                                    max={todayStr}
-                                    value={formData.dateOfBirth || ""}
-                                    onChange={(e) => handleFormTextChange("dateOfBirth", e.target.value)}
+                                    value={formData[name] ?? ""}
+                                    onChange={(e) => handleFormTextChange(name, e.target.value)}
+                                    placeholder={`Enter ${formattedLabel}`}
                                   />
-                                  <div style={{ marginTop: 8 }}>
-                                    <p>{labelFor("age")}</p>
-                                    <input
-                                      type="text"
-                                      className="walkin-input-field"
-                                      value={
-                                        formData.dateOfBirth
-                                          ? derivedAge != null
-                                            ? String(derivedAge)
-                                            : ""
-                                          : ""
-                                      }
-                                      readOnly
-                                      placeholder="Will be computed"
-                                    />
-                                  </div>
                                 </div>
                               );
-                            }
-
-                            const lower = name.toLowerCase();
-                            const type =
-                              lower.includes("email")
-                                ? "email"
-                                : lower.includes("contact") || lower.includes("phone")
-                                ? "tel"
-                                : "text";
-                            const formattedLabel = labelFor(name);
-
-                            return (
-                              <div className="fields-section-walkin" key={`tf-${name}`}>
-                                <p>
-                                  {formattedLabel} <span className="required">*</span>
-                                </p>
-                                <input
-                                  type={type}
-                                  className="walkin-input-field"
-                                  required
-                                  value={formData[name] ?? ""}
-                                  onChange={(e) => handleFormTextChange(name, e.target.value)}
-                                  placeholder={`Enter ${formattedLabel}`}
-                                />
-                              </div>
-                            );
-                          })}
+                            })}
+                        </div>
                       </div>
                     </div>
                   </>

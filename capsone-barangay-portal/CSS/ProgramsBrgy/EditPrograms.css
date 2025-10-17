@@ -2062,15 +2062,58 @@ input:checked + .slider::before {
   background-color: transparent;
 }
 
+.orange-radio input[type="radio"] {
+  accent-color: #ED7014;
+}
+
+.role-label {
+  margin-bottom: 6px;
+}
+
+.role-options {
+  display: flex;
+  gap: 16px;
+}
+
+.role-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+
 .walkin-details-section {
   display: flex;
+  flex-direction: column;
   width: 100%;
   overflow-y: auto;
   padding-left: 50px;
 }
 
+.program-type-info {
+  font-size: 13px;
+  color: #dd3327;
+  margin-bottom: 20px;
+}
 
+.program-role-label {
+  font-size: 16px;
+  color: #2C3E50;
+  font-weight: bold;
+}
 
+.walkin-details-top {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.walkin-details-bottom {
+  display: flex;
+  width: 100%;
+  margin-top: 5px;
+}
 
 .walkin-requirements-section {
   display: flex;
@@ -2121,13 +2164,27 @@ input:checked + .slider::before {
     font-size: 16px;
   }
 
-  .walkin-input-field:focus {
+  .walkin-input-field-day-chosen {
+    padding: 8px;
+    width: 95%;
+    height: 35px;
+    margin-top: 10px;
+    border: 1px solid rgba(36, 53, 76, 0.7);
+    border-radius: 5px;
+    color: #000000;
+    text-align: left; 
+    font-size: 16px;
+  }
+
+  .walkin-input-field:focus,
+  .walkin-input-field-day-chosen:focus {
   border-color: #f49028;
   outline: none;
   box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
 }
 
-  .walkin-input-field option:disabled {
+  .walkin-input-field option:disabled,
+  .walkin-input-field-day-chosen option:disabled {
     color: grey;
   }
 
@@ -2160,7 +2217,7 @@ input:checked + .slider::before {
   font-weight: bold;
   font-size: 16px;
   z-index: 10;
-  width: 192px;
+  width: auto;
   text-align: center;
 }
 
