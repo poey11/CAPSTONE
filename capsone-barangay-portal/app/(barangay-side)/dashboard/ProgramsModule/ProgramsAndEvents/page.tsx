@@ -414,7 +414,20 @@ export default function ProgramsModule() {
   const programsPerPage = 10;
   const indexOfLast = currentPage * programsPerPage;
   const indexOfFirst = indexOfLast - programsPerPage;
-  const currentPrograms = filteredPrograms.slice(indexOfFirst, indexOfLast);
+  //const currentPrograms = filteredPrograms.slice(indexOfFirst, indexOfLast);
+
+  const sortedPrograms = [...filteredPrograms].sort((a, b) => {
+  const order = {
+    Upcoming: 1,
+    Ongoing: 2,
+    Completed: 3,
+    Rejected: 4,
+  };
+  return (order[a.progressStatus] || 99) - (order[b.progressStatus] || 99);
+});
+
+const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
+
   const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
   const nextPage = () =>
@@ -1323,7 +1336,7 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                               />
                             </button>
                           )}
-                          {program.progressStatus === "Completed" && (
+                          { canDelete && program.progressStatus === "Completed" && (
                             <button
                               className="action-programs-button"
                               onClick={(e) => {
