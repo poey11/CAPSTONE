@@ -83,41 +83,69 @@ const decideStatuses = (p: any): {
 } => {
   const approval: Program["approvalStatus"] = p?.approvalStatus ?? "Pending";
 
-  // If rejected, stop here.
+  // Rejected hard-stop
   if (approval === "Rejected") {
     return { progress: "Rejected", active: "Rejected" };
   }
 
-  // Otherwise compute date-based progress
+  // --- compute progress using start/end + timeEnd ---
   const s = parseYMD(p?.startDate);
   const e = parseYMD(p?.endDate);
+  const now = new Date();
+
+  const combineDateTime = (date: Date, timeStr?: string | null) => {
+    if (!date) return null;
+    const d = new Date(date);
+    if (timeStr && /^\d{2}:\d{2}$/.test(timeStr)) {
+      const [hh, mm] = timeStr.split(":").map(Number);
+      d.setHours(hh || 0, mm || 0, 0);
+    } else {
+      d.setHours(23, 59, 59, 999);
+    }
+    return d;
+  };
+
   let progress: Program["progressStatus"] =
     (p?.progressStatus as Program["progressStatus"]) || "Upcoming";
 
   if (s) {
-    const today = startOfToday();
     const isSingle =
-      p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
+      p?.eventType === "single" || (!!e && s.getTime() === (e as Date).getTime());
+
+    const startDT = combineDateTime(s, p?.timeStart || "00:00");
+    const endDT = combineDateTime(e || s, p?.timeEnd || "23:59");
 
     if (isSingle) {
-      if (today.getTime() < s.getTime()) progress = "Upcoming";
-      else if (today.getTime() === s.getTime()) progress = "Ongoing";
+      if (now < (startDT as Date)) progress = "Upcoming";
+      else if (now <= (endDT as Date)) progress = "Ongoing";
       else progress = "Completed";
     } else if (e) {
-      if (today.getTime() < s.getTime()) progress = "Upcoming";
-      else if (today.getTime() > e.getTime()) progress = "Completed";
+      if (now < (startDT as Date)) progress = "Upcoming";
+      else if (now > (endDT as Date)) progress = "Completed";
       else progress = "Ongoing";
     }
   }
 
-  // Active rule: Pending OR Completed => Inactive, else preserve/Active
-  const active: Program["activeStatus"] =
-    approval === "Pending" || progress === "Completed"
-      ? "Inactive"
-      : ((p?.activeStatus as Program["activeStatus"]) ?? "Inactive");
+  // --- compute active ---
+  // Force cases
+  if (progress === "Completed") return { progress, active: "Inactive" };
 
-  return { progress, active };
+  // Pending defaults to Inactive
+  if (approval === "Pending") {
+    return { progress, active: "Inactive" };
+  }
+
+  // Otherwise (Upcoming/Ongoing & Approved): RESPECT existing stored activeStatus if present
+  const stored = p?.activeStatus as Program["activeStatus"] | undefined;
+  if (stored === "Active" || stored === "Inactive") {
+    return { progress, active: stored };
+  }
+
+  // Default when nothing stored yet
+  return { progress, active: "Active" };
 };
+
+
 
 function tsToYMD(ts?: Timestamp | null): string {
   try {

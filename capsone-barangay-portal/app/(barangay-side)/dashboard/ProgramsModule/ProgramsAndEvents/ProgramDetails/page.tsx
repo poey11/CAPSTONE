@@ -55,9 +55,7 @@ export default function ProgramDetails() {
 
   // Roles
   const isPunongBarangay = userPosition === "Punong Barangay";
-  const isSecretary = userPosition === "Secretary";
-  const isAssistantSecretary = userPosition === "Assistant Secretary";
-  const isHigherUp = isPunongBarangay || isSecretary || isAssistantSecretary;
+  const isHigherUp = isPunongBarangay;
 
   type Section = "details" | "reqs" | "others" | "reject";
   const [activeSection, setActiveSection] = useState<Section>("details");
@@ -168,7 +166,7 @@ export default function ProgramDetails() {
 
   // --- EDIT & VISIBILITY RULES (updated per your requirements) ---
   // Pending: only PB can edit/approve; hide Active/Inactive toggle
-  // Approved + Upcoming: PB, Secretary, Assistant Secretary can edit
+  // Approved + Upcoming: PB can edit
   // Ongoing or later (or Rejected): fully locked
   const canEdit = (() => {
     if (approvalStatus === "Pending") return isPunongBarangay;
@@ -178,7 +176,7 @@ export default function ProgramDetails() {
   const isReadOnly = !canEdit;
   
   const showActiveToggle =
-  isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" &&progressStatus !== "Completed";
+  isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" && progressStatus !== "Completed";
 
   const [noParticipantLimit, setNoParticipantLimit] = useState(false);
   const [participantDays, setParticipantDays] = useState<number[]>([]);
@@ -878,7 +876,7 @@ export default function ProgramDetails() {
             ) : approvalStatus === "Approved" && progressStatus === "Completed" ? (
               <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
             ) : approvalStatus === "Approved" && progressStatus === "Upcoming" && !isHigherUp ? (
-              <>This program is <strong>Approved (Upcoming)</strong>. Only the <strong>Punong Barangay</strong>, <strong>Secretary</strong>, and <strong>Assistant Secretary</strong> may edit until it becomes <strong>Ongoing</strong>.</>
+              <>This program is <strong>Approved (Upcoming)</strong>. Only the <strong>Punong Barangay</strong> may edit until it becomes <strong>Ongoing</strong>.</>
             ) : approvalStatus === "Rejected" ? (
               <>
                 This program has been <strong>Rejected</strong>
