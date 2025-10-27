@@ -88,36 +88,67 @@ const decideStatuses = (p: any): {
     return { progress: "Rejected", active: "Rejected" };
   }
 
-  // Otherwise compute date-based progress
   const s = parseYMD(p?.startDate);
   const e = parseYMD(p?.endDate);
   let progress: Program["progressStatus"] =
     (p?.progressStatus as Program["progressStatus"]) || "Upcoming";
 
+  const today = new Date();
+
   if (s) {
-    const today = startOfToday();
     const isSingle =
       p?.eventType === "single" || (!!e && s.getTime() === e.getTime());
 
+    // Combine date and time for comparison
+    const combineDateTime = (date: Date, timeStr?: string | null) => {
+      if (!timeStr) return date;
+      const [hh, mm] = timeStr.split(":").map(Number);
+      const d = new Date(date);
+      d.setHours(hh || 0, mm || 0, 0, 0);
+      return d;
+    };
+
+    const startTime = combineDateTime(s, p?.timeStart);
+    const endTime = combineDateTime(e || s, p?.timeEnd);
+
     if (isSingle) {
-      if (today.getTime() < s.getTime()) progress = "Upcoming";
-      else if (today.getTime() === s.getTime()) progress = "Ongoing";
+      // Single-day event
+      if (today < startTime) progress = "Upcoming";
+      else if (today >= startTime && today <= endTime) progress = "Ongoing";
       else progress = "Completed";
     } else if (e) {
-      if (today.getTime() < s.getTime()) progress = "Upcoming";
-      else if (today.getTime() > e.getTime()) progress = "Completed";
+      // Multi-day event
+      if (today < startTime) progress = "Upcoming";
+      else if (today > endTime) progress = "Completed";
       else progress = "Ongoing";
     }
   }
 
-  // Active rule: Pending OR Completed => Inactive, else preserve/Active
-  const active: Program["activeStatus"] =
-    approval === "Pending" || progress === "Completed"
-      ? "Inactive"
-      : ((p?.activeStatus as Program["activeStatus"]) ?? "Inactive");
+  // Active rule:
+  // Pending OR Completed OR (endDate’s timeEnd passed) => Inactive
+  let active: Program["activeStatus"] = "Active";
+
+  if (
+    approval === "Pending" ||
+    progress === "Completed" ||
+    (() => {
+      const e = parseYMD(p?.endDate);
+      if (!e) return false;
+      const [hh, mm] = (p?.timeEnd || "").split(":").map(Number);
+      if (!isNaN(hh) && !isNaN(mm)) {
+        const endDateTime = new Date(e);
+        endDateTime.setHours(hh || 0, mm || 0, 0, 0);
+        return new Date() > endDateTime;
+      }
+      return false;
+    })()
+  ) {
+    active = "Inactive";
+  }
 
   return { progress, active };
 };
+
 
 function tsToYMD(ts?: Timestamp | null): string {
   try {
