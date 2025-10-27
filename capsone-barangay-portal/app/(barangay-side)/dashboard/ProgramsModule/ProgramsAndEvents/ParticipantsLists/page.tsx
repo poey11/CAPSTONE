@@ -207,11 +207,8 @@ export default function ParticipantsList() {
           setNoParticipantLimitList(Array.isArray(d?.noParticipantLimitList) ? d.noParticipantLimitList : []);
 
           // 🔧 IMPORTANT: null-out capacity when there's a global "no limit"
-          if (noLimit) {
-            setProgramCapacity(null);
-          } else {
-            setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
-          }
+          if (noLimit) setProgramCapacity(null);
+          else setProgramCapacity(Number.isFinite(capParticipants) ? capParticipants : null);
 
           setProgramVolunteerCapacity(Number.isFinite(capVolunteers) ? capVolunteers : null);
           setProgramTitle(d?.programName || "");
@@ -349,6 +346,25 @@ export default function ParticipantsList() {
     }
   }, [eventType, participantDays, dayChosen]);
 
+  // 🔒 NEW: Hide Add when the selected day has already ended (now > end datetime)
+  const isSelectedDayEnded = useMemo(() => {
+    if (!startDate) return false;
+    const now = new Date();
+
+    if (eventType === "single") {
+      const endDT = combineYMDAndTime(startDate, timeEnd || "23:59");
+      return now > endDT;
+    } else {
+      const idx = Number.isInteger(dayChosen) ? dayChosen : 0;
+      const start = ymdToDateLocal(startDate);
+      const theDay = new Date(start);
+      theDay.setDate(start.getDate() + idx);
+      const theDayYMD = formatYMD(theDay);
+      const endDT = combineYMDAndTime(theDayYMD, timeEnd || "23:59");
+      return now > endDT;
+    }
+  }, [eventType, startDate, dayChosen, timeEnd]);
+
   // Search + Role filter
   const filteredParticipants = useMemo(() => {
     const q = searchName.trim().toLowerCase();
@@ -467,16 +483,17 @@ export default function ParticipantsList() {
   );
 
   // Editable only when program is Ongoing
-const showAttendanceColumn = useMemo(
-  () => ["ongoing", "completed"].includes((programStatus || "").toLowerCase()),
-  [programStatus]
-);
+  const showAttendanceColumn = useMemo(
+    () => ["ongoing", "completed"].includes((programStatus || "").toLowerCase()),
+    [programStatus]
+  );
 
-// Editable only when Ongoing (keep your rule)
-const isAttendanceEditable = useMemo(
-  () => (programStatus || "").toLowerCase() === "ongoing",
-  [programStatus]
-);
+  // Editable only when Ongoing (keep your rule)
+  const isAttendanceEditable = useMemo(
+    () => (programStatus || "").toLowerCase() === "ongoing",
+    [programStatus]
+  );
+
   // Time window guard for attendance checkbox
   const canEditAttendanceByTime = (p: Participant) => {
     const now = new Date();
@@ -501,6 +518,14 @@ const isAttendanceEditable = useMemo(
   };
 
   const openAddPopup = async () => {
+    // Defensive block even though the button is hidden already
+    if (isSelectedDayEnded) {
+      setErrorToastMsg("You can’t add participants — the selected day has already ended.");
+      setShowErrorToast(true);
+      setTimeout(() => setShowErrorToast(false), 3000);
+      return;
+    }
+
     if (!programId) {
       setErrorToastMsg("To add a walk-in participant, open this page from a specific Program.");
       setShowErrorToast(true);
@@ -724,7 +749,7 @@ const isAttendanceEditable = useMemo(
                   ))}
                 </select>
               </div>
-          )}
+            )}
 
             <div className="participants-count">{badgeParticipantsText}</div>
             {showVolunteerBadge && <div className="participants-count">{badgeVolunteersText}</div>}
@@ -752,27 +777,22 @@ const isAttendanceEditable = useMemo(
 
           {(user?.position === "Secretary" ||
             user?.position === "Assistant Secretary" ||
-            user?.position === "Admin Staff") && (
-            <button
-              type="button"
-              title={
-                isProgramClosed
-                  ? `This program is ${programStatus}`
-                  : isAtCapacity
-                  ? "Program capacity reached"
-                  : "Add participant"
-              }
-              onClick={openAddPopup}
-              disabled={isProgramClosed || isAtCapacity}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: isProgramClosed || isAtCapacity ? "not-allowed" : "pointer",
-                opacity: isProgramClosed || isAtCapacity ? 0.5 : 1,
-              }}
-            >
-              <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
-            </button>
+            user?.position === "Admin Staff") &&
+            !isProgramClosed &&
+            !isAtCapacity &&
+            !isSelectedDayEnded && (
+              <button
+                type="button"
+                title="Add participant"
+                onClick={openAddPopup}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <img src="/Images/addicon.png" alt="Add Icon" className="add-icon" />
+              </button>
           )}
         </div>
 
