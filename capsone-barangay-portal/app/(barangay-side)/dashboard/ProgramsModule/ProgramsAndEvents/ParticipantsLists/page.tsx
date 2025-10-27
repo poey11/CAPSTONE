@@ -807,12 +807,12 @@ export default function ParticipantsList() {
             ) : (
               <table className="participants-table fixed-columns">
                 <colgroup>
-                  <col style={{ width: "24%" }} />
-                  <col style={{ width: "16%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "12%" }} />
-                  <col style={{ width: "8%" }} />
+                  <col style={{ width: showAttendanceColumn ? "22%" : "24%" }} />
+                  <col style={{ width: showAttendanceColumn ? "15%" : "16%" }} />
+                  <col style={{ width: showAttendanceColumn ? "18%" : "20%" }} />
+                  <col style={{ width: showAttendanceColumn ? "18%" : "20%" }} />
+                  <col style={{ width: showAttendanceColumn ? "11%" : "12%" }} />
+                  {showAttendanceColumn && <col style={{ width: "8%" }} />}
                 </colgroup>
 
                 <thead>
