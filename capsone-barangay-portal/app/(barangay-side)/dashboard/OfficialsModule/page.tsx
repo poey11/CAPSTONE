@@ -345,6 +345,35 @@ const addNewOfficer = async () => {
   }
 };
 
+useEffect(() => {
+  const handleExpiredOfficials = async () => {
+    const currentYear = new Date().getFullYear();
+
+    for (const element of displayedOfficials) {
+      const match = element.term.match(/\d{4}$/); // grabs last 4 digits
+      const lastTermYear = match ? parseInt(match[0]) : null;
+
+      if (lastTermYear === currentYear) {
+        try {
+          // Delete image from Firebase Storage
+          await deleteObject(ref(storage, element.image));
+
+          // Delete document from Firestore
+          await deleteDoc(doc(db, "DisplayedOfficials", element.id));
+
+          console.log(`Deleted official: ${element.name || element.id}`);
+        } catch (error) {
+          console.error("Error deleting:", error);
+        }
+      }
+    }
+  };
+
+  if (displayedOfficials.length > 0) {
+    handleExpiredOfficials();
+  }
+}, [displayedOfficials]);
+
 
 const [showDeletePopup, setShowDeletePopup] = useState(false);
 const [officerToDeleteId, setOfficerToDeleteId] = useState<string | null>(null);
