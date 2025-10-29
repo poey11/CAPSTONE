@@ -30,6 +30,7 @@ type Program = {
 type Participant = {
   id: string;
   programId?: string; // <<— now using programId as the linkage
+  residentId?: string;
   fullName?: string;
   firstName?: string;
   lastName?: string;
@@ -47,6 +48,7 @@ type Participant = {
 type ParticipantRecord = {
   id: string;
   programId?: string;
+  residentId?: string;
   fullName?: string;
   firstName?: string;
   lastName?: string;
@@ -159,6 +161,26 @@ function tsToYMD(ts?: Timestamp | null): string {
     return "";
   }
 }
+
+const fetchResidentUidMap = async (residentIds: string[]): Promise<Map<string, string>> => {
+  const clean = Array.from(new Set(residentIds.filter(Boolean)));
+  const map = new Map<string, string>();
+  if (clean.length === 0) return map;
+  const CHUNK = 10;
+  for (let i = 0; i < clean.length; i += CHUNK) {
+    const slice = clean.slice(i, i + CHUNK);
+    const snap = await getDocs(
+      query(collection(db, "ResidentUsers"), where("residentId", "in", slice))
+    );
+    snap.forEach((d) => {
+      const data = d.data() as any;
+      const rid = data?.residentId;
+      const uid = data?.uid || d.id;
+      if (rid && uid) map.set(String(rid), String(uid));
+    });
+  }
+  return map;
+};
 
 export default function ProgramsModule() {
   const router = useRouter();
@@ -352,7 +374,8 @@ export default function ProgramsModule() {
           const d = docu.data() as any;
           list.push({
             id: docu.id,
-            programId: d.programId ?? d.programID ?? "", // <<— pick up programId
+            programId: d.programId ?? d.programID ?? "",
+            residentId: d.residentId ?? "",  // <<— pick up programId
             fullName: d.fullName ?? "",
             firstName: d.firstName ?? "",
             lastName: d.lastName ?? "",
@@ -713,21 +736,30 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
     }
   };
 
-  // ===== AUTO-REJECT: pending participants tied to ongoing/completed programs (by programId) =====
-  const autoRejectRunning = useRef(false);
+const autoRejectRunning = useRef(false);
+
+  const allProgramsForMap = useMemo(
+    () => [...programs, ...programsAssignedData],
+    [programs, programsAssignedData]
+  );
+
+  const programInfoMap = useMemo(() => {
+    const m = new Map<string, { name: string; status: Program["progressStatus"] }>();
+    allProgramsForMap.forEach((p) =>
+      m.set(p.id, { name: p.programName, status: p.progressStatus })
+    );
+    return m;
+  }, [allProgramsForMap]);
 
   const ongoingOrCompletedProgramIds = useMemo(() => {
-    // consider both approved/non-pending and pending arrays, just in case
-    const all = [...programs, ...programsAssignedData];
     return new Set(
-      all
+      allProgramsForMap
         .filter((p) => p.progressStatus === "Ongoing" || p.progressStatus === "Completed")
         .map((p) => p.id)
     );
-  }, [programs, programsAssignedData]);
+  }, [allProgramsForMap]);
 
   useEffect(() => {
-    // run when we have participants and program statuses
     if (loadingParticipants || loadingPrograms) return;
     if (autoRejectRunning.current) return;
 
@@ -736,17 +768,21 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
       const pid = (pp.programId || "").trim();
       return isPending && pid && ongoingOrCompletedProgramIds.has(pid);
     });
-
     if (toReject.length === 0) return;
 
     const run = async () => {
       autoRejectRunning.current = true;
       try {
-        // Firestore write batch limit is 500 ops; keep a safe margin
-        const CHUNK = 400;
+        // ✅ Fetch resident UID map
+        const residentIds = toReject.map((p) => p.residentId || "").filter(Boolean);
+        const residentUidMap = await fetchResidentUidMap(residentIds);
+
+        // ✅ Batch updates + notifications
+        const CHUNK = 200;
         for (let i = 0; i < toReject.length; i += CHUNK) {
           const slice = toReject.slice(i, i + CHUNK);
           const batch = writeBatch(db);
+
           slice.forEach((pp) => {
             const ref = doc(db, "ProgramsParticipants", pp.id);
             batch.update(ref, {
@@ -756,17 +792,43 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
               autoRejectedAt: serverTimestamp(),
               autoRejectedBy: user?.email || "system",
             });
+
+            const pinfo = programInfoMap.get(pp.programId || "");
+            const pStatus = pinfo?.status || "Ongoing";
+            const pName = pinfo?.name || pp.programName || "";
+            const residentUid =
+              pp.residentId && residentUidMap.has(pp.residentId)
+                ? residentUidMap.get(pp.residentId)
+                : null;
+
+            const notifRef = doc(collection(db, "Notifications"));
+            batch.set(notifRef, {
+              residentID: residentUid || null,
+              participantID: pp.id,
+              programId: pp.programId || null,
+              programName: pName || "",
+              role: pp.role || "Participant",
+              message: `Your registration for ${pName || "the program"} as ${
+                pp.role || "Participant"
+              } has been rejected due to the program being ${pStatus}. You can still participate by registering at the site.`,
+              timestamp: serverTimestamp(),
+              transactionType: "Program Registration",
+              isRead: false,
+            });
           });
+
           await batch.commit();
         }
+
         showToast(
           "success",
           `Auto-rejected ${toReject.length} pending participant${
             toReject.length > 1 ? "s" : ""
-          } for ongoing/completed programs.`
+          } for ongoing/completed programs.`,
+          3000
         );
       } catch (e) {
-        console.error(e);
+        console.error("Auto-reject failed:", e);
         showToast("error", "Auto-reject failed for some participants.");
       } finally {
         autoRejectRunning.current = false;
@@ -779,10 +841,9 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
     loadingPrograms,
     participantsListsData,
     ongoingOrCompletedProgramIds,
+    programInfoMap,
     user?.email,
   ]);
-  // ===== END AUTO-REJECT =====
-
 
   // participant report
 
