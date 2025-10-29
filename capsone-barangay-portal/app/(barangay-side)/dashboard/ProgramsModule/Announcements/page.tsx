@@ -426,8 +426,12 @@ useEffect(() => {
                         />
                       </button>
 
-                      {/* Edit & Delete buttons - only for Admin Staff */}
-                      {user?.position === "Admin Staff" || user?.position === "Punong Barangay"|| user?.position === "Secretary"|| user?.position === "Assistant Secretary" && (
+                        {(
+                          user?.position === "Admin Staff" ||
+                          user?.position === "Punong Barangay" ||
+                          user?.position === "Secretary" ||
+                          user?.position === "Assistant Secretary"
+                        ) && (
                         <>
                           <button
                             type="button"
