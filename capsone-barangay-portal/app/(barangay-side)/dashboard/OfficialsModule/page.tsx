@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import React,{useState, useEffect, useRef} from "react";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
-import { collection, onSnapshot, addDoc, deleteDoc, doc} from "firebase/firestore";
+import { collection, onSnapshot, addDoc, deleteDoc, doc, getDoc} from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes, deleteObject } from "@firebase/storage";
@@ -146,6 +146,7 @@ useEffect(() => {
       return {
         id: doc.id,
         name: doc.data().name,
+        userId: doc.data().userId || "",
         position: rawPosition === "LF Staff"
           ? `${rawPosition} (${doc.data().department || "N/A"})`
           : rawPosition,
@@ -300,7 +301,7 @@ const addNewOfficer = async () => {
 
     const newOfficialData = {
       ...(officialToAdd?.id && {
-        id: officialToAdd?.id || ""
+        userId: officialToAdd?.id || ""
       }),
       name: officialToAdd?.name || "N/A",
       contact: officialToAdd?.contact || "N/A",
@@ -344,6 +345,73 @@ const addNewOfficer = async () => {
     setTimeout(() => setShowErrorPopup(false), 3000);
   }
 };
+
+useEffect(() => {
+  const handleExpiredOfficials = async () => {
+    const currentYear = new Date().getFullYear();
+
+    for (const element of displayedOfficials) {
+      const match = element.term.match(/\d{4}$/); // grabs last 4 digits
+      const lastTermYear = match ? parseInt(match[0]) : null;
+
+      if (lastTermYear === currentYear) {
+        try {
+          // Delete image from Firebase Storage
+          await deleteObject(ref(storage, element.image));
+
+          // Delete document from Firestore
+          await deleteDoc(doc(db, "DisplayedOfficials", element.id));
+
+          console.log(`Deleted official: ${element.name || element.id}`);
+        } catch (error) {
+          console.error("Error deleting:", error);
+        }
+      }
+    }
+  };
+
+  if (displayedOfficials.length > 0) {
+    handleExpiredOfficials();
+  }
+}, [displayedOfficials]);
+
+useEffect(() => {
+  const officialValidityChecker = async () => {
+    for (const element of displayedOfficials) {
+      try {
+        // element.id here refers to the user UID stored inside the document field
+        const userId = element.userId; 
+
+        // Check if a corresponding BarangayUser document exists
+        const docRef = doc(db, "BarangayUsers", userId);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          console.log(`🗑️ Deleting orphaned official: ${element.name || userId}`);
+
+          if (element.image) {
+            await deleteObject(ref(storage, element.image));
+          }
+
+          // Delete the DisplayedOfficials document using its Firestore ID
+          await deleteDoc(doc(db, "DisplayedOfficials", element.id));
+        } else {
+          console.log(`✅ Valid official: ${element.name || userId}`);
+        }
+
+      } catch (error) {
+        console.error(`❌ Error checking official ${element.id}:`, error);
+      }
+    }
+  };
+
+  if (Array.isArray(displayedOfficials) && displayedOfficials.length > 0) {
+    officialValidityChecker();
+  }
+}, [displayedOfficials]);
+
+
+
 
 
 const [showDeletePopup, setShowDeletePopup] = useState(false);
