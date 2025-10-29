@@ -157,7 +157,7 @@ export default function SettingsPage() {
 
     useEffect(() => {
         const currentYear = new Date(chosenTerm).getFullYear();
-        setFormattedTerm(`${currentYear} - ${currentYear + 3}`);
+        setFormattedTerm(`${currentYear} - ${currentYear + 4}`);
     }, [chosenTerm]);
 
 

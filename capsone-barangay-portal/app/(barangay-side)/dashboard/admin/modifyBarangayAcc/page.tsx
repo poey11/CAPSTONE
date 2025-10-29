@@ -425,7 +425,7 @@ export default function EditBarangayAccount() {
                                                 onChange={()=> {
                                                     const input = (document.getElementsByName("term")[0] as HTMLInputElement).value;
                                                     const year = new Date(input).getFullYear();
-                                                    const next3year = year + 3;
+                                                    const next3year = year + 4;
                                                     setChosenTerm(input);
                                                     setFormData((prevData) => ({ ...prevData, term: `${year} - ${next3year}` }));
                                                 }}

@@ -295,7 +295,7 @@ const addNewOfficer = async () => {
     let termFormatted = "N/A";
     if (manualNewOfficial) {
       const startYear = new Date(officialToAdd.term).getFullYear();
-      const endYear = startYear + 3;
+      const endYear = startYear + 4;
       termFormatted = `${startYear} - ${endYear}`;
     }
 

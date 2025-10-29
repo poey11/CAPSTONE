@@ -138,7 +138,7 @@ export default function AddBarangayUser() {
       const confirmSubmit = async () => {
         setShowSubmitPopup(false);
         const currentYear = new Date().getFullYear();
-        const term = `${currentYear} - ${currentYear + 3}`;
+        const term = `${currentYear} - ${currentYear + 4}`;
         const passwordHash = await hash(users.password, 12);
         const docRef = await addDoc(collection(db, "BarangayUsers"), {
           userid: users.userId,
