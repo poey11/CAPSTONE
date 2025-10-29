@@ -1304,7 +1304,6 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
             >
               <option value="">All Approval Status</option>
               <option value="Approved">Approved</option>
-              <option value="Pending">Pending</option>
               <option value="Rejected">Rejected</option>
             </select>
 
@@ -1633,16 +1632,6 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
               value={pendingSearchName}
               onChange={(e) => setPendingSearchName(e.target.value)}
             />
-            <select
-              className="programs-module-filter"
-              value={pendingApprovalFilter}
-              onChange={(e) => setPendingApprovalFilter(e.target.value)}
-            >
-              <option value="">All Approval Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
-            </select>
             <select
               className="programs-module-filter"
               value={pendingProgressFilter}
