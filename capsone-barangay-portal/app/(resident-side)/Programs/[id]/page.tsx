@@ -45,6 +45,22 @@ function formatHHmmTo12h(hhmm?: string): string {
   return `${h}:${String(m).padStart(2, "0")}${period}`;
 }
 
+// Which fields are locked (prefilled from user/resident data)
+// The list of predefined, lock-eligible fields
+const LOCKABLE_PREDEFINED = new Set([
+  "firstName",
+  "lastName",
+  "contactNumber",
+  "emailAddress",
+  "location",
+  "dateOfBirth",
+]);
+
+
+
+
+
+
 // ---- Local-only date helpers (avoid UTC parsing drift) ----
 const formatYMD = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -245,6 +261,9 @@ export default function SpecificProgram() {
     setTimeout(() => setToastVisible(false), ms);
   };
 
+  const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({});
+
+
   useEffect(() => {
     const load = async () => {
       const snap = await getDoc(doc(db, "Programs", id as string));
@@ -353,7 +372,8 @@ export default function SpecificProgram() {
             .replace(/\s+/g, " ")
             .trim();
 
-          setFormData((prev) => ({
+        setFormData((prev) => {
+          const next = {
             ...prev,
             firstName: rd.firstName || prev.firstName || "",
             lastName: rd.lastName || prev.lastName || "",
@@ -362,12 +382,21 @@ export default function SpecificProgram() {
             location: rd.address || prev.location || "",
             fullName: fullName || prev.fullName || "",
             dateOfBirth: rd.dateOfBirth || prev.dateOfBirth || "",
-          }));
+          };
+          // lock any predefined fields we just prefilled with non-empty values
+          const newLocks: Record<string, boolean> = { ...lockedFields };
+          for (const k of Object.keys(next)) {
+            if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
+          }
+          setLockedFields(newLocks);
+          return next;
+        });
         } else {
           const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
             .replace(/\s+/g, " ")
             .trim();
-          setFormData((prev) => ({
+        setFormData((prev) => {
+          const next = {
             ...prev,
             firstName: u.first_name || prev.firstName || "",
             lastName: u.last_name || prev.lastName || "",
@@ -375,13 +404,22 @@ export default function SpecificProgram() {
             emailAddress: u.email || prev.emailAddress || "",
             location: u.address || prev.location || "",
             fullName: fullName || prev.fullName || "",
-          }));
+          };
+          const newLocks: Record<string, boolean> = { ...lockedFields };
+          for (const k of Object.keys(next)) {
+            if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
+          }
+          setLockedFields(newLocks);
+          return next;
+        });
+
         }
       } else {
         const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
           .replace(/\s+/g, " ")
           .trim();
-        setFormData((prev) => ({
+      setFormData((prev) => {
+        const next = {
           ...prev,
           firstName: u.first_name || prev.firstName || "",
           lastName: u.last_name || prev.lastName || "",
@@ -389,7 +427,15 @@ export default function SpecificProgram() {
           emailAddress: u.email || prev.emailAddress || "",
           location: u.address || prev.location || "",
           fullName: fullName || prev.fullName || "",
-        }));
+        };
+        const newLocks: Record<string, boolean> = { ...lockedFields };
+        for (const k of Object.keys(next)) {
+          if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
+        }
+        setLockedFields(newLocks);
+        return next;
+      });
+
       }
 
       setPreVerifiedIdUrl(candidateUrl || null);
@@ -1077,6 +1123,8 @@ export default function SpecificProgram() {
                                     max={todayStr}
                                     value={formData.dateOfBirth || ""}
                                     onChange={(e) => onTextChange("dateOfBirth", e.target.value)}
+                                    disabled={!!lockedFields["dateOfBirth"]}
+
                                   />
                                   <div className="form-group-specific-age">
                                     <label className="form-label-specific">{ageLabel}</label>
@@ -1163,6 +1211,7 @@ export default function SpecificProgram() {
                                   value={formData[name] || ""}
                                   onChange={(e) => onTextChange(name, e.target.value)}
                                   placeholder={`Enter ${formattedLabel}`}
+                                  disabled={!!lockedFields[name]}
                                 />
                               </div>
                             );
