@@ -25,6 +25,7 @@ type Program = {
   createdAt?: Timestamp | null;
   dateCreated: string;
   startDate: string;
+  timeStart: string
 };
 
 type Participant = {
@@ -341,6 +342,7 @@ export default function ProgramsModule() {
             createdAt: d.createdAt ?? null,
             dateCreated,
             startDate,
+            timeStart: d.timeStart || "",
           });
         });
 
@@ -660,7 +662,7 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
     }
   };
 
-  const sendApprovedSMS = async (contactNumber: string, fullName: string, programName: string, role: string) => {
+  const sendApprovedSMS = async (contactNumber: string, fullName: string, programName: string, role: string, timeStart: string) => {
     try {
       const response = await fetch("/api/clickSendApi", {
         method: "POST",
@@ -669,7 +671,12 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
         },
         body: JSON.stringify({
             to: contactNumber,
-            message: `Hello ${fullName}, your registration for the program "${programName}" as "${role}" has been approved. Thank you!`,
+            message: `Good day, ${fullName}. Your registration for "${programName}" as ${role} has been approved.
+            \n\nKindly be at the venue before ${timeStart} and present a valid ID upon entry for verification.
+            \n\nThank you for your cooperation and active participation in our barangay program!`
+
+
+
         })
       });   
       if (!response.ok) {
@@ -681,23 +688,63 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
 
     }
   }
+    const toAmPm = (hhmm?: string | null): string => {
+    if (!hhmm || !/^\d{1,2}:\d{2}$/.test(hhmm)) return "";
+    const [hStr, mStr] = hhmm.split(":");
+    let h = Number(hStr);
+    const m = Number(mStr);
+    if (Number.isNaN(h) || Number.isNaN(m)) return "";
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+  };
 
-  // Participant approve
+    // Participant approve
   const handleParticipantApprove = async (id: string) => {
-    
     try {
       await updateDoc(doc(db, "ProgramsParticipants", id), {
         approvalStatus: "Approved",
       });
       showToast("success", "Participant approved.");
+
       const participant = participantsListsData.find((p) => p.id === id);
+
       if (participant) {
-        //sendApprovedSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", participant.role||""); // send approval SMS
+        // default/fallbacks
+        let formattedTime = "";
+        let role = participant.role || "Participant";
+
+        // Try to fetch timeStart from the linked Program
+        const programId = (participant.programId || "").trim();
+        if (programId) {
+          try {
+            const progSnap = await getDoc(doc(db, "Programs", programId));
+            const progData = progSnap.exists() ? (progSnap.data() as any) : null;
+            const rawTimeStart: string | undefined = progData?.timeStart; // e.g., "13:30"
+            formattedTime = toAmPm(rawTimeStart) || ""; // e.g., "1:30 PM"
+          } catch (err) {
+            // silently ignore; we'll keep fallback
+            console.error("Failed to fetch program timeStart:", err);
+          }
+        }
+
+        // Nice fallback text if time missing
+        const timeForSms = formattedTime || "the scheduled start time";
+
+        // await sendApprovedSMS(
+        //   participant.contactNumber || "",
+        //   participant.fullName || "",
+        //   participant.programName || "",
+        //   role,
+        //   timeForSms
+        // );
       }
-    } catch {
+    } catch (e) {
       showToast("error", "Failed to approve participant.");
     }
   };
+
 
   const sendRejectionSMS = async (contactNumber: string, fullName: string, programName: string, reason: string, role:string ) => {
     try {
@@ -708,7 +755,11 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
         },
         body: JSON.stringify({
           to: contactNumber,
-          message: `Hello ${fullName}, we regret to inform you that your registration for the program "${programName}" as "${role}" has been rejected. Reason: ${reason}. Thank you!`,
+message: `Good day, ${fullName}. We regret to inform you that your registration for "${programName}" as ${role} has been declined.
+          \n\nReason: ${reason}
+          \n\nWe value your willingness to take part in our community initiatives. 
+          \n\n\We encourage you to join our upcoming programs and continue being involved in our barangay activities. 
+          Thank you for your cooperation and understanding.`
         }),
       });
       if (!response.ok) {
@@ -729,7 +780,7 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
       showToast("success", "Participant rejected.");
       const participant = participantsListsData.find((p) => p.id === id);
       if (participant) {
-        //sendRejectionSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", reason, participant.role||""); // send rejection SMS
+        // sendRejectionSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", reason, participant.role||""); // send rejection SMS
       }
     } catch {
       showToast("error", "Failed to reject participant.");
