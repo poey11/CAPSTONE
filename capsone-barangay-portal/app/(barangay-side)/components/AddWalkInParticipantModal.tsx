@@ -68,6 +68,8 @@ type ProgramLite = {
   programName?: string;
   eventType?: "single" | "multiple";
   startDate?: string;
+  timeStart?: string;
+  timeEnd?: string;
   participantDays?: number[];
   noParticipantLimit?: boolean;
   noParticipantLimitList?: boolean[];
@@ -151,6 +153,8 @@ export default function AddWalkInParticipantModal({
           programName: p.programName,
           eventType: p.eventType,
           startDate: p.startDate,
+          timeStart: p.timeStart,
+          timeEnd: p.timeEnd,
           participantDays: Array.isArray(p.participantDays) ? p.participantDays : [],
           noParticipantLimit: Boolean(p.noParticipantLimit),
           noParticipantLimitList: Array.isArray(p.noParticipantLimitList) ? p.noParticipantLimitList : [],
@@ -164,6 +168,42 @@ export default function AddWalkInParticipantModal({
       isMounted = false;
     };
   }, [programId]);
+
+
+    const ymdToDateLocal = (ymd: string) => {
+      const [y, m, d] = ymd.split("-").map(Number);
+      return new Date(y, (m ?? 1) - 1, d ?? 1); // local midnight
+    };
+
+    const isSameLocalDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+
+    const setTimeOnDate = (day: Date, hhmm?: string) => {
+      const d = new Date(day);
+      if (!hhmm || !/^\d{1,2}:\d{2}$/.test(hhmm)) return d;
+      const [hStr, mStr] = hhmm.split(":");
+      d.setHours(Number(hStr) || 0, Number(mStr) || 0, 0, 0);
+      return d;
+    };
+
+    const hasEndedToday = (day: Date, timeEnd?: string) => {
+      const now = new Date();
+      if (!isSameLocalDay(day, now) || !timeEnd) return false;
+      const end = setTimeOnDate(day, timeEnd);
+      return now > end;
+    };
+
+    const isNowWithinWindow = (day: Date, timeStart?: string, timeEnd?: string) => {
+      if (!timeStart || !timeEnd) return true; // no window → allow
+      const now = new Date();
+      if (!isSameLocalDay(day, now)) return true; // only enforce when it's *today*
+      const start = setTimeOnDate(day, timeStart);
+      const end = setTimeOnDate(day, timeEnd);
+      return now >= start && now <= end;
+    };
+
 
   // --- Which days are FULL (participants only) ---
   const [dayFull, setDayFull] = useState<boolean[]>([]);
@@ -351,16 +391,104 @@ export default function AddWalkInParticipantModal({
     }
   };
 
-  // ------- Capacity checks (server) -------
-  const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChosenNum: number | null) => {
-    const progSnap = await getDoc(doc(db, "Programs", programId));
-    if (!progSnap.exists()) throw new Error("Program not found.");
-    const p: any = progSnap.data() || {};
+// Which days are "ended" today (timeEnd passed)
+const dayEnded = useMemo<boolean[]>(() => {
+  if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
+  const base = program.startDate ? ymdToDateLocal(program.startDate) : new Date();
+  return program.participantDays.map((_, idx) => {
+    const d = new Date(base);
+    d.setDate(base.getDate() + idx);
+    return hasEndedToday(d, program.timeEnd);
+  });
+}, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
 
-    const statusNow = (p?.progressStatus || "").toString().toLowerCase();
-    if (["rejected", "completed"].includes(statusNow)) {
-      throw new Error(`This program is ${p?.progressStatus}. You can’t add entries.`);
+// If chosen day becomes FULL or ENDED, clear it (participants only)
+useEffect(() => {
+  if (selectedRole !== "Participant") return;
+  const v = formData.dayChosen;
+  if (v === undefined || v === "") return;
+  const idx = Number(v);
+  if (!Number.isInteger(idx)) return;
+
+  if (dayFull[idx] || dayEnded[idx]) {
+    setFormData((prev) => ({ ...prev, dayChosen: "" }));
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [dayFull, dayEnded, selectedRole]);
+
+
+const isOngoing = (program?.progressStatus || "").toLowerCase() === "ongoing";
+
+const nowAllowedByWindow = useMemo(() => {
+  if (!program || !isOngoing) return true;
+
+  const base = program.startDate ? ymdToDateLocal(program.startDate) : null;
+  if (!base) return true;
+
+  // Single-day: check today's window
+  if (program.eventType === "single") {
+    const theDay = base;
+    return isNowWithinWindow(theDay, program.timeStart, program.timeEnd) && !hasEndedToday(theDay, program.timeEnd);
+  }
+
+  // Multi-day: only enforce the window if the selected day is *today*
+  const chosen = formData.dayChosen;
+  if (chosen === undefined || chosen === "") return true; // selection not made yet
+  const idx = Number(chosen);
+  if (!Number.isInteger(idx)) return true;
+
+  const theDay = new Date(base);
+  theDay.setDate(base.getDate() + idx);
+
+  // If today but ended → false; if today but outside window → false; otherwise true
+  if (hasEndedToday(theDay, program.timeEnd)) return false;
+  return isNowWithinWindow(theDay, program.timeStart, program.timeEnd);
+}, [program?.eventType, program?.progressStatus, program?.startDate, program?.timeStart, program?.timeEnd, formData.dayChosen]);
+
+
+  // ------- Capacity checks (server) -------
+const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChosenNum: number | null) => {
+  const progSnap = await getDoc(doc(db, "Programs", programId));
+  if (!progSnap.exists()) throw new Error("Program not found.");
+  const p: any = progSnap.data() || {};
+
+  const statusNow = (p?.progressStatus || "").toString().toLowerCase();
+  if (["rejected", "completed"].includes(statusNow)) {
+    throw new Error(`This program is ${p?.progressStatus}. You can’t add entries.`);
+  }
+
+  // ---- NEW: time window enforcement when Ongoing ----
+  if (statusNow === "ongoing") {
+    const sYMD: string | undefined = p?.startDate;
+    const tStart: string | undefined = p?.timeStart;
+    const tEnd: string | undefined = p?.timeEnd;
+
+    if (sYMD) {
+      const base = ymdToDateLocal(sYMD);
+
+      // Determine which calendar day is being added to
+      const targetDay = p?.eventType === "multiple" && dayChosenNum != null
+        ? new Date(base.setDate(base.getDate() - 0 + dayChosenNum)) // clone via new Date below for clarity
+        : ymdToDateLocal(sYMD);
+
+      // clone base then offset if multi
+      const day = p?.eventType === "multiple" && dayChosenNum != null
+        ? (() => { const d = ymdToDateLocal(sYMD); d.setDate(d.getDate() + dayChosenNum); return d; })()
+        : ymdToDateLocal(sYMD);
+
+      // If target day is today:
+      const now = new Date();
+      if (isSameLocalDay(day, now)) {
+        const within = isNowWithinWindow(day, tStart, tEnd);
+        if (!within) {
+          throw new Error("Walk-ins are only allowed during the scheduled time window today.");
+        }
+        if (hasEndedToday(day, tEnd)) {
+          throw new Error("Selected day has already ended.");
+        }
+      }
     }
+  }
 
     // Volunteers: check volunteer cap only
     if (role === "Volunteer") {
@@ -469,6 +597,11 @@ export default function AddWalkInParticipantModal({
     if (!programId) return;
     setSaving(true);
     try {
+
+    if (!nowAllowedByWindow) {
+      throw new Error("Walk-ins are only allowed during the scheduled time window today.");
+    }
+
       validateReqForm();
 
       const progRef = doc(db, "Programs", programId);
@@ -556,10 +689,12 @@ export default function AddWalkInParticipantModal({
     }
   };
 
+
+    // --- Auto-fill kept (participants only). Leave disabled in UI by default. ---
+  const [autoFillLoading, setAutoFillLoading] = useState(false);
   if (!isOpen) return null;
 
-  // --- Auto-fill kept (participants only). Leave disabled in UI by default. ---
-  const [autoFillLoading, setAutoFillLoading] = useState(false);
+
 
   // Helpers for day selector UI
   const disabledSingle = program?.eventType === "single";
@@ -631,7 +766,6 @@ export default function AddWalkInParticipantModal({
                             {/* For single-day we still render choices (purely visual),
                                 but disabled state prevents selection */}
                             {(days.length ? days : [null]).map((_, idx) => {
-                              // If we truly have no days array, show a single "Day 1" placeholder
                               const dIdx = days.length ? idx : 0;
                               let label = `Day ${dIdx + 1}`;
                               let optionDisabled = disabledSingle;
@@ -639,19 +773,31 @@ export default function AddWalkInParticipantModal({
                               if (start) {
                                 const optionDate = new Date(start);
                                 optionDate.setDate(start.getDate() + dIdx);
-                                label += ` (${optionDate.toDateString()})`;
 
-                                // Disable past dates (same logic as before)
                                 const today = new Date();
                                 today.setHours(0, 0, 0, 0);
                                 optionDate.setHours(0, 0, 0, 0);
-                                if (optionDate < today) optionDisabled = true;
-                              }
 
-                              // FULL mark (only matters for multi-day)
-                              if (!disabledSingle && dayFull[dIdx]) {
-                                label += " — FULL";
-                                optionDisabled = true;
+                                const isPast = optionDate < today;
+                                const isEnded = !!dayEnded[dIdx];
+
+                                if (isPast) optionDisabled = true;
+                                if (!disabledSingle && dayFull[dIdx]) {
+                                  label += " — FULL";
+                                  optionDisabled = true;
+                                }
+                                if (isEnded) {
+                                  label += " — Day Ended";
+                                  optionDisabled = true;
+                                }
+
+                                // If today AND program is Ongoing AND we're currently outside time window, disable
+                                if (isSameLocalDay(optionDate, today) && isOngoing && !isNowWithinWindow(optionDate, program?.timeStart, program?.timeEnd)) {
+                                  label += " — Outside Time Window";
+                                  optionDisabled = true;
+                                }
+
+                                label += ` (${optionDate.toDateString()})`;
                               }
 
                               return (
@@ -660,6 +806,7 @@ export default function AddWalkInParticipantModal({
                                 </option>
                               );
                             })}
+
                           </select>
                         </div>
 
@@ -969,7 +1116,8 @@ export default function AddWalkInParticipantModal({
               <button
                 className="participant-action-accept"
                 onClick={submit}
-                disabled={saving || autoFillLoading}
+                disabled={saving || autoFillLoading || !nowAllowedByWindow}
+                title={!nowAllowedByWindow ? "Walk-ins only allowed during the scheduled time window" : undefined}
               >
                 {saving ? "Saving..." : "Save"}
               </button>

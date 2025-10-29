@@ -329,6 +329,29 @@ export default function SpecificProgram() {
     return () => clearInterval(t);
   }, [images]);
 
+
+  const isSameLocalDay = (a: Date, b: Date) => {
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth() === b.getMonth() &&
+         a.getDate() === b.getDate();
+};
+
+const hasEndedToday = (day: Date, timeEnd?: string) => {
+  if (!timeEnd) return false; // no end time -> do not mark as ended
+  const [hStr, mStr] = timeEnd.split(":");
+  const h = Number(hStr);
+  const m = Number(mStr ?? "0");
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return false;
+
+  // build "today at timeEnd" on the *local* day for this option
+  const end = new Date(day);
+  end.setHours(h, m, 0, 0);
+
+  const now = new Date();
+  return isSameLocalDay(day, now) && now > end;
+};
+
+
   // try to prefill user info
   useEffect(() => {
     const fetchUserData = async () => {
@@ -804,11 +827,29 @@ export default function SpecificProgram() {
     });
   }, [program?.eventType, program?.participantDays, program?.noParticipantLimitList, approvedParticipantCountList]);
 
+
+  const dayEndedList = useMemo<boolean[]>(() => {
+  if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
+  const sYMD = program.startDate || "";
+  const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
+
+  return program.participantDays.map((_, idx) => {
+    const d = new Date(startLocal);
+    d.setDate(startLocal.getDate() + idx);
+    return hasEndedToday(d, program.timeEnd);
+  });
+}, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
+
   // If the selected day becomes full (or is invalid), clear it
   useEffect(() => {
     if (dayChosen == null) return;
     if (dayFullList[dayChosen]) setDayChosen(null);
   }, [dayFullList, dayChosen]);
+
+  useEffect(() => {
+  if (dayChosen == null) return;
+  if (dayFullList[dayChosen] || dayEndedList[dayChosen]) setDayChosen(null);
+}, [dayFullList, dayEndedList, dayChosen]);  
 
   if (!program) {
     return (
@@ -817,6 +858,8 @@ export default function SpecificProgram() {
       </main>
     );
   }
+
+
 
   const { datePart, timePart } = buildScheduleParts({
     eventType: program.eventType,
@@ -1172,16 +1215,21 @@ export default function SpecificProgram() {
                                       const today = new Date();
                                       today.setHours(0, 0, 0, 0);
                                       optionDate.setHours(0, 0, 0, 0);
-                                      const isPast = optionDate < today;
 
-                                      // 🔒 Disable when FULL (unless no-limit for that day)
+                                      const isPast = optionDate < today;
                                       const isFull = !!dayFullList[idx];
+
+                                      // ✅ New: mark as "ended" if today and timeEnd has already passed
+                                      const isEnded = !!dayEndedList[idx];
 
                                       let label = `Day ${idx + 1} (${optionDate.toDateString()})`;
                                       if (isFull) label += " — FULL";
+                                      if (isEnded) label += " — Day Ended";
+
+                                      const disabled = isPast || isFull || isEnded;
 
                                       return (
-                                        <option key={idx} value={idx} disabled={isPast || isFull}>
+                                        <option key={idx} value={idx} disabled={disabled}>
                                           {label}
                                         </option>
                                       );
