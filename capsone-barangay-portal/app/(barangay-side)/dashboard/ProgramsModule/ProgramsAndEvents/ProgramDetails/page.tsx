@@ -620,7 +620,7 @@ export default function ProgramDetails() {
     } finally {
       setLoading(false);
       setTimeout(() => {
-        router.push(`/dashboard/ProgramsModule/ProgramsAndEvents?highlight=${programId}`);
+        router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programId}`);
       }, 1200);
     }
   };
