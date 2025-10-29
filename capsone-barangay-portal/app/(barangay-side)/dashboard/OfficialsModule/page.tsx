@@ -470,7 +470,7 @@ const deleteOfficer = async () => {
 
   return (
     <main className="brgy-officials-main-container">
-      {(user === "Admin Staff" || user === "Assistant Secretary" || user === "Secretary" )&& (
+      {(user === "Assistant Secretary" || user === "Secretary" )&& (
         <div className="brgy-officials-section-1"> 
           <button 
             className="add-brgy-official-btn add-brgy-official-animated"
