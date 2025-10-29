@@ -241,7 +241,7 @@ export default function EditParticipantModal({
           {/* Header */}
           <div className="view-user-main-section1">
             <div className="view-user-header-first-section">
-              <img src="/images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+              <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
             </div>
             <div className="view-user-header-second-section">
               <h2 className="gov-info">Republic of the Philippines</h2>
