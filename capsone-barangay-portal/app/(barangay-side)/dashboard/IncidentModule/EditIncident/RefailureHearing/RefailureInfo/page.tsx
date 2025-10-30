@@ -297,6 +297,200 @@ useEffect(() => {
             console.error("Error sending SMS:", error);
         }
     }
+
+
+
+    
+    const handleMeetingChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        const value = e.target.value; // YYYY-MM-DDTHH:mm
+        const res = validateMeetingSelection(otherInfo.DateOfDelivery, value);
+
+        if (!res.ok) {
+            showError(res.msg || "Invalid meeting date/time.");
+            e.target.value = "";
+            setOtherInfo((prev:any) => ({ ...prev, DateTimeOfMeeting: "" }));
+            return;
+        }
+
+        // Valid -> update
+        handleChange(e);
+    };
+
+    const handleDeliveryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const value = e.target.value; // YYYY-MM-DD
+
+    // Basic delivery rule (Mon–Sat)
+    const del = isValidDeliveryDate(value);
+    if (!del.ok) {
+        showError(del.msg || "Invalid delivery date.");
+        e.target.value = "";
+        setOtherInfo((prev:any) => ({ ...prev, DateOfDelivery: "" }));
+        return;
+    }
+
+    // If a meeting was picked earlier, ensure pair rule holds now
+    if (otherInfo.DateTimeOfMeeting) {
+        const pair = isAtLeastTwoDaysAfter(value, otherInfo.DateTimeOfMeeting);
+        if (!pair.ok) {
+        showError(pair.msg || "Delivery/meeting mismatch.");
+        e.target.value = "";
+        setOtherInfo((prev:any) => ({ ...prev, DateOfDelivery: "" }));
+        return;
+        }
+    }
+
+    // Valid -> update and do not auto-clear meeting (it’s valid)
+    handleChange(e);
+    };
+    type Check = { ok: boolean; msg?: string };
+
+    const pad2 = (n: number) => n.toString().padStart(2, "0");
+
+    const toLocalISOStringForInput = (d: Date) =>
+    `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+
+    const addDays = (d: Date, days: number) => {
+    const nd = new Date(d);
+    nd.setDate(nd.getDate() + days);
+    return nd;
+    };
+
+    // Earliest pickable meeting time: delivery + 2 days at 08:00 (used only when delivery exists)
+    const getMinMeetingISO = (deliveryISO?: string) => {
+    if (!deliveryISO) return "";
+    const base = new Date(deliveryISO);
+    if (isNaN(base.getTime())) return "";
+    const min = addDays(base, 2);
+    min.setHours(8, 0, 0, 0); // 08:00
+    return toLocalISOStringForInput(min);
+    };
+
+    // Popup helper (auto-hide)
+    const showError = (msg: string) => {
+    setErrorPopup({ show: true, message: msg });
+    setTimeout(() => setErrorPopup({ show: false, message: "" }), 2000);
+    };
+
+    // Delivery: Mon–Sat only
+    const isValidDeliveryDate = (deliveryISO?: string): Check => {
+    if (!deliveryISO) return { ok: false, msg: "Please pick a delivery date." };
+    const d = new Date(deliveryISO);
+    if (isNaN(d.getTime())) return { ok: false, msg: "Invalid delivery date." };
+    const dow = d.getDay(); // 0=Sun
+    if (dow === 0) return { ok: false, msg: "Delivery cannot be scheduled on Sundays." };
+    return { ok: true };
+    };
+
+    // Meeting weekday/time rules (independent of delivery)
+    const isWithinAllowedHours = (dt: Date): Check => {
+    const day = dt.getDay(); // 0 Sun ... 6 Sat
+    const hours = dt.getHours();
+    const mins = dt.getMinutes();
+
+    if (day === 0) return { ok: false, msg: "Meetings cannot be scheduled on Sundays." };
+
+    // Mon–Fri: 08:00–17:00
+    if (day >= 1 && day <= 5) {
+        const afterOpen = hours > 8 || (hours === 8 && mins >= 0);
+        const beforeClose = hours < 17 || (hours === 17 && mins === 0);
+        return afterOpen && beforeClose
+        ? { ok: true }
+        : { ok: false, msg: "Mon–Fri meetings must be between 8:00 AM and 5:00 PM." };
+    }
+
+    // Saturday: 08:00–14:00
+    if (day === 6) {
+        const afterOpen = hours > 8 || (hours === 8 && mins >= 0);
+        const beforeClose = hours < 14 || (hours === 14 && mins === 0);
+        return afterOpen && beforeClose
+        ? { ok: true }
+        : { ok: false, msg: "Saturday meetings must be between 8:00 AM and 2:00 PM." };
+    }
+
+    return { ok: false, msg: "Invalid day." };
+    };
+
+    // Pair rule (only matters if both sides exist)
+    const isAtLeastTwoDaysAfter = (deliveryISO?: string, meetingISO?: string): Check => {
+    if (!deliveryISO || !meetingISO) return { ok: true }; // no pair yet -> don't block selecting either first
+    const delivery = new Date(deliveryISO);
+    const meeting = new Date(meetingISO);
+    if (isNaN(delivery.getTime()) || isNaN(meeting.getTime())) {
+        return { ok: false, msg: "Invalid date(s). Please reselect." };
+    }
+    const diffMs = meeting.getTime() - delivery.getTime();
+    if (diffMs < 48 * 60 * 60 * 1000) {
+        return { ok: false, msg: "Meeting must be at least 2 days after the Date of Delivery." };
+    }
+    return { ok: true };
+    };
+
+    // Validates meeting alone (no Sundays, time window) + pair rule if delivery present
+    const validateMeetingSelection = (deliveryISO?: string, meetingISO?: string): Check => {
+    if (!meetingISO) return { ok: false, msg: "Please pick a meeting date & time." };
+    const meeting = new Date(meetingISO);
+    if (isNaN(meeting.getTime())) return { ok: false, msg: "Invalid meeting date/time." };
+
+    const baseCheck = isWithinAllowedHours(meeting);
+    if (!baseCheck.ok) return baseCheck;
+
+    const pairCheck = isAtLeastTwoDaysAfter(deliveryISO, meetingISO);
+    if (!pairCheck.ok) return pairCheck;
+
+    return { ok: true };
+    };
+
+
+    // Auto-hide error popup after 2s
+    useEffect(() => {
+        if (!errorPopup.show) return;
+        const t = setTimeout(() => setErrorPopup({ show: false, message: "" }), 2000);
+        return () => clearTimeout(t);
+    }, [errorPopup.show]);
+
+    // Dynamic min/max bounds for the meeting picker
+    const [meetingBounds, setMeetingBounds] = useState<{ min: string; max: string }>({ min: "", max: "" });
+
+    const getWindowForDate = (d: Date) => {
+        const open = new Date(d);
+        open.setHours(8, 0, 0, 0);
+
+        const close = new Date(d);
+        if (d.getDay() === 6) close.setHours(14, 0, 0, 0); // Sat 08–14
+        else close.setHours(17, 0, 0, 0); // Mon–Fri 08–17
+
+        return {
+        openISO: toLocalISOStringForInput(open),
+        closeISO: toLocalISOStringForInput(close),
+        };
+    };
+
+    useEffect(() => {
+        const defaultMin = getMinMeetingISO(otherInfo.DateOfDelivery);
+
+        if (!otherInfo.DateTimeOfMeeting) {
+        setMeetingBounds({ min: defaultMin, max: "" });
+        return;
+        }
+
+        const dt = new Date(otherInfo.DateTimeOfMeeting);
+        if (isNaN(dt.getTime()) || dt.getDay() === 0) {
+        setMeetingBounds({ min: defaultMin, max: "" });
+        return;
+        }
+
+        const { openISO, closeISO } = getWindowForDate(dt);
+        setMeetingBounds({
+        min: new Date(openISO) > new Date(defaultMin) ? openISO : defaultMin,
+        max: closeISO,
+        });
+    }, [otherInfo.DateTimeOfMeeting, otherInfo.DateOfDelivery]);
+
+
+
+
+
+
     return (
         <main className="main-container-letter">
 
@@ -657,7 +851,7 @@ useEffect(() => {
                                                         })()}
                                                         onKeyDown={(e) => e.preventDefault()}
                                                         onChange={(e) => {
-                                                            handleChange(e); // ✅ actually call it
+                                                            handleDeliveryChange(e); // ✅ actually call it
                                                             setOtherInfo((prev: any) => ({
                                                             ...prev,
                                                             DateTimeOfMeeting: "", // ✅ reset meeting when delivery date changes
@@ -670,6 +864,7 @@ useEffect(() => {
                                                 </div>
                                                 <div className="fields-section-letter">
                                                     <p>Date and Time of Meeting</p>
+
                                                     <input
                                                         type="datetime-local"
                                                         className="generate-letter-input-field"
@@ -677,25 +872,13 @@ useEffect(() => {
                                                         onKeyDown={(e) => e.preventDefault()}
                                                         id="DateTimeOfMeeting"
                                                         name="DateTimeOfMeeting"
-                                                        onChange={handleChange}
-                                                        min={(() => {
-                                                        if (!otherInfo?.DateOfDelivery) return "";
-                                                        const tomorrow = new Date(otherInfo.DateOfDelivery);
-                                                        tomorrow.setDate(tomorrow.getDate() + 1);
-
-                                                        const pad = (n: number) => n.toString().padStart(2, "0");
-                                                        const yyyy = tomorrow.getFullYear();
-                                                        const mm = pad(tomorrow.getMonth() + 1);
-                                                        const dd = pad(tomorrow.getDate());
-                                                        const hh = pad(tomorrow.getHours());
-                                                        const min = pad(tomorrow.getMinutes());
-
-                                                        // Must return `YYYY-MM-DDTHH:MM`
-                                                        return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-                                                        })()}
+                                                        onChange={handleMeetingChange}
+                                                        min={getMinMeetingISO(otherInfo.DateOfDelivery) || undefined}
                                                         required
                                                         disabled={!!refailureHearingData?.[`refailureExplainationMeetingHearing${index}`]}
-                                                    />
+                                                        />
+
+
                                                     </div>
 
                                             </div>
