@@ -8,6 +8,7 @@ import { collection, onSnapshot, addDoc, deleteDoc, doc, getDoc} from "firebase/
 import { db, storage } from "@/app/db/firebase";
 import { useSession } from "next-auth/react";
 import { getDownloadURL, ref, uploadBytes, deleteObject } from "@firebase/storage";
+import { timeStamp } from "node:console";
 
 
 
@@ -346,6 +347,37 @@ const addNewOfficer = async () => {
   }
 };
 
+
+
+const notifcationToSecandAssSec = async (officialName: string, position: string, type: string) => {
+  const notificationRef = collection(db, "BarangayNotifications");
+  let newNotification = {};
+  if(type === "A"){
+    newNotification = {
+      message:`${position} (${officialName}) has been automatically removed after exceeding the term limit in the Officials Module (Barangay Officials).`,
+    }      
+  }
+  else if (type === "B"){
+    newNotification = {
+      message: `A Barangay Official (${position}: ${officialName}) has been automatically deleted in the Officials Module (Barangay Officials) due to the absence of a corresponding Barangay User account in the Users and Roles module.`,
+    }
+  }
+  newNotification ={
+    ...newNotification,
+    timestamp: new Date(),
+    recipientRole: "Secretary",
+    isRead: false,
+    transactionType: "Official Deletion Notification",
+  }
+  const newNotifB = {
+    ...newNotification,
+    recipientRole: "Assistant Secretary"
+
+  }
+  await addDoc(notificationRef, newNotification);
+  await addDoc(notificationRef, newNotifB);
+
+}
 useEffect(() => {
   const handleExpiredOfficials = async () => {
     const currentYear = new Date().getFullYear();
@@ -354,9 +386,11 @@ useEffect(() => {
       const match = element.term.match(/\d{4}$/); // grabs last 4 digits
       const lastTermYear = match ? parseInt(match[0]) : null;
 
-      if (lastTermYear === currentYear) {
+      if (lastTermYear !== null && currentYear > lastTermYear ) {
+        
         try {
           // Delete image from Firebase Storage
+          notifcationToSecandAssSec(element.name, element.position, "A");
           await deleteObject(ref(storage, element.image));
 
           // Delete document from Firestore
@@ -375,18 +409,20 @@ useEffect(() => {
   }
 }, [displayedOfficials]);
 
+
 useEffect(() => {
   const officialValidityChecker = async () => {
     for (const element of displayedOfficials) {
       try {
         // element.id here refers to the user UID stored inside the document field
         const userId = element.userId; 
-
+        
         // Check if a corresponding BarangayUser document exists
         const docRef = doc(db, "BarangayUsers", userId);
         const docSnap = await getDoc(docRef);
-
+        
         if (!docSnap.exists()) {
+          notifcationToSecandAssSec(element.name, element.position, "B");
           console.log(`🗑️ Deleting orphaned official: ${element.name || userId}`);
 
           if (element.image) {
