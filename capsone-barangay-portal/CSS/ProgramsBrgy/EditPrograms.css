@@ -2660,3 +2660,5 @@ input[type="checkbox"] {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+
+.row-disabled { opacity: 0.5; }

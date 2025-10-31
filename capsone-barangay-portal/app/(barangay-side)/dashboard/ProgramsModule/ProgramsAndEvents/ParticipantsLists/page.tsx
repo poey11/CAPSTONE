@@ -3,8 +3,6 @@ import "@/CSS/ProgramsBrgy/EditPrograms.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-
-// Firestore
 import {
   collection,
   doc,
@@ -17,9 +15,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@/app/db/firebase";
-
 import ViewApprovedParticipantModal from "@/app/(barangay-side)/components/ViewApprovedParticipantModal";
 import AddWalkInParticipantModal from "@/app/(barangay-side)/components/AddWalkInParticipantModal";
+
+
 
 type Participant = {
   id: string;
@@ -171,7 +170,19 @@ export default function ParticipantsList() {
     }
   };
 
-  // Load program meta (including dates and caps)
+
+  type PriorStatus = {
+    anyAttended: boolean;
+    priorDays: number[];
+    upcomingBookedDays: number[];
+  };
+
+  const [priorByResident, setPriorByResident] = useState<Record<string, PriorStatus>>({});
+  const isMulti = (eventType || "single").toLowerCase() === "multiple";
+    
+
+
+
   useEffect(() => {
     let cancelled = false;
     const loadProgram = async () => {
@@ -334,6 +345,99 @@ export default function ParticipantsList() {
   }, [programId]);
 
   const [dayChosen, setDayChosen] = useState<number>(0);
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadPriorStatuses = async () => {
+    if (!showResidentsPopup || !programId || !isMulti) {
+      if (!cancelled) setPriorByResident({});
+      return;
+    }
+
+    try {
+      // Pull all participant docs for this program once
+      const qRef = query(
+        collection(db, "ProgramsParticipants"),
+        where("programId", "==", programId),
+        where("role", "==", "Participant")
+      );
+      const snap = await getDocs(qRef);
+
+      const byResident: Record<string, PriorStatus> = {};
+      const base = startDate ? ymdToDateLocal(startDate) : null;
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      snap.forEach(docu => {
+        const d: any = docu.data();
+        const residentId = d?.residentId;
+        if (!residentId) return;
+
+        const idx = Number.isInteger(d?.dayChosen) ? Number(d.dayChosen) : null;
+        const attended = d?.attendance === true;
+
+        if (!byResident[residentId]) {
+          byResident[residentId] = { anyAttended: false, priorDays: [], upcomingBookedDays: [] };
+        }
+
+        const s = byResident[residentId];
+        if (attended) s.anyAttended = true;
+        if (idx != null) {
+          s.priorDays.push(idx);
+
+          // Day is considered “upcoming” if not attended and dayDate >= today
+          if (!attended) {
+            if (base) {
+              const dd = new Date(base);
+              dd.setDate(base.getDate() + idx);
+              dd.setHours(0,0,0,0);
+              if (dd >= today) s.upcomingBookedDays.push(idx);
+            } else {
+              // If we can't compute a date, be conservative
+              s.upcomingBookedDays.push(idx);
+            }
+          }
+        }
+      });
+
+      if (!cancelled) setPriorByResident(byResident);
+    } catch {
+      if (!cancelled) setPriorByResident({});
+    }
+  };
+
+  loadPriorStatuses();
+  return () => { cancelled = true; };
+}, [showResidentsPopup, programId, isMulti, startDate, dayChosen]);
+
+
+
+
+const getResidentDisableInfo = (residentId?: string) => {
+  if (!residentId) return { disabled: false, reason: "" };
+  if (!isMulti) return { disabled: false, reason: "" }; // single-day handled elsewhere
+  if (!Number.isInteger(dayChosen)) return { disabled: true, reason: "Select a day first" };
+
+  const status = priorByResident[residentId];
+  if (!status) return { disabled: false, reason: "" };
+
+  const { anyAttended, priorDays, upcomingBookedDays } = status;
+
+  if (anyAttended) {
+    return { disabled: true, reason: "Already attended a day" };
+  }
+  if (priorDays.includes(dayChosen)) {
+    return { disabled: true, reason: `Already enlisted for Day ${dayChosen + 1}` };
+  }
+  if (upcomingBookedDays.length > 0 && !upcomingBookedDays.includes(dayChosen)) {
+    const lockedTo = Math.min(...upcomingBookedDays);
+    return { disabled: true, reason: `Has future booking for Day ${lockedTo + 1}` };
+  }
+  return { disabled: false, reason: "" };
+};
+
+
+
 
   // Safety: default a day if multi-day
   useEffect(() => {
@@ -587,30 +691,127 @@ export default function ParticipantsList() {
   const fileFieldsToRender = useMemo<SimpleField[]>(() => reqFileFields, [reqFileFields]);
 
   // Duplicate guard on resident click
-  const openResidentForm = async (resident: Resident) => {
-    if (!programId) return;
-    try {
-      const dupQ = query(
-        collection(db, "ProgramsParticipants"),
-        where("programId", "==", programId),
-        where("residentId", "==", resident.id)
-      );
-      const dupSnap = await getDocs(dupQ);
-      if (!dupSnap.empty) {
-        setErrorToastMsg("This resident is already enlisted in this program.");
+const openResidentForm = async (resident: Resident) => {
+  if (!programId) return;
+
+  try {
+    const isMulti = (eventType || "single").toLowerCase() === "multiple";
+
+    if (isMulti) {
+      if (!Number.isInteger(dayChosen)) {
+        setErrorToastMsg("Please select a day first.");
         setShowErrorToast(true);
         setTimeout(() => setShowErrorToast(false), 3000);
         return;
       }
+
+      // Fetch ALL prior participant docs for this resident in this program
+      const priorQ = query(
+        collection(db, "ProgramsParticipants"),
+        where("programId", "==", programId),
+        where("residentId", "==", resident.id),
+        where("role", "==", "Participant")
+      );
+      const priorSnap = await getDocs(priorQ);
+
+      // Fast path: no prior docs -> open modal
+      if (priorSnap.empty) {
+        setResidentForAdd(resident);
+        setShowResidentsPopup(false);
+        setShowAddWalkInModal(true);
+        return;
+      }
+
+      // Build prior insight
+      const today = new Date(); today.setHours(0,0,0,0);
+      const base = startDate ? ymdToDateLocal(startDate) : null;
+
+      let anyAttended = false;
+      const priorDaySet = new Set<number>();          // days already enlisted (any status)
+      const upcomingBookedSet = new Set<number>();    // days booked for today/future (attendance !== true)
+
+      priorSnap.forEach(docu => {
+        const d: any = docu.data();
+        const idx = Number.isInteger(d?.dayChosen) ? Number(d.dayChosen) : null;
+        const attended = d?.attendance === true;
+        if (attended) anyAttended = true;
+        if (idx != null) {
+          priorDaySet.add(idx);
+          // compute day date to tell if it's upcoming
+          if (base) {
+            const dd = new Date(base);
+            dd.setDate(base.getDate() + idx);
+            dd.setHours(0,0,0,0);
+            if (!attended && dd >= today) {
+              upcomingBookedSet.add(idx);
+            }
+          } else {
+            // If we can't compute dates, be conservative: treat non-attended as upcoming
+            if (!attended) upcomingBookedSet.add(idx);
+          }
+        }
+      });
+
+      // 1) Hard block: already attended any day
+      if (anyAttended) {
+        setErrorToastMsg("This resident has already attended a day for this program.");
+        setShowErrorToast(true);
+        setTimeout(() => setShowErrorToast(false), 3000);
+        return;
+      }
+
+      // 2) Block same-day duplicate
+      if (priorDaySet.has(dayChosen)) {
+        setErrorToastMsg(`This resident is already enlisted for Day ${dayChosen + 1}.`);
+        setShowErrorToast(true);
+        setTimeout(() => setShowErrorToast(false), 3000);
+        return;
+      }
+
+      // 3) If they already have a future/today booking for ANOTHER day, force them to stick to it
+      if (upcomingBookedSet.size > 0 && !upcomingBookedSet.has(dayChosen)) {
+        const lockedTo = Array.from(upcomingBookedSet)[0]; // any one future booking
+        setErrorToastMsg(
+          `This resident already has a future booking for Day ${lockedTo + 1}. ` +
+          `Please keep them on that day.`
+        );
+        setShowErrorToast(true);
+        setTimeout(() => setShowErrorToast(false), 3000);
+        return;
+      }
+
+      // Otherwise allowed: (e.g., they were absent on a past day)
       setResidentForAdd(resident);
       setShowResidentsPopup(false);
       setShowAddWalkInModal(true);
-    } catch {
-      setErrorToastMsg("Failed to check resident status. Please try again.");
+      return;
+    }
+
+    // Single-day program: keep original "any prior entry = duplicate"
+    const dupQ = query(
+      collection(db, "ProgramsParticipants"),
+      where("programId", "==", programId),
+      where("residentId", "==", resident.id)
+    );
+    const dupSnap = await getDocs(dupQ);
+    if (!dupSnap.empty) {
+      setErrorToastMsg("This resident is already enlisted in this program.");
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 3000);
+      return;
     }
-  };
+
+    setResidentForAdd(resident);
+    setShowResidentsPopup(false);
+    setShowAddWalkInModal(true);
+  } catch {
+    setErrorToastMsg("Failed to check resident status. Please try again.");
+    setShowErrorToast(true);
+    setTimeout(() => setShowErrorToast(false), 3000);
+  }
+};
+
+
 
   const openManualEntry = () => {
     setResidentForAdd(null);
@@ -919,20 +1120,29 @@ export default function ParticipantsList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredResidents.map((resident) => (
-                      <tr
-                        key={resident.id}
-                        className="program-table-row"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => openResidentForm(resident)}
-                      >
-                        <td>{resident.residentNumber ?? ""}</td>
-                        <td>{resident.firstName ?? ""}</td>
-                        <td>{resident.middleName ?? ""}</td>
-                        <td>{resident.lastName ?? ""}</td>
-                        <td>{resident.address ?? ""}</td>
-                      </tr>
-                    ))}
+                    {filteredResidents.map((resident) => {
+                      const { disabled, reason } = getResidentDisableInfo(resident.id);
+                      return (
+                        <tr
+                          key={resident.id}
+                          className={`program-table-row ${disabled ? "row-disabled" : ""}`}
+                          style={{
+                            cursor: disabled ? "not-allowed" : "pointer",
+                            opacity: disabled ? 0.5 : 1,
+                          }}
+                          title={disabled ? reason : "Click to add"}
+                          onClick={() => {
+                            if (!disabled) openResidentForm(resident);
+                          }}
+                        >
+                          <td>{resident.residentNumber ?? ""}</td>
+                          <td>{resident.firstName ?? ""}</td>
+                          <td>{resident.middleName ?? ""}</td>
+                          <td>{resident.lastName ?? ""}</td>
+                          <td>{resident.address ?? ""}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -960,6 +1170,10 @@ export default function ParticipantsList() {
           onSaved={handleWalkInSaved}
           onError={handleWalkInError}
           prettyLabels={PRETTY_LABELS}
+
+          // NEW: bind to the day selected in ParticipantsList
+          selectedDayIndex={(eventType || "single").toLowerCase() === "multiple" ? dayChosen : null}
+          lockDaySelection={false} 
         />
       )}
 

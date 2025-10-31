@@ -26,7 +26,7 @@ type Resident = {
   contactNumber?: string;
   emailAddress?: string;
   verificationFilesURLs?: string[];
-  dateOfBirth?: string; // YYYY-MM-DD
+  dateOfBirth?: string;
 };
 
 type Props = {
@@ -40,12 +40,15 @@ type Props = {
   textFields: SimpleField[];
   fileFields: SimpleField[];
 
-  resident: Resident | null; // null for manual entry
+  resident: Resident | null;
 
   onSaved: (msg?: string) => void;
   onError?: (msg: string) => void;
 
   prettyLabels?: Record<string, string>;
+
+  selectedDayIndex?: number | null;
+  lockDaySelection?: boolean;
 };
 
 const DEFAULT_LABELS: Record<string, string> = {
@@ -103,36 +106,44 @@ export default function AddWalkInParticipantModal({
   onSaved,
   onError,
   prettyLabels,
+  selectedDayIndex = null,
+  lockDaySelection = false,
 }: Props) {
   const LABELS = prettyLabels || DEFAULT_LABELS;
 
-  // ------- Role selection -------
   const [selectedRole, setSelectedRole] = useState<"Participant" | "Volunteer">("Participant");
 
-  // Prefill from resident (if any)
-  const [formData, setFormData] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    for (const f of textFields || []) init[f.name] = "";
+const [formData, setFormData] = useState<Record<string, string>>(() => {
+  const init: Record<string, string> = {};
+  for (const f of textFields || []) init[f.name] = "";
 
-    if (resident) {
-      const fullName = `${resident.firstName || ""} ${
-        resident.middleName ? resident.middleName + " " : ""
-      }${resident.lastName || ""}`
-        .replace(/\s+/g, " ")
-        .trim();
+  if (resident) {
+    const fullName = `${resident.firstName || ""} ${
+      resident.middleName ? resident.middleName + " " : ""
+    }${resident.lastName || ""}`
+      .replace(/\s+/g, " ")
+      .trim();
 
-      for (const f of textFields || []) {
-        if (f.name === "firstName") init[f.name] = resident.firstName || "";
-        else if (f.name === "lastName") init[f.name] = resident.lastName || "";
-        else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || "";
-        else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || "";
-        else if (f.name === "location") init[f.name] = resident.address || resident.location || "";
-        else if (f.name === "fullName") init[f.name] = fullName;
-        else if (f.name === "dateOfBirth") init[f.name] = resident.dateOfBirth || "";
-      }
+    for (const f of textFields || []) {
+      if (f.name === "firstName") init[f.name] = resident.firstName || "";
+      else if (f.name === "lastName") init[f.name] = resident.lastName || "";
+      else if (f.name === "contactNumber") init[f.name] = resident.contactNumber || "";
+      else if (f.name === "emailAddress") init[f.name] = resident.emailAddress || "";
+      else if (f.name === "location") init[f.name] = resident.address || resident.location || "";
+      else if (f.name === "fullName") init[f.name] = fullName;
+      else if (f.name === "dateOfBirth") init[f.name] = resident.dateOfBirth || "";
     }
-    return init;
-  });
+  }
+
+    if (selectedDayIndex !== null && selectedDayIndex !== undefined) {
+      init["dayChosen"] = String(selectedDayIndex);
+    }
+
+  return init;
+});
+
+
+
 
   const [formFiles, setFormFiles] = useState<Record<string, File | null>>({});
   const [saving, setSaving] = useState(false);
@@ -169,41 +180,141 @@ export default function AddWalkInParticipantModal({
     };
   }, [programId]);
 
+  type PriorEntry = { dayChosen: number | null; attendance: boolean; dayDate?: Date };
 
-    const ymdToDateLocal = (ymd: string) => {
-      const [y, m, d] = ymd.split("-").map(Number);
-      return new Date(y, (m ?? 1) - 1, d ?? 1); // local midnight
-    };
+const [priorEntries, setPriorEntries] = useState<PriorEntry[]>([]);
 
-    const isSameLocalDay = (a: Date, b: Date) =>
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate();
+useEffect(() => {
+  let cancelled = false;
+  (async () => {
+    if (!resident?.id || !programId) {
+      if (!cancelled) setPriorEntries([]);
+      return;
+    }
+    try {
+      const qRef = query(
+        collection(db, "ProgramsParticipants"),
+        where("programId", "==", programId),
+        where("residentId", "==", resident.id),
+        where("role", "==", "Participant")
+      );
+      const snap = await getDocs(qRef);
 
-    const setTimeOnDate = (day: Date, hhmm?: string) => {
-      const d = new Date(day);
-      if (!hhmm || !/^\d{1,2}:\d{2}$/.test(hhmm)) return d;
-      const [hStr, mStr] = hhmm.split(":");
-      d.setHours(Number(hStr) || 0, Number(mStr) || 0, 0, 0);
-      return d;
-    };
+      // Compute the calendar date for each prior day (for future/past logic)
+      const entries: PriorEntry[] = [];
+      const base = program?.startDate ? ymdToDateLocal(program.startDate) : null;
 
-    const hasEndedToday = (day: Date, timeEnd?: string) => {
-      const now = new Date();
-      if (!isSameLocalDay(day, now) || !timeEnd) return false;
-      const end = setTimeOnDate(day, timeEnd);
-      return now > end;
-    };
+      snap.forEach(d => {
+        const data: any = d.data();
+        const idx = Number.isInteger(data?.dayChosen) ? Number(data.dayChosen) : null;
+        let dayDate: Date | undefined = undefined;
+        if (base && idx != null) {
+          const dd = new Date(base);
+          dd.setDate(base.getDate() + idx);
+          dd.setHours(0,0,0,0);
+          dayDate = dd;
+        }
+        entries.push({
+          dayChosen: idx,
+          attendance: data?.attendance === true,
+          dayDate,
+        });
+      });
 
-    const isNowWithinWindow = (day: Date, timeStart?: string, timeEnd?: string) => {
-      if (!timeStart || !timeEnd) return true; // no window → allow
-      const now = new Date();
-      if (!isSameLocalDay(day, now)) return true; // only enforce when it's *today*
-      const start = setTimeOnDate(day, timeStart);
-      const end = setTimeOnDate(day, timeEnd);
-      return now >= start && now <= end;
-    };
+      if (!cancelled) setPriorEntries(entries);
+    } catch {
+      if (!cancelled) setPriorEntries([]);
+    }
+  })();
+  return () => { cancelled = true; };
+}, [resident?.id, programId, program?.startDate]);
 
+const computeDayDate = (idx: number): Date | null => {
+  if (!program?.startDate) return null;
+  const base = ymdToDateLocal(program.startDate);
+  const d = new Date(base);
+  d.setDate(base.getDate() + idx);
+  d.setHours(0,0,0,0);
+  return d;
+};
+
+const todayMidnight = () => {
+  const t = new Date();
+  t.setHours(0,0,0,0);
+  return t;
+};
+
+// Prior info distilled
+const anyAttended = useMemo(
+  () => priorEntries.some(pe => pe.attendance === true),
+  [priorEntries]
+);
+
+// Set of days already booked (any status)
+const priorDaySet = useMemo(() => {
+  const s = new Set<number>();
+  priorEntries.forEach(pe => { if (typeof pe.dayChosen === 'number') s.add(pe.dayChosen); });
+  return s;
+}, [priorEntries]);
+
+// Upcoming bookings (registered but not attended and day is today or future)
+const upcomingBookedSet = useMemo(() => {
+  const s = new Set<number>();
+  const today = todayMidnight();
+  priorEntries.forEach(pe => {
+    if (pe.attendance === true) return; // attended is handled separately
+    if (typeof pe.dayChosen !== 'number') return;
+    if (!pe.dayDate) return;
+    if (pe.dayDate >= today) s.add(pe.dayChosen);
+  });
+  return s;
+}, [priorEntries]);
+
+const isDayDisabledByPrior = (idx: number): { disabled: boolean; reason?: string } => {
+  if (priorDaySet.has(idx)) {
+    return { disabled: true, reason: "Already enlisted for this day" };
+  }
+  if (anyAttended) {
+    return { disabled: true, reason: "Already attended a day" };
+  }
+  if (upcomingBookedSet.size > 0 && !upcomingBookedSet.has(idx)) {
+    return { disabled: true, reason: "Has a future booking for another day" };
+  }
+  return { disabled: false };
+};
+
+
+
+  const ymdToDateLocal = (ymd: string) => {
+    const [y, m, d] = ymd.split("-").map(Number);
+    return new Date(y, (m ?? 1) - 1, d ?? 1); // local midnight
+  };
+  const isSameLocalDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+
+  const setTimeOnDate = (day: Date, hhmm?: string) => {
+    const d = new Date(day);
+    if (!hhmm || !/^\d{1,2}:\d{2}$/.test(hhmm)) return d;
+    const [hStr, mStr] = hhmm.split(":");
+    d.setHours(Number(hStr) || 0, Number(mStr) || 0, 0, 0);
+    return d;
+  };
+  const hasEndedToday = (day: Date, timeEnd?: string) => {
+    const now = new Date();
+    if (!isSameLocalDay(day, now) || !timeEnd) return false;
+    const end = setTimeOnDate(day, timeEnd);
+    return now > end;
+  };
+  const isNowWithinWindow = (day: Date, timeStart?: string, timeEnd?: string) => {
+    if (!timeStart || !timeEnd) return true; // no window → allow
+    const now = new Date();
+    if (!isSameLocalDay(day, now)) return true; // only enforce when it's *today*
+    const start = setTimeOnDate(day, timeStart);
+    const end = setTimeOnDate(day, timeEnd);
+    return now >= start && now <= end;
+  };
 
   // --- Which days are FULL (participants only) ---
   const [dayFull, setDayFull] = useState<boolean[]>([]);
@@ -317,7 +428,7 @@ export default function AddWalkInParticipantModal({
 
   const visibleTextFields = useMemo<SimpleField[]>(() => {
     const base = textFields?.length ? textFields : [];
-    // We will render dayChosen ALWAYS as a standalone block, so filter it out from the columns.
+    // Render dayChosen as a standalone block, so filter it out from the columns.
     if (selectedRole === "Volunteer") {
       return base.filter((f) => isDefaultField(f.name) && f.name !== "dayChosen");
     }
@@ -391,104 +502,99 @@ export default function AddWalkInParticipantModal({
     }
   };
 
-// Which days are "ended" today (timeEnd passed)
-const dayEnded = useMemo<boolean[]>(() => {
-  if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
-  const base = program.startDate ? ymdToDateLocal(program.startDate) : new Date();
-  return program.participantDays.map((_, idx) => {
-    const d = new Date(base);
-    d.setDate(base.getDate() + idx);
-    return hasEndedToday(d, program.timeEnd);
-  });
-}, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
+  // Which days are "ended" today (timeEnd passed)
+  const dayEnded = useMemo<boolean[]>(() => {
+    if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
+    const base = program.startDate ? ymdToDateLocal(program.startDate) : new Date();
+    return program.participantDays.map((_, idx) => {
+      const d = new Date(base);
+      d.setDate(base.getDate() + idx);
+      return hasEndedToday(d, program.timeEnd);
+    });
+  }, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
 
-// If chosen day becomes FULL or ENDED, clear it (participants only)
-useEffect(() => {
-  if (selectedRole !== "Participant") return;
-  const v = formData.dayChosen;
-  if (v === undefined || v === "") return;
-  const idx = Number(v);
-  if (!Number.isInteger(idx)) return;
+  // If chosen day becomes FULL or ENDED, clear it (participants only)
+  useEffect(() => {
+    if (selectedRole !== "Participant") return;
+    const v = formData.dayChosen;
+    if (v === undefined || v === "") return;
+    const idx = Number(v);
+    if (!Number.isInteger(idx)) return;
 
-  if (dayFull[idx] || dayEnded[idx]) {
-    setFormData((prev) => ({ ...prev, dayChosen: "" }));
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [dayFull, dayEnded, selectedRole]);
+    if (dayFull[idx] || dayEnded[idx]) {
+      setFormData((prev) => ({ ...prev, dayChosen: "" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayFull, dayEnded, selectedRole]);
 
+  const isOngoing = (program?.progressStatus || "").toLowerCase() === "ongoing";
 
-const isOngoing = (program?.progressStatus || "").toLowerCase() === "ongoing";
+  const nowAllowedByWindow = useMemo(() => {
+    if (!program || !isOngoing) return true;
 
-const nowAllowedByWindow = useMemo(() => {
-  if (!program || !isOngoing) return true;
+    const base = program.startDate ? ymdToDateLocal(program.startDate) : null;
+    if (!base) return true;
 
-  const base = program.startDate ? ymdToDateLocal(program.startDate) : null;
-  if (!base) return true;
+    // Single-day: check today's window
+    if (program.eventType === "single") {
+      const theDay = base;
+      return isNowWithinWindow(theDay, program.timeStart, program.timeEnd) && !hasEndedToday(theDay, program.timeEnd);
+    }
 
-  // Single-day: check today's window
-  if (program.eventType === "single") {
-    const theDay = base;
-    return isNowWithinWindow(theDay, program.timeStart, program.timeEnd) && !hasEndedToday(theDay, program.timeEnd);
-  }
+    // Multi-day: only enforce the window if the selected day is *today*
+    const chosen = formData.dayChosen;
+    if (chosen === undefined || chosen === "") return true; // selection not made yet
+    const idx = Number(chosen);
+    if (!Number.isInteger(idx)) return true;
 
-  // Multi-day: only enforce the window if the selected day is *today*
-  const chosen = formData.dayChosen;
-  if (chosen === undefined || chosen === "") return true; // selection not made yet
-  const idx = Number(chosen);
-  if (!Number.isInteger(idx)) return true;
+    const theDay = new Date(base);
+    theDay.setDate(base.getDate() + idx);
 
-  const theDay = new Date(base);
-  theDay.setDate(base.getDate() + idx);
-
-  // If today but ended → false; if today but outside window → false; otherwise true
-  if (hasEndedToday(theDay, program.timeEnd)) return false;
-  return isNowWithinWindow(theDay, program.timeStart, program.timeEnd);
-}, [program?.eventType, program?.progressStatus, program?.startDate, program?.timeStart, program?.timeEnd, formData.dayChosen]);
-
+    // If today but ended → false; if today but outside window → false; otherwise true
+    if (hasEndedToday(theDay, program.timeEnd)) return false;
+    return isNowWithinWindow(theDay, program.timeStart, program.timeEnd);
+  }, [program?.eventType, program?.progressStatus, program?.startDate, program?.timeStart, program?.timeEnd, formData.dayChosen]);
 
   // ------- Capacity checks (server) -------
-const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChosenNum: number | null) => {
-  const progSnap = await getDoc(doc(db, "Programs", programId));
-  if (!progSnap.exists()) throw new Error("Program not found.");
-  const p: any = progSnap.data() || {};
+  const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChosenNum: number | null) => {
+    const progSnap = await getDoc(doc(db, "Programs", programId));
+    if (!progSnap.exists()) throw new Error("Program not found.");
+    const p: any = progSnap.data() || {};
 
-  const statusNow = (p?.progressStatus || "").toString().toLowerCase();
-  if (["rejected", "completed"].includes(statusNow)) {
-    throw new Error(`This program is ${p?.progressStatus}. You can’t add entries.`);
-  }
+    const statusNow = (p?.progressStatus || "").toString().toLowerCase();
+    if (["rejected", "completed"].includes(statusNow)) {
+      throw new Error(`This program is ${p?.progressStatus}. You can’t add entries.`);
+    }
 
-  // ---- NEW: time window enforcement when Ongoing ----
-  if (statusNow === "ongoing") {
-    const sYMD: string | undefined = p?.startDate;
-    const tStart: string | undefined = p?.timeStart;
-    const tEnd: string | undefined = p?.timeEnd;
+    // ---- time window enforcement when Ongoing ----
+    if (statusNow === "ongoing") {
+      const sYMD: string | undefined = p?.startDate;
+      const tStart: string | undefined = p?.timeStart;
+      const tEnd: string | undefined = p?.timeEnd;
 
-    if (sYMD) {
-      const base = ymdToDateLocal(sYMD);
+      if (sYMD) {
+        const base = ymdToDateLocal(sYMD);
+        const day =
+          p?.eventType === "multiple" && dayChosenNum != null
+            ? (() => {
+                const d = ymdToDateLocal(sYMD);
+                d.setDate(d.getDate() + dayChosenNum);
+                return d;
+              })()
+            : ymdToDateLocal(sYMD);
 
-      // Determine which calendar day is being added to
-      const targetDay = p?.eventType === "multiple" && dayChosenNum != null
-        ? new Date(base.setDate(base.getDate() - 0 + dayChosenNum)) // clone via new Date below for clarity
-        : ymdToDateLocal(sYMD);
-
-      // clone base then offset if multi
-      const day = p?.eventType === "multiple" && dayChosenNum != null
-        ? (() => { const d = ymdToDateLocal(sYMD); d.setDate(d.getDate() + dayChosenNum); return d; })()
-        : ymdToDateLocal(sYMD);
-
-      // If target day is today:
-      const now = new Date();
-      if (isSameLocalDay(day, now)) {
-        const within = isNowWithinWindow(day, tStart, tEnd);
-        if (!within) {
-          throw new Error("Walk-ins are only allowed during the scheduled time window today.");
-        }
-        if (hasEndedToday(day, tEnd)) {
-          throw new Error("Selected day has already ended.");
+        const now = new Date();
+        if (isSameLocalDay(day, now)) {
+          const within = isNowWithinWindow(day, tStart, tEnd);
+          if (!within) {
+            throw new Error("Walk-ins are only allowed during the scheduled time window today.");
+          }
+          if (hasEndedToday(day, tEnd)) {
+            throw new Error("Selected day has already ended.");
+          }
         }
       }
     }
-  }
 
     // Volunteers: check volunteer cap only
     if (role === "Volunteer") {
@@ -528,9 +634,7 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
 
     // Per-day cap if multi-day and day chosen
     if (p?.eventType === "multiple" && dayChosenNum !== null) {
-      const noLimitList: boolean[] = Array.isArray(p?.noParticipantLimitList)
-        ? p.noParticipantLimitList
-        : [];
+      const noLimitList: boolean[] = Array.isArray(p?.noParticipantLimitList) ? p.noParticipantLimitList : [];
       const perDayNoLimit = Boolean(noLimitList?.[dayChosenNum]);
       if (!perDayNoLimit) {
         const dayCaps: any[] = Array.isArray(p?.participantDays) ? p.participantDays : [];
@@ -597,27 +701,16 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
     if (!programId) return;
     setSaving(true);
     try {
-
-    if (!nowAllowedByWindow) {
-      throw new Error("Walk-ins are only allowed during the scheduled time window today.");
-    }
+      if (!nowAllowedByWindow) {
+        throw new Error("Walk-ins are only allowed during the scheduled time window today.");
+      }
 
       validateReqForm();
 
+      // (Optional existence check; recheckCapacityServer will also load the program)
       const progRef = doc(db, "Programs", programId);
       const progSnap = await getDoc(progRef);
       if (!progSnap.exists()) throw new Error("Program not found.");
-
-      // Resident duplicate guard (any role)
-      if (resident?.id) {
-        const dupQ = query(
-          collection(db, "ProgramsParticipants"),
-          where("programId", "==", programId),
-          where("residentId", "==", resident.id)
-        );
-        const dupSnap = await getDocs(dupQ);
-        if (!dupSnap.empty) throw new Error("This resident is already enlisted in this program.");
-      }
 
       // Day chosen parse (keep 0 as Day 1)
       const disabledSingle = program?.eventType === "single";
@@ -627,8 +720,41 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
           ? Number(dayChosenStr)
           : null;
 
-      // Capacity checks
       const p = await recheckCapacityServer(selectedRole, dayChosenNum);
+
+
+      if (resident?.id) {
+        if (selectedRole === "Participant" && p?.eventType === "multiple" && dayChosenNum !== null) {
+          // Fetch all participant docs for this resident & program
+          const priorQ = query(
+            collection(db, "ProgramsParticipants"),
+            where("programId", "==", programId),
+            where("residentId", "==", resident.id),
+            where("role", "==", "Participant")
+          );
+          const priorSnap = await getDocs(priorQ);
+
+          // If none -> allowed (covers: "not in ParticipantsLists at all")
+          if (!priorSnap.empty) {
+            // Block only if same day already enlisted
+            const sameDay = priorSnap.docs.find((d) => (d.data()?.dayChosen ?? null) === dayChosenNum);
+            if (sameDay) {
+              throw new Error(`This resident is already enlisted for Day ${dayChosenNum + 1}.`);
+            }
+
+          }
+        } else {
+          const dupQ = query(
+            collection(db, "ProgramsParticipants"),
+            where("programId", "==", programId),
+            where("residentId", "==", resident.id)
+          );
+          const dupSnap = await getDocs(dupQ);
+          if (!dupSnap.empty) {
+            throw new Error("This resident is already enlisted in this program.");
+          }
+        }
+      }
 
       const firstName = formData.firstName ?? (resident ? resident.firstName || "" : "");
       const lastName = formData.lastName ?? (resident ? resident.lastName || "" : "");
@@ -645,6 +771,22 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
       if (needsValidId && !uploadedFiles.validIDjpg && residentValidIdUrl) {
         const autoFiles = await maybeUploadResidentValidID(uidTag);
         uploadedFiles = { ...uploadedFiles, ...autoFiles };
+      }
+
+      if (anyAttended) {
+        throw new Error("This resident has already attended a day for this program.");
+      }
+
+      if (
+        typeof dayChosenNum === 'number' &&
+        upcomingBookedSet.size > 0 &&
+        !upcomingBookedSet.has(dayChosenNum)
+      ) {
+        throw new Error("This resident already has a future booking for another day.");
+      }
+
+      if (typeof dayChosenNum === 'number' && priorDaySet.has(dayChosenNum)) {
+        throw new Error(`This resident is already enlisted for Day ${dayChosenNum + 1}.`);
       }
 
       await addDoc(collection(db, "ProgramsParticipants"), {
@@ -666,11 +808,8 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
         dateOfBirth: dateOfBirth || "",
         age: computedAge ?? null,
 
-        // Only include dayChosen if:
-        // - program is multi-day AND
-        // - a day was selected AND
-        // - role is Participant
-        ...(program?.eventType === "multiple" &&
+
+        ...(p?.eventType === "multiple" &&
         dayChosenNum !== null &&
         selectedRole === "Participant"
           ? { dayChosen: dayChosenNum }
@@ -689,14 +828,9 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
     }
   };
 
-
-    // --- Auto-fill kept (participants only). Leave disabled in UI by default. ---
   const [autoFillLoading, setAutoFillLoading] = useState(false);
   if (!isOpen) return null;
 
-
-
-  // Helpers for day selector UI
   const disabledSingle = program?.eventType === "single";
   const days = program?.participantDays ?? [];
   const start = program?.startDate ? new Date(program.startDate) : null;
@@ -739,10 +873,8 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
                 {/* ------- DETAILS ------- */}
                 {activeSection === "details" && (
                   <>
-                    
                     <div className="walkin-details-section">
                       <div className="walkin-details-top">
-
                         {/* Day selector — ALWAYS visible; disabled for single-day */}
                         <div className="fields-section-walkin" key="tf-dayChosen" style={{ marginBottom: 12 }}>
                           <p>
@@ -756,26 +888,29 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
                             className="walkin-input-field-day-chosen"
                             value={formData.dayChosen ?? ""}
                             onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
-                            disabled={disabledSingle}
-                            title={disabledSingle ? "One-day event only" : undefined}
+                            disabled={disabledSingle || lockDaySelection}
+                            title={
+                              disabledSingle
+                                ? "One-day event only"
+                                : lockDaySelection
+                                ? "Day is bound to the parent selection"
+                                : undefined
+                            }
                           >
                             <option value="">
                               {disabledSingle ? "One-day event only" : "Select a day"}
                             </option>
 
-                            {/* For single-day we still render choices (purely visual),
-                                but disabled state prevents selection */}
                             {(days.length ? days : [null]).map((_, idx) => {
                               const dIdx = days.length ? idx : 0;
                               let label = `Day ${dIdx + 1}`;
-                              let optionDisabled = disabledSingle;
+                              let optionDisabled = disabledSingle || lockDaySelection;
 
                               if (start) {
                                 const optionDate = new Date(start);
                                 optionDate.setDate(start.getDate() + dIdx);
 
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
+                                const today = new Date(); today.setHours(0, 0, 0, 0);
                                 optionDate.setHours(0, 0, 0, 0);
 
                                 const isPast = optionDate < today;
@@ -790,10 +925,14 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
                                   label += " — Day Ended";
                                   optionDisabled = true;
                                 }
-
-                                // If today AND program is Ongoing AND we're currently outside time window, disable
                                 if (isSameLocalDay(optionDate, today) && isOngoing && !isNowWithinWindow(optionDate, program?.timeStart, program?.timeEnd)) {
                                   label += " — Outside Time Window";
+                                  optionDisabled = true;
+                                }
+
+                                const priorGate = isDayDisabledByPrior(dIdx);
+                                if (priorGate.disabled) {
+                                  label += priorGate.reason ? ` — ${priorGate.reason}` : "";
                                   optionDisabled = true;
                                 }
 
@@ -819,37 +958,36 @@ const recheckCapacityServer = async (role: "Participant" | "Volunteer", dayChose
                         {/* Role selector */}
                         <div className="role-selection-section">
                           <p className="program-role-label"> Role <span className="required">*</span></p>
-                            <p className="role-label">{LABELS.role}</p>
-                            <div className="role-options">
-                              <label className="role-option">
-                                <div className="orange-radio">
-                                  <input
-                                    type="radio"
-                                    name="walkin-role"
-                                    value="Participant"
-                                    checked={selectedRole === "Participant"}
-                                    onChange={() => setSelectedRole("Participant")}
-                                  />
-                                </div>
-                                Participant
-                              </label>
-                              <label className="role-option">
-                                <div className="orange-radio">
-                                  <input
-                                    type="radio"
-                                    name="walkin-role"
-                                    value="Volunteer"
-                                    checked={selectedRole === "Volunteer"}
-                                    onChange={() => setSelectedRole("Volunteer")}
-                                  />
-                                </div>  
-                                Volunteer
-                              </label>
-                            </div>
+                          <p className="role-label">{LABELS.role}</p>
+                          <div className="role-options">
+                            <label className="role-option">
+                              <div className="orange-radio">
+                                <input
+                                  type="radio"
+                                  name="walkin-role"
+                                  value="Participant"
+                                  checked={selectedRole === "Participant"}
+                                  onChange={() => setSelectedRole("Participant")}
+                                />
+                              </div>
+                              Participant
+                            </label>
+                            <label className="role-option">
+                              <div className="orange-radio">
+                                <input
+                                  type="radio"
+                                  name="walkin-role"
+                                  value="Volunteer"
+                                  checked={selectedRole === "Volunteer"}
+                                  onChange={() => setSelectedRole("Volunteer")}
+                                />
+                              </div>
+                              Volunteer
+                            </label>
+                          </div>
                         </div>
-
-                      
                       </div>
+
                       <div className="walkin-details-bottom">
                         <div className="walkin-content-left-side">
                           {visibleTextFields
