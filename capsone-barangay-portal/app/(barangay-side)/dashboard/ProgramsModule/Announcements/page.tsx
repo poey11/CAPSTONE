@@ -6,6 +6,48 @@ import {useSession} from "next-auth/react";
 import { addDoc, collection, onSnapshot, deleteDoc, doc} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db,storage } from "@/app/db/firebase";
+
+
+const pad2 = (n: number) => n.toString().padStart(2, "0");
+
+const formatDate12 = (date: Date): string => {
+  const mm = pad2(date.getMonth() + 1);
+  const dd = pad2(date.getDate());
+  const yy = date.getFullYear().toString().slice(-2);
+
+  let hours = date.getHours();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  if (hours === 0) hours = 12; 
+
+  const HH = pad2(hours);
+  const MM = pad2(date.getMinutes());
+  const SS = pad2(date.getSeconds());
+
+  return `${mm}/${dd}/${yy} ${HH}:${MM}:${SS} ${ampm}`;
+};
+
+const parseCreatedAtToDate = (s: string): Date | null => {
+  const m = s.match(
+    /^(\d{2})\/(\d{2})\/(\d{2}) (\d{2}):(\d{2}):(\d{2}) (AM|PM)$/
+  );
+  if (!m) return null;
+  const [, mmStr, ddStr, yyStr, hStr, miStr, ssStr, ap] = m;
+  const mm = parseInt(mmStr, 10);
+  const dd = parseInt(ddStr, 10);
+  const yy = parseInt(yyStr, 10);
+  let h = parseInt(hStr, 10) % 12;
+  if (ap === "PM") h += 12;
+
+  const year = 2000 + yy; // 
+  const mi = parseInt(miStr, 10);
+  const ss = parseInt(ssStr, 10);
+  return new Date(year, mm - 1, dd, h, mi, ss);
+};
+
+const dateKey = (d: Date) =>
+  `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
 interface AnnouncementHeader {
   id: string;
   announcementHeadline: string;
@@ -92,7 +134,7 @@ export default function AnnouncementModule() {
   }, []);
 
   const [newAnnouncement, setNewAnnouncement] = useState<AnnouncementFormProps>({
-    createdAt: new Date().toLocaleString(),
+    createdAt: formatDate12(new Date()),
     createdBy: user?.fullName || "",
     category: "Public Advisory",
     isInFeatured: "Active",
@@ -167,7 +209,7 @@ export default function AnnouncementModule() {
     setAnnouncementFile(null);
     setAnnouncementPreview(null);
     setNewAnnouncement({
-      createdAt: new Date().toLocaleString(),
+      createdAt: formatDate12(new Date()),
       createdBy: user?.fullName || "",
       category: "Public Advisory",
       isInFeatured: "Inactive",
@@ -511,7 +553,7 @@ useEffect(() => {
 
             <div className={`add-announcements-profile-container ${invalidFields.includes("image") ? "input-error" : ""}`}>
               <img
-                src={announcementPreview || "/Images/thumbnail.png"} 
+                src={announcementPreview || "/images/thumbnail.png"} 
                 alt="Announcement"
                 className="add-announcements-photo"
               />
