@@ -798,14 +798,14 @@ export default function ProgramDetails() {
               <div className="program-redirection-icons-section">
                 <img src="/Images/generatedoc.png" alt="approve" className="program-redirection-icons-info" />
               </div>
-              <h1>Approve Requested Program</h1>
+              <h1>Approve Suggested Program</h1>
             </button>
 
             <button className="program-redirection-buttons" onClick={() => setShowRejectPopup(true)}>
               <div className="program-redirection-icons-section">
                 <img src="/Images/rejected.png" alt="reject" className="program-redirection-icons-info" />
               </div>
-              <h1>Reject Requested Program</h1>
+              <h1>Reject Suggested Program</h1>
             </button>
           </>
         )}
