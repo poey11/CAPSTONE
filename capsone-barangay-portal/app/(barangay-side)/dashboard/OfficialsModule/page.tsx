@@ -414,13 +414,16 @@ useEffect(() => {
   const officialValidityChecker = async () => {
     for (const element of displayedOfficials) {
       try {
-        // element.id here refers to the user UID stored inside the document field
-        const userId = element.userId; 
-        
-        // Check if a corresponding BarangayUser document exists
+        const userId = element.userId;
+
+        if (!userId) {
+          console.warn(`⚠️ Skipping official ${element.name || element.id} – missing userId.`);
+          continue;
+        }
+
         const docRef = doc(db, "BarangayUsers", userId);
         const docSnap = await getDoc(docRef);
-        
+
         if (!docSnap.exists()) {
           notifcationToSecandAssSec(element.name, element.position, "B");
           console.log(`🗑️ Deleting orphaned official: ${element.name || userId}`);
@@ -429,7 +432,6 @@ useEffect(() => {
             await deleteObject(ref(storage, element.image));
           }
 
-          // Delete the DisplayedOfficials document using its Firestore ID
           await deleteDoc(doc(db, "DisplayedOfficials", element.id));
         } else {
           console.log(`✅ Valid official: ${element.name || userId}`);
