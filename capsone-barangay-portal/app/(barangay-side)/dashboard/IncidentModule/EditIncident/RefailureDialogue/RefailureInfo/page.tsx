@@ -263,7 +263,7 @@ export default function RefailureInfo() {
             to: staffContactNos,
             message:  `Good day Mr./Ms. ${staffName} ${staffLastName},\n\nThis is to formally inform you that the Lupon Tagapamayapa of Barangay Fairview has prepared a
                 Refailure letter that requires your attention.\n\nYou are requested to proceed to the Lupon office on ${DateOfDelivery}
-                to retrieve the said document. Once received, kindly ensure its prompt delivery to both the respondent and the complainant involved in the case.
+                to retrieve the said document and deliver it to the recipient. Once received, kindly ensure its prompt delivery to the respondent involved in the case.
                 \n\nThis letter contains important information regarding the scheduled dialogue, and your assistance in facilitating its delivery is greatly appreciated.
                 \n\nShould you have any questions or need further clarification, please contact the Barangay Hall.\n\nThank you for your cooperation.
                 \n\nSincerely,\nLupon Tagapamayapa\nBarangay Fairview`
