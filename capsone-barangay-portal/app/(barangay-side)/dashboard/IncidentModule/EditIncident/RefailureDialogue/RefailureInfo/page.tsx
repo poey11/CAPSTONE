@@ -612,7 +612,7 @@ export default function RefailureInfo() {
                                     `${reportData?.respondent?.fname ?? ""} ${reportData?.respondent?.lname ?? ""}`,
                                     "dialogue"
                                 );
-                                //handleSMSNotification();
+                                handleSMSNotification();
                                 }}
                             >
                                 Print
