@@ -319,7 +319,7 @@ const handleSubmitClick = async () => {
 
       setPopupMessage("Online Report Submitted Succesfuly!!");
       setShowPopup(true);
-      //await handleSMSToAssignedOfficer(); // Send SMS to assigned officer
+      await handleSMSToAssignedOfficer(); // Send SMS to assigned officer
       
       const docId = await handleSubmit(fakeEvent as unknown as React.FormEvent<HTMLFormElement>);
 
