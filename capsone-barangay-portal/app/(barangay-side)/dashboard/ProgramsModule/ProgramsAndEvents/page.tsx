@@ -732,13 +732,13 @@ const currentPrograms = sortedPrograms.slice(indexOfFirst, indexOfLast);
         // Nice fallback text if time missing
         const timeForSms = formattedTime || "the scheduled start time";
 
-        // await sendApprovedSMS(
-        //   participant.contactNumber || "",
-        //   participant.fullName || "",
-        //   participant.programName || "",
-        //   role,
-        //   timeForSms
-        // );
+        await sendApprovedSMS(
+          participant.contactNumber || "",
+          participant.fullName || "",
+          participant.programName || "",
+          role,
+          timeForSms
+        );
       }
     } catch (e) {
       showToast("error", "Failed to approve participant.");
@@ -780,7 +780,7 @@ message: `Good day, ${fullName}. We regret to inform you that your registration 
       showToast("success", "Participant rejected.");
       const participant = participantsListsData.find((p) => p.id === id);
       if (participant) {
-        // sendRejectionSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", reason, participant.role||""); // send rejection SMS
+         sendRejectionSMS(participant.contactNumber || "", participant.fullName || "", participant.programName || "", reason, participant.role||""); // send rejection SMS
       }
     } catch {
       showToast("error", "Failed to reject participant.");
