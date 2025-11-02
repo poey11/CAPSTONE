@@ -96,7 +96,8 @@ export default function EditResident() {
     emailAddress: "full",
     precinctNumber: "full",
     verificationFiles: "others",
-    typeOfDisability: "others", // NEW
+    typeOfDisability: "others",
+    pwdIdFile: "others",    
   };
 
   //const [file, setFile] = useState<File | null>(null);
@@ -296,19 +297,23 @@ export default function EditResident() {
       return;
     }
 
-    if (name === "isPWD") {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData((prev) => ({
-        ...prev,
-        isPWD: checked,
-        ...(checked ? {} : { pwdType: "", pwdTemporaryUntil: "", typeOfDisability: "" }),
-      }));
-      if (!checked) {
-        setPwdIdFile(null);
-        setPwdIdPreview(formData.pwdIdFileURL ? formData.pwdIdFileURL : null);
-      }
-      return;
-    }
+if (name === "isPWD") {
+  const checked = (e.target as HTMLInputElement).checked;
+  setFormData((prev) => ({
+    ...prev,
+    isPWD: checked,
+    ...(checked
+      ? {}
+      : { pwdType: "", pwdTemporaryUntil: "", typeOfDisability: "", pwdIdFileURL: "" }
+    ),
+  }));
+  if (!checked) {
+    setPwdIdFile(null);
+    setPwdIdPreview(null);
+  }
+  return;
+}
+
 
     setFormData((prevData) => {
       let updatedData = {
@@ -359,7 +364,11 @@ export default function EditResident() {
     // extra PWD validation
     if (formData.isPWD) {
       if (!formData.pwdType) invalidFields.push("pwdType");
-      // require disability type (and manual text if Others)
+
+      const hasPwdId = !!pwdIdFile || !!formData.pwdIdFileURL;
+      if (!hasPwdId) invalidFields.push("pwdIdFile");
+
+      // existing disability type checks...
       if (!formData.typeOfDisability) {
         invalidFields.push("typeOfDisability");
       } else if (
