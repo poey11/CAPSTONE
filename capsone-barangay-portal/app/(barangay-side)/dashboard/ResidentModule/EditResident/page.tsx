@@ -63,7 +63,6 @@ export default function EditResident() {
     "South Fairview": ["AKAP", "ARNAI", "F.L.N.A", "FEWRANO", "UPPER CORVETTE HOA"],
   };
 
-  // DOH-recognized disability categories (PRPWD/DOH-aligned + common LGU reporting)
   const DOH_DISABILITY_OPTIONS = [
     "Deaf or Hard of Hearing",
     "Intellectual Disability",
@@ -285,7 +284,6 @@ export default function EditResident() {
     const { name, value, type } = e.target;
     const newValue = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
 
-    // 🔵 Intercept for confirmation-required fields
     if (name === "dateOfBirth" && typeof newValue === "string") {
       // Ask for confirmation; do NOT update state yet
       requestFieldChange("dateOfBirth", newValue);
