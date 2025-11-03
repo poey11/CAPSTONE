@@ -21,7 +21,9 @@ type Participant = {
   programName?: string;
   idImageUrl?: string; // legacy single-ID field
   role?: string;
+  dayChosen?: number; // 0-based index (0 = Day 1)
 };
+
 
 type SimpleField = { name: string };
 
@@ -166,6 +168,8 @@ export default function ViewApprovedParticipantModal({
 
   const roleValue = (fieldsMap.role || "") as string;
   const isVolunteer = roleValue?.trim().toLowerCase() === "volunteer";
+  const isParticipantRole = roleValue.trim().toLowerCase() === "participant";
+
 
   // For Volunteers, allow only PRETTY text fields (excluding file keys and derived "age")
   const PRETTY_TEXT_KEYS_SET = useMemo(() => {
@@ -195,12 +199,19 @@ export default function ViewApprovedParticipantModal({
 
   // Build ordered text fields to show: program-defined order; if none, fallback to common fields
   const orderedTextNames: string[] = useMemo(() => {
-    if (reqTextFields.length > 0) return reqTextFields.map((f) => f.name);
-    // fallback order if program has no config (include DOB if present)
-    const base = ["firstName", "lastName", "contactNumber", "emailAddress", "location"];
-    if (dobValue) base.push("dateOfBirth");
-    return base;
+    let names: string[];
+
+    if (reqTextFields.length > 0) {
+      names = reqTextFields.map((f) => f.name);
+    } else {
+      const base = ["firstName", "lastName", "contactNumber", "emailAddress", "location"];
+      if (dobValue) base.push("dateOfBirth");
+      names = base;
+    }
+
+    return names.filter((name) => name !== "dayChosen");
   }, [reqTextFields, dobValue]);
+
 
   // Filter text fields if Volunteer (only PRETTY labels)
   const filteredTextNames: string[] = useMemo(() => {
@@ -244,6 +255,15 @@ export default function ViewApprovedParticipantModal({
   const isPdfUrl = (url: string) => url?.toLowerCase().includes(".pdf");
 
   if (!isOpen || !participant) return null;
+
+  const dayChosenIndex =
+  typeof fullDoc?.dayChosen === "number"
+    ? fullDoc.dayChosen
+    : typeof participant?.dayChosen === "number"
+    ? participant.dayChosen
+    : 0; // default index 0 means Day 1
+
+const dayChosenLabel = `Day ${dayChosenIndex + 1}`;
 
   return (
     <>
@@ -343,6 +363,17 @@ export default function ViewApprovedParticipantModal({
                                       readOnly
                                     />
                                   </div>
+                                  {isParticipantRole && (
+                                    <div className="view-participant-fields-section">
+                                    <p>Day Chosen</p>
+                                    <input
+                                      type="text"
+                                      className="view-participant-input-field"
+                                      value={dayChosenLabel}
+                                      readOnly
+                                    />
+                                    </div>
+                                  )}
                                 </React.Fragment>
                               );
                             }
@@ -362,7 +393,8 @@ export default function ViewApprovedParticipantModal({
                                   type={
                                     name.toLowerCase().includes("email")
                                       ? "email"
-                                      : name.toLowerCase().includes("contact") || name.toLowerCase().includes("phone")
+                                      : name.toLowerCase().includes("contact") ||
+                                        name.toLowerCase().includes("phone")
                                       ? "tel"
                                       : "text"
                                   }
@@ -373,6 +405,7 @@ export default function ViewApprovedParticipantModal({
                               </div>
                             );
                           })}
+
                         </div>
                       )}
                     </div>

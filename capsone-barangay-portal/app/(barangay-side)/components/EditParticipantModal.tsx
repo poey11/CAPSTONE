@@ -22,6 +22,7 @@ type Participant = {
   programName?: string;
   idImageUrl?: string; // legacy single-ID field
   role?: string;
+  dayChosen?: number; // 0-based day index (optional)  
 };
 
 type Props = {
@@ -112,6 +113,8 @@ export default function EditParticipantModal({
 
   const roleValue = fieldsMap.role || "";
   const isVolunteer = roleValue.trim().toLowerCase() === "volunteer";
+  const isParticipantRole = roleValue.trim().toLowerCase() === "participant";
+
 
   // Requirements: file URLs. validIDjpg first, then others alpha.
   const filesMap: Record<string, string> = useMemo(() => {
@@ -389,6 +392,19 @@ export default function EditParticipantModal({
                             readOnly
                           />
                         </div>
+
+                      {isParticipantRole && (
+                        <div className="view-participant-fields-section">
+                          <p>Day Chosen</p>
+                          <input
+                            type="text"
+                            className="view-participant-input-field"
+                            value={`Day ${((fullDoc?.dayChosen ?? participant?.dayChosen ?? 0) as number) + 1}`}
+                            readOnly
+                          />
+                        </div>
+                      )}
+
 
                         <div className="view-participant-fields-section">
                           <p>Role</p>
