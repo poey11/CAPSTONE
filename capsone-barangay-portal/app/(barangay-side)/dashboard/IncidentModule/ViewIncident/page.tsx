@@ -329,7 +329,7 @@ const thirdHearing = hearingData?.length > 2 ? hearingFormDataA(hearingData[2], 
       <div className="view-incident-main-content">
         <div className="view-incident-main-section1">
             <div className="view-incident-header-first-section">
-              <img src="/Images/QClogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
+              <img src="/Images/QCLogo.png" alt="QC Logo" className="logo1-image-side-bar-1" />
             </div>
 
             <div className="view-incident-header-second-section">

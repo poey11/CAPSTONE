@@ -241,7 +241,7 @@ export default function ViewUser() {
             <div className="view-user-main-content">
                 <div className="view-user-main-section1">
                     <div className="view-user-header-first-section">
-                        <img src="/Images/QClogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
+                        <img src="/Images/QCLogo.png" alt="QC Logo" className="user-logo1-image-side-bar-1" />
                     </div>
 
                     <div className="view-user-header-second-section">
