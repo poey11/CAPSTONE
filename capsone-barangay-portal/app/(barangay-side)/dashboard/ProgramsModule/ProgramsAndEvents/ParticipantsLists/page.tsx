@@ -621,6 +621,15 @@ const getResidentDisableInfo = (residentId?: string) => {
     }
   };
 
+const allowedAttendanceRoles = ["Secretary", "Assistant Secretary", "Admin Staff"];
+
+const canUserEditAttendance = useMemo(() => {
+  const pos = (user as any)?.position || "";
+  return allowedAttendanceRoles.includes(pos);
+}, [user]);
+
+  
+
   const openAddPopup = async () => {
     // Defensive block even though the button is hidden already
     if (isSelectedDayEnded) {
@@ -1030,7 +1039,10 @@ const openResidentForm = async (resident: Resident) => {
                   {filteredParticipants.map((p) => {
                     const name = p.fullName || `${p.firstName || ""} ${p.lastName || ""}`.trim();
                     const timeGate = canEditAttendanceByTime(p);
-                    const canEditNow = isAttendanceEditable && timeGate; // still only editable when Ongoing + within time window
+                    const canEditNow =
+                      isAttendanceEditable &&       // program must be Ongoing
+                      timeGate &&                   // within time window
+                      canUserEditAttendance;  
 
                     return (
                       <tr
@@ -1055,6 +1067,8 @@ const openResidentForm = async (resident: Resident) => {
                               title={
                                 canEditNow
                                   ? "Mark attendance"
+                                  : !canUserEditAttendance
+                                  ? "You are not authorized to modify attendance."
                                   : (programStatus || "").toLowerCase() === "completed"
                                   ? "Read-only (program completed)"
                                   : !timeGate
