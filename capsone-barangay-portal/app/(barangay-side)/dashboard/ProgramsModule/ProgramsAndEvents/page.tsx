@@ -25,7 +25,10 @@ type Program = {
   createdAt?: Timestamp | null;
   dateCreated: string;
   startDate: string;
-  timeStart: string
+  timeStart: string;
+  eventType?: "single" | "multiple";
+  endDate?: string;
+  timeEnd?: string;  
 };
 
 type Participant = {
@@ -44,6 +47,7 @@ type Participant = {
   programName?: string; // kept for display/search
   idImageUrl?: string;
   approvalStatus?: "Pending" | "Approved" | "Rejected";
+  dayChosen?: number;  
 };
 
 type ParticipantRecord = {
@@ -343,6 +347,9 @@ export default function ProgramsModule() {
             dateCreated,
             startDate,
             timeStart: d.timeStart || "",
+            eventType: d.eventType || "single",
+            endDate: d.endDate || "",
+            timeEnd: d.timeEnd || "",            
           });
         });
 
@@ -377,7 +384,7 @@ export default function ProgramsModule() {
           list.push({
             id: docu.id,
             programId: d.programId ?? d.programID ?? "",
-            residentId: d.residentId ?? "",  // <<— pick up programId
+            residentId: d.residentId ?? "",
             fullName: d.fullName ?? "",
             firstName: d.firstName ?? "",
             lastName: d.lastName ?? "",
@@ -390,6 +397,8 @@ export default function ProgramsModule() {
             idImageUrl: d.idImageUrl ?? "",
             approvalStatus: d.approvalStatus ?? "Pending",
             role: d.role ?? "",
+            dayChosen:
+              typeof d.dayChosen === "number" ? d.dayChosen : undefined,
           });
         });
         setParticipantsListsData(list);
@@ -401,6 +410,7 @@ export default function ProgramsModule() {
     );
     return () => unsub();
   }, []);
+
 
   // Section routing sync — enforce role access on URL
   const handleSectionSwitch = (section: "main" | "programs" | "participants") => {
@@ -787,114 +797,181 @@ message: `Good day, ${fullName}. We regret to inform you that your registration 
     }
   };
 
-const autoRejectRunning = useRef(false);
+  
 
   const allProgramsForMap = useMemo(
     () => [...programs, ...programsAssignedData],
     [programs, programsAssignedData]
   );
 
-  const programInfoMap = useMemo(() => {
-    const m = new Map<string, { name: string; status: Program["progressStatus"] }>();
-    allProgramsForMap.forEach((p) =>
-      m.set(p.id, { name: p.programName, status: p.progressStatus })
-    );
-    return m;
-  }, [allProgramsForMap]);
+const programInfoMap = useMemo(() => {
+  const m = new Map<
+    string,
+    {
+      name: string;
+      status: Program["progressStatus"];
+      eventType?: Program["eventType"];
+      startDate?: string;
+      endDate?: string;
+      timeEnd?: string;
+    }
+  >();
+  allProgramsForMap.forEach((p) =>
+    m.set(p.id, {
+      name: p.programName,
+      status: p.progressStatus,
+      eventType: p.eventType,
+      startDate: p.startDate,
+      endDate: p.endDate,
+      timeEnd: p.timeEnd,
+    })
+  );
+  return m;
+}, [allProgramsForMap]);
 
-  const ongoingOrCompletedProgramIds = useMemo(() => {
-    return new Set(
-      allProgramsForMap
-        .filter((p) => p.progressStatus === "Ongoing" || p.progressStatus === "Completed")
-        .map((p) => p.id)
-    );
-  }, [allProgramsForMap]);
 
-  useEffect(() => {
-    if (loadingParticipants || loadingPrograms) return;
-    if (autoRejectRunning.current) return;
+const autoRejectRunning = useRef(false);
 
-    const toReject = participantsListsData.filter((pp) => {
-      const isPending = (pp.approvalStatus ?? "Pending") === "Pending";
-      const pid = (pp.programId || "").trim();
-      return isPending && pid && ongoingOrCompletedProgramIds.has(pid);
-    });
-    if (toReject.length === 0) return;
+const startOfToday = () => {
+  const t = new Date();
+  t.setHours(0, 0, 0, 0);
+  return t;
+};
 
-    const run = async () => {
-      autoRejectRunning.current = true;
-      try {
-        // ✅ Fetch resident UID map
-        const residentIds = toReject.map((p) => p.residentId || "").filter(Boolean);
-        const residentUidMap = await fetchResidentUidMap(residentIds);
+useEffect(() => {
+  if (loadingParticipants || loadingPrograms) return;
+  if (autoRejectRunning.current) return;
 
-        // ✅ Batch updates + notifications
-        const CHUNK = 200;
-        for (let i = 0; i < toReject.length; i += CHUNK) {
-          const slice = toReject.slice(i, i + CHUNK);
-          const batch = writeBatch(db);
+  const toReject = participantsListsData.filter((pp) => {
+    const isPending = (pp.approvalStatus ?? "Pending") === "Pending";
+    const pid = (pp.programId || "").trim();
+    if (!isPending || !pid) return false;
 
-          slice.forEach((pp) => {
-            const ref = doc(db, "ProgramsParticipants", pp.id);
-            batch.update(ref, {
-              approvalStatus: "Rejected",
-              rejectionReason:
-                "Automatically rejected: program is already Ongoing/Completed.",
-              autoRejectedAt: serverTimestamp(),
-              autoRejectedBy: user?.email || "system",
-            });
+    const pinfo = programInfoMap.get(pid);
+    if (!pinfo) return false;
 
-            const pinfo = programInfoMap.get(pp.programId || "");
-            const pStatus = pinfo?.status || "Ongoing";
-            const pName = pinfo?.name || pp.programName || "";
-            const residentUid =
-              pp.residentId && residentUidMap.has(pp.residentId)
-                ? residentUidMap.get(pp.residentId)
-                : null;
+    const status = pinfo.status;
+    const eventType = pinfo.eventType || "single";
 
-            const notifRef = doc(collection(db, "Notifications"));
-            batch.set(notifRef, {
-              residentID: residentUid || null,
-              participantID: pp.id,
-              programId: pp.programId || null,
-              programName: pName || "",
-              role: pp.role || "Participant",
-              message: `Your registration for ${pName || "the program"} as ${
-                pp.role || "Participant"
-              } has been rejected due to the program being ${pStatus}. You can still participate by registering at the site.`,
-              timestamp: serverTimestamp(),
-              transactionType: "Program Registration",
-              isRead: false,
-            });
+    if (status === "Completed") return true;
+
+    if (status === "Ongoing" && eventType === "single") return true;
+
+    if (status === "Ongoing") {
+      // try to detect eventType properly if missing
+      const inferredType =
+        pinfo.eventType ||
+        (pinfo.endDate && pinfo.endDate !== pinfo.startDate ? "multiple" : "single");
+      const eventType = inferredType || "single";
+
+      if (eventType === "single") return true;
+
+      if (eventType === "multiple") {
+        const idx = typeof pp.dayChosen === "number" ? pp.dayChosen : null;
+        const baseYMD = pinfo.startDate || "";
+        if (!baseYMD || idx == null) return true;
+
+        const [y, m, d] = baseYMD.split("-").map(Number);
+        const base = new Date(y, (m ?? 1) - 1, d ?? 1);
+        base.setHours(0, 0, 0, 0);
+
+        const dayDate = new Date(base);
+        dayDate.setDate(base.getDate() + idx);
+        dayDate.setHours(0, 0, 0, 0);
+
+        const today = startOfToday();
+
+        // ❌ Only reject if chosen day is before today
+        if (dayDate < today) return true;
+
+        // ✅ Keep pending if today or later
+        return false;
+      }
+    }
+
+
+    // Upcoming or other states → don't auto-reject
+    return false;
+  });
+
+  if (toReject.length === 0) return;
+
+  const run = async () => {
+    autoRejectRunning.current = true;
+    try {
+      const residentIds = toReject
+        .map((p) => p.residentId || "")
+        .filter(Boolean);
+      const residentUidMap = await fetchResidentUidMap(residentIds);
+
+      const CHUNK = 200;
+      for (let i = 0; i < toReject.length; i += CHUNK) {
+        const slice = toReject.slice(i, i + CHUNK);
+        const batch = writeBatch(db);
+
+        slice.forEach((pp) => {
+          const ref = doc(db, "ProgramsParticipants", pp.id);
+          batch.update(ref, {
+            approvalStatus: "Rejected",
+            rejectionReason:
+              "Automatically rejected: the schedule for your chosen day has already passed.",
+            autoRejectedAt: serverTimestamp(),
+            autoRejectedBy: user?.email || "system",
           });
 
-          await batch.commit();
-        }
+          const pinfo = programInfoMap.get(pp.programId || "");
+          const pStatus = pinfo?.status || "Ongoing";
+          const pName = pinfo?.name || pp.programName || "";
+          const residentUid =
+            pp.residentId && residentUidMap.has(pp.residentId)
+              ? residentUidMap.get(pp.residentId)
+              : null;
 
-        showToast(
-          "success",
-          `Auto-rejected ${toReject.length} pending participant${
-            toReject.length > 1 ? "s" : ""
-          } for ongoing/completed programs.`,
-          3000
-        );
-      } catch (e) {
-        console.error("Auto-reject failed:", e);
-        showToast("error", "Auto-reject failed for some participants.");
-      } finally {
-        autoRejectRunning.current = false;
+          const notifRef = doc(collection(db, "Notifications"));
+          batch.set(notifRef, {
+            residentID: residentUid || null,
+            participantID: pp.id,
+            programId: pp.programId || null,
+            programName: pName || "",
+            role: pp.role || "Participant",
+            message: `Your registration for ${
+              pName || "the program"
+            } as ${
+              pp.role || "Participant"
+            } has been rejected because the schedule for your chosen day has already passed. You may still participate by registering onsite if allowed.`,
+            timestamp: serverTimestamp(),
+            transactionType: "Program Registration",
+            isRead: false,
+          });
+        });
+
+        await batch.commit();
       }
-    };
 
-    void run();
-  }, [
-    loadingParticipants,
-    loadingPrograms,
-    participantsListsData,
-    ongoingOrCompletedProgramIds,
-    programInfoMap,
-    user?.email,
-  ]);
+      showToast(
+        "success",
+        `Auto-rejected ${toReject.length} pending participant${
+          toReject.length > 1 ? "s" : ""
+        } whose chosen day has already passed.`,
+        3000
+      );
+    } catch (e) {
+      console.error("Auto-reject failed:", e);
+      showToast("error", "Auto-reject failed for some participants.");
+    } finally {
+      autoRejectRunning.current = false;
+    }
+  };
+
+  void run();
+}, [
+  loadingParticipants,
+  loadingPrograms,
+  participantsListsData,
+  programInfoMap,
+  user?.email,
+]);
+
 
   // participant report
 

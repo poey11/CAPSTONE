@@ -56,11 +56,6 @@ const LOCKABLE_PREDEFINED = new Set([
   "dateOfBirth",
 ]);
 
-
-
-
-
-
 // ---- Local-only date helpers (avoid UTC parsing drift) ----
 const formatYMD = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -263,7 +258,6 @@ export default function SpecificProgram() {
 
   const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({});
 
-
   useEffect(() => {
     const load = async () => {
       const snap = await getDoc(doc(db, "Programs", id as string));
@@ -329,28 +323,26 @@ export default function SpecificProgram() {
     return () => clearInterval(t);
   }, [images]);
 
-
   const isSameLocalDay = (a: Date, b: Date) => {
-  return a.getFullYear() === b.getFullYear() &&
-         a.getMonth() === b.getMonth() &&
-         a.getDate() === b.getDate();
-};
+    return a.getFullYear() === b.getFullYear() &&
+           a.getMonth() === b.getMonth() &&
+           a.getDate() === b.getDate();
+  };
 
-const hasEndedToday = (day: Date, timeEnd?: string) => {
-  if (!timeEnd) return false; // no end time -> do not mark as ended
-  const [hStr, mStr] = timeEnd.split(":");
-  const h = Number(hStr);
-  const m = Number(mStr ?? "0");
-  if (!Number.isFinite(h) || !Number.isFinite(m)) return false;
+  const hasEndedToday = (day: Date, timeEnd?: string) => {
+    if (!timeEnd) return false; // no end time -> do not mark as ended
+    const [hStr, mStr] = timeEnd.split(":");
+    const h = Number(hStr);
+    const m = Number(mStr ?? "0");
+    if (!Number.isFinite(h) || !Number.isFinite(m)) return false;
 
-  // build "today at timeEnd" on the *local* day for this option
-  const end = new Date(day);
-  end.setHours(h, m, 0, 0);
+    // build "today at timeEnd" on the *local* day for this option
+    const end = new Date(day);
+    end.setHours(h, m, 0, 0);
 
-  const now = new Date();
-  return isSameLocalDay(day, now) && now > end;
-};
-
+    const now = new Date();
+    return isSameLocalDay(day, now) && now > end;
+  };
 
   // try to prefill user info
   useEffect(() => {
@@ -395,29 +387,51 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
             .replace(/\s+/g, " ")
             .trim();
 
-        setFormData((prev) => {
-          const next = {
-            ...prev,
-            firstName: rd.firstName || prev.firstName || "",
-            lastName: rd.lastName || prev.lastName || "",
-            contactNumber: rd.contactNumber || prev.contactNumber || "",
-            emailAddress: u.email || prev.emailAddress || "",
-            location: rd.address || prev.location || "",
-            fullName: fullName || prev.fullName || "",
-            dateOfBirth: rd.dateOfBirth || prev.dateOfBirth || "",
-          };
-          // lock any predefined fields we just prefilled with non-empty values
-          const newLocks: Record<string, boolean> = { ...lockedFields };
-          for (const k of Object.keys(next)) {
-            if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
-          }
-          setLockedFields(newLocks);
-          return next;
-        });
+          setFormData((prev) => {
+            const next = {
+              ...prev,
+              firstName: rd.firstName || prev.firstName || "",
+              lastName: rd.lastName || prev.lastName || "",
+              contactNumber: rd.contactNumber || prev.contactNumber || "",
+              emailAddress: u.email || prev.emailAddress || "",
+              location: rd.address || prev.location || "",
+              fullName: fullName || prev.fullName || "",
+              dateOfBirth: rd.dateOfBirth || prev.dateOfBirth || "",
+            };
+            // lock any predefined fields we just prefilled with non-empty values
+            const newLocks: Record<string, boolean> = { ...lockedFields };
+            for (const k of Object.keys(next)) {
+              if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
+            }
+            setLockedFields(newLocks);
+            return next;
+          });
         } else {
           const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
             .replace(/\s+/g, " ")
             .trim();
+          setFormData((prev) => {
+            const next = {
+              ...prev,
+              firstName: u.first_name || prev.firstName || "",
+              lastName: u.last_name || prev.lastName || "",
+              contactNumber: u.phone || prev.contactNumber || "",
+              emailAddress: u.email || prev.emailAddress || "",
+              location: u.address || prev.location || "",
+              fullName: fullName || prev.fullName || "",
+            };
+            const newLocks: Record<string, boolean> = { ...lockedFields };
+            for (const k of Object.keys(next)) {
+              if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
+            }
+            setLockedFields(newLocks);
+            return next;
+          });
+        }
+      } else {
+        const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
+          .replace(/\s+/g, " ")
+          .trim();
         setFormData((prev) => {
           const next = {
             ...prev,
@@ -435,30 +449,6 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
           setLockedFields(newLocks);
           return next;
         });
-
-        }
-      } else {
-        const fullName = `${u.first_name || ""} ${u.middle_name || ""} ${u.last_name || ""}`
-          .replace(/\s+/g, " ")
-          .trim();
-      setFormData((prev) => {
-        const next = {
-          ...prev,
-          firstName: u.first_name || prev.firstName || "",
-          lastName: u.last_name || prev.lastName || "",
-          contactNumber: u.phone || prev.contactNumber || "",
-          emailAddress: u.email || prev.emailAddress || "",
-          location: u.address || prev.location || "",
-          fullName: fullName || prev.fullName || "",
-        };
-        const newLocks: Record<string, boolean> = { ...lockedFields };
-        for (const k of Object.keys(next)) {
-          if (LOCKABLE_PREDEFINED.has(k) && next[k as keyof typeof next]) newLocks[k] = true;
-        }
-        setLockedFields(newLocks);
-        return next;
-      });
-
       }
 
       setPreVerifiedIdUrl(candidateUrl || null);
@@ -827,18 +817,17 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
     });
   }, [program?.eventType, program?.participantDays, program?.noParticipantLimitList, approvedParticipantCountList]);
 
-
   const dayEndedList = useMemo<boolean[]>(() => {
-  if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
-  const sYMD = program.startDate || "";
-  const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
+    if (!program || program.eventType !== "multiple" || !program.participantDays) return [];
+    const sYMD = program.startDate || "";
+    const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
 
-  return program.participantDays.map((_, idx) => {
-    const d = new Date(startLocal);
-    d.setDate(startLocal.getDate() + idx);
-    return hasEndedToday(d, program.timeEnd);
-  });
-}, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
+    return program.participantDays.map((_, idx) => {
+      const d = new Date(startLocal);
+      d.setDate(startLocal.getDate() + idx);
+      return hasEndedToday(d, program.timeEnd);
+    });
+  }, [program?.eventType, program?.participantDays, program?.startDate, program?.timeEnd]);
 
   // If the selected day becomes full (or is invalid), clear it
   useEffect(() => {
@@ -847,9 +836,9 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
   }, [dayFullList, dayChosen]);
 
   useEffect(() => {
-  if (dayChosen == null) return;
-  if (dayFullList[dayChosen] || dayEndedList[dayChosen]) setDayChosen(null);
-}, [dayFullList, dayEndedList, dayChosen]);  
+    if (dayChosen == null) return;
+    if (dayFullList[dayChosen] || dayEndedList[dayChosen]) setDayChosen(null);
+  }, [dayFullList, dayEndedList, dayChosen]);
 
   if (!program) {
     return (
@@ -858,8 +847,6 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
       </main>
     );
   }
-
-
 
   const { datePart, timePart } = buildScheduleParts({
     eventType: program.eventType,
@@ -905,6 +892,10 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
 
   // whether participant DOB should be required (only when program sets an age restriction)
   const participantDOBRequired = !!(program?.ageRestriction && !program.ageRestriction.noAgeLimit);
+
+  // NEW: single-day programs that are already Ongoing should only allow walk-in
+  const isSingleOngoing =
+    program.eventType === "single" && program.progressStatus === "Ongoing";
 
   return (
     <main className="main-container-specific">
@@ -1055,6 +1046,16 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
             </div>
             <p className="status-message">
               You have already registered for this event. Please wait for further instructions.
+            </p>
+          </div>
+        ) : isSingleOngoing ? (
+          <div className="program-detail-card-specific">
+            <div className="status-header">
+              <img src="/Images/prohibition.png" alt="Ongoing" className="status-icon" />
+              <h3>Program Ongoing</h3>
+            </div>
+            <p className="status-message">
+              Program is already Ongoing. If you are an eligible participant, you may register as a walk-in at the venue.
             </p>
           </div>
         ) : audienceBlockedMsg ? (
@@ -1219,14 +1220,22 @@ const hasEndedToday = (day: Date, timeEnd?: string) => {
                                       const isPast = optionDate < today;
                                       const isFull = !!dayFullList[idx];
 
-                                      // ✅ New: mark as "ended" if today and timeEnd has already passed
+                                      // Already ended today (after timeEnd)
                                       const isEnded = !!dayEndedList[idx];
+
+                                      // NEW: if program is Ongoing and this is the current day,
+                                      // do not allow online registration (walk-in only for that day)
+                                      const isToday =
+                                        optionDate.getTime() === today.getTime();
+                                      const isOngoingDay =
+                                        program.progressStatus === "Ongoing" && isToday;
 
                                       let label = `Day ${idx + 1} (${optionDate.toDateString()})`;
                                       if (isFull) label += " — FULL";
                                       if (isEnded) label += " — Day Ended";
+                                      if (isOngoingDay) label += " — Ongoing (Walk-in only)";
 
-                                      const disabled = isPast || isFull || isEnded;
+                                      const disabled = isPast || isFull || isEnded || isOngoingDay;
 
                                       return (
                                         <option key={idx} value={idx} disabled={disabled}>
