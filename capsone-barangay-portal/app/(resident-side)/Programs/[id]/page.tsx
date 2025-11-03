@@ -754,9 +754,10 @@ export default function SpecificProgram() {
         age: userAge ?? null,
         fields: formData,
         files: uploadedFiles,
-        ...((program.eventType === "multiple" && dayChosen !== null) && {
-          dayChosen,
-        })
+        dayChosen:
+            program.eventType === "multiple"
+              ? (dayChosen ?? 0)
+              : 0, 
       });
 
       const roleLabel = role === "Volunteer" ? "volunteer" : "participant";
