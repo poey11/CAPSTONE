@@ -89,6 +89,7 @@ export default function AddNewProgramModal({
     { name: "emailAddress", description: "Used to save the email address of the participant" },
     { name: "location", description: "Used to save the address of the participant" },
     { name: "dateOfBirth", description: "Used to save the participant's date of birth (enables age checks)" },
+    { name: "dayChosen", description: "Used to save the chosen day for the program"},
   ];
 
   const PREDEFINED_REQ_FILES: SimpleField[] = [
@@ -451,18 +452,7 @@ export default function AddNewProgramModal({
       // Resolve agency to store
       const resolvedAgency =
         agency === "others" ? (otherAgency.trim() || "Others") : agency;
-      const baseTextFields = [...PREDEFINED_REQ_TEXT, ...reqTextFields];
-      const textFields =
-        eventType === "multiple"
-          ? [
-              {
-                name: "dayChosen",
-                description:
-                  "Used to save the chosen day for the program for multiple days event",
-              },
-              ...baseTextFields,
-            ]
-          : baseTextFields;
+      const textFields = [...PREDEFINED_REQ_TEXT, ...reqTextFields];
 
       const payload: any = {
         programName: programName.trim(),

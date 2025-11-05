@@ -318,6 +318,16 @@ export default function SpecificProgram() {
   }, [id]);
 
   useEffect(() => {
+  if (program?.eventType === "single") {
+    // always treat single-day as Day 0 internally
+    setDayChosen(0);
+  }
+}, [program?.eventType]);
+    
+
+
+
+  useEffect(() => {
     if (!images.length) return;
     const t = setInterval(() => setCurrentSlide((s) => (s + 1) % images.length), 6000);
     return () => clearInterval(t);
@@ -1189,65 +1199,89 @@ export default function SpecificProgram() {
                               );
                             }
 
-                            if (name === "dayChosen") {
-                              return (
-                                <div className="form-group-specific" key={`tf-day-${i}`}>
-                                  <label className="form-label-specific">
-                                    {renderPrettyLabel(name)} <span className="required">*</span>
-                                  </label>
-                                  <select
-                                    className="form-input-specific"
-                                    required
-                                    value={dayChosen ?? ""}
-                                    onChange={(e) => {
-                                      const val = e.target.value;
-                                      setDayChosen(val === "" ? null : Number(val));
-                                    }}
-                                  >
-                                    <option value="" disabled>
-                                      Select a day
-                                    </option>
-                                    {program.participantDays?.map((day: number, idx: number) => {
-                                      // Local date math for each option
-                                      const sYMD = program.startDate || "";
-                                      const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
-                                      const optionDate = new Date(startLocal);
-                                      optionDate.setDate(startLocal.getDate() + idx);
+if (name === "dayChosen") {
+  const isMultiple = program?.eventType === "multiple";
 
-                                      const today = new Date();
-                                      today.setHours(0, 0, 0, 0);
-                                      optionDate.setHours(0, 0, 0, 0);
+  // 🔹 SINGLE-DAY: fixed Day 1, disabled select, always value 0
+  if (!isMultiple) {
+    const sYMD = program?.startDate || program?.endDate || "";
+    let label = "Day 1";
+    if (sYMD) {
+      const d = ymdToDateLocal(sYMD); // you already have this helper
+      label = `Day 1 (${d.toDateString()})`;
+    }
 
-                                      const isPast = optionDate < today;
-                                      const isFull = !!dayFullList[idx];
+    return (
+      <div className="form-group-specific" key={`tf-day-${i}`}>
+        <label className="form-label-specific">
+          {renderPrettyLabel(name)} <span className="required">*</span>
+        </label>
+        <select
+          className="form-input-specific"
+          value={0}     // 🔒 always 0
+          disabled      // user can't change it
+        >
+          <option value={0}>{label}</option>
+        </select>
+      </div>
+    );
+  }
 
-                                      // Already ended today (after timeEnd)
-                                      const isEnded = !!dayEndedList[idx];
+  // 🔹 MULTI-DAY: same behavior as before
+  return (
+    <div className="form-group-specific" key={`tf-day-${i}`}>
+      <label className="form-label-specific">
+        {renderPrettyLabel(name)} <span className="required">*</span>
+      </label>
+      <select
+        className="form-input-specific"
+        required
+        value={dayChosen ?? ""}
+        onChange={(e) => {
+          const val = e.target.value;
+          setDayChosen(val === "" ? null : Number(val));
+        }}
+      >
+        <option value="" disabled>
+          Select a day
+        </option>
+        {program.participantDays?.map((day: number, idx: number) => {
+          // Local date math for each option
+          const sYMD = program.startDate || "";
+          const startLocal = sYMD ? ymdToDateLocal(sYMD) : new Date();
+          const optionDate = new Date(startLocal);
+          optionDate.setDate(startLocal.getDate() + idx);
 
-                                      // NEW: if program is Ongoing and this is the current day,
-                                      // do not allow online registration (walk-in only for that day)
-                                      const isToday =
-                                        optionDate.getTime() === today.getTime();
-                                      const isOngoingDay =
-                                        program.progressStatus === "Ongoing" && isToday;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          optionDate.setHours(0, 0, 0, 0);
 
-                                      let label = `Day ${idx + 1} (${optionDate.toDateString()})`;
-                                      if (isFull) label += " — FULL";
-                                      if (isEnded) label += " — Day Ended";
-                                      if (isOngoingDay) label += " — Ongoing (Walk-in only)";
+          const isPast = optionDate < today;
+          const isFull = !!dayFullList[idx];
+          const isEnded = !!dayEndedList[idx];
 
-                                      const disabled = isPast || isFull || isEnded || isOngoingDay;
+          const isToday = optionDate.getTime() === today.getTime();
+          const isOngoingDay =
+            program.progressStatus === "Ongoing" && isToday;
 
-                                      return (
-                                        <option key={idx} value={idx} disabled={disabled}>
-                                          {label}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                </div>
-                              );
-                            }
+          let label = `Day ${idx + 1} (${optionDate.toDateString()})`;
+          if (isFull) label += " — FULL";
+          if (isEnded) label += " — Day Ended";
+          if (isOngoingDay) label += " — Ongoing (Walk-in only) ";
+
+          const disabled = isPast || isFull || isEnded || isOngoingDay;
+
+          return (
+            <option key={idx} value={idx} disabled={disabled}>
+              {label}
+            </option>
+          );
+        })}
+      </select>
+    </div>
+  );
+}
+
 
                             const lower = name?.toLowerCase();
                             const type =

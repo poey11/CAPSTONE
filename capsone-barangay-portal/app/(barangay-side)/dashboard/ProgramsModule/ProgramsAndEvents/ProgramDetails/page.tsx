@@ -17,6 +17,7 @@ const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "emailAddress", description: "Used to save the email address of the participant" },
   { name: "location", description: "Used to save the address of the participant" },
   { name: "dateOfBirth", description: "Used to save the participant's date of birth (enables age checks)" },
+  { name: "dayChosen", description: "Used to save the chosen day for the program"},
 ];
 
 const PREDEFINED_REQ_FILES: SimpleField[] = [
@@ -179,7 +180,7 @@ export default function ProgramDetails() {
   isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" && progressStatus !== "Completed";
 
   const [noParticipantLimit, setNoParticipantLimit] = useState(false);
-  const [participantDays, setParticipantDays] = useState<number[]>([]);
+  const [participantDays, setParticipantDays] = useState<number[]>([]); 
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
   // Load program
   useEffect(() => {
