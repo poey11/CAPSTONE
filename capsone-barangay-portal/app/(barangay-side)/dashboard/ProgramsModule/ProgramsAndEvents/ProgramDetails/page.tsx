@@ -1,6 +1,6 @@
 "use client";
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { collection, doc, getDoc, updateDoc, addDoc } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
@@ -8,6 +8,62 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
 type SimpleField = { name: string; description?: string };
+
+// ---------- Announcement helpers / types (copied/adapted from Announcements) ----------
+const pad2 = (n: number) => n.toString().padStart(2, "0");
+
+const formatDate12 = (date: Date): string => {
+  const mm = pad2(date.getMonth() + 1);
+  const dd = pad2(date.getDate());
+  const yy = date.getFullYear().toString().slice(-2);
+
+  let hours = date.getHours();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  const HH = pad2(hours);
+  const MM = pad2(date.getMinutes());
+  const SS = pad2(date.getSeconds());
+
+  return `${mm}/${dd}/${yy} ${HH}:${MM}:${SS} ${ampm}`;
+};
+
+const formatDateLong = (dateStr: string): string => {
+  if (!dateStr) return "N/A";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return "N/A";
+  return d.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const formatTime12 = (timeStr: string): string => {
+  if (!timeStr || !timeStr.includes(":")) return "";
+  const [hStr, mStr] = timeStr.split(":");
+  let h = Number(hStr);
+  const m = Number(mStr);
+  if (Number.isNaN(h) || Number.isNaN(m)) return "";
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12;
+  if (h === 0) h = 12;
+  return `${h}:${pad2(m)}${ampm}`;
+};
+
+interface AnnouncementFormProps {
+  announcementHeadline?: string;
+  category?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  image?: string;
+  content?: string;
+  isActive?: boolean;
+  isInFeatured?: string;
+}
+
 
 const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "firstName", description: "Used to save the first name of the participant" },
@@ -68,7 +124,14 @@ export default function ProgramDetails() {
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSaveConfirmPopup, setShowSaveConfirmPopup] = useState(false);
-  const [showSmsPromptPopup, setShowSmsPromptPopup] = useState(false);  
+  const [showSmsPromptPopup, setShowSmsPromptPopup] = useState(false);
+
+  // NEW: Announcement popups/errors
+  const [showAddAnnouncementPopup, setShowAddAnnouncementPopup] = useState(false);
+  const [showAnnouncementSubmitPopup, setShowAnnouncementSubmitPopup] = useState(false);
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState("");
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   // Form state
   const [programName, setProgramName] = useState("");
@@ -84,6 +147,14 @@ export default function ProgramDetails() {
   const [endDate, setEndDate] = useState("");
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
+
+  // ORIGINAL schedule snapshot (for diffing in announcement)
+  const [originalEventType, setOriginalEventType] = useState<"single" | "multiple">("single");
+  const [originalSingleDate, setOriginalSingleDate] = useState("");
+  const [originalStartDate, setOriginalStartDate] = useState("");
+  const [originalEndDate, setOriginalEndDate] = useState("");
+  const [originalTimeStart, setOriginalTimeStart] = useState("");
+  const [originalTimeEnd, setOriginalTimeEnd] = useState("");
 
   // createdAt + minStartDate (>= createdAt + 4 days, also not in the past)
   const [createdAt, setCreatedAt] = useState<Date | null>(null);
@@ -146,6 +217,7 @@ export default function ProgramDetails() {
   const [reqFileNew, setReqFileNew] = useState("");
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
 
+
   const addReqText = () => {
     const v = reqTextNew.trim();
     if (!v) return;
@@ -174,6 +246,17 @@ export default function ProgramDetails() {
   };
   const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
+
+
+  // Announcement state (for popup)
+  const [newAnnouncement, setNewAnnouncement] = useState<AnnouncementFormProps>({
+    createdAt: formatDate12(new Date()),
+    createdBy: user?.fullName || user?.name || "",
+    category: "Barangay Event",
+    isInFeatured: "Inactive",
+    isActive: true,
+  });
+  const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
 
   // --- EDIT & VISIBILITY RULES (updated) ---
   // - Pending: Punong Barangay can edit ALL fields.
@@ -267,30 +350,58 @@ export default function ProgramDetails() {
         const existingEventType = data.eventType as "single" | "multiple" | undefined;
         const sDate = data.startDate ?? "";
         const eDate = data.endDate ?? "";
+
         if (existingEventType) {
-          setEventType(existingEventType);
           if (existingEventType === "single") {
-            setSingleDate(sDate || eDate || "");
+            const single = sDate || eDate || "";
+            setEventType("single");
+            setSingleDate(single);
             setStartDate("");
             setEndDate("");
+            // originals
+            setOriginalEventType("single");
+            setOriginalSingleDate(single);
+            setOriginalStartDate("");
+            setOriginalEndDate("");
           } else {
-            setStartDate(sDate || "");
-            setEndDate(eDate || "");
+            const start = sDate || "";
+            const end = eDate || "";
+            setEventType("multiple");
+            setStartDate(start);
+            setEndDate(end);
             setSingleDate("");
+            // originals
+            setOriginalEventType("multiple");
+            setOriginalStartDate(start);
+            setOriginalEndDate(end);
+            setOriginalSingleDate("");
           }
         } else {
           if (sDate && eDate && sDate === eDate) {
             setEventType("single");
             setSingleDate(sDate);
+            setOriginalEventType("single");
+            setOriginalSingleDate(sDate);
+            setOriginalStartDate("");
+            setOriginalEndDate("");
           } else {
             setEventType("multiple");
             setStartDate(sDate || "");
             setEndDate(eDate || "");
+            setOriginalEventType("multiple");
+            setOriginalStartDate(sDate || "");
+            setOriginalEndDate(eDate || "");
+            setOriginalSingleDate("");
           }
         }
 
         setTimeStart(data.timeStart ?? "");
         setTimeEnd(data.timeEnd ?? "");
+
+        // originals for time
+        setOriginalTimeStart(data.timeStart ?? "");
+        setOriginalTimeEnd(data.timeEnd ?? "");
+
         setDescription(data.description ?? "");
         setSummary(data.summary ?? "");
 
@@ -320,8 +431,6 @@ export default function ProgramDetails() {
     };
     load();
   }, [programId]);
-
-  console.log(participantDays);
 
   const handleBack = () => {
     router.push("/dashboard/ProgramsModule/ProgramsAndEvents");
@@ -393,6 +502,63 @@ export default function ProgramDetails() {
     if (!minDate) return true;
     // safe lexicographical compare because YYYY-MM-DD
     return dateStr >= minDate;
+  };
+
+  // Has schedule changed?
+  const hasScheduleChanged = () => {
+    if (eventType !== originalEventType) return true;
+
+    if (eventType === "single") {
+      if (singleDate !== originalSingleDate) return true;
+    } else {
+      if (startDate !== originalStartDate || endDate !== originalEndDate) return true;
+    }
+
+    if (timeStart !== originalTimeStart || timeEnd !== originalTimeEnd) return true;
+
+    return false;
+  };
+
+  // Build announcement content for schedule change
+  const buildScheduleChangeContent = () => {
+    // Old/new start dates
+    const oldStartRaw = originalEventType === "single" ? originalSingleDate : originalStartDate;
+    const newStartRaw = eventType === "single" ? singleDate : startDate;
+
+    const oldStartText = formatDateLong(oldStartRaw);
+    const newStartText = formatDateLong(newStartRaw);
+
+    const oldTimeStartText = originalTimeStart && timeStart && originalTimeStart !== timeStart
+      ? formatTime12(originalTimeStart)
+      : "";
+    const newTimeStartText = originalTimeStart && timeStart && originalTimeStart !== timeStart
+      ? formatTime12(timeStart)
+      : "";
+
+    const oldTimeEndText = originalTimeEnd && timeEnd && originalTimeEnd !== timeEnd
+      ? formatTime12(originalTimeEnd)
+      : "";
+    const newTimeEndText = originalTimeEnd && timeEnd && originalTimeEnd !== timeEnd
+      ? formatTime12(timeEnd)
+      : "";
+
+    let content = `To all approved volunteers and participants, please take note of the changes in the schedule for the program "${programName}".\n\n` +
+      `Original Start Date:\n${oldStartText}\n\n` +
+      `New Start Date:\n${newStartText}\n`;
+
+    if (oldTimeStartText && newTimeStartText) {
+      content += `\nOld Time Start:\n${oldTimeStartText}\n` +
+        `New Time Start:\n${newTimeStartText}\n`;
+    }
+
+    if (oldTimeEndText && newTimeEndText) {
+      content += `\nOld Time End:\n${oldTimeEndText}\n` +
+        `New Time End:\n${newTimeEndText}\n`;
+    }
+
+    content += `\nWe apologize for any inconvenience this may cause and we hope to see you there. Thank you for your understanding.`;
+
+    return content;
   };
 
   // Build the full update payload for current form state (including uploads)
@@ -540,7 +706,6 @@ export default function ProgramDetails() {
     // If nobody can edit anything, skip
     if (!canEditAll && !canEditSchedule) return false;
 
-    const scheduleOnly = canEditSchedule && !canEditAll;
     const e: { [k: string]: boolean } = {};
     const need = (k: string, ok: boolean) => {
       if (!ok) {
@@ -640,72 +805,144 @@ export default function ProgramDetails() {
     return Object.keys(e).length === 0;
   };
 
-const handleConfirmSave = async () => {
-  if (loading) return;
-  setShowSaveConfirmPopup(false);
-  await handleSave();
-};
+  const handleConfirmSave = async () => {
+    if (loading) return;
+    setShowSaveConfirmPopup(false);
+    await handleSave();
+  };
 
-// Dummy SMS handler – REPLACE BODY when backend SMS is ready @MALCOLM ANDITO YUNG SMS FUNCTION KABITAN MO NA LANGGG
-const handleSendSmsToApprovedParticipants = () => {
-  setShowSmsPromptPopup(false);
+  // Announcement validation (for popup in this page)
+  const validateAnnouncementFields = () => {
+    const newInvalid: string[] = [];
 
-  // TODO: Replace this block with real SMS sending logic
-  // Example:
-  // await sendSmsToApprovedParticipants(programId);
+    if (!newAnnouncement.announcementHeadline || newAnnouncement.announcementHeadline.trim() === "") {
+      newInvalid.push("announcementHeadline");
+      setPopupErrorMessage("Announcement Headline is required.");
+    } else if (!newAnnouncement.category || newAnnouncement.category.trim() === "") {
+      newInvalid.push("category");
+      setPopupErrorMessage("Announcement Category is required.");
+    } else if (!newAnnouncement.content || newAnnouncement.content.trim() === "") {
+      newInvalid.push("content");
+      setPopupErrorMessage("Description is required.");
+    }
 
-  setTimeout(() => {
-    setPopupMessage("SMS sent to all approved participants successfully!");
-    setShowPopup(true);
-  }, 2000);
-};  
+    if (newInvalid.length > 0) {
+      setInvalidFields(newInvalid);
+      setShowErrorPopup(true);
+      setTimeout(() => setShowErrorPopup(false), 3000);
+      return false;
+    }
 
-const handleSave = async () => {
-  if (!programId) return;
-  if (!validate()) {
-    setPopupMessage("Please correct the highlighted fields.");
-    setShowPopup(true);
-    return;
-  }
+    setInvalidFields([]);
+    return true;
+  };
 
-  setLoading(true);
-  try {
-    const updates = await buildUpdatesWithUploads();
+  const createAnnouncementFromProgram = async () => {
+    if (!validateAnnouncementFields()) return;
 
-    // Reflect photo state locally if changed
-    if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
-    if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
+    try {
+      const announcementData = {
+        ...newAnnouncement,
+        image: newAnnouncement.image || existingPhotoURL || "",
+      };
 
-    await updateDoc(doc(db, "Programs", programId), updates);
+      await addDoc(collection(db, "announcements"), announcementData);
 
-    setPopupMessage("Program saved successfully!");
-    setShowPopup(true);
+      setShowAddAnnouncementPopup(false);
+      setPopupMessage("Announcement created successfully!");
+      setShowPopup(true);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      setPopupErrorMessage("There was an error creating the announcement.");
+      setShowErrorPopup(true);
+    }
+  };
 
-    // Cleanup previews
-    setPreviewURLs((old) => {
-      old.forEach((u) => URL.revokeObjectURL(u));
-      return [];
-    });
-    setPhotoFiles([]);
-    setFileError(null);
+  const confirmSubmitAnnouncement = async () => {
+    setShowAnnouncementSubmitPopup(false);
+    await createAnnouncementFromProgram();
+  };
 
-    // 👉 After 2 seconds, show the "Send SMS" prompt popup
+  // Dummy SMS handler – REPLACE BODY when backend SMS is ready
+  const handleSendSmsToApprovedParticipants = () => {
+    setShowSmsPromptPopup(false);
+
+    // TODO: Replace this block with real SMS sending logic
     setTimeout(() => {
-      setShowSmsPromptPopup(true);
+      setPopupMessage("SMS sent to all approved participants successfully!");
+      setShowPopup(true);
     }, 2000);
-  } catch (e) {
-    console.error(e);
-    setPopupMessage("Failed to save program.");
-    setShowPopup(true);
-  } finally {
-    setLoading(false);
-    // ⛔ Removed the auto-redirect so the user can see SMS-related popups
-    // setTimeout(() => {
-    //   router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programId}`);
-    // }, 1200);
-  }
-};
 
+    // After SMS, if schedule changed, auto-open Add Announcement popup
+    if (hasScheduleChanged()) {
+      const headline = `Changes in Schedule for ${programName}`;
+      const now = new Date();
+      const createdAtStr = formatDate12(now);
+      const author = user?.fullName || user?.name || "";
+
+      const content = buildScheduleChangeContent();
+
+      setNewAnnouncement({
+        announcementHeadline: headline,
+        category: "Barangay Event",
+        createdAt: createdAtStr,
+        createdBy: author,
+        updatedAt: "",
+        image: existingPhotoURL || "",
+        content,
+        isActive: true,
+        isInFeatured: "Inactive", // Featured OFF by default
+      });
+
+      setAnnouncementPreview(existingPhotoURL || "/Images/thumbnail.png");
+      setInvalidFields([]);
+      setPopupErrorMessage("");
+      setShowErrorPopup(false);
+      setShowAddAnnouncementPopup(true);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!programId) return;
+    if (!validate()) {
+      setPopupMessage("Please correct the highlighted fields.");
+      setShowPopup(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const updates = await buildUpdatesWithUploads();
+
+      // Reflect photo state locally if changed
+      if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
+      if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
+
+      await updateDoc(doc(db, "Programs", programId), updates);
+
+      setPopupMessage("Program saved successfully!");
+      setShowPopup(true);
+
+      // Cleanup previews
+      setPreviewURLs((old) => {
+        old.forEach((u) => URL.revokeObjectURL(u));
+        return [];
+      });
+      setPhotoFiles([]);
+      setFileError(null);
+
+      // 👉 After 2 seconds, show the "Send SMS" prompt popup
+      setTimeout(() => {
+        setShowSmsPromptPopup(true);
+      }, 2000);
+    } catch (e) {
+      console.error(e);
+      setPopupMessage("Failed to save program.");
+      setShowPopup(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Approve AND persist any unsaved changes from the form in the same write.
   const handleApprove = async () => {
@@ -846,6 +1083,16 @@ const handleSave = async () => {
           <div className="popup-program">
             <img src="/Images/check.png" alt="icon alert" className="icon-alert" />
             <p>{popupMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error popup (for announcement validation) */}
+      {showErrorPopup && (
+        <div className={`error-popup-overlay show`}>
+          <div className="popup">
+            <img src={"/Images/warning-1.png"} alt="popup icon" className="icon-alert" />
+            <p>{popupErrorMessage}</p>
           </div>
         </div>
       )}
@@ -1889,7 +2136,6 @@ const handleSave = async () => {
         </div>
       </div>
 
-
       {showSaveConfirmPopup && (
         <div className="confirmation-popup-overlay-edit-program">
           <div className="confirmation-popup-edit-program">
@@ -1953,6 +2199,186 @@ const handleSave = async () => {
                   setShowDiscardPopup(false);
                   handleBack();
                 }}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔔 Add Announcement popup (auto-opened after SMS if schedule changed) */}
+      {showAddAnnouncementPopup && (
+        <div className="add-announcements-popup-overlay">
+          <div className="add-announcements-confirmation-popup">
+            <h2>Add New Announcement</h2>
+
+            <div className="add-announcements-main-container">
+              <div className="add-announcements-photo-section">
+                <span className="add-announcements-details-label">Photo</span>
+
+                <div
+                  className={`add-announcements-profile-container ${
+                    invalidFields.includes("image") ? "input-error" : ""
+                  }`}
+                >
+                  <img
+                    src={announcementPreview || existingPhotoURL || "/Images/thumbnail.png"}
+                    alt="Announcement"
+                    className="add-announcements-photo"
+                  />
+                </div>
+
+                {/* Photo is reused from program; no new upload here */}
+              </div>
+
+              <div className="add-announcements-info-main-container">
+                <div className="add-announcements-upper-section">
+                  <div className="add-announcements-content-left-side">
+                    <div className="fields-section-add-announcements">
+                      <p>
+                        Announcement Headline<span className="required">*</span>
+                      </p>
+                      <input
+                        type="text"
+                        className={`add-announcements-input-field ${
+                          invalidFields.includes("announcementHeadline") ? "input-error" : ""
+                        }`}
+                        placeholder="Announcement Headline"
+                        value={newAnnouncement.announcementHeadline || ""}
+                        readOnly // headline locked
+                      />
+                    </div>
+
+                    <div className="fields-section-add-announcements">
+                      <p>
+                        Announcement Category<span className="required">*</span>
+                      </p>
+                      <select
+                        className={`add-announcements-input-field ${
+                          invalidFields.includes("category") ? "input-error" : ""
+                        }`}
+                        value={newAnnouncement.category}
+                        disabled // locked to Barangay Event
+                      >
+                        <option value="Barangay Event">Barangay Event</option>
+                      </select>
+                    </div>
+
+                    <div className="fields-section-add-announcements">
+                      <p className="switch-label">Featured in Home Page</p>
+                      <label className="switch">
+                        <input
+                          type="checkbox"
+                          checked={newAnnouncement.isInFeatured === "Active"}
+                          disabled // locked OFF
+                        />
+                        <span className="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="add-announcements-content-right-side">
+                    <div className="fields-section-add-announcements">
+                      <p>
+                        Published Date <span className="required">*</span>
+                      </p>
+                      <input
+                        type="text"
+                        className="add-announcements-input-field"
+                        value={newAnnouncement.createdAt || ""}
+                        readOnly
+                      />
+                    </div>
+
+                    <div className="fields-section-add-announcements">
+                      <p>
+                        Author<span className="required">*</span>
+                      </p>
+                      <input
+                        type="text"
+                        className="add-announcements-input-field"
+                        placeholder="Author"
+                        value={newAnnouncement.createdBy || ""}
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="add-announcements-lower-section">
+                  <div className="announcements-description-container">
+                    <div className="box-container-outer-description-announcements">
+                      <div className="title-description-announcements">
+                        Full Content / Description
+                      </div>
+                      <div
+                        className={`box-container-description-announcements ${
+                          invalidFields.includes("content") ? "input-error" : ""
+                        }`}
+                      >
+                        <textarea
+                          placeholder="Write the full content/description of the announcement here..."
+                          value={newAnnouncement.content || ""}
+                          onChange={(e) =>
+                            setNewAnnouncement({
+                              ...newAnnouncement,
+                              content: e.target.value,
+                            })
+                          }
+                          required
+                          className="description-input-field-announcements"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="announcement-yesno-container">
+              <button
+                onClick={() => {
+                  setShowAddAnnouncementPopup(false);
+                  setInvalidFields([]);
+                  setPopupErrorMessage("");
+                  setShowErrorPopup(false);
+                }}
+                className="announcement-no-button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (validateAnnouncementFields()) {
+                    setShowAnnouncementSubmitPopup(true);
+                  }
+                }}
+                className="announcement-yes-button"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAnnouncementSubmitPopup && (
+        <div className="submit-announcements-confirmation-popup-overlay">
+          <div className="submit-announcements-confirmation-popup">
+            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+            <p>Are you sure you want to submit this announcement?</p>
+            <div className="yesno-container-add">
+              <button
+                onClick={() => setShowAnnouncementSubmitPopup(false)}
+                className="no-button-add"
+              >
+                No
+              </button>
+              <button
+                onClick={confirmSubmitAnnouncement}
+                className="yes-button-add"
               >
                 Yes
               </button>

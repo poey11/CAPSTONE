@@ -2662,3 +2662,445 @@ input[type="checkbox"] {
 }
 
 .row-disabled { opacity: 0.5; }
+
+
+/* new css for the add announcement paayos na lang @justine @derick hehe */
+
+/* === Add Announcement Popup (overlay + container) === */
+
+.add-announcements-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.add-announcements-confirmation-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 570px;
+  width: 65%;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+  animation: slideDownFadeIn 0.4s ease-out;
+}
+
+.add-announcements-confirmation-popup h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  color: #214666;
+  width: 100%;
+  padding-bottom: 10px;
+}
+
+/* === Layout inside popup === */
+
+.add-announcements-main-container {
+  width: 100%;
+  height: 375px;
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.add-announcements-photo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 35%;
+  padding-top: 20px;
+}
+
+.add-announcements-details-label {
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 18px;
+  position: relative;
+  top: 12px;
+  z-index: 1;
+  left: 10px;
+}
+
+.add-announcements-profile-container {
+  border: 1px solid rgba(44, 62, 80, 0.7);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  text-align: center;
+  margin-top: -8px;
+  margin-left: 20px;
+  height: 250px;
+}
+
+.add-announcements-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(100%);
+}
+
+.add-announcements-upload-link {
+  margin-top: 20px;
+  color: rgb(245, 143, 88);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* Right side (fields + description) */
+
+.add-announcements-info-main-container {
+  width: 65%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.add-announcements-upper-section {
+  display: flex;
+  width: 100%;
+}
+
+.add-announcements-lower-section {
+  display: flex;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.add-announcements-content-left-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+
+.add-announcements-content-right-side {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+}
+
+/* === Field groups + inputs === */
+
+.fields-section-add-announcements {
+  display: flex;
+  flex-direction: column;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.fields-section-add-announcements p {
+  font-size: 15px;
+  color: #2c3e50;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+.fields-section-add-announcements-toggle {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 18px;
+  width: 100%;
+}
+
+.fields-section-add-announcements-toggle p {
+  font-size: 15px;
+  color: #2c3e50;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+p .required {
+  color: red;
+  margin-left: 5px;
+}
+
+.add-announcements-input-field {
+  padding: 8px;
+  width: 90%;
+  height: 35px;
+  margin-top: 10px;
+  border: 1px solid rgba(36, 53, 76, 0.7);
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  font-size: 16px;
+}
+
+.add-announcements-input-field:focus {
+  border-color: #f49028;
+  outline: none;
+  box-shadow: 0 0 5px rgba(244, 144, 40, 0.5);
+}
+
+.add-announcements-input-field option:disabled {
+  color: grey;
+}
+
+/* === Toggle switch (Featured in Home Page) === */
+
+/* === Description box inside popup === */
+
+.announcements-description-container {
+  width: 100%;
+  padding-right: 20px;
+}
+
+.box-container-outer-description-announcements {
+  position: relative;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.title-description-announcements {
+  position: absolute;
+  left: 50%;
+  top: 30px;
+  transform: translate(-50%, -50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 5;
+  width: 300px;
+  text-align: center;
+}
+
+.box-container-description-announcements {
+  position: relative;
+  width: 100%;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  margin-top: 30px;
+  height: 250px;
+}
+
+.description-input-field-announcements {
+  padding: 8px;
+  width: 100%;
+  border-radius: 5px;
+  color: #000000;
+  text-align: left;
+  height: 225px;
+  margin-top: 20px;
+  resize: none;
+}
+
+.description-input-field-announcements:focus {
+  outline: none;
+  border-color: rgba(36, 53, 76, 0.7);
+  box-shadow: none;
+}
+
+/* === Yes / No buttons at bottom of popup === */
+
+.announcement-yesno-container {
+  padding-top: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.announcement-yes-button,
+.announcement-no-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+}
+
+.announcement-yes-button {
+  background-color: #4caf50;
+}
+
+.announcement-yes-button:hover {
+  background-color: #3d8c40;
+}
+
+.announcement-no-button {
+  background-color: #f44336;
+}
+
+.announcement-no-button:hover {
+  background-color: #c2352b;
+}
+
+/* === Submit confirmation for announcement === */
+
+.submit-announcements-confirmation-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(px);
+  transition: background 0.3s ease-in-out;
+}
+
+.submit-announcements-confirmation-popup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+}
+
+.submit-announcements-confirmation-popup p {
+  color: rgb(97, 97, 97);
+}
+
+/* === Invalid field highlighting (used by announcement + program) === */
+
+.input-error {
+  border: 2px solid red !important;
+  background-color: #ffe5e5 !important;
+  animation: shake 0.3s ease-in-out;
+  transition: background-color 0.3s ease, border 0.3s ease;
+  box-shadow: 0 0 5px red;
+}
+
+.input-error:hover {
+  background-color: #ffd6d6 !important;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+/* === Error toast for announcement validation (showErrorPopup) === */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.error-popup-overlay {
+  position: fixed;
+  top: 13%;
+  right: -3px;
+  background: #cc3434;
+  color: white;
+  width: 420px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  text-align: center;
+  font-size: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 10px solid #8a0f0f;
+}
+
+.popup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.error-popup-overlay.show {
+  animation: slideIn 0.5s ease-out;
+}
+
+.error-popup-overlay.hide {
+  animation: slideOut 0.5s ease-out;
+}
+
+/* Shared icon sizes */
+
+.successful-icon-popup {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.icon-alert {
+  width: 27px;
+  height: 27px;
+}
+
+/* Re-used animation for the main popup itself */
+@keyframes slideDownFadeIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
