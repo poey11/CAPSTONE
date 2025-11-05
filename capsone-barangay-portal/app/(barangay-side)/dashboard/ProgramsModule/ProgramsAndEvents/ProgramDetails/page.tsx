@@ -67,6 +67,8 @@ export default function ProgramDetails() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSaveConfirmPopup, setShowSaveConfirmPopup] = useState(false);
+  const [showSmsPromptPopup, setShowSmsPromptPopup] = useState(false);  
 
   // Form state
   const [programName, setProgramName] = useState("");
@@ -638,45 +640,72 @@ export default function ProgramDetails() {
     return Object.keys(e).length === 0;
   };
 
-  const handleSave = async () => {
-    if (!programId) return;
-    if (!validate()) {
-      setPopupMessage("Please correct the highlighted fields.");
-      setShowPopup(true);
-      return;
-    }
+const handleConfirmSave = async () => {
+  if (loading) return;
+  setShowSaveConfirmPopup(false);
+  await handleSave();
+};
 
-    setLoading(true);
-    try {
-      const updates = await buildUpdatesWithUploads();
+// Dummy SMS handler – REPLACE BODY when backend SMS is ready @MALCOLM ANDITO YUNG SMS FUNCTION KABITAN MO NA LANGGG
+const handleSendSmsToApprovedParticipants = () => {
+  setShowSmsPromptPopup(false);
 
-      // Reflect photo state locally if changed
-      if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
-      if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
+  // TODO: Replace this block with real SMS sending logic
+  // Example:
+  // await sendSmsToApprovedParticipants(programId);
 
-      await updateDoc(doc(db, "Programs", programId), updates);
+  setTimeout(() => {
+    setPopupMessage("SMS sent to all approved participants successfully!");
+    setShowPopup(true);
+  }, 2000);
+};  
 
-      setPopupMessage("Program saved successfully!");
-      setShowPopup(true);
+const handleSave = async () => {
+  if (!programId) return;
+  if (!validate()) {
+    setPopupMessage("Please correct the highlighted fields.");
+    setShowPopup(true);
+    return;
+  }
 
-      // Cleanup previews
-      setPreviewURLs((old) => {
-        old.forEach((u) => URL.revokeObjectURL(u));
-        return [];
-      });
-      setPhotoFiles([]);
-      setFileError(null);
-    } catch (e) {
-      console.error(e);
-      setPopupMessage("Failed to save program.");
-      setShowPopup(true);
-    } finally {
-      setLoading(false);
-      setTimeout(() => {
-        router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programId}`);
-      }, 1200);
-    }
-  };
+  setLoading(true);
+  try {
+    const updates = await buildUpdatesWithUploads();
+
+    // Reflect photo state locally if changed
+    if (typeof updates.photoURL !== "undefined") setExistingPhotoURL(updates.photoURL);
+    if (Array.isArray(updates.photoURLs)) setExistingPhotoURLs(updates.photoURLs);
+
+    await updateDoc(doc(db, "Programs", programId), updates);
+
+    setPopupMessage("Program saved successfully!");
+    setShowPopup(true);
+
+    // Cleanup previews
+    setPreviewURLs((old) => {
+      old.forEach((u) => URL.revokeObjectURL(u));
+      return [];
+    });
+    setPhotoFiles([]);
+    setFileError(null);
+
+    // 👉 After 2 seconds, show the "Send SMS" prompt popup
+    setTimeout(() => {
+      setShowSmsPromptPopup(true);
+    }, 2000);
+  } catch (e) {
+    console.error(e);
+    setPopupMessage("Failed to save program.");
+    setShowPopup(true);
+  } finally {
+    setLoading(false);
+    // ⛔ Removed the auto-redirect so the user can see SMS-related popups
+    // setTimeout(() => {
+    //   router.push(`/dashboard/ProgramsModule/ProgramsAndEvents/ProgramDetails?id=${programId}`);
+    // }, 1200);
+  }
+};
+
 
   // Approve AND persist any unsaved changes from the form in the same write.
   const handleApprove = async () => {
@@ -902,7 +931,11 @@ export default function ProgramDetails() {
                 <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>
                   Discard
                 </button>
-                <button className="action-save" onClick={handleSave}>
+                <button
+                  className="action-save"
+                  onClick={() => setShowSaveConfirmPopup(true)}
+                  disabled={loading}
+                >
                   {loading ? "Saving..." : "Save"}
                 </button>
               </>
@@ -1855,6 +1888,55 @@ export default function ProgramDetails() {
           </div>
         </div>
       </div>
+
+
+      {showSaveConfirmPopup && (
+        <div className="confirmation-popup-overlay-edit-program">
+          <div className="confirmation-popup-edit-program">
+            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+            <p>Are you sure you want to save these changes?</p>
+            <div className="yesno-container-add">
+              <button
+                onClick={() => setShowSaveConfirmPopup(false)}
+                className="no-button-add"
+                disabled={loading}
+              >
+                No
+              </button>
+              <button
+                className="yes-button-add"
+                onClick={handleConfirmSave}
+                disabled={loading}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSmsPromptPopup && (
+        <div className="confirmation-popup-overlay-edit-program">
+          <div className="confirmation-popup-edit-program">
+            <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
+            <p>Send SMS to all approved participants?</p>
+            <div className="yesno-container-add">
+              <button
+                onClick={() => setShowSmsPromptPopup(false)}
+                className="no-button-add"
+              >
+                No
+              </button>
+              <button
+                className="yes-button-add"
+                onClick={handleSendSmsToApprovedParticipants}
+              >
+                Send SMS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDiscardPopup && (
         <div className="confirmation-popup-overlay-edit-program">
