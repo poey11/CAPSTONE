@@ -6,7 +6,6 @@ import { collection, doc, getDoc, updateDoc, addDoc } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
-import { set } from "date-fns";
 
 type SimpleField = { name: string; description?: string };
 
@@ -17,7 +16,7 @@ const PREDEFINED_REQ_TEXT: SimpleField[] = [
   { name: "emailAddress", description: "Used to save the email address of the participant" },
   { name: "location", description: "Used to save the address of the participant" },
   { name: "dateOfBirth", description: "Used to save the participant's date of birth (enables age checks)" },
-  { name: "dayChosen", description: "Used to save the chosen day for the program"},
+  { name: "dayChosen", description: "Used to save the chosen day for the program" },
 ];
 
 const PREDEFINED_REQ_FILES: SimpleField[] = [
@@ -83,6 +82,15 @@ export default function ProgramDetails() {
   const [endDate, setEndDate] = useState("");
   const [timeStart, setTimeStart] = useState("");
   const [timeEnd, setTimeEnd] = useState("");
+
+  // createdAt + minStartDate (>= createdAt + 4 days, also not in the past)
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
+  const [minDate, setMinDate] = useState<string>(() => {
+    const t = new Date();
+    t.setDate(t.getDate() + 1);
+    t.setHours(0, 0, 0, 0);
+    return t.toISOString().split("T")[0];
+  });
 
   // Text areas
   const [description, setDescription] = useState("");
@@ -165,23 +173,31 @@ export default function ProgramDetails() {
   const removeReqText = (i: number) => setReqTextFields((prev) => prev.filter((_, idx) => idx !== i));
   const removeReqFile = (i: number) => setReqFileFields((prev) => prev.filter((_, idx) => idx !== i));
 
-  // --- EDIT & VISIBILITY RULES (updated per your requirements) ---
-  // Pending: only PB can edit/approve; hide Active/Inactive toggle
-  // Approved + Upcoming: PB can edit
-  // Ongoing or later (or Rejected): fully locked
-  const canEdit = (() => {
+  // --- EDIT & VISIBILITY RULES (updated) ---
+  // - Pending: Punong Barangay can edit ALL fields.
+  // - Approved + Upcoming: Punong Barangay can ONLY edit dates + timeStart + timeEnd.
+  // - Others: fully locked.
+  const canEditAll = (() => {
     if (approvalStatus === "Pending") return isPunongBarangay;
-    if (approvalStatus === "Approved" && progressStatus === "Upcoming") return isHigherUp;
     return false;
   })();
-  const isReadOnly = !canEdit;
-  
+
+  const canEditSchedule = isPunongBarangay && approvalStatus === "Approved" && progressStatus === "Upcoming";
+
+  // General "read-only" for non-schedule fields
+  const isReadOnly = !canEditAll;
+  // Completely read-only (even schedule cannot be edited)
+  const isCompletelyReadOnly = !canEditAll && !canEditSchedule;
+  // Convenience flag for date/time controls
+  const canEditDatesAndTimes = canEditAll || canEditSchedule;
+
   const showActiveToggle =
-  isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" && progressStatus !== "Completed";
+    isHigherUp && approvalStatus !== "Pending" && approvalStatus !== "Rejected" && progressStatus !== "Completed";
 
   const [noParticipantLimit, setNoParticipantLimit] = useState(false);
-  const [participantDays, setParticipantDays] = useState<number[]>([]); 
+  const [participantDays, setParticipantDays] = useState<number[]>([]);
   const [noParticipantLimitList, setNoParticipantLimitList] = useState<boolean[]>([]);
+
   // Load program
   useEffect(() => {
     const load = async () => {
@@ -198,6 +214,29 @@ export default function ProgramDetails() {
         setNoParticipantLimit(data.noParticipantLimit || false);
         setParticipantDays(data.participantDays || []);
         setNoParticipantLimitList(data.noParticipantLimitList || []);
+
+        // createdAt + minDate (>= createdAt + 4 days, and not before today)
+        const createdAtRaw: any = data.createdAt;
+        if (createdAtRaw) {
+          let base: Date;
+          if (typeof createdAtRaw.toDate === "function") {
+            base = createdAtRaw.toDate();
+          } else {
+            base = new Date(createdAtRaw);
+          }
+          base.setHours(0, 0, 0, 0);
+
+          const minFromCreated = new Date(base);
+          minFromCreated.setDate(minFromCreated.getDate() + 4);
+
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          const finalMin = minFromCreated < today ? today : minFromCreated;
+          setCreatedAt(base);
+          setMinDate(finalMin.toISOString().split("T")[0]);
+        }
+
         setProgramName(data.programName ?? "");
         setParticipants(typeof data.participants === "number" ? String(data.participants) : data.participants ?? "");
         setVolunteers(typeof data.volunteers === "number" ? String(data.volunteers) : data.volunteers ?? "");
@@ -279,6 +318,7 @@ export default function ProgramDetails() {
     };
     load();
   }, [programId]);
+
   console.log(participantDays);
 
   const handleBack = () => {
@@ -287,7 +327,7 @@ export default function ProgramDetails() {
 
   // Multi file select
   const handleFilesChange = (files: FileList | null) => {
-    if (isReadOnly) return;
+    if (!canEditAll) return;
     setFileError(null);
 
     // Clear previous previews
@@ -338,14 +378,6 @@ export default function ProgramDetails() {
     };
   }, []);
 
-  const isFutureDate = (dateStr: string) => {
-    if (!dateStr) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const d = new Date(dateStr);
-    return d > today;
-  };
-
   const toMinutes = (hhmm: string) => {
     if (!hhmm || !hhmm.includes(":")) return -1;
     const [h, m] = hhmm.split(":").map(Number);
@@ -353,13 +385,13 @@ export default function ProgramDetails() {
     return h * 60 + m;
   };
 
-  // Min date (tomorrow)
-  const minDate = useMemo(() => {
-    const t = new Date();
-    t.setDate(t.getDate() + 1);
-    t.setHours(0, 0, 0, 0);
-    return t.toISOString().split("T")[0];
-  }, []);
+  // Helper: dateStr must be on or after minDate (YYYY-MM-DD)
+  const isOnOrAfterMinDate = (dateStr: string) => {
+    if (!dateStr) return false;
+    if (!minDate) return true;
+    // safe lexicographical compare because YYYY-MM-DD
+    return dateStr >= minDate;
+  };
 
   // Build the full update payload for current form state (including uploads)
   const buildUpdatesWithUploads = async () => {
@@ -390,8 +422,8 @@ export default function ProgramDetails() {
       summary: summary.trim(),
 
       //  Persist agency both normalized and raw
-      agency: resolvedAgency,     // display/normalized value
-      agencyRaw: agency,          // "none" | "cityhall" | "others" | ""
+      agency: resolvedAgency, // display/normalized value
+      agencyRaw: agency, // "none" | "cityhall" | "others" | ""
 
       otherAgency: otherAgency.trim() || null,
 
@@ -503,7 +535,10 @@ export default function ProgramDetails() {
   };
 
   const validate = () => {
-    if (isReadOnly) return false;
+    // If nobody can edit anything, skip
+    if (!canEditAll && !canEditSchedule) return false;
+
+    const scheduleOnly = canEditSchedule && !canEditAll;
     const e: { [k: string]: boolean } = {};
     const need = (k: string, ok: boolean) => {
       if (!ok) {
@@ -511,75 +546,92 @@ export default function ProgramDetails() {
         triggerShake(k);
       }
     };
-    let noOfParticipantsNum = Number(participants);
-    if(noParticipantLimit === false && noOfParticipantsNum <= 0 && eventType === "single"){
-      need("participants", false);
+
+    // --- FULL VALIDATION (Pending + PB) ---
+    if (canEditAll) {
+      let noOfParticipantsNum = Number(participants);
+      if (noParticipantLimit === false && noOfParticipantsNum <= 0 && eventType === "single") {
+        need("participants", false);
+      }
+      need("programName", !!programName.trim());
+      need("volunteers", !!volunteers);
+      need("eligibleParticipants", !!eligibleParticipants);
+      need("location", !!location.trim());
+
+      // --- Enforce minimum lengths ---
+      const summaryOk = summary.trim().length >= MIN_SUMMARY_CHARS;
+      need("summary", summaryOk);
+
+      const descriptionOk = description.trim().length >= MIN_DESC_CHARS;
+      need("description", descriptionOk);
+
+      // Agency validation
+      need("agency", !!agency);
+      if (agency === "others") {
+        need("otherAgency", !!otherAgency.trim());
+      }
+
+      // Age restriction validation (only when not "No age limit")
+      if (!noAgeLimit) {
+        const hasMin = ageMin.trim().length > 0;
+        const hasMax = ageMax.trim().length > 0;
+        if (!hasMin && !hasMax) {
+          e["ageMin"] = true;
+          e["ageMax"] = true;
+          triggerShake("ageMin");
+          triggerShake("ageMax");
+        } else {
+          const minNum = hasMin ? Number(ageMin) : null;
+          const maxNum = hasMax ? Number(ageMax) : null;
+          const validMin = minNum === null || (Number.isFinite(minNum) && minNum >= 0 && minNum <= 150);
+          const validMax = maxNum === null || (Number.isFinite(maxNum) && maxNum >= 0 && maxNum <= 150);
+          if (!validMin) {
+            e["ageMin"] = true;
+            triggerShake("ageMin");
+          }
+          if (!validMax) {
+            e["ageMax"] = true;
+            triggerShake("ageMax");
+          }
+          if (validMin && validMax && minNum !== null && maxNum !== null && minNum > maxNum) {
+            e["ageMin"] = true;
+            e["ageMax"] = true;
+            triggerShake("ageMin");
+            triggerShake("ageMax");
+          }
+        }
+      }
     }
-    need("programName", !!programName.trim());
-    need("volunteers", !!volunteers);
-    need("eligibleParticipants", !!eligibleParticipants);
-    need("location", !!location.trim());
 
-    // --- Enforce minimum lengths ---
-    const summaryOk = summary.trim().length >= MIN_SUMMARY_CHARS;
-    need("summary", summaryOk);
-
-    const descriptionOk = description.trim().length >= MIN_DESC_CHARS;
-    need("description", descriptionOk);
-
-    // Agency validation
-    need("agency", !!agency);
-    if (agency === "others") {
-      need("otherAgency", !!otherAgency.trim());
-    }
-
-    // Age restriction validation (only when not "No age limit")
-    if (!noAgeLimit) {
-      const hasMin = ageMin.trim().length > 0;
-      const hasMax = ageMax.trim().length > 0;
-      if (!hasMin && !hasMax) {
-        e["ageMin"] = true;
-        e["ageMax"] = true;
-        triggerShake("ageMin");
-        triggerShake("ageMax");
+    // --- DATE / TIME VALIDATION (for both full-edit and schedule-only) ---
+    if (canEditDatesAndTimes) {
+      if (eventType === "single") {
+        // singleDate must exist and be >= minDate (>= createdAt + 4 days)
+        need("singleDate", !!singleDate && isOnOrAfterMinDate(singleDate));
       } else {
-        const minNum = hasMin ? Number(ageMin) : null;
-        const maxNum = hasMax ? Number(ageMax) : null;
-        const validMin = minNum === null || (Number.isFinite(minNum) && minNum >= 0 && minNum <= 150);
-        const validMax = maxNum === null || (Number.isFinite(maxNum) && maxNum >= 0 && maxNum <= 150);
-        if (!validMin) { e["ageMin"] = true; triggerShake("ageMin"); }
-        if (!validMax) { e["ageMax"] = true; triggerShake("ageMax"); }
-        if (validMin && validMax && minNum !== null && maxNum !== null && minNum > maxNum) {
-          e["ageMin"] = true; e["ageMax"] = true; triggerShake("ageMin"); triggerShake("ageMax");
+        need("startDate", !!startDate && isOnOrAfterMinDate(startDate));
+        need("endDate", !!endDate && isOnOrAfterMinDate(endDate));
+        if (startDate && endDate) {
+          const s = new Date(startDate);
+          const eDate = new Date(endDate);
+          if (!(eDate > s)) {
+            e["startDate"] = true;
+            e["endDate"] = true;
+            triggerShake("startDate");
+            triggerShake("endDate");
+          }
         }
       }
-    }
 
-    if (eventType === "single") {
-      need("singleDate", !!singleDate && isFutureDate(singleDate));
-    } else {
-      need("startDate", !!startDate && isFutureDate(startDate));
-      need("endDate", !!endDate && isFutureDate(endDate));
-      if (startDate && endDate) {
-        const s = new Date(startDate);
-        const eDate = new Date(endDate);
-        if (!(eDate > s)) {
-          e["startDate"] = true;
-          e["endDate"] = true;
-          triggerShake("startDate");
-          triggerShake("endDate");
+      if (timeStart && timeEnd) {
+        if (toMinutes(timeEnd) <= toMinutes(timeStart)) {
+          e["timeEnd"] = true;
+          triggerShake("timeEnd");
         }
+      } else {
+        need("timeStart", !!timeStart);
+        need("timeEnd", !!timeEnd);
       }
-    }
-
-    if (timeStart && timeEnd) {
-      if (toMinutes(timeEnd) <= toMinutes(timeStart)) {
-        e["timeEnd"] = true;
-        triggerShake("timeEnd");
-      }
-    } else {
-      need("timeStart", !!timeStart);
-      need("timeEnd", !!timeEnd);
     }
 
     setErrors(e);
@@ -587,7 +639,7 @@ export default function ProgramDetails() {
   };
 
   const handleSave = async () => {
-    if (!programId || isReadOnly) return;
+    if (!programId) return;
     if (!validate()) {
       setPopupMessage("Please correct the highlighted fields.");
       setShowPopup(true);
@@ -628,7 +680,7 @@ export default function ProgramDetails() {
 
   // Approve AND persist any unsaved changes from the form in the same write.
   const handleApprove = async () => {
-    if (!programId || isReadOnly) return;
+    if (!programId || !canEditAll) return;
     try {
       setLoading(true);
 
@@ -694,20 +746,18 @@ export default function ProgramDetails() {
   };
   const togglePredefinedOpen = () => setIsPredefinedOpen((prev) => !prev);
 
-
   useEffect(() => {
-  if (showPopup) {
-    const timer = setTimeout(() => {
-      setShowPopup(false);
-    }, 3000); // hides after 2 seconds
-    return () => clearTimeout(timer);
-  }
-}, [showPopup]);
-
+    if (showPopup) {
+      const timer = setTimeout(() => {
+        setShowPopup(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showPopup]);
 
   return (
     <main className="edit-program-main-container">
-      {/* Reject popups & generic popup (unchanged) */}
+      {/* Reject popups & generic popup */}
       {showRejectPopup && (
         <div className="reasonfor-recject-popup-overlay">
           <div className="reasonfor-reject-confirmation-popup">
@@ -723,7 +773,7 @@ export default function ProgramDetails() {
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Enter the reason for rejecting the program (e.g., overlaps with another event, insufficient budget allocation, safety concerns)..."
-                    disabled={isReadOnly}
+                    disabled={!canEditAll}
                   />
                 </div>
               </div>
@@ -734,7 +784,7 @@ export default function ProgramDetails() {
                 <button
                   type="button"
                   className="reject-reason-yes-button"
-                  disabled={loading || isReadOnly}
+                  disabled={loading || !canEditAll}
                   onClick={() => setShowSubmitRejectPopup(true)}
                 >
                   {loading ? "Saving..." : "Save"}
@@ -793,7 +843,7 @@ export default function ProgramDetails() {
           </button>
         )}
 
-        {approvalStatus === "Pending" && isPunongBarangay && !isReadOnly && (
+        {approvalStatus === "Pending" && isPunongBarangay && canEditAll && (
           <>
             <button className="program-redirection-buttons" onClick={handleApprove}>
               <div className="program-redirection-icons-section">
@@ -847,7 +897,7 @@ export default function ProgramDetails() {
               </label>
             )}
 
-            {!isReadOnly && (
+            {!isCompletelyReadOnly && (
               <>
                 <button className="action-discard" onClick={() => setShowDiscardPopup(true)}>
                   Discard
@@ -860,7 +910,7 @@ export default function ProgramDetails() {
           </div>
         </div>
 
-        {isReadOnly && (
+        {(isReadOnly || canEditSchedule) && (
           <div
             style={{
               margin: "10px 20px 0",
@@ -873,19 +923,44 @@ export default function ProgramDetails() {
             }}
           >
             {approvalStatus === "Approved" && progressStatus === "Ongoing" ? (
-              <>This program is <strong>Approved</strong> and currently <strong>Ongoing</strong>. Editing is disabled for everyone.</>
+              <>
+                This program is <strong>Approved</strong> and currently <strong>Ongoing</strong>. Editing is disabled for
+                everyone.
+              </>
             ) : approvalStatus === "Approved" && progressStatus === "Completed" ? (
               <>This program is <strong>Completed</strong>. Editing is disabled (view-only).</>
+            ) : approvalStatus === "Approved" && progressStatus === "Upcoming" && canEditSchedule && !canEditAll ? (
+              <>
+                This program is <strong>Approved (Upcoming)</strong>. You can only adjust the{" "}
+                <strong>event dates</strong> and <strong>time</strong>. All other fields are locked.
+              </>
             ) : approvalStatus === "Approved" && progressStatus === "Upcoming" && !isHigherUp ? (
-              <>This program is <strong>Approved (Upcoming)</strong>. Only the <strong>Punong Barangay</strong> may edit until it becomes <strong>Ongoing</strong>.</>
+              <>
+                This program is <strong>Approved (Upcoming)</strong>. Only the <strong>Punong Barangay</strong> may adjust
+                the schedule.
+              </>
             ) : approvalStatus === "Rejected" ? (
               <>
                 This program has been <strong>Rejected</strong>
-                {rejectionReason ? <> — <em>{rejectionReason}</em></> : null}. Editing is disabled (view-only).
+                {rejectionReason ? (
+                  <>
+                    {" "}
+                    — <em>{rejectionReason}</em>
+                  </>
+                ) : null}
+                . Editing is disabled (view-only).
               </>
             ) : approvalStatus === "Pending" && !isPunongBarangay ? (
-              <>This program is <strong>Pending</strong>. Only the <strong>Punong Barangay</strong> can edit and make a decision.</>
+              <>
+                This program is <strong>Pending</strong>. Only the <strong>Punong Barangay</strong> can edit and make a
+                decision.
+              </>
             ) : null}
+            {minDate && (
+              <div style={{ marginTop: 4, fontSize: 12, opacity: 0.8 }}>
+                Earliest allowed start date: <strong>{minDate}</strong>
+              </div>
+            )}
           </div>
         )}
 
@@ -922,11 +997,13 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.programName ? "input-error" : "",
                             shake.programName ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           placeholder="Program Name (E.g. Feeding Program)"
                           value={programName}
                           onChange={(e) => setProgramName(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         />
                       </div>
 
@@ -940,16 +1017,18 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.location ? "input-error" : "",
                             shake.location ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           placeholder="Location (E.g. Barangay Hall)"
                           value={location}
                           onChange={(e) => setLocation(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         />
                       </div>
                       {eventType === "multiple" ? (
                         <>
-                          { participantDays.map((day, index) => (
+                          {participantDays.map((day, index) => (
                             <div key={index} className="fields-section-edit-programs">
                               <p>
                                 Number of Participants for Day {index + 1}
@@ -963,7 +1042,9 @@ export default function ProgramDetails() {
                                   "edit-programs-input-field",
                                   errors.participants ? "input-error" : "",
                                   shake.participants ? "shake" : "",
-                                ].join(" ").trim()}
+                                ]
+                                  .join(" ")
+                                  .trim()}
                                 placeholder="E.g. 50"
                                 value={day > 0 ? String(day) : ""}
                                 onChange={(e) => {
@@ -981,7 +1062,7 @@ export default function ProgramDetails() {
                                     return updated;
                                   });
                                 }}
-                                disabled={isReadOnly || noParticipantLimitList[index]}
+                                disabled={!canEditAll || noParticipantLimitList[index]}
                               />
 
                               <label className="flex-center-gap" style={{ marginTop: 6 }}>
@@ -1012,14 +1093,13 @@ export default function ProgramDetails() {
                                       });
                                     }
                                   }}
-                                  disabled={isReadOnly}
+                                  disabled={!canEditAll}
                                 />
                                 <span>No participant limit for Day {index + 1}</span>
                               </label>
                             </div>
                           ))}
                         </>
-
                       ) : (
                         <>
                           <div className="fields-section-edit-programs">
@@ -1033,17 +1113,18 @@ export default function ProgramDetails() {
                                 "edit-programs-input-field",
                                 errors.participants ? "input-error" : "",
                                 shake.participants ? "shake" : "",
-                              ].join(" ").trim()}
+                              ]
+                                .join(" ")
+                                .trim()}
                               placeholder="E.g. 50"
                               value={participants}
                               onChange={(e) => setParticipants(e.target.value)}
-                              disabled={isReadOnly || noParticipantLimit}
+                              disabled={!canEditAll || noParticipantLimit}
                             />
                           </div>
-
                         </>
                       )}
-                      
+
                       <div className="fields-section-edit-programs">
                         <p>
                           Number of Volunteers<span className="required">*</span>
@@ -1055,11 +1136,13 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.volunteers ? "input-error" : "",
                             shake.volunteers ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           placeholder="E.g. 50"
                           value={volunteers}
                           onChange={(e) => setVolunteers(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         />
                       </div>
 
@@ -1072,10 +1155,12 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.eligibleParticipants ? "input-error" : "",
                             shake.eligibleParticipants ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={eligibleParticipants}
                           onChange={(e) => setEligibleParticipants(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         >
                           <option value="">Select requirement</option>
                           <option value="resident">Resident</option>
@@ -1089,7 +1174,7 @@ export default function ProgramDetails() {
                         <p>
                           Age Restriction<span className="required">*</span>
                         </p>
-                        
+
                         <label className="flex-center-gap">
                           <input
                             type="checkbox"
@@ -1106,11 +1191,10 @@ export default function ProgramDetails() {
                                 });
                               }
                             }}
-                            disabled={isReadOnly}
+                            disabled={!canEditAll}
                           />
-                          
+
                           <span>No age limit</span>
-                          
                         </label>
 
                         <div className="grid-2col-gap">
@@ -1122,10 +1206,12 @@ export default function ProgramDetails() {
                               "edit-programs-input-field",
                               errors.ageMin ? "input-error" : "",
                               shake.ageMin ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             value={ageMin}
                             onChange={(e) => setAgeMin(e.target.value)}
-                            disabled={isReadOnly || noAgeLimit}
+                            disabled={!canEditAll || noAgeLimit}
                           />
                           <input
                             type="number"
@@ -1135,12 +1221,13 @@ export default function ProgramDetails() {
                               "edit-programs-input-field",
                               errors.ageMax ? "input-error" : "",
                               shake.ageMax ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             value={ageMax}
                             onChange={(e) => setAgeMax(e.target.value)}
-                            disabled={isReadOnly || noAgeLimit}
+                            disabled={!canEditAll || noAgeLimit}
                           />
-                          
                         </div>
 
                         {!noAgeLimit && (errors.ageMin || errors.ageMax) && (
@@ -1149,8 +1236,6 @@ export default function ProgramDetails() {
                           </div>
                         )}
                       </div>
-
-                      
                     </div>
 
                     <div className="edit-program-section-2-right-side">
@@ -1163,7 +1248,9 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.agency ? "input-error" : "",
                             shake.agency ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={agency}
                           onChange={(e) => {
                             const v = e.target.value;
@@ -1180,7 +1267,7 @@ export default function ProgramDetails() {
                               return rest;
                             });
                           }}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         >
                           <option value="">Select agency</option>
                           <option value="none">None</option>
@@ -1196,7 +1283,9 @@ export default function ProgramDetails() {
                               "edit-programs-input-field",
                               errors.otherAgency ? "input-error" : "",
                               shake.otherAgency ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             value={otherAgency}
                             onChange={(e) => {
                               setOtherAgency(e.target.value);
@@ -1205,7 +1294,7 @@ export default function ProgramDetails() {
                                 return rest;
                               });
                             }}
-                            disabled={isReadOnly}
+                            disabled={!canEditAll}
                           />
                         )}
                       </div>
@@ -1218,7 +1307,7 @@ export default function ProgramDetails() {
                           className="edit-programs-input-field"
                           value={eventType}
                           onChange={(e) => setEventType(e.target.value as "single" | "multiple")}
-                          disabled={isReadOnly}
+                          disabled={!canEditAll}
                         >
                           <option value="single">Single Day</option>
                           <option value="multiple">Multiple Days</option>
@@ -1236,11 +1325,13 @@ export default function ProgramDetails() {
                               "edit-programs-input-field",
                               errors.singleDate ? "input-error" : "",
                               shake.singleDate ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             min={minDate}
                             value={singleDate}
                             onChange={(e) => setSingleDate(e.target.value)}
-                            disabled={isReadOnly}
+                            disabled={!canEditDatesAndTimes}
                           />
                         </div>
                       ) : (
@@ -1255,11 +1346,13 @@ export default function ProgramDetails() {
                                 "edit-programs-input-field",
                                 errors.startDate ? "input-error" : "",
                                 shake.startDate ? "shake" : "",
-                              ].join(" ").trim()}
+                              ]
+                                .join(" ")
+                                .trim()}
                               min={minDate}
                               value={startDate}
                               onChange={(e) => setStartDate(e.target.value)}
-                              disabled={isReadOnly}
+                              disabled={!canEditDatesAndTimes}
                             />
                           </div>
 
@@ -1273,11 +1366,13 @@ export default function ProgramDetails() {
                                 "edit-programs-input-field",
                                 errors.endDate ? "input-error" : "",
                                 shake.endDate ? "shake" : "",
-                              ].join(" ").trim()}
+                              ]
+                                .join(" ")
+                                .trim()}
                               min={minDate}
                               value={endDate}
                               onChange={(e) => setEndDate(e.target.value)}
-                              disabled={isReadOnly}
+                              disabled={!canEditDatesAndTimes}
                             />
                           </div>
                         </>
@@ -1293,10 +1388,12 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.timeStart ? "input-error" : "",
                             shake.timeStart ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={timeStart}
                           onChange={(e) => setTimeStart(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditDatesAndTimes}
                         />
                       </div>
 
@@ -1310,10 +1407,12 @@ export default function ProgramDetails() {
                             "edit-programs-input-field",
                             errors.timeEnd ? "input-error" : "",
                             shake.timeEnd ? "shake" : "",
-                          ].join(" ").trim()}
+                          ]
+                            .join(" ")
+                            .trim()}
                           value={timeEnd}
                           onChange={(e) => setTimeEnd(e.target.value)}
-                          disabled={isReadOnly}
+                          disabled={!canEditDatesAndTimes}
                         />
                       </div>
                       {eventType === "single" && (
@@ -1324,29 +1423,26 @@ export default function ProgramDetails() {
                           <label className="flex-center-gap">
                             <input
                               type="checkbox"
-                              checked={noParticipantLimit} // ✅ just the boolean state
+                              checked={noParticipantLimit}
                               onChange={(e) => {
                                 const isChecked = e.target.checked;
                                 setNoParticipantLimit(isChecked);
 
                                 if (isChecked) {
-                                  setParticipants(""); // ⚠️ careful: if participants is supposed to be an array or number, don’t use ""
+                                  setParticipants("");
                                   setErrors((prev) => {
                                     const { participants, ...rest } = prev;
                                     return rest;
                                   });
                                 }
                               }}
-                              disabled={isReadOnly}
+                              disabled={!canEditAll}
                             />
 
                             <span>No participant limit</span>
-
                           </label>
                         </div>
                       )}
-
-                      
                     </div>
                   </div>
                 </>
@@ -1429,11 +1525,11 @@ export default function ProgramDetails() {
                                     addReqText();
                                   }
                                 }}
-                                disabled={isReadOnly}
+                                disabled={!canEditAll}
                               />
                             </div>
                             <div className="row-button-section-programs">
-                              <button type="button" className="program-field-add-button" onClick={addReqText}>
+                              <button type="button" className="program-field-add-button" onClick={addReqText} disabled={!canEditAll}>
                                 +
                               </button>
                             </div>
@@ -1456,11 +1552,11 @@ export default function ProgramDetails() {
                                           prev.map((x, idx) => (idx === i ? { name: v } : x))
                                         );
                                       }}
-                                      disabled={isReadOnly}
+                                      disabled={!canEditAll}
                                     />
                                   </div>
                                   <div className="row-button-section-programs">
-                                    {!isReadOnly && (
+                                    {canEditAll && (
                                       <button
                                         type="button"
                                         className="program-field-remove-button"
@@ -1507,11 +1603,11 @@ export default function ProgramDetails() {
                                     addReqFile();
                                   }
                                 }}
-                                disabled={isReadOnly}
+                                disabled={!canEditAll}
                               />
                             </div>
                             <div className="row-button-section-programs">
-                              <button type="button" className="program-field-add-button" onClick={addReqFile}>
+                              <button type="button" className="program-field-add-button" onClick={addReqFile} disabled={!canEditAll}>
                                 +
                               </button>
                             </div>
@@ -1534,11 +1630,11 @@ export default function ProgramDetails() {
                                           prev.map((x, idx) => (idx === i ? { name: v } : x))
                                         );
                                       }}
-                                      disabled={isReadOnly}
+                                      disabled={!canEditAll}
                                     />
                                   </div>
                                   <div className="row-button-section-programs">
-                                    {!isReadOnly && (
+                                    {canEditAll && (
                                       <button
                                         type="button"
                                         className="program-field-remove-button"
@@ -1571,7 +1667,7 @@ export default function ProgramDetails() {
                             <label
                               htmlFor="identification-file-upload"
                               className="upload-link"
-                              style={isReadOnly ? { opacity: 0.5, pointerEvents: "none" } : {}}
+                              style={!canEditAll ? { opacity: 0.5, pointerEvents: "none" } : {}}
                             >
                               Click to Upload File(s)
                             </label>
@@ -1582,7 +1678,7 @@ export default function ProgramDetails() {
                               accept="image/*"
                               multiple
                               onChange={(e) => handleFilesChange(e.target.files)}
-                              disabled={isReadOnly}
+                              disabled={!canEditAll}
                             />
 
                             <div className="identificationpic-content">
@@ -1593,13 +1689,13 @@ export default function ProgramDetails() {
                                     alt="Program Cover"
                                     className="program-cover"
                                   />
-                                  {!isReadOnly && previewURLs[0] && (
+                                  {canEditAll && previewURLs[0] && (
                                     <button className="delete-btn" onClick={() => handleDeleteNew(0)}>
                                       ✕
                                     </button>
                                   )}
                                 </div>
-                              </div> 
+                              </div>
 
                               <div className="photosprogram-thumbnails">
                                 {previewURLs.length > 1 && (
@@ -1607,7 +1703,7 @@ export default function ProgramDetails() {
                                     {previewURLs.slice(1).map((u, i) => (
                                       <div key={`new-${i}`} className="thumb-wrapper">
                                         <img src={u} alt={`New ${i + 2}`} className="thumb-img" />
-                                        {!isReadOnly && (
+                                        {canEditAll && (
                                           <button className="delete-btn" onClick={() => handleDeleteNew(i + 1)}>
                                             ✕
                                           </button>
@@ -1628,7 +1724,7 @@ export default function ProgramDetails() {
                                       {existingPhotoURLs.map((u, i) => (
                                         <div key={`old-${i}-${u}`} className="thumb-wrapper">
                                           <img src={u} alt={`Existing ${i + 1}`} className="thumb-img" />
-                                          {!isReadOnly && (
+                                          {canEditAll && (
                                             <button
                                               className="delete-btn"
                                               onClick={() => handleDeleteExisting(i)}
@@ -1660,7 +1756,9 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.description ? "input-error" : "",
                               shake.description ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             placeholder={`Write at least ${MIN_DESC_CHARS} characters...`}
                             name="programDescription"
                             value={description}
@@ -1673,13 +1771,11 @@ export default function ProgramDetails() {
                                 });
                               }
                             }}
-                            disabled={isReadOnly}
+                            disabled={!canEditAll}
                           />
                           {/* Counter + validation hint */}
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
-                            <span style={{ opacity: 0.7 }}>
-                              Minimum {MIN_DESC_CHARS} characters
-                            </span>
+                            <span style={{ opacity: 0.7 }}>Minimum {MIN_DESC_CHARS} characters</span>
                             <span
                               style={{
                                 opacity: descriptionLen < MIN_DESC_CHARS ? 1 : 0.7,
@@ -1700,7 +1796,9 @@ export default function ProgramDetails() {
                               "programdesc-input-field",
                               errors.summary ? "input-error" : "",
                               shake.summary ? "shake" : "",
-                            ].join(" ").trim()}
+                            ]
+                              .join(" ")
+                              .trim()}
                             placeholder={`Write at least ${MIN_SUMMARY_CHARS} characters...`}
                             name="programSummary"
                             value={summary}
@@ -1713,13 +1811,11 @@ export default function ProgramDetails() {
                                 });
                               }
                             }}
-                            disabled={isReadOnly}
+                            disabled={!canEditAll}
                           />
                           {/* Counter + validation hint */}
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 12 }}>
-                            <span style={{ opacity: 0.7 }}>
-                              Minimum {MIN_SUMMARY_CHARS} characters
-                            </span>
+                            <span style={{ opacity: 0.7 }}>Minimum {MIN_SUMMARY_CHARS} characters</span>
                             <span
                               style={{
                                 opacity: summaryLen < MIN_SUMMARY_CHARS ? 1 : 0.7,
@@ -1747,7 +1843,7 @@ export default function ProgramDetails() {
                             className="programdesc-input-field"
                             name="reasonForReject"
                             value={rejectionReason}
-                            disabled={isReadOnly}
+                            disabled={true}
                           />
                         </div>
                       </div>
