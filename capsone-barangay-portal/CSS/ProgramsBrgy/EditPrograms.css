@@ -3104,3 +3104,51 @@ p .required {
     opacity: 1;
   }
 }
+
+
+
+
+
+
+
+
+
+.notify-button {
+  padding: 7px 10px;
+  font-size: 15px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; 
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+
+  background-color: #4caf50; 
+}
+
+.notify-button:hover {
+  background-color: #3d8c40; 
+}
+
+
+
+
+
+.announcement-yes-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+  margin-top: 20px;
+  width: 180px;
+  background-color: #4caf50;
+}
+
+
+.announcement-yes-button:hover {
+  background-color: #3d8c40;
+}
