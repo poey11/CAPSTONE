@@ -20,8 +20,6 @@ const IncidentHeatmap: React.FC<props> = ({ incidents }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [hoveredArea, setHoveredArea] = useState<string | null>(null);
-
   const areaBoundaries = {
     "South Fairview": [
       [121.06777, 14.697256],
@@ -228,13 +226,11 @@ const IncidentHeatmap: React.FC<props> = ({ incidents }) => {
           `)
           .addTo(map.current!);
 
-        setHoveredArea(areaName);
         map.current?.setFilter("area-hover", ["==", "name", areaName]);
       });
 
       map.current?.on("mouseleave", "area-fill", () => {
         popup.remove();
-        setHoveredArea(null);
         map.current?.setFilter("area-hover", ["==", "name", ""]);
       });
     });
