@@ -2,7 +2,7 @@
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { collection, doc, getDoc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, doc, getDoc, updateDoc, addDoc, getDocs, query, where, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
@@ -217,6 +217,26 @@ export default function ProgramDetails() {
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
 
 
+  // Originals (for change detection)
+  const [programNameOriginal, setProgramNameOriginal] = useState("");
+  const [locationOriginal, setLocationOriginal] = useState("");
+  const [participantsOriginal, setParticipantsOriginal] = useState("");
+  const [volunteersOriginal, setVolunteersOriginal] = useState("");
+  const [eligibleParticipantsOriginal, setEligibleParticipantsOriginal] = useState("");
+  const [descriptionOriginal, setDescriptionOriginal] = useState("");
+  const [summaryOriginal, setSummaryOriginal] = useState("");
+  const [agencyOriginal, setAgencyOriginal] = useState("");
+  const [otherAgencyOriginal, setOtherAgencyOriginal] = useState("");
+  const [noAgeLimitOriginal, setNoAgeLimitOriginal] = useState(true);
+  const [ageMinOriginal, setAgeMinOriginal] = useState("");
+  const [ageMaxOriginal, setAgeMaxOriginal] = useState("");
+  const [activeStatusOriginal, setActiveStatusOriginal] = useState<"Active" | "Inactive">("Inactive");
+  const [reqTextFieldsOriginal, setReqTextFieldsOriginal] = useState<SimpleField[]>([]);
+  const [reqFileFieldsOriginal, setReqFileFieldsOriginal] = useState<SimpleField[]>([]);
+
+
+
+
   const addReqText = () => {
     const v = reqTextNew.trim();
     if (!v) return;
@@ -403,6 +423,30 @@ export default function ProgramDetails() {
         setDescription(data.description ?? "");
         setSummary(data.summary ?? "");
 
+        const req = data.requirements || {};
+        const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
+        const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
+        
+
+        // Save originals for change detection
+        setProgramNameOriginal(data.programName ?? "");
+        setLocationOriginal(data.location ?? "");
+        setParticipantsOriginal(String(data.participants ?? ""));
+        setVolunteersOriginal(String(data.volunteers ?? ""));
+        setEligibleParticipantsOriginal(data.eligibleParticipants ?? "");
+        setDescriptionOriginal(data.description ?? "");
+        setSummaryOriginal(data.summary ?? "");
+        setAgencyOriginal(data.agencyRaw || data.agency || "");
+        setOtherAgencyOriginal(data.otherAgency || "");
+        setNoAgeLimitOriginal(!!(data.ageRestriction?.noAgeLimit));
+        setAgeMinOriginal(data.ageRestriction?.minAge != null ? String(data.ageRestriction.minAge) : "");
+        setAgeMaxOriginal(data.ageRestriction?.maxAge != null ? String(data.ageRestriction.maxAge) : "");
+        setActiveStatusOriginal((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
+        setReqTextFieldsOriginal(dedupeByName(allText));
+        setReqFileFieldsOriginal(dedupeByName(allFiles));
+
+
+
         // Photos (existing)
         const cover = data.photoURL ?? null;
         const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : cover ? [cover] : [];
@@ -413,9 +457,18 @@ export default function ProgramDetails() {
         const preTextSet = toSet(PREDEFINED_REQ_TEXT);
         const preFileSet = toSet(PREDEFINED_REQ_FILES);
 
-        const req = data.requirements || {};
-        const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
-        const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
+
+        const dedupText = dedupeByName(allText);
+        const dedupFiles = dedupeByName(allFiles);
+
+        const customText = dedupText.filter((f) => !preTextSet.has(f.name.toLowerCase()));
+        const customFiles = dedupFiles.filter((f) => !preFileSet.has(f.name.toLowerCase()));
+
+        // Use these for BOTH UI state and "original" state:
+        setReqTextFields(customText);
+        setReqFileFields(customFiles);
+        setReqTextFieldsOriginal(customText);
+        setReqFileFieldsOriginal(customFiles);        
 
         setReqTextFields(dedupeByName(allText).filter((f) => !preTextSet.has(f.name.toLowerCase())));
         setReqFileFields(dedupeByName(allFiles).filter((f) => !preFileSet.has(f.name.toLowerCase())));
@@ -516,6 +569,43 @@ export default function ProgramDetails() {
 
     return false;
   };
+
+
+
+// Detect if *any* field has changed from Firestore snapshot
+const hasAnyChanges = () => {
+  // Schedule-related changes
+  if (hasScheduleChanged()) return true;
+
+  // Simple field comparisons
+  if (programName.trim() !== (programNameOriginal?.trim() || "")) return true;
+  if (location.trim() !== (locationOriginal?.trim() || "")) return true;
+  if (participants !== participantsOriginal) return true;
+  if (volunteers !== volunteersOriginal) return true;
+  if (eligibleParticipants !== eligibleParticipantsOriginal) return true;
+  if (description.trim() !== (descriptionOriginal?.trim() || "")) return true;
+  if (summary.trim() !== (summaryOriginal?.trim() || "")) return true;
+  if (agency !== agencyOriginal) return true;
+  if (otherAgency.trim() !== (otherAgencyOriginal?.trim() || "")) return true;
+  if (noAgeLimit !== noAgeLimitOriginal) return true;
+  if (ageMin !== ageMinOriginal) return true;
+  if (ageMax !== ageMaxOriginal) return true;
+  if (activeStatus !== activeStatusOriginal) return true;
+
+  // Photo changes
+  if (photoFiles.length > 0) return true;
+
+  // Requirements
+  const currentReqText = reqTextFields.map(f => f.name.toLowerCase()).sort().join(",");
+  const originalReqText = reqTextFieldsOriginal.map(f => f.name.toLowerCase()).sort().join(",");
+  const currentReqFile = reqFileFields.map(f => f.name.toLowerCase()).sort().join(",");
+  const originalReqFile = reqFileFieldsOriginal.map(f => f.name.toLowerCase()).sort().join(",");
+  if (currentReqText !== originalReqText || currentReqFile !== originalReqFile) return true;
+
+  return false;
+};
+  
+
 
   // Build announcement content for schedule change
   const buildScheduleChangeContent = () => {
@@ -837,15 +927,69 @@ export default function ProgramDetails() {
 
   const createAnnouncementFromProgram = async () => {
     if (!validateAnnouncementFields()) return;
+    if (!programId) return; // safety guard
 
     try {
+      // 1) Create the announcement
       const announcementData = {
         ...newAnnouncement,
         image: newAnnouncement.image || existingPhotoURL || "",
       };
 
-      await addDoc(collection(db, "announcements"), announcementData);
+      const announcementRef = await addDoc(collection(db, "announcements"), announcementData);
+      const announcementId = announcementRef.id;
 
+      // 2) Fetch participants of this program
+      const participantsSnap = await getDocs(
+        query(
+          collection(db, "ProgramsParticipants"), // <-- change if your collection name differs
+          where("programId", "==", programId)
+        )
+      );
+
+      // 3) Create notifications for each participant with a valid residentId
+      const notifPromises: Promise<void>[] = [];
+
+      participantsSnap.forEach((docSnap) => {
+        const participantData: any = docSnap.data();
+
+        const residentId = participantData.residentId;
+        if (!residentId || residentId === "null") {
+          return; // skip if residentId is null or missing
+        }
+
+        const notificationRef = doc(collection(db, "Notifications"));
+
+        notifPromises.push(
+          setDoc(notificationRef, {
+            residentID: residentId,
+            participantID: docSnap.id,
+            programId: programId,
+            programName: programName || participantData.programName || "",
+            role: participantData.role || "Participant",
+
+            // 🔗 announcement info (for routing)
+            announcementId: announcementId,
+            announcementTitle: announcementData.announcementHeadline || "",
+            announcementDescription: announcementData.content || "",
+            announcementDate: announcementData.createdAt || "",
+            announcementImage: announcementData.image || "",
+
+            // message shown in notifications list
+            message: `Changes have been made to ${
+              programName || participantData.programName || "the program"
+            }. You may click here to view the announcement.`,
+
+            timestamp: serverTimestamp(),
+            transactionType: "Program Announcement",
+            isRead: false,
+          })
+        );
+      });
+
+      await Promise.all(notifPromises);
+
+      // 4) UI feedback
       setShowAddAnnouncementPopup(false);
       setPopupMessage("Announcement created successfully!");
       setShowPopup(true);
@@ -855,6 +999,7 @@ export default function ProgramDetails() {
       setShowErrorPopup(true);
     }
   };
+
 
   const confirmSubmitAnnouncement = async () => {
     setShowAnnouncementSubmitPopup(false);
@@ -1178,7 +1323,8 @@ export default function ProgramDetails() {
                 <button
                   className="action-save"
                   onClick={() => setShowSaveConfirmPopup(true)}
-                  disabled={loading}
+                  disabled={loading || !hasAnyChanges()}
+                  title={!hasAnyChanges() ? "No changes to save" : ""}
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -2149,7 +2295,7 @@ export default function ProgramDetails() {
               <button
                 className="yes-button-add"
                 onClick={handleConfirmSave}
-                disabled={loading}
+                disabled={loading || !hasAnyChanges()}
               >
                 Yes
               </button>
