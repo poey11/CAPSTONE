@@ -219,20 +219,7 @@ const IncidentHeatmap: React.FC<props> = ({ incidents }) => {
                   (incident) => incident.areaOfIncident === areaName
                 ).length
               }</span>
-             
-              <span>Total Cases Per Department: </span>
               <br>
-              <span>${
-                ["Lupon", "BCPC", "GAD", "VAWC"]
-                  .map((dept => {
-                    const count = incidents.filter(
-                      (incident) =>
-                        incident.areaOfIncident === areaName &&
-                        incident.department === dept
-                    ).length;
-                    return `${dept}: ${count}`;
-                  })).join(", ")
-              }</span>
 
               
               <span style="display:block; font-size:11px; color:#555;">(Hovering to view details)</span>
