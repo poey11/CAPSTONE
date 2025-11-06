@@ -218,23 +218,6 @@ export default function ProgramDetails() {
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
 
 
-  // Originals (for change detection)
-  const [programNameOriginal, setProgramNameOriginal] = useState("");
-  const [locationOriginal, setLocationOriginal] = useState("");
-  const [participantsOriginal, setParticipantsOriginal] = useState("");
-  const [volunteersOriginal, setVolunteersOriginal] = useState("");
-  const [eligibleParticipantsOriginal, setEligibleParticipantsOriginal] = useState("");
-  const [descriptionOriginal, setDescriptionOriginal] = useState("");
-  const [summaryOriginal, setSummaryOriginal] = useState("");
-  const [agencyOriginal, setAgencyOriginal] = useState("");
-  const [otherAgencyOriginal, setOtherAgencyOriginal] = useState("");
-  const [noAgeLimitOriginal, setNoAgeLimitOriginal] = useState(true);
-  const [ageMinOriginal, setAgeMinOriginal] = useState("");
-  const [ageMaxOriginal, setAgeMaxOriginal] = useState("");
-  const [activeStatusOriginal, setActiveStatusOriginal] = useState<"Active" | "Inactive">("Inactive");
-  const [reqTextFieldsOriginal, setReqTextFieldsOriginal] = useState<SimpleField[]>([]);
-  const [reqFileFieldsOriginal, setReqFileFieldsOriginal] = useState<SimpleField[]>([]);
-
 
 
 
@@ -429,22 +412,6 @@ export default function ProgramDetails() {
         const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
         
 
-        // Save originals for change detection
-        setProgramNameOriginal(data.programName ?? "");
-        setLocationOriginal(data.location ?? "");
-        setParticipantsOriginal(String(data.participants ?? ""));
-        setVolunteersOriginal(String(data.volunteers ?? ""));
-        setEligibleParticipantsOriginal(data.eligibleParticipants ?? "");
-        setDescriptionOriginal(data.description ?? "");
-        setSummaryOriginal(data.summary ?? "");
-        setAgencyOriginal(data.agencyRaw || data.agency || "");
-        setOtherAgencyOriginal(data.otherAgency || "");
-        setNoAgeLimitOriginal(!!(data.ageRestriction?.noAgeLimit));
-        setAgeMinOriginal(data.ageRestriction?.minAge != null ? String(data.ageRestriction.minAge) : "");
-        setAgeMaxOriginal(data.ageRestriction?.maxAge != null ? String(data.ageRestriction.maxAge) : "");
-        setActiveStatusOriginal((data.activeStatus as "Active" | "Inactive") ?? "Inactive");
-        setReqTextFieldsOriginal(dedupeByName(allText));
-        setReqFileFieldsOriginal(dedupeByName(allFiles));
 
 
 
@@ -468,8 +435,7 @@ export default function ProgramDetails() {
         // Use these for BOTH UI state and "original" state:
         setReqTextFields(customText);
         setReqFileFields(customFiles);
-        setReqTextFieldsOriginal(customText);
-        setReqFileFieldsOriginal(customFiles);        
+      
 
         setReqTextFields(dedupeByName(allText).filter((f) => !preTextSet.has(f.name.toLowerCase())));
         setReqFileFields(dedupeByName(allFiles).filter((f) => !preFileSet.has(f.name.toLowerCase())));
@@ -573,38 +539,7 @@ export default function ProgramDetails() {
 
 
 
-// Detect if *any* field has changed from Firestore snapshot
-const hasAnyChanges = () => {
-  // Schedule-related changes
-  if (hasScheduleChanged()) return true;
 
-  // Simple field comparisons
-  if (programName.trim() !== (programNameOriginal?.trim() || "")) return true;
-  if (location.trim() !== (locationOriginal?.trim() || "")) return true;
-  if (participants !== participantsOriginal) return true;
-  if (volunteers !== volunteersOriginal) return true;
-  if (eligibleParticipants !== eligibleParticipantsOriginal) return true;
-  if (description.trim() !== (descriptionOriginal?.trim() || "")) return true;
-  if (summary.trim() !== (summaryOriginal?.trim() || "")) return true;
-  if (agency !== agencyOriginal) return true;
-  if (otherAgency.trim() !== (otherAgencyOriginal?.trim() || "")) return true;
-  if (noAgeLimit !== noAgeLimitOriginal) return true;
-  if (ageMin !== ageMinOriginal) return true;
-  if (ageMax !== ageMaxOriginal) return true;
-  if (activeStatus !== activeStatusOriginal) return true;
-
-  // Photo changes
-  if (photoFiles.length > 0) return true;
-
-  // Requirements
-  const currentReqText = reqTextFields.map(f => f.name.toLowerCase()).sort().join(",");
-  const originalReqText = reqTextFieldsOriginal.map(f => f.name.toLowerCase()).sort().join(",");
-  const currentReqFile = reqFileFields.map(f => f.name.toLowerCase()).sort().join(",");
-  const originalReqFile = reqFileFieldsOriginal.map(f => f.name.toLowerCase()).sort().join(",");
-  if (currentReqText !== originalReqText || currentReqFile !== originalReqFile) return true;
-
-  return false;
-};
   
 
 
@@ -1325,8 +1260,8 @@ const hasAnyChanges = () => {
                 <button
                   className="action-save"
                   onClick={() => setShowSaveConfirmPopup(true)}
-                  disabled={loading || !hasAnyChanges()}
-                  title={!hasAnyChanges() ? "No changes to save" : ""}
+                  disabled={loading }
+                  title={"No changes to save"}
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -2297,7 +2232,7 @@ const hasAnyChanges = () => {
               <button
                 className="yes-button-add"
                 onClick={handleConfirmSave}
-                disabled={loading || !hasAnyChanges()}
+                disabled={loading}
               >
                 Yes
               </button>
