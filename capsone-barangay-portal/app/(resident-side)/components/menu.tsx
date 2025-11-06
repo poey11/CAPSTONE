@@ -24,6 +24,11 @@ type Notification = {
   isRead?: boolean;
   programId: string;
   participantID: string;
+  announcementId: string;
+  announcementTitle: string;
+  announcementDescription: string;
+  announcementDate: string;
+  announcementImage: string;
 };
 
 interface Resident {
@@ -313,7 +318,17 @@ const handleNotificationClick = async (notification: Notification) => {
   }
   else if (type === "Program Registration") {
     router.push(`/Programs/${notification?.programId}`);
-  }  
+  } 
+  else if (type === "Program Announcement") {
+    const params = new URLSearchParams({
+      title: notification.announcementTitle || "",
+      description: notification.announcementDescription || "",
+      date: notification.announcementDate || "",
+      image: notification.announcementImage || "",
+    });
+
+    router.push(`/Announcements/${notification.announcementId}?${params.toString()}`);
+  }
   else {
     console.log("No navigation triggered for this notification type.");
   }

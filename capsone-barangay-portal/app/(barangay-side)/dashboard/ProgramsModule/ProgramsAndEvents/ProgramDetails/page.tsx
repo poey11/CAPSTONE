@@ -2,7 +2,7 @@
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { collection, doc, getDoc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, doc, getDoc, updateDoc, addDoc, getDocs, query, where, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
@@ -61,6 +61,7 @@ interface AnnouncementFormProps {
   image?: string;
   content?: string;
   isActive?: boolean;
+  isInFeatured?: string;
 }
 
 
@@ -215,6 +216,9 @@ export default function ProgramDetails() {
   const [reqTextNew, setReqTextNew] = useState("");
   const [reqFileNew, setReqFileNew] = useState("");
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
+
+
+
 
 
   const addReqText = () => {
@@ -403,6 +407,14 @@ export default function ProgramDetails() {
         setDescription(data.description ?? "");
         setSummary(data.summary ?? "");
 
+        const req = data.requirements || {};
+        const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
+        const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
+        
+
+
+
+
         // Photos (existing)
         const cover = data.photoURL ?? null;
         const gallery: string[] = Array.isArray(data.photoURLs) ? data.photoURLs : cover ? [cover] : [];
@@ -413,9 +425,17 @@ export default function ProgramDetails() {
         const preTextSet = toSet(PREDEFINED_REQ_TEXT);
         const preFileSet = toSet(PREDEFINED_REQ_FILES);
 
-        const req = data.requirements || {};
-        const allText: SimpleField[] = Array.isArray(req.textFields) ? req.textFields : [];
-        const allFiles: SimpleField[] = Array.isArray(req.fileFields) ? req.fileFields : [];
+
+        const dedupText = dedupeByName(allText);
+        const dedupFiles = dedupeByName(allFiles);
+
+        const customText = dedupText.filter((f) => !preTextSet.has(f.name.toLowerCase()));
+        const customFiles = dedupFiles.filter((f) => !preFileSet.has(f.name.toLowerCase()));
+
+        // Use these for BOTH UI state and "original" state:
+        setReqTextFields(customText);
+        setReqFileFields(customFiles);
+      
 
         setReqTextFields(dedupeByName(allText).filter((f) => !preTextSet.has(f.name.toLowerCase())));
         setReqFileFields(dedupeByName(allFiles).filter((f) => !preFileSet.has(f.name.toLowerCase())));
@@ -516,6 +536,12 @@ export default function ProgramDetails() {
 
     return false;
   };
+
+
+
+
+  
+
 
   // Build announcement content for schedule change
   const buildScheduleChangeContent = () => {
@@ -837,15 +863,69 @@ export default function ProgramDetails() {
 
   const createAnnouncementFromProgram = async () => {
     if (!validateAnnouncementFields()) return;
+    if (!programId) return; // safety guard
 
     try {
+      // 1) Create the announcement
       const announcementData = {
         ...newAnnouncement,
         image: newAnnouncement.image || existingPhotoURL || "",
       };
 
-      await addDoc(collection(db, "announcements"), announcementData);
+      const announcementRef = await addDoc(collection(db, "announcements"), announcementData);
+      const announcementId = announcementRef.id;
 
+      // 2) Fetch participants of this program
+      const participantsSnap = await getDocs(
+        query(
+          collection(db, "ProgramsParticipants"), // <-- change if your collection name differs
+          where("programId", "==", programId)
+        )
+      );
+
+      // 3) Create notifications for each participant with a valid residentId
+      const notifPromises: Promise<void>[] = [];
+
+      participantsSnap.forEach((docSnap) => {
+        const participantData: any = docSnap.data();
+
+        const residentId = participantData.residentId;
+        if (!residentId || residentId === "null") {
+          return; // skip if residentId is null or missing
+        }
+
+        const notificationRef = doc(collection(db, "Notifications"));
+
+        notifPromises.push(
+          setDoc(notificationRef, {
+            residentID: residentId,
+            participantID: docSnap.id,
+            programId: programId,
+            programName: programName || participantData.programName || "",
+            role: participantData.role || "Participant",
+
+            // 🔗 announcement info (for routing)
+            announcementId: announcementId,
+            announcementTitle: announcementData.announcementHeadline || "",
+            announcementDescription: announcementData.content || "",
+            announcementDate: announcementData.createdAt || "",
+            announcementImage: announcementData.image || "",
+
+            // message shown in notifications list
+            message: `Changes have been made to ${
+              programName || participantData.programName || "the program"
+            }. You may click here to view the announcement.`,
+
+            timestamp: serverTimestamp(),
+            transactionType: "Program Announcement",
+            isRead: false,
+          })
+        );
+      });
+
+      await Promise.all(notifPromises);
+
+      // 4) UI feedback
       setShowAddAnnouncementPopup(false);
       setPopupMessage("Announcement created successfully!");
       setShowPopup(true);
@@ -855,6 +935,7 @@ export default function ProgramDetails() {
       setShowErrorPopup(true);
     }
   };
+
 
   const confirmSubmitAnnouncement = async () => {
     setShowAnnouncementSubmitPopup(false);
@@ -889,6 +970,7 @@ export default function ProgramDetails() {
         image: existingPhotoURL || "",
         content,
         isActive: true,
+        isInFeatured: "Inactive",
       });
 
       setAnnouncementPreview(existingPhotoURL || "/Images/thumbnail.png");
@@ -1178,7 +1260,8 @@ export default function ProgramDetails() {
                 <button
                   className="action-save"
                   onClick={() => setShowSaveConfirmPopup(true)}
-                  disabled={loading}
+                  disabled={loading }
+                  title={"No changes to save"}
                 >
                   {loading ? "Saving..." : "Save"}
                 </button>
@@ -2247,7 +2330,12 @@ export default function ProgramDetails() {
                         }`}
                         placeholder="Announcement Headline"
                         value={newAnnouncement.announcementHeadline || ""}
-                        readOnly // headline locked
+                        onChange={(e) =>
+                          setNewAnnouncement((prev) => ({
+                            ...prev,
+                            announcementHeadline: e.target.value,
+                          }))
+                        }
                       />
                     </div>
 
