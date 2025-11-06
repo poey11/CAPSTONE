@@ -61,6 +61,7 @@ interface AnnouncementFormProps {
   image?: string;
   content?: string;
   isActive?: boolean;
+  isInFeatured?: string;
 }
 
 
@@ -1034,6 +1035,7 @@ const hasAnyChanges = () => {
         image: existingPhotoURL || "",
         content,
         isActive: true,
+        isInFeatured: "Inactive",
       });
 
       setAnnouncementPreview(existingPhotoURL || "/Images/thumbnail.png");
