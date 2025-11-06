@@ -2247,7 +2247,12 @@ export default function ProgramDetails() {
                         }`}
                         placeholder="Announcement Headline"
                         value={newAnnouncement.announcementHeadline || ""}
-                        readOnly // headline locked
+                        onChange={(e) =>
+                          setNewAnnouncement((prev) => ({
+                            ...prev,
+                            announcementHeadline: e.target.value,
+                          }))
+                        }
                       />
                     </div>
 
