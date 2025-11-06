@@ -634,7 +634,7 @@ useEffect(() => {
                                 if (index===0) number= "First";
                                 else if (index===1) number= "Second";
                                 else if (index===2) number= "Third";
-                                handleSMSNotification(number);
+                                //handleSMSNotification(number);
                                 setTimeout(() => {
                                     setShowPopup(false);
                                     router.push(
