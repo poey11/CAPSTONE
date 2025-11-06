@@ -2450,3 +2450,65 @@ input[type="checkbox"] {
   width: 27px;
   height: 27px;
 }
+
+
+/* ============================
+   ADD SUMMARY POPUP STYLES
+   ============================ */
+
+.confirmation-popup-add-summary {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px 28px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirmation-popup-add-summary img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.confirmation-popup-add-summary p {
+  font-size: 16px;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.program-summary-textarea-add-summary {
+  width: 100%;
+  min-height: 120px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.yesno-container-add-summary {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+  gap: 10px;
+  width: 100%;
+}
+
+.yesno-container-add-summary button {
+  flex: 1;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+  transition: background-color 0.2s ease;
+}

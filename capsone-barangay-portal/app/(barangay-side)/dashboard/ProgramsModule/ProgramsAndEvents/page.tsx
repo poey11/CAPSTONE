@@ -28,7 +28,8 @@ type Program = {
   timeStart: string;
   eventType?: "single" | "multiple";
   endDate?: string;
-  timeEnd?: string;  
+  timeEnd?: string;
+  programSummary?: string;
 };
 
 type Participant = {
@@ -349,7 +350,8 @@ export default function ProgramsModule() {
             timeStart: d.timeStart || "",
             eventType: d.eventType || "single",
             endDate: d.endDate || "",
-            timeEnd: d.timeEnd || "",            
+            timeEnd: d.timeEnd || "",
+            programSummary: d.programSummary || "",           
           });
         });
 
@@ -478,6 +480,53 @@ export default function ProgramsModule() {
   const indexOfLast = currentPage * programsPerPage;
   const indexOfFirst = indexOfLast - programsPerPage;
   //const currentPrograms = filteredPrograms.slice(indexOfFirst, indexOfLast);
+
+  // new for programSummary
+  const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [summaryProgram, setSummaryProgram] = useState<Program | null>(null);
+  const [summaryText, setSummaryText] = useState("");  
+
+  const openSummaryModalForProgram = (program: Program) => {
+    setSummaryProgram(program);
+    setSummaryText(program.programSummary || "");
+    setSummaryModalOpen(true);
+  };
+
+  const closeSummaryModal = () => {
+    setSummaryModalOpen(false);
+    setSummaryProgram(null);
+    setSummaryText("");
+  };
+
+  const handleSaveProgramSummary = async () => {
+    if (!summaryProgram) return;
+    const trimmed = summaryText.trim();
+
+    try {
+      await updateDoc(doc(db, "Programs", summaryProgram.id), {
+        programSummary: trimmed,
+      });
+
+      // Update local state so UI reflects the saved summary
+      setPrograms((prev) =>
+        prev.map((p) =>
+          p.id === summaryProgram.id ? { ...p, programSummary: trimmed } : p
+        )
+      );
+      setProgramsAssignedData((prev) =>
+        prev.map((p) =>
+          p.id === summaryProgram.id ? { ...p, programSummary: trimmed } : p
+        )
+      );
+
+      showToast("success", "Program summary saved.");
+      closeSummaryModal();
+    } catch (e) {
+      console.error("Failed to save program summary:", e);
+      showToast("error", "Failed to save program summary.");
+    }
+  };
+    
 
   const sortedPrograms = [...filteredPrograms].sort((a, b) => {
   const order = {
@@ -1019,11 +1068,15 @@ const fetchProgramParticipants = async (programId: string): Promise<ParticipantR
     const [loadingProgramSummary, setLoadingProgramSummary] = useState(false);    
   
 
-const generateProgramSummaryXlsx = async (programId: string, fallbackName?: string): Promise<string | null> => {
+const generateProgramSummaryXlsx = async (
+  programId: string,
+  fallbackName?: string
+): Promise<string | null> => {
   try {
     setLoadingProgramSummary?.(true);
     setIsGenerating?.(true);
     setGeneratingMessage?.("Generating Program Summary Report...");
+
     // Load program
     const progSnap = await getDoc(doc(db, "Programs", programId));
     if (!progSnap.exists()) {
@@ -1044,19 +1097,23 @@ const generateProgramSummaryXlsx = async (programId: string, fallbackName?: stri
     const wsInfo = wb.addWorksheet("Program Info");
     const wsList = wb.addWorksheet("Participants & Volunteers");
 
-// === Sheet 1: Program Info ===
-const programName = p.programName || fallbackName || programId;
+    // === Sheet 1: Program Info ===
+    const programName = p.programName || fallbackName || programId;
 
-// 1) In-sheet visible title (shows in Excel UI)
-const headerTitle = `BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n(${programName})`;
-wsInfo.mergeCells("A1:F1");
-const headerCell = wsInfo.getCell("A1");
-headerCell.value = headerTitle;
-headerCell.font = { name: "Calibri", size: 16, bold: true };
-headerCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
-wsInfo.getRow(1).height = 60;
+    // 1) In-sheet visible title (shows in Excel UI)
+    const headerTitle = `BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n(${programName})`;
+    wsInfo.mergeCells("A1:F1");
+    const headerCell = wsInfo.getCell("A1");
+    headerCell.value = headerTitle;
+    headerCell.font = { name: "Calibri", size: 16, bold: true };
+    headerCell.alignment = {
+      horizontal: "center",
+      vertical: "middle",
+      wrapText: true,
+    };
+    wsInfo.getRow(1).height = 60;
 
-wsInfo.addRow([]);
+    wsInfo.addRow([]);
 
     const eventType = p.eventType || "single";
     const sDate = fmtDate(p.startDate);
@@ -1067,54 +1124,58 @@ wsInfo.addRow([]);
     const approval = p.approvalStatus || "—";
     const progressStatus = p.progressStatus || "—";
     const description = p.description || p.programDescription || "";
+    const programSummary = p.programSummary || "";
 
     // display date/time range
     const dateRange = eDate ? `${sDate} — ${eDate}` : sDate;
-    const timeRange = tStart && tEnd ? `${tStart} — ${tEnd}` : (tStart || tEnd || "");
+    const timeRange =
+      tStart && tEnd ? `${tStart} — ${tEnd}` : tStart || tEnd || "";
 
     // capacity
     const capParticipants = Number(p.participants || 0) || 0;
     const capVolunteers = Number(p.volunteers || 0) || 0;
 
     // participantDays (for multiple)
-    const participantDays: number[] = Array.isArray(p.participantDays) ? p.participantDays : [];
+    const participantDays: number[] = Array.isArray(p.participantDays)
+      ? p.participantDays
+      : [];
 
     // 2) Printed header/footer (this is what PDF converters use)
-wsInfo.headerFooter = {
-  // Centered (&C), bold (&B), font size 16 (&16) for the first two lines
-  // Program name smaller (&10). Escape & as && to avoid Excel header tokens.
-  oddHeader:
-    '&C&B&16BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&10(' +
-    String(programName).replace(/&/g, '&&') +
-    ')',
-};
+    wsInfo.headerFooter = {
+      // Centered (&C), bold (&B), font size 16 (&16) for the first two lines
+      // Program name smaller (&10). Escape & as && to avoid Excel header tokens.
+      oddHeader:
+        "&C&B&16BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&10(" +
+        String(programName).replace(/&/g, "&&") +
+        ")",
+    };
 
-// Page setup with generous top/header margins so the header prints in PDF
-wsInfo.pageSetup = {
-  orientation: "portrait",
-  fitToPage: true,
-  fitToWidth: 1,
-  fitToHeight: 0,
-  paperSize: 9, // A4
-  margins: {
-    left: 0.4,
-    right: 0.4,
-    top: 1.0,     // more top so header area is clear in PDF
-    bottom: 0.5,
-    header: 0.5,  // header margin area
-    footer: 0.3,
-  },
-};
+    // Page setup with generous top/header margins so the header prints in PDF
+    wsInfo.pageSetup = {
+      orientation: "portrait",
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9, // A4
+      margins: {
+        left: 0.4,
+        right: 0.4,
+        top: 1.0, // more top so header area is clear in PDF
+        bottom: 0.5,
+        header: 0.5, // header margin area
+        footer: 0.3,
+      },
+    };
 
     // Info table
-      wsInfo.columns = [
-        { header: "", width: 26 }, // labels
-        { header: "", width: 64 }, // values (wider so text doesn't clip)
-        { header: "", width: 12 },
-        { header: "", width: 12 },
-        { header: "", width: 12 },
-        { header: "", width: 12 },
-      ];
+    wsInfo.columns = [
+      { header: "", width: 26 }, // labels
+      { header: "", width: 64 }, // values (wider so text doesn't clip)
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+    ];
 
     const addInfo = (label: string, value: string) => {
       const r = wsInfo.addRow([label, value]);
@@ -1130,7 +1191,6 @@ wsInfo.pageSetup = {
     addInfo("Location", location);
     addInfo("Date Range", dateRange);
     if (timeRange) addInfo("Time", timeRange);
-
 
     // ── Capacity section (cleaner table layout)
     if (eventType === "multiple" && participantDays.length) {
@@ -1157,11 +1217,17 @@ wsInfo.pageSetup = {
 
       // Blank line, then Max Volunteers in same format
       wsInfo.addRow([]);
-      const mv = wsInfo.addRow(["Max Volunteers", capVolunteers ? String(capVolunteers) : "—"]);
+      const mv = wsInfo.addRow([
+        "Max Volunteers",
+        capVolunteers ? String(capVolunteers) : "—",
+      ]);
       mv.getCell(1).font = { bold: true };
       mv.getCell(2).alignment = { horizontal: "right" };
     } else {
-      addInfo("Max Participants", capParticipants ? String(capParticipants) : "—");
+      addInfo(
+        "Max Participants",
+        capParticipants ? String(capParticipants) : "—"
+      );
       addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
     }
 
@@ -1183,6 +1249,22 @@ wsInfo.pageSetup = {
       descRow.height = 80; // adjust as you like
     }
 
+    if (programSummary) {
+      wsInfo.addRow([]);
+      const sumHeader = wsInfo.addRow([
+        "Program Summary / Post-event Remarks",
+      ]);
+      sumHeader.font = { bold: true };
+
+      const sumRow = wsInfo.addRow([programSummary]);
+      const sumRowNum = sumRow.number;
+      wsInfo.mergeCells(`A${sumRowNum}:F${sumRowNum}`);
+
+      const cell = wsInfo.getCell(`A${sumRowNum}`);
+      cell.alignment = { wrapText: true, vertical: "top" };
+      sumRow.height = 80;
+    }
+
     // style basics
     wsInfo.eachRow((row) => {
       row.eachCell((cell) => {
@@ -1195,7 +1277,14 @@ wsInfo.pageSetup = {
       fitToWidth: 1,
       fitToHeight: 0,
       paperSize: 9,
-      margins: { left: 0.3, right: 0.3, top: 0.4, bottom: 0.4, header: 0.2, footer: 0.2 },
+      margins: {
+        left: 0.3,
+        right: 0.3,
+        top: 0.4,
+        bottom: 0.4,
+        header: 0.2,
+        footer: 0.2,
+      },
     };
 
     // === Sheet 2: Participants & Volunteers ===
@@ -1208,13 +1297,22 @@ wsInfo.pageSetup = {
       { header: "Attendance", width: 14 },
     ];
 
-    const title2 = wsList.addRow(["Participants / Volunteers (Approved Only)"]);
+    const title2 = wsList.addRow([
+      "Participants / Volunteers (Approved Only)",
+    ]);
     wsList.mergeCells(`A${title2.number}:F${title2.number}`);
-    wsList.getCell(`A${title2.number}`).font = { name: "Calibri", size: 14, bold: true };
-    wsList.getCell(`A${title2.number}`).alignment = { horizontal: "center", vertical: "middle" };
+    wsList.getCell(`A${title2.number}`).font = {
+      name: "Calibri",
+      size: 14,
+      bold: true,
+    };
+    wsList.getCell(`A${title2.number}`).alignment = {
+      horizontal: "center",
+      vertical: "middle",
+    };
     wsList.addRow([]);
 
-    const header2 = wsList.addRow(wsList.columns.map(c => c.header));
+    const header2 = wsList.addRow(wsList.columns.map((c) => c.header));
     header2.eachCell((c) => {
       c.font = { name: "Calibri", size: 12, bold: true };
       c.alignment = {
@@ -1231,21 +1329,32 @@ wsInfo.pageSetup = {
       c.fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: "FFF2F2F2" }, // optional: light gray header background
+        fgColor: { argb: "FFF2F2F2" },
       };
     });
-    header2.height = 22; // optional — more vertical padding for header row
+    header2.height = 22;
 
     // Load participants (Approved only)
     const all = await fetchProgramParticipants(programId);
-    const approved = all.filter(r => String(r.approvalStatus || "").toLowerCase() === "approved");
+    const approved = all.filter(
+      (r) =>
+        String(r.approvalStatus || "").toLowerCase() === "approved"
+    );
 
     // Sort: participants first, then alpha by last name
     const roleOrder = (r: ParticipantRecord) =>
-      (String(r.role || "").toLowerCase() === "participant" ? 0 : 1);
+      String(r.role || "").toLowerCase() === "participant" ? 0 : 1;
     const nameKey = (r: ParticipantRecord) =>
-      `${(r.lastName || "").toString().toUpperCase()}|${(r.firstName || "").toString().toUpperCase()}`;
-    approved.sort((a, b) => roleOrder(a) - roleOrder(b) || nameKey(a).localeCompare(nameKey(b)));
+      `${(r.lastName || "").toString().toUpperCase()}|${(
+        r.firstName || ""
+      )
+        .toString()
+        .toUpperCase()}`;
+    approved.sort(
+      (a, b) =>
+        roleOrder(a) - roleOrder(b) ||
+        nameKey(a).localeCompare(nameKey(b))
+    );
 
     approved.forEach((rec, i) => {
       const addr = rec.address || rec.location || "—";
@@ -1253,12 +1362,28 @@ wsInfo.pageSetup = {
       const role = rec.role || "—";
       const attendance = rec.attendance ? "Yes" : "No";
 
-      const r = wsList.addRow([i + 1, safeFullName(rec), addr, contact, role, attendance]);
+      const r = wsList.addRow([
+        i + 1,
+        safeFullName(rec),
+        addr,
+        contact,
+        role,
+        attendance,
+      ]);
       r.height = 22;
       r.eachCell((c) => {
-        c.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
+        c.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
         c.font = { name: "Calibri", size: 12 };
-        c.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+        c.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
       });
     });
 
@@ -1278,22 +1403,118 @@ wsInfo.pageSetup = {
       },
     };
 
+    // === Attendance Summary (writes into wsInfo) ===
+    const approvedParticipants = approved.filter(
+      (r) =>
+        String(r.role || "").toLowerCase() === "participant"
+    );
+
+    if (approvedParticipants.length > 0) {
+      wsInfo.addRow([]);
+      const attHeader = wsInfo.addRow(["Attendance Summary"]);
+      attHeader.font = { bold: true };
+
+      // Helper: create merged, wrapped row in wsInfo
+      const addAttLine = (line: string) => {
+        const row = wsInfo.addRow([line]);
+        const rn = row.number;
+        wsInfo.mergeCells(`A${rn}:F${rn}`);
+        const cell = wsInfo.getCell(`A${rn}`);
+        cell.alignment = { wrapText: true, vertical: "top" };
+        row.height = 20;
+      };
+
+      if (eventType === "multiple" && participantDays.length) {
+        // Per-day stats
+        let totalApprovedAll = 0;
+        let totalAttendedAll = 0;
+
+        participantDays.forEach((_, dayIndex) => {
+          const dayApproved = approvedParticipants.filter(
+            (r) => (r as any).dayChosen === dayIndex
+          );
+          const dayApprovedCount = dayApproved.length;
+          const dayAttended = dayApproved.filter(didAttend).length;
+
+          totalApprovedAll += dayApprovedCount;
+          totalAttendedAll += dayAttended;
+
+          const percDay =
+            dayApprovedCount > 0
+              ? Math.round(
+                  (dayAttended / dayApprovedCount) * 100
+                )
+              : 0;
+
+          addAttLine(
+            `Day ${dayIndex + 1}: ${dayAttended}/${
+              dayApprovedCount || 0
+            } approved participants attended (${percDay}% attendance achieved).`
+          );
+        });
+
+        // Overall
+        const overallApproved =
+          totalApprovedAll || approvedParticipants.length;
+        const overallAttended =
+          totalAttendedAll ||
+          approvedParticipants.filter(didAttend).length;
+
+        const overallPerc =
+          overallApproved > 0
+            ? Math.round(
+                (overallAttended / overallApproved) * 100
+              )
+            : 0;
+
+        addAttLine(
+          `Total attendance: ${overallAttended}/${overallApproved} approved participants attended (${overallPerc}% attendance achieved throughout the whole event).`
+        );
+      } else {
+        // Single event
+        const totalApproved = approvedParticipants.length;
+        const attendedCount =
+          approvedParticipants.filter(didAttend).length;
+        const perc =
+          totalApproved > 0
+            ? Math.round((attendedCount / totalApproved) * 100)
+            : 0;
+
+        addAttLine(
+          `${attendedCount}/${totalApproved} approved participants attended (${perc}% attendance achieved).`
+        );
+      }
+    }
+
     // Upload XLSX
-    const safeName = String(programName || programId).replace(/[^\w.-]/g, "_");
-    const xlsxRef = ref(storage, `GeneratedReports/Program_Summary_${safeName}.xlsx`);
+    const safeName = String(programName || programId).replace(
+      /[^\w.-]/g,
+      "_"
+    );
+    const xlsxRef = ref(
+      storage,
+      `GeneratedReports/Program_Summary_${safeName}.xlsx`
+    );
     const buf = await wb.xlsx.writeBuffer();
-    await uploadBytes(xlsxRef, new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+    await uploadBytes(
+      xlsxRef,
+      new Blob([buf], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      })
+    );
     const xlsxUrl = await getDownloadURL(xlsxRef);
 
     return xlsxUrl;
   } catch (err) {
     console.error("generateProgramSummaryXlsx error:", err);
     showToast("error", "Failed to generate Program Summary XLSX.");
+    try {
+      setLoadingProgramSummary?.(false);
+    } catch {}
     return null;
-        try { setLoadingProgramSummary?.(false); } catch {}
-
   }
 };
+
 
 
 const handleGenerateProgramPDF = async (programId: string, programName?: string) => {
@@ -1524,7 +1745,7 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                             >
                               <img
                                 src="/Images/view.png"
-                                alt="Edit"
+                                alt="View"
                                 className="action-programs-view"
                               />
                             </button>
@@ -1540,6 +1761,7 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                               />
                             </button>
                           )}
+
                           {canDelete && (
                             <button
                               className="action-programs-button"
@@ -1552,23 +1774,46 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                               />
                             </button>
                           )}
-                          { canDelete && program.progressStatus === "Completed" && (
-                            <button
-                              className="action-programs-button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleGenerateProgramPDF(program.id, program.programName);
-                              }}
-                            >
-                              <img
-                                src="/Images/printer.png"
-                                alt="Print"
-                                className="action-programs-print"
-                              />
-                            </button>
-                          )}                          
+
+                          {/* ✅ Only show "Add Summary" when Completed and NO summary yet */}
+                          {canDelete &&
+                            program.progressStatus === "Completed" &&
+                            !program.programSummary && (
+                              <button
+                                className="action-programs-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openSummaryModalForProgram(program);
+                                }}
+                              >
+                                <span className="action-programs-summary-label">
+                                  Add Summary
+                                </span>
+                              </button>
+                            )}
+
+                          {/* ✅ Only show Print when Completed AND summary already exists */}
+                          {canDelete &&
+                            program.progressStatus === "Completed" &&
+                            !!program.programSummary && (
+                              <button
+                                className="action-programs-button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleGenerateProgramPDF(program.id, program.programName);
+                                }}
+                              >
+                                <img
+                                  src="/Images/printer.png"
+                                  alt="Print"
+                                  className="action-programs-print"
+                                />
+                              </button>
+                            )}
                         </div>
                       </td>
+                                          
+
                     </tr>
                   ))}
                 </tbody>
@@ -1923,6 +2168,44 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
           </div>
         </div>
       )}
+
+{/* Summary pop-up */}
+{summaryModalOpen && summaryProgram && (
+  <div className="confirmation-popup-overlay-add-program">
+    <div className="confirmation-popup-add-summary">
+      <img
+        src="/Images/edit.png"
+        alt="summary icon"
+      />
+      <p>
+        Add post-event summary for:
+        <br />
+        <strong>{summaryProgram.programName}</strong>
+      </p>
+
+      <textarea
+        className="program-summary-textarea-add-summary"
+        value={summaryText}
+        onChange={(e) => setSummaryText(e.target.value)}
+        placeholder="Write how the program went, issues encountered (e.g., inventory shortage, low turnout), and recommendations for future programs."
+        rows={6}
+      />
+
+      <div className="yesno-container">
+        <button onClick={closeSummaryModal} className="no-button-add">
+          Cancel
+        </button>
+        <button
+          onClick={handleSaveProgramSummary}
+          className="yes-button-add"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
           {/* Generating of Report Popup */}
