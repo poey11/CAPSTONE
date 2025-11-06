@@ -61,7 +61,6 @@ interface AnnouncementFormProps {
   image?: string;
   content?: string;
   isActive?: boolean;
-  isInFeatured?: string;
 }
 
 
@@ -253,7 +252,6 @@ export default function ProgramDetails() {
     createdAt: formatDate12(new Date()),
     createdBy: user?.fullName || user?.name || "",
     category: "Barangay Event",
-    isInFeatured: "Inactive",
     isActive: true,
   });
   const [announcementPreview, setAnnouncementPreview] = useState<string | null>(null);
@@ -891,7 +889,6 @@ export default function ProgramDetails() {
         image: existingPhotoURL || "",
         content,
         isActive: true,
-        isInFeatured: "Inactive", // Featured OFF by default
       });
 
       setAnnouncementPreview(existingPhotoURL || "/Images/thumbnail.png");
