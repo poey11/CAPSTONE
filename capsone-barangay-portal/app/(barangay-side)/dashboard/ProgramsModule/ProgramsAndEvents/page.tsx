@@ -1762,18 +1762,6 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                             </button>
                           )}
 
-                          {canDelete && (
-                            <button
-                              className="action-programs-button"
-                              onClick={() => askConfirmDeleteProgram(program)}
-                            >
-                              <img
-                                src="/Images/delete.png"
-                                alt="Delete"
-                                className="action-programs-delete"
-                              />
-                            </button>
-                          )}
 
                           {/* ✅ Only show "Add Summary" when Completed and NO summary yet */}
                           {canDelete &&
@@ -1786,9 +1774,12 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                                   openSummaryModalForProgram(program);
                                 }}
                               >
-                                <span className="action-programs-summary-label">
-                                  Add Summary
-                                </span>
+
+                               <img
+                                src="/Images/summary.png"
+                                alt="Delete"
+                                className="action-programs-summary"
+                              />
                               </button>
                             )}
 
@@ -1810,6 +1801,20 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
                                 />
                               </button>
                             )}
+
+
+                                                      {canDelete && (
+                            <button
+                              className="action-programs-button"
+                              onClick={() => askConfirmDeleteProgram(program)}
+                            >
+                              <img
+                                src="/Images/delete.png"
+                                alt="Delete"
+                                className="action-programs-delete"
+                              />
+                            </button>
+                          )}
                         </div>
                       </td>
                                           
@@ -2171,27 +2176,24 @@ const handleGenerateProgramPDF = async (programId: string, programName?: string)
 
 {/* Summary pop-up */}
 {summaryModalOpen && summaryProgram && (
-  <div className="confirmation-popup-overlay-add-program">
-    <div className="confirmation-popup-add-summary">
-      <img
-        src="/Images/edit.png"
-        alt="summary icon"
-      />
-      <p>
-        Add post-event summary for:
-        <br />
-        <strong>{summaryProgram.programName}</strong>
-      </p>
+  <div className="add-summary-popup-overlay">
+    <div className="add-summary-confirmation-popup">
+
+
+        <h2> Add post-event summary for: </h2>
+       
+        <p>{summaryProgram.programName} </p> 
+   
 
       <textarea
         className="program-summary-textarea-add-summary"
         value={summaryText}
         onChange={(e) => setSummaryText(e.target.value)}
         placeholder="Write how the program went, issues encountered (e.g., inventory shortage, low turnout), and recommendations for future programs."
-        rows={6}
+        rows={7}
       />
 
-      <div className="yesno-container">
+      <div className="yes-no-container-summary-program">
         <button onClick={closeSummaryModal} className="no-button-add">
           Cancel
         </button>

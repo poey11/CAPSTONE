@@ -2165,19 +2165,23 @@ export default function ProgramDetails() {
         <div className="confirmation-popup-overlay-edit-program">
           <div className="confirmation-popup-edit-program">
             <img src="/Images/question.png" alt="warning icon" className="successful-icon-popup" />
-            <p>Send SMS to all approved participants?</p>
+            <p>Notify the registered participants and volunteers about the changes?</p>
             <div className="yesno-container-add">
+
+              {/*}
+              comment kasi dapat walang option na no hahahah
               <button
                 onClick={() => setShowSmsPromptPopup(false)}
                 className="no-button-add"
               >
                 No
               </button>
+              */}
               <button
-                className="yes-button-add"
+                className="notify-button"
                 onClick={handleSendSmsToApprovedParticipants}
               >
-                Send SMS
+                Send via SMS 
               </button>
             </div>
           </div>
@@ -2265,17 +2269,7 @@ export default function ProgramDetails() {
                       </select>
                     </div>
 
-                    <div className="fields-section-add-announcements">
-                      <p className="switch-label">Featured in Home Page</p>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          checked={newAnnouncement.isInFeatured === "Active"}
-                          disabled // locked OFF
-                        />
-                        <span className="slider round"></span>
-                      </label>
-                    </div>
+
                   </div>
 
                   <div className="add-announcements-content-right-side">
@@ -2337,17 +2331,7 @@ export default function ProgramDetails() {
             </div>
 
             <div className="announcement-yesno-container">
-              <button
-                onClick={() => {
-                  setShowAddAnnouncementPopup(false);
-                  setInvalidFields([]);
-                  setPopupErrorMessage("");
-                  setShowErrorPopup(false);
-                }}
-                className="announcement-no-button"
-              >
-                Cancel
-              </button>
+
               <button
                 type="button"
                 onClick={() => {
