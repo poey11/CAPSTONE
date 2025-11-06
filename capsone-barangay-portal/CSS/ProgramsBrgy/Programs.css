@@ -361,6 +361,10 @@ width: 100px;
 }
 
 
+.action-programs-summary {
+  filter: brightness(0) saturate(100%) invert(34%) sepia(89%) saturate(1287%) hue-rotate(265deg) brightness(93%) contrast(97%);
+}
+
   /* NEW UPDATED */
   .no-result-card-programs {
   display: flex;
@@ -2486,7 +2490,7 @@ input[type="checkbox"] {
   min-height: 120px;
   margin-top: 10px;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid #2C3E50;
   border-radius: 6px;
   resize: vertical;
   font-family: inherit;
@@ -2512,3 +2516,62 @@ input[type="checkbox"] {
   color: #fff;
   transition: background-color 0.2s ease;
 }
+
+
+
+
+
+
+
+.add-summary-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000; 
+}
+
+  .add-summary-confirmation-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 350px;
+    width: 40%;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    border: 2px solid rgb(168, 161, 158);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: lighter;
+    position: fixed;
+
+    animation: slideDownFadeIn 0.4s ease-out;
+  }
+
+  .add-summary-confirmation-popup p {
+    color: rgb(97, 97, 97);
+  }
+.add-summary-confirmation-popup h2 {
+    font-size: 1.80rem;
+  font-weight: bolder;
+  text-align: center;
+  font-weight: bold;
+  color: #214666;
+  width: 100%;
+}
+
+
+
+.yes-no-container-summary-program {
+      display: flex;
+    gap: 20px;
+}
+
