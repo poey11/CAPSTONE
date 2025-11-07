@@ -1126,30 +1126,26 @@ const generateProgramSummaryXlsx = async (
 
       // --- BODY: split into logical "lines" and add one row per line ---
       const lines: string[] = [];
-
-      // First respect any explicit newlines coming from the text
       const paragraphs = content.split(/\r?\n/);
 
       paragraphs.forEach((para) => {
-        let p = para.trim();
-        if (!p) {
-          // preserve blank line between paragraphs
+        let s = para.trim();
+        if (!s) {
           lines.push("");
           return;
         }
 
-        while (p.length > maxCharsPerRow) {
-          // try to break at last space before maxCharsPerRow
-          let breakPos = p.lastIndexOf(" ", maxCharsPerRow);
+        while (s.length > maxCharsPerRow) {
+          let breakPos = s.lastIndexOf(" ", maxCharsPerRow);
           if (breakPos <= 0) breakPos = maxCharsPerRow;
-          lines.push(p.slice(0, breakPos));
-          p = p.slice(breakPos).trim();
+          lines.push(s.slice(0, breakPos));
+          s = s.slice(breakPos).trim();
         }
-        if (p) lines.push(p);
+        if (s) lines.push(s);
       });
 
       if (lines.length === 0) {
-        lines.push(""); // safety
+        lines.push("");
       }
 
       lines.forEach((line) => {
@@ -1158,12 +1154,15 @@ const generateProgramSummaryXlsx = async (
         wsInfo.mergeCells(`A${rn}:F${rn}`);
         const cell = wsInfo.getCell(`A${rn}`);
         cell.font = { name: "Calibri", size: bodySize };
-        cell.alignment = { wrapText: true, vertical: "top", horizontal: "justify" };
-        // No manual row.height — let Excel auto-size and paginate
+        cell.alignment = {
+          wrapText: true,
+          vertical: "top",
+          horizontal: "justify",
+        };
       });
     };
 
-    // 1) In-sheet visible title (use richText so program name can be italic)
+    // Title row
     wsInfo.mergeCells("A1:F1");
     const headerCell = wsInfo.getCell("A1");
     headerCell.value = {
@@ -1188,14 +1187,12 @@ const generateProgramSummaryXlsx = async (
       wrapText: true,
     };
     wsInfo.getRow(1).height = 70;
-
     wsInfo.addRow([]);
 
     const eventType = p.eventType || "single";
     const sDate = fmtDate(p.startDate);
     const eDate = p.endDate ? fmtDate(p.endDate) : "";
 
-    // time → AM/PM using your helper
     const rawStart: string = p.timeStart || "";
     const rawEnd: string = p.timeEnd || "";
     const tStart = toAmPm(rawStart) || rawStart;
@@ -1207,21 +1204,18 @@ const generateProgramSummaryXlsx = async (
     const description = p.description || p.programDescription || "";
     const programSummary = p.programSummary || "";
 
-    // display date/time range
     const dateRange = eDate ? `${sDate} — ${eDate}` : sDate;
     const timeRange =
       tStart && tEnd ? `${tStart} — ${tEnd}` : tStart || tEnd || "";
 
-    // capacity
     const capParticipants = Number(p.participants || 0) || 0;
     const capVolunteers = Number(p.volunteers || 0) || 0;
 
-    // participantDays (for multiple)
     const participantDays: number[] = Array.isArray(p.participantDays)
       ? p.participantDays
       : [];
 
-    // Printed header/footer: show only on first page
+    // Printed header/footer – only first page
     wsInfo.headerFooter = {
       differentFirst: true,
       firstHeader:
@@ -1232,27 +1226,27 @@ const generateProgramSummaryXlsx = async (
       evenHeader: "",
     };
 
-    // Page setup
+    // Page setup (sheet 1)
     wsInfo.pageSetup = {
       orientation: "portrait",
       fitToPage: true,
       fitToWidth: 1,
-      fitToHeight: 0, // allow multiple pages vertically
-      paperSize: 9, // A4
+      fitToHeight: 0,
+      paperSize: 9,
       margins: {
-        left: 0.4,
-        right: 0.4,
-        top: 1.0,
-        bottom: 0.5,
-        header: 0.5,
-        footer: 0.3,
+        left: 0.3,
+        right: 0.3,
+        top: 0.4,
+        bottom: 0.4,
+        header: 0.2,
+        footer: 0.2,
       },
     };
 
     // Info table
     wsInfo.columns = [
-      { header: "", width: 26 }, // labels
-      { header: "", width: 64 }, // values
+      { header: "", width: 26 },
+      { header: "", width: 64 },
       { header: "", width: 12 },
       { header: "", width: 12 },
       { header: "", width: 12 },
@@ -1278,7 +1272,6 @@ const generateProgramSummaryXlsx = async (
     addInfo("Date Range", dateRange);
     if (timeRange) addInfo("Time", timeRange);
 
-    // Capacity section
     if (eventType === "multiple" && participantDays.length) {
       wsInfo.addRow([]);
 
@@ -1321,17 +1314,14 @@ const generateProgramSummaryXlsx = async (
       addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
     }
 
-    // Description block
     if (description) {
       addWrappedBlock("Description", description);
     }
 
-    // Program Summary block
     if (programSummary) {
       addWrappedBlock("Program Summary/Post-event Remarks", programSummary);
     }
 
-    // Ensure all cells on sheet 1 wrap text
     wsInfo.eachRow((row) => {
       row.eachCell((cell) => {
         const currentAlign = cell.alignment || {};
@@ -1339,31 +1329,16 @@ const generateProgramSummaryXlsx = async (
       });
     });
 
-    // Keep pageSetup with fitToHeight: 0
-    wsInfo.pageSetup = {
-      orientation: "portrait",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9,
-      margins: {
-        left: 0.3,
-        right: 0.3,
-        top: 0.4,
-        bottom: 0.4,
-        header: 0.2,
-        footer: 0.2,
-      },
-    };
-
     // === Sheet 2: Participants & Volunteers ===
+    // Make columns slightly narrower so all 6 fit on one portrait page,
+    // and rely on wrapping + fitToWidth=1 to keep Role/Attendance together.
     wsList.columns = [
-      { key: "idx", width: 6 },
-      { key: "fullName", width: 32 },
-      { key: "address", width: 34 },
-      { key: "contact", width: 18 },
-      { key: "role", width: 16 },
-      { key: "attendance", width: 14 },
+      { key: "idx", width: 5 },       // #
+      { key: "fullName", width: 26 }, // Full Name
+      { key: "address", width: 30 },  // Address
+      { key: "contact", width: 15 },  // Contact
+      { key: "role", width: 12 },     // Role
+      { key: "attendance", width: 12 } // Attendance
     ];
 
     const title2 = wsList.addRow([
@@ -1455,15 +1430,21 @@ const generateProgramSummaryXlsx = async (
         role,
         attendance,
       ]);
-      r.height = 22;
-      r.eachCell((c) => {
-        c.alignment = {
-          horizontal: "center",
+
+
+
+      r.eachCell((cell, colNumber) => {
+        // Left-align text-heavy columns, center others
+        let horizontal: "left" | "center" = "center";
+        if (colNumber === 2 || colNumber === 3) horizontal = "left"; // Full Name, Address
+
+        cell.alignment = {
+          horizontal,
           vertical: "middle",
           wrapText: true,
         };
-        c.font = { name: "Calibri", size: 14 };
-        c.border = {
+        cell.font = { name: "Calibri", size: 14 };
+        cell.border = {
           top: { style: "thin" },
           bottom: { style: "thin" },
           left: { style: "thin" },
@@ -1471,6 +1452,7 @@ const generateProgramSummaryXlsx = async (
         };
       });
     };
+
 
     if (eventType === "multiple" && participantDays.length) {
       participantDays.forEach((_, dayIndex) => {
@@ -1556,11 +1538,14 @@ const generateProgramSummaryXlsx = async (
       }
     }
 
+    // 🔧 IMPORTANT: fit all 6 columns on one page width,
+    // but allow unlimited pages vertically for long lists.
     wsList.pageSetup = {
       orientation: "portrait",
       paperSize: 9,      // A4
-      fitToPage: false,  // <-- IMPORTANT: don't try to fit it to one page
-      scale: 100,        // normal size; Excel will add extra pages as needed
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,    // no vertical shrink — just add more pages
       margins: {
         left: 0.3,
         right: 0.3,
@@ -1673,6 +1658,7 @@ const generateProgramSummaryXlsx = async (
     return null;
   }
 };
+
 
 
 
