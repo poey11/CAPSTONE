@@ -1558,10 +1558,9 @@ const generateProgramSummaryXlsx = async (
 
     wsList.pageSetup = {
       orientation: "portrait",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9,
+      paperSize: 9,      // A4
+      fitToPage: false,  // <-- IMPORTANT: don't try to fit it to one page
+      scale: 100,        // normal size; Excel will add extra pages as needed
       margins: {
         left: 0.3,
         right: 0.3,
