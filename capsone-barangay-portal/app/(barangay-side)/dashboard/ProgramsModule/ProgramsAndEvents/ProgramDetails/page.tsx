@@ -1,13 +1,31 @@
 "use client";
 import "@/CSS/ProgramsBrgy/EditPrograms.css";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { collection, doc, getDoc, updateDoc, addDoc, getDocs, query, where, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, doc, getDoc, updateDoc, addDoc, getDocs, query, where, setDoc, serverTimestamp, orderBy, onSnapshot } from "firebase/firestore";
 import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { useSession } from "next-auth/react";
 
 type SimpleField = { name: string; description?: string };
+
+type Participant = {
+  id: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  contactNumber?: string;
+  emailAddress?: string;
+  location?: string;
+  address?: string;
+  programId?: string;
+  programName?: string;
+  residentId?: string;
+  role?: string; // "Participant" | "Volunteer"
+  approvalStatus?: string;
+  attendance?: boolean;
+  dayChosen?: number; // 0-based
+};
 
 // ---------- Announcement helpers / types (copied/adapted from Announcements) ----------
 const pad2 = (n: number) => n.toString().padStart(2, "0");
@@ -218,6 +236,65 @@ export default function ProgramDetails() {
   const [isPredefinedOpen, setIsPredefinedOpen] = useState(false);
 
 
+  const [participantList, setParticipantList] = useState<Participant[]>([]);
+ useEffect(() => {
+     setLoading(true);
+     const colRef = collection(db, "ProgramsParticipants");
+     const qRef = programId
+       ? query(
+           colRef,
+           where("programId", "==", programId),
+           where("approvalStatus", "==", "Approved"),
+           orderBy("fullName", "asc")
+         )
+       : query(colRef, where("approvalStatus", "==", "Approved"), orderBy("programName", "asc"));
+ 
+     const unsub = onSnapshot(
+       qRef,
+       async (snap) => {
+         const rows: Participant[] = [];
+         const inits: Array<Promise<any>> = [];
+ 
+         snap.forEach((docu) => {
+           const d = docu.data() as any;
+           const hasAttendance = typeof d.attendance === "boolean";
+           const attendance = hasAttendance ? d.attendance : false;
+ 
+           if (!hasAttendance) {
+             inits.push(
+               updateDoc(doc(db, "ProgramsParticipants", docu.id), { attendance: false }).catch(() => {})
+             );
+           }
+ 
+           rows.push({
+             id: docu.id,
+             fullName: d.fullName ?? "",
+             firstName: d.firstName ?? "",
+             lastName: d.lastName ?? "",
+             contactNumber: d.contactNumber ?? "",
+             emailAddress: d.emailAddress ?? "",
+             location: d.location ?? d.address ?? "",
+             address: d.address ?? d.location ?? "",
+             programId: d.programId ?? "",
+             programName: d.programName ?? "",
+             residentId: d.residentId ?? "",
+             role: d.role ?? "Participant",
+             approvalStatus: d.approvalStatus ?? "Approved",
+             attendance,
+             dayChosen: Number(d.dayChosen) ?? null,
+           });
+         });
+ 
+         if (inits.length) Promise.allSettled(inits);
+ 
+         setParticipantList(rows);
+       },
+       
+     );
+ 
+     return () => unsub();
+   }, [programId]);
+  console.log("participantList", participantList);
 
 
 
@@ -943,7 +1020,7 @@ export default function ProgramDetails() {
   };
 
   // Dummy SMS handler – REPLACE BODY when backend SMS is ready
-  const handleSendSmsToApprovedParticipants = () => {
+  const handleSendSmsToApprovedParticipants = async() => {
     setShowSmsPromptPopup(false);
 
     // TODO: Replace this block with real SMS sending logic
@@ -960,6 +1037,8 @@ export default function ProgramDetails() {
       const author = user?.fullName || user?.name || "";
 
       const content = buildScheduleChangeContent();
+
+      
 
       setNewAnnouncement({
         announcementHeadline: headline,
@@ -978,6 +1057,31 @@ export default function ProgramDetails() {
       setPopupErrorMessage("");
       setShowErrorPopup(false);
       setShowAddAnnouncementPopup(true);
+
+      participantList.forEach(async (p) => {
+        console.log(`Preparing to send announcement to participant: ${p.fullName} (Resident ID: ${p.residentId})`);
+        console.log(`Preparing to send announcement to participant: ${p.fullName} (Resident ID: ${p.residentId})`);
+        try {
+          const response = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                to: p.contactNumber,
+                message:`${content} 
+                \n\nFor more details, please check the announcement in the Barangay Fairview Website. Thank You!`, 
+            })
+          });   
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          } 
+
+          } catch (error) {
+            console.error("Error sending SMS:", error);
+
+        }
+      })
     }
   };
 
