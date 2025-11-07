@@ -1102,26 +1102,13 @@ const generateProgramSummaryXlsx = async (
 
     /**
      * Helper for big wrapped blocks (Description / Summary)
-     * Auto-adjusts font size based on text length so very long content
-     * gets a slightly smaller font and fits more comfortably.
+     * Fixed font size; split into multiple rows so Excel can paginate nicely.
      */
-    const addWrappedBlock = (
-      title: string,
-      text: string,
-      baseMinHeight = 70
-    ) => {
+    const addWrappedBlock = (title: string, text: string) => {
       const content = String(text || "");
-      const length = content.length;
-
-      // Auto font size: shorter text = bigger font
-      let bodySize = 16;
-      if (length > 1800) bodySize = 11;
-      else if (length > 1500) bodySize = 12;
-      else if (length > 1200) bodySize = 13;
-      else if (length > 900) bodySize = 14;
-      else if (length > 600) bodySize = 15;
-
-      const headerSize = Math.max(bodySize + 1, 16);
+      const bodySize = 16;
+      const headerSize = 16;
+      const maxCharsPerRow = 120; // soft wrap target
 
       wsInfo.addRow([]);
 
@@ -1137,27 +1124,44 @@ const generateProgramSummaryXlsx = async (
         wrapText: true,
       };
 
-      // --- BODY ROW (MERGED A..F) ---
-      const row = wsInfo.addRow([content]);
-      const rn = row.number;
-      wsInfo.mergeCells(`A${rn}:F${rn}`);
-      const cell = wsInfo.getCell(`A${rn}`);
-      cell.alignment = { wrapText: true, vertical: "top" };
-      cell.font = { name: "Calibri", size: bodySize };
+      // --- BODY: split into logical "lines" and add one row per line ---
+      const lines: string[] = [];
 
-      // Estimate lines and set height
-      const charsPerLineBase = 90;
-      const charsPerLine = Math.round(
-        charsPerLineBase * (bodySize / 16)
-      );
-      const estLines = Math.max(
-        1,
-        Math.ceil(length / Math.max(charsPerLine, 40))
-      );
-      const lineHeight = bodySize + 4;
-      row.height = Math.max(baseMinHeight, estLines * lineHeight);
+      // First respect any explicit newlines coming from the text
+      const paragraphs = content.split(/\r?\n/);
+
+      paragraphs.forEach((para) => {
+        let p = para.trim();
+        if (!p) {
+          // preserve blank line between paragraphs
+          lines.push("");
+          return;
+        }
+
+        while (p.length > maxCharsPerRow) {
+          // try to break at last space before maxCharsPerRow
+          let breakPos = p.lastIndexOf(" ", maxCharsPerRow);
+          if (breakPos <= 0) breakPos = maxCharsPerRow;
+          lines.push(p.slice(0, breakPos));
+          p = p.slice(breakPos).trim();
+        }
+        if (p) lines.push(p);
+      });
+
+      if (lines.length === 0) {
+        lines.push(""); // safety
+      }
+
+      lines.forEach((line) => {
+        const row = wsInfo.addRow([line]);
+        const rn = row.number;
+        wsInfo.mergeCells(`A${rn}:F${rn}`);
+        const cell = wsInfo.getCell(`A${rn}`);
+        cell.font = { name: "Calibri", size: bodySize };
+        cell.alignment = { wrapText: true, vertical: "top", horizontal: "justify" };
+        // No manual row.height — let Excel auto-size and paginate
+      });
     };
-
 
     // 1) In-sheet visible title (use richText so program name can be italic)
     wsInfo.mergeCells("A1:F1");
@@ -1217,12 +1221,15 @@ const generateProgramSummaryXlsx = async (
       ? p.participantDays
       : [];
 
-    // Printed header/footer
+    // Printed header/footer: show only on first page
     wsInfo.headerFooter = {
-      oddHeader:
+      differentFirst: true,
+      firstHeader:
         "&C&B&18BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&12(" +
         String(programName).replace(/&/g, "&&") +
         ")",
+      oddHeader: "",
+      evenHeader: "",
     };
 
     // Page setup
@@ -1230,7 +1237,7 @@ const generateProgramSummaryXlsx = async (
       orientation: "portrait",
       fitToPage: true,
       fitToWidth: 1,
-      fitToHeight: 0,
+      fitToHeight: 0, // allow multiple pages vertically
       paperSize: 9, // A4
       margins: {
         left: 0.4,
@@ -1314,17 +1321,14 @@ const generateProgramSummaryXlsx = async (
       addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
     }
 
-    // Description block (auto font size)
+    // Description block
     if (description) {
       addWrappedBlock("Description", description);
     }
 
-    // Program Summary block (auto font size)
+    // Program Summary block
     if (programSummary) {
-      addWrappedBlock(
-        "Program Summary/Post-event Remarks",
-        programSummary
-      );
+      addWrappedBlock("Program Summary/Post-event Remarks", programSummary);
     }
 
     // Ensure all cells on sheet 1 wrap text
@@ -1335,6 +1339,7 @@ const generateProgramSummaryXlsx = async (
       });
     });
 
+    // Keep pageSetup with fitToHeight: 0
     wsInfo.pageSetup = {
       orientation: "portrait",
       fitToPage: true,
@@ -1352,14 +1357,13 @@ const generateProgramSummaryXlsx = async (
     };
 
     // === Sheet 2: Participants & Volunteers ===
-    // (unchanged from your last version)
     wsList.columns = [
-      { header: "#", width: 6 },
-      { header: "Full Name", width: 32 },
-      { header: "Address", width: 34 },
-      { header: "Contact", width: 18 },
-      { header: "Role", width: 16 },
-      { header: "Attendance", width: 14 },
+      { key: "idx", width: 6 },
+      { key: "fullName", width: 32 },
+      { key: "address", width: 34 },
+      { key: "contact", width: 18 },
+      { key: "role", width: 16 },
+      { key: "attendance", width: 14 },
     ];
 
     const title2 = wsList.addRow([
@@ -1407,7 +1411,14 @@ const generateProgramSummaryXlsx = async (
       );
 
     const addTableHeader = () => {
-      const headerRow = wsList.addRow(wsList.columns.map((c) => c.header));
+      const headerRow = wsList.addRow([
+        "#",
+        "Full Name",
+        "Address",
+        "Contact",
+        "Role",
+        "Attendance",
+      ]);
       headerRow.eachCell((c) => {
         c.font = { name: "Calibri", size: 14, bold: true };
         c.alignment = {
@@ -1520,9 +1531,9 @@ const generateProgramSummaryXlsx = async (
       const titleText = `Attendance: ${attendedCount}/${totalApproved} (${perc}% attendance of approved participants)`;
       const attTitle = wsList.addRow([titleText]);
       wsList.mergeCells(`A${attTitle.number}:F${attTitle.number}`);
-      const attCell = wsList.getCell(`A${attTitle.number}`);
-      attCell.font = { name: "Calibri", size: 14, bold: true };
-      attCell.alignment = { horizontal: "left", vertical: "middle" };
+      const attCell2 = wsList.getCell(`A${attTitle.number}`);
+      attCell2.font = { name: "Calibri", size: 14, bold: true };
+      attCell2.alignment = { horizontal: "left", vertical: "middle" };
 
       wsList.addRow([]);
       addTableHeader();
@@ -1578,7 +1589,6 @@ const generateProgramSummaryXlsx = async (
         const cell = wsInfo.getCell(`A${rn}`);
         cell.alignment = { wrapText: true, vertical: "top" };
         cell.font = { name: "Calibri", size: 16 };
-        row.height = 22;
       };
 
       if (eventType === "multiple" && participantDays.length) {
@@ -1664,6 +1674,7 @@ const generateProgramSummaryXlsx = async (
     return null;
   }
 };
+
 
 
 
