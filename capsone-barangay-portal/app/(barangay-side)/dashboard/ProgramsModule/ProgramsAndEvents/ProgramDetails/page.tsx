@@ -830,6 +830,9 @@ export default function ProgramDetails() {
   };
 
   const handleConfirmSave = async () => {
+
+
+    
     if (loading) return;
     setShowSaveConfirmPopup(false);
     await handleSave();
@@ -983,6 +986,18 @@ export default function ProgramDetails() {
 
   const handleSave = async () => {
     if (!programId) return;
+
+
+  // 1️⃣ Check if anything actually changed
+  const hasChanges = hasScheduleChanged() 
+
+  if (!hasChanges) {
+    setPopupErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return; // exit early, don't proceed to validate or save
+  }
+
     if (!validate()) {
       setPopupMessage("Please correct the highlighted fields.");
       setShowPopup(true);

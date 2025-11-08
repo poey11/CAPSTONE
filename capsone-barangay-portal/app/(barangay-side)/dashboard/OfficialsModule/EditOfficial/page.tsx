@@ -141,6 +141,21 @@ export default function EditOfficial() {
   const validateAndConfirm = () => {
     if (!selectedOfficial) return false;
 
+
+    const hasChanges =
+    JSON.stringify(selectedOfficial) !== JSON.stringify(originalOfficialData) ||
+    identificationFile ||
+    updateTerm;
+
+  if (!hasChanges) {
+    setErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setShowSubmitPopup(false);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return false;
+  }
+
+
     const newInvalid: string[] = [];
     const isLinked = !!linkedUserId;
 

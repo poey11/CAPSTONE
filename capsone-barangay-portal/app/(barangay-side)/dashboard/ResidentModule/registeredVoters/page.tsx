@@ -1079,8 +1079,8 @@ const handleUploadAndContinue = async () => {
       )}
 
       {showEditJustificationPopup && editVoter && (
-        <div className="confirmation-popup-overlay-module-voters">
-          <div className="confirmation-popup-module-voters">
+        <div className="confirmation-popup-overlay-module-main-justifiation-letter">
+          <div className="confirmation-popup-module-justification-letter">
             <img src="/Images/letter.png" alt="upload icon" className="letter-icon-popup" />
             <h2>Upload Justification Letter</h2>
             <p>
@@ -1099,7 +1099,7 @@ const handleUploadAndContinue = async () => {
               {uploading && <p>Uploading… {uploadProgress}%</p>}
             </div>
 
-            <div className="yesno-container-module">
+            <div className="yesno-container-module-justification-letter">
               <button
                 onClick={() => {
                   if (!uploading) {
@@ -1107,14 +1107,14 @@ const handleUploadAndContinue = async () => {
                     setJustificationFile(null);
                   }
                 }}
-                className="no-button-module"
+                className="no-button-module-justification-letter"
                 disabled={uploading}
               >
                 Cancel
               </button>
               <button
                 onClick={handleUploadAndContinue}
-                className="yes-button-module"
+                className="yes-button-module-justification-letter"
                 disabled={!justificationFile || uploading}
                 title={!justificationFile ? "Select a file first" : "Upload & continue"}
               >

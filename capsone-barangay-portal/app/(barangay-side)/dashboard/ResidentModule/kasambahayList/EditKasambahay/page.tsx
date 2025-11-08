@@ -312,6 +312,24 @@ export default function EditKasambahay() {
   };
 
   const confirmSave = async () => {
+
+  // 🟢 Check if there are any actual changes made
+  const hasChanges =
+    JSON.stringify(formData) !== JSON.stringify(originalData) ||
+    identificationFile ||
+    verificationFiles.length > 0 ||
+    identificationFileDeleted;
+
+  if (!hasChanges) {
+    setPopupErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setShowSavePopup(false);
+
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+  
+
     setShowSavePopup(false);
     setPopupMessage("Changes saved successfully!");
     setShowPopup(true);

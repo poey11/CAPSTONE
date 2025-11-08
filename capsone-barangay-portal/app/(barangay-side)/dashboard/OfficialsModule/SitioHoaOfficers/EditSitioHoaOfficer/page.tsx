@@ -99,6 +99,21 @@ export default function EditOfficer() {
 
       //Validation before saving
   const validateAndConfirm = () => {
+
+
+  // 🟢 Check if there are any changes made
+  const hasChanges =
+    JSON.stringify(selectedOfficial) !== JSON.stringify(selectedOfficialData) ||
+    identificationFile;
+
+  if (!hasChanges) {
+    setErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setShowSubmitPopup(false);
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return false;
+  }
+
     const newInvalidFields: string[] = [];
 
     if (!selectedOfficial.fullName) newInvalidFields.push("fullName");

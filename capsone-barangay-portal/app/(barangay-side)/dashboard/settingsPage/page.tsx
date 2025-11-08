@@ -161,7 +161,8 @@ export default function SettingsPage() {
     }, [chosenTerm]);
 
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    {/*
+            const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
           // Prevent form submit popup if user just clicked Upload Image
@@ -172,6 +173,44 @@ export default function SettingsPage() {
 
         setShowSubmitPopup(true); // Just show the confirmation popup
       };
+        
+        */}
+
+        const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Prevent form submit popup if user just clicked Upload Image
+    if (isUploadingImage) {
+        setIsUploadingImage(false); // Reset after click
+        return;
+    }
+
+    // Check if there are any changes compared to Firestore
+    if (userId) {
+        getDoc(doc(db, "BarangayUsers", userId)).then((docSnap) => {
+            if (docSnap.exists()) {
+                const currentData = docSnap.data();
+                const isDataChanged = Object.keys(userData).some((key) => {
+                    const newVal = userData[key as keyof typeof userData]?.toString().trim();
+                    const currentVal = currentData[key]?.toString().trim();
+                    return newVal !== currentVal;
+                });
+
+                if (!isDataChanged) {
+                    setPopupErrorMessage("No changes were made.");
+                    setShowErrorPopup(true);
+                    setTimeout(() => setShowErrorPopup(false), 3000);
+                    return;
+                }
+
+                // If changes exist, show confirmation popup
+                setShowSubmitPopup(true);
+            }
+        });
+    }
+};
+
+
       
 
 
