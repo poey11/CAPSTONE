@@ -901,7 +901,6 @@ const handleFileChange = (
 
     // Upload files to Firebase Storage if there are any
      for (const [key, storageRef] of Object.entries(storageRefs)) {
-      console
           const file = clearanceInput[key];
           if (file instanceof File && storageRef) {
             // Upload each file to storage
@@ -1316,33 +1315,33 @@ const handleFileChange = (
 
       requiredImageFields.push(...dynamicImageFields); // Ensure signature is always required
 
-      // Step 2: Check other required image fields
-      for (const imgField of requiredImageFields) {
-        const value = clearanceInput[imgField];
+      // // Step 2: Check other required image fields
+      // for (const imgField of requiredImageFields) {
+      //   const value = clearanceInput[imgField];
       
-        if (
-          (!value || !(value instanceof File)) &&
-          !(atLeastOneIDRequired &&
-            (imgField === "barangayIDjpg" ||
-              imgField === "validIDjpg" ||
-              imgField === "letterjpg"))
-        ) {
-            const label =
-            imageFieldLabels[imgField] ||
-            imgField
-              .replace(/_/g, " ") // Replace underscores with spaces
-              .replace(/(?!^)([A-Z])/g, " $1")
-              .replace(/\.[^/.]+$/, "")
-              .toLowerCase()
-              .replace(/\b\w/g, (c) => c.toUpperCase())
-              .replace(/\b(Id|ID|id)\b/g, "ID")
-              .replace(/\b(Ph|PH|ph)\b/g, "PH");
+      //   if (
+      //     (!value || !(value instanceof File)) &&
+      //     !(atLeastOneIDRequired &&
+      //       (imgField === "barangayIDjpg" ||
+      //         imgField === "validIDjpg" ||
+      //         imgField === "letterjpg"))
+      //   ) {
+      //       const label =
+      //       imageFieldLabels[imgField] ||
+      //       imgField
+      //         .replace(/_/g, " ") // Replace underscores with spaces
+      //         .replace(/(?!^)([A-Z])/g, " $1")
+      //         .replace(/\.[^/.]+$/, "")
+      //         .toLowerCase()
+      //         .replace(/\b\w/g, (c) => c.toUpperCase())
+      //         .replace(/\b(Id|ID|id)\b/g, "ID")
+      //         .replace(/\b(Ph|PH|ph)\b/g, "PH");
         
-          setErrorMessage(`Please upload the required image: ${label}.`);
-          setShowErrorPopup(true);
-          return;
-        }
-      }
+      //     setErrorMessage(`Please upload the required image: ${label}.`);
+      //     setShowErrorPopup(true);
+      //     return;
+      //   }
+      // }
 
       // List all file-related keys in an array for easier maintenance
       const fileKeys = [
@@ -1431,7 +1430,7 @@ const handleFileChange = (
         civilStatus: clearanceInput.civilStatus,
         contact: clearanceInput.contact,
         citizenship: clearanceInput.citizenship,
-        signaturejpg: filenames.signaturejpg, // Store filename instead of file object
+        ...(clearanceInput.signaturejpg? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
         ...(clearanceInput.purpose === "Cohabitation" && {
         partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
         cohabitationStartDate: clearanceInput.cohabitationStartDate,
@@ -1457,9 +1456,9 @@ const handleFileChange = (
         noIncomePurpose: clearanceInput.noIncomePurpose,
         noIncomeChildFName: clearanceInput.noIncomeChildFName,
         }),
-        ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
-        ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
-        ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
+        ...(clearanceInput.barangayIDjpg ? { barangayIDjpg: filenames.barangayIDjpg }: {barangayIDjpg:null}),
+        ...(clearanceInput.validIDjpg ? { validIDjpg: filenames.validIDjpg }:{ validIDjpg: null }),
+        ...(clearanceInput.letterjpg ? { letterjpg: filenames.letterjpg }:{ letterjpg: null }),
         ...(((clearanceInput.purpose === "Residency" && docB === "Barangay Certificate") || docB === "Barangay Indigency") && {
           appointmentDate: clearanceInput.appointmentDate,
           purpose: clearanceInput.purpose,
@@ -1541,10 +1540,14 @@ const handleFileChange = (
         businessNature: clearanceInput.businessNature,
         estimatedCapital: clearanceInput.estimatedCapital,
 
-        copyOfPropertyTitle: filenames.copyOfPropertyTitle,
-        dtiRegistration: filenames.dtiRegistration,
-        isCCTV: filenames.isCCTV,
-        signaturejpg: filenames.signaturejpg,
+        ...clearanceInput.copyOfPropertyTitle ? {copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null },
+        ...clearanceInput.dtiRegistration ? {dtiRegistration: filenames.dtiRegistration } : { dtiRegistration: null },
+        ...clearanceInput.isCCTV ? {isCCTV: filenames.isCCTV } : { isCCTV: null },
+        ...clearanceInput.signaturejpg ? {signaturejpg: filenames.signaturejpg } : { signaturejpg: null },
+        // copyOfPropertyTitle: filenames.copyOfPropertyTitle,
+        // dtiRegistration: filenames.dtiRegistration,
+        // isCCTV: filenames.isCCTV,
+        // signaturejpg: filenames.signaturejpg,
       };
       handleReportUpload(clearanceVars, storageRefs);
       }
@@ -1574,10 +1577,16 @@ const handleFileChange = (
         typeofbldg: clearanceInput.typeofbldg,
         projectName: clearanceInput.projectName,
         projectLocation: clearanceInput.projectLocation,
-        taxDeclaration: filenames.taxDeclaration,
-        approvedBldgPlan: filenames.approvedBldgPlan,
-        copyOfPropertyTitle: filenames.copyOfPropertyTitle,
-        signaturejpg: filenames.signaturejpg,
+
+        ...(clearanceInput.taxDeclaration ? { taxDeclaration: filenames.taxDeclaration } : { taxDeclaration: null }),
+        ...(clearanceInput.approvedBldgPlan ? { approvedBldgPlan: filenames.approvedBldgPlan } : { approvedBldgPlan: null }),
+        ...(clearanceInput.copyOfPropertyTitle ? { copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null }),
+        ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
+
+        // taxDeclaration: filenames.taxDeclaration,
+        // approvedBldgPlan: filenames.approvedBldgPlan,
+        // copyOfPropertyTitle: filenames.copyOfPropertyTitle,
+        // signaturejpg: filenames.signaturejpg,
         ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
       };
       handleReportUpload(clearanceVars, storageRefs);
@@ -1614,10 +1623,10 @@ const handleFileChange = (
         civilStatus: clearanceInput.civilStatus,
         contact: clearanceInput.contact,
         citizenship: clearanceInput.citizenship,
-        signaturejpg: filenames.signaturejpg,
-        ...(clearanceInput.barangayIDjpg && { barangayIDjpg: filenames.barangayIDjpg }),
-        ...(clearanceInput.validIDjpg && { validIDjpg: filenames.validIDjpg }),
-        ...(clearanceInput.letterjpg && { letterjpg: filenames.letterjpg }),
+        ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
+        ...(clearanceInput.barangayIDjpg ? { barangayIDjpg: filenames.barangayIDjpg }: { barangayIDjpg: null }),
+        ...(clearanceInput.validIDjpg ? { validIDjpg: filenames.validIDjpg }: { validIDjpg: null }),
+        ...(clearanceInput.letterjpg ? { letterjpg: filenames.letterjpg }: { letterjpg: null }),
       };
 
       // Add dynamic text fields (non-image fields)
