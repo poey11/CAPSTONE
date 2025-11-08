@@ -945,7 +945,7 @@ export default function ProgramDetails() {
     await createAnnouncementFromProgram();
   };
 
-  // Dummy SMS handler – REPLACE BODY when backend SMS is ready
+  // Dummy SMS handler – REPLACE BODY when backend SMS is ready here siya @malcolm
   const handleSendSmsToApprovedParticipants = () => {
     setShowSmsPromptPopup(false);
 
