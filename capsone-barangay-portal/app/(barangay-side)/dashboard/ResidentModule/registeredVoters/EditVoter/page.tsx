@@ -129,6 +129,17 @@ export default function EditVoter() {
   
   const handleSaveClick = async () => {
 
+ // Check if there are any changes
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData);
+
+  if (!hasChanges) {
+    setPopupErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setShowSavePopup(false); // prevent confirmation popup
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
 
     const { 
     lastName, firstName, homeAddress, precinctNumber

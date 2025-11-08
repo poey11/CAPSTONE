@@ -193,6 +193,20 @@ export default function AnnouncementDetails() {
 
 
     const handleSaveClick = () => {
+      
+  // Check if there are changes first
+  const hasChanges = JSON.stringify(announcementData) !== JSON.stringify(selectedAnnnouncementData) || !!file;
+
+  if (!hasChanges) {
+    setPopupErrorMessage("No changes were made.");
+    setShowErrorPopup(true);
+    setShowSavePopup(false); // make sure the confirmation popup does not show
+    setTimeout(() => setShowErrorPopup(false), 3000);
+    return;
+  }
+
+
+      
       if (validateFields()) {
         setShowSavePopup(true); // only open confirmation if valid
       }
