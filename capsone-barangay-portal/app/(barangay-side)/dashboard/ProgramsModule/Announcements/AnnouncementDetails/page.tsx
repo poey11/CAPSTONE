@@ -274,13 +274,13 @@ return (
                                     <div className="edit-title-description-announcements">
                                         Announcement Headline
                                     </div>
-                                    <div className={`edit-box-container-headline-announcements ${invalidFields.includes("content") ? "input-error" : ""}`}>
+                                    <div className={`edit-box-container-headline-announcements ${invalidFields.includes("announcementHeadline") ? "input-error" : ""}`}>
                                       <textarea 
                                         value={announcementData?.announcementHeadline || ""}
                                         onChange={(e) =>
                                           setAnnouncementData((prev) => ({
                                             ...prev,
-                                            content: e.target.value,
+                                            announcementHeadline: e.target.value,
                                           }))
                                         }
                                         placeholder="Write the full content or description of the announcement here..."
