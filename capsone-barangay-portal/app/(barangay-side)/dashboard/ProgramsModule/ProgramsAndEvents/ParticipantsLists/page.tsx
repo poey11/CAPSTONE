@@ -917,200 +917,200 @@ const openResidentForm = async (resident: Resident) => {
     }
   };
 
-    const handleAutoFillTestParticipants = async () => {
-    if (!programId) {
-      setErrorToastMsg("Program not found. Unable to auto-fill participants.");
-      setShowErrorToast(true);
-      setTimeout(() => setShowErrorToast(false), 3000);
-      return;
-    }
+  //   const handleAutoFillTestParticipants = async () => {
+  //   if (!programId) {
+  //     setErrorToastMsg("Program not found. Unable to auto-fill participants.");
+  //     setShowErrorToast(true);
+  //     setTimeout(() => setShowErrorToast(false), 3000);
+  //     return;
+  //   }
 
-    try {
-      // 1) Load all residents
-      const resSnap = await getDocs(collection(db, "Residents"));
-      const allResidents: Resident[] = resSnap.docs.map((d) => ({
-        id: d.id,
-        ...(d.data() as any),
-      }));
+  //   try {
+  //     // 1) Load all residents
+  //     const resSnap = await getDocs(collection(db, "Residents"));
+  //     const allResidents: Resident[] = resSnap.docs.map((d) => ({
+  //       id: d.id,
+  //       ...(d.data() as any),
+  //     }));
 
-      if (allResidents.length === 0) {
-        setErrorToastMsg("No residents found to auto-fill from.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
+  //     if (allResidents.length === 0) {
+  //       setErrorToastMsg("No residents found to auto-fill from.");
+  //       setShowErrorToast(true);
+  //       setTimeout(() => setShowErrorToast(false), 3000);
+  //       return;
+  //     }
 
-      // 2) Load existing participants for this program to avoid duplicates
-      const partSnap = await getDocs(
-        query(
-          collection(db, "ProgramsParticipants"),
-          where("programId", "==", programId)
-        )
-      );
+  //     // 2) Load existing participants for this program to avoid duplicates
+  //     const partSnap = await getDocs(
+  //       query(
+  //         collection(db, "ProgramsParticipants"),
+  //         where("programId", "==", programId)
+  //       )
+  //     );
 
-      const existingResidentIds = new Set<string>();
-      partSnap.forEach((docu) => {
-        const d: any = docu.data();
-        if (d?.residentId) existingResidentIds.add(d.residentId);
-      });
+  //     const existingResidentIds = new Set<string>();
+  //     partSnap.forEach((docu) => {
+  //       const d: any = docu.data();
+  //       if (d?.residentId) existingResidentIds.add(d.residentId);
+  //     });
 
-      // Filter residents that are not yet in this program
-      const availableResidents = allResidents.filter(
-        (r) => !existingResidentIds.has(r.id)
-      );
+  //     // Filter residents that are not yet in this program
+  //     const availableResidents = allResidents.filter(
+  //       (r) => !existingResidentIds.has(r.id)
+  //     );
 
-      if (availableResidents.length === 0) {
-        setErrorToastMsg("All residents are already enlisted for this program.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
+  //     if (availableResidents.length === 0) {
+  //       setErrorToastMsg("All residents are already enlisted for this program.");
+  //       setShowErrorToast(true);
+  //       setTimeout(() => setShowErrorToast(false), 3000);
+  //       return;
+  //     }
 
-      const isMulti = (eventType || "single").toLowerCase() === "multiple";
-      const colRef = collection(db, "ProgramsParticipants");
-      const writes: Promise<any>[] = [];
+  //     const isMulti = (eventType || "single").toLowerCase() === "multiple";
+  //     const colRef = collection(db, "ProgramsParticipants");
+  //     const writes: Promise<any>[] = [];
 
-      let usedResidentIndex = 0; // walk through availableResidents once
-      const perDayTarget = 30;
+  //     let usedResidentIndex = 0; // walk through availableResidents once
+  //     const perDayTarget = 30;
 
-      if (!isMulti) {
-        // ---------- SINGLE-DAY: up to 30 participants ----------
-        let maxToAdd = perDayTarget;
+  //     if (!isMulti) {
+  //       // ---------- SINGLE-DAY: up to 30 participants ----------
+  //       let maxToAdd = perDayTarget;
 
-        if (!noParticipantLimit && programCapacity !== null) {
-          const remaining = programCapacity - participantCount;
-          if (remaining <= 0) {
-            setErrorToastMsg("Program capacity already reached. No more participants can be added.");
-            setShowErrorToast(true);
-            setTimeout(() => setShowErrorToast(false), 3000);
-            return;
-          }
-          maxToAdd = Math.min(maxToAdd, remaining);
-        }
+  //       if (!noParticipantLimit && programCapacity !== null) {
+  //         const remaining = programCapacity - participantCount;
+  //         if (remaining <= 0) {
+  //           setErrorToastMsg("Program capacity already reached. No more participants can be added.");
+  //           setShowErrorToast(true);
+  //           setTimeout(() => setShowErrorToast(false), 3000);
+  //           return;
+  //         }
+  //         maxToAdd = Math.min(maxToAdd, remaining);
+  //       }
 
-        if (maxToAdd <= 0) {
-          setErrorToastMsg("No remaining slots available to auto-fill.");
-          setShowErrorToast(true);
-          setTimeout(() => setShowErrorToast(false), 3000);
-          return;
-        }
+  //       if (maxToAdd <= 0) {
+  //         setErrorToastMsg("No remaining slots available to auto-fill.");
+  //         setShowErrorToast(true);
+  //         setTimeout(() => setShowErrorToast(false), 3000);
+  //         return;
+  //       }
 
-        const selected = availableResidents.slice(0, maxToAdd);
+  //       const selected = availableResidents.slice(0, maxToAdd);
 
-        selected.forEach((resident) => {
-          const fullName = `${resident.firstName ?? ""} ${resident.lastName ?? ""}`
-            .replace(/\s+/g, " ")
-            .trim();
+  //       selected.forEach((resident) => {
+  //         const fullName = `${resident.firstName ?? ""} ${resident.lastName ?? ""}`
+  //           .replace(/\s+/g, " ")
+  //           .trim();
 
-          writes.push(
-            addDoc(colRef, {
-              fullName,
-              firstName: resident.firstName ?? "",
-              lastName: resident.lastName ?? "",
-              contactNumber: resident.contactNumber ?? resident.mobile ?? "",
-              emailAddress: resident.emailAddress ?? "",
-              location: resident.address ?? resident.location ?? "",
-              address: resident.address ?? resident.location ?? "",
-              programId,
-              programName: programTitle,
-              residentId: resident.id,
-              role: "Participant",
-              approvalStatus: "Approved",
-              attendance: true,          // ✅ pre-checked
-              // no dayChosen for single-day
-            })
-          );
-        });
+  //         writes.push(
+  //           addDoc(colRef, {
+  //             fullName,
+  //             firstName: resident.firstName ?? "",
+  //             lastName: resident.lastName ?? "",
+  //             contactNumber: resident.contactNumber ?? resident.mobile ?? "",
+  //             emailAddress: resident.emailAddress ?? "",
+  //             location: resident.address ?? resident.location ?? "",
+  //             address: resident.address ?? resident.location ?? "",
+  //             programId,
+  //             programName: programTitle,
+  //             residentId: resident.id,
+  //             role: "Participant",
+  //             approvalStatus: "Approved",
+  //             attendance: true,          // ✅ pre-checked
+  //             // no dayChosen for single-day
+  //           })
+  //         );
+  //       });
 
-        await Promise.all(writes);
-        setSuccessToastMsg(`Auto-filled ${selected.length} participants for this program.`);
-        setShowSuccessToast(true);
-        setTimeout(() => setShowSuccessToast(false), 2500);
-        return;
-      }
+  //       await Promise.all(writes);
+  //       setSuccessToastMsg(`Auto-filled ${selected.length} participants for this program.`);
+  //       setShowSuccessToast(true);
+  //       setTimeout(() => setShowSuccessToast(false), 2500);
+  //       return;
+  //     }
 
-      // ---------- MULTI-DAY: up to 30 per day, no duplicates across days ----------
-      if (!participantDays || participantDays.length === 0) {
-        setErrorToastMsg("No days configured for this multi-day program.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
+  //     // ---------- MULTI-DAY: up to 30 per day, no duplicates across days ----------
+  //     if (!participantDays || participantDays.length === 0) {
+  //       setErrorToastMsg("No days configured for this multi-day program.");
+  //       setShowErrorToast(true);
+  //       setTimeout(() => setShowErrorToast(false), 3000);
+  //       return;
+  //     }
 
-      let totalAdded = 0;
+  //     let totalAdded = 0;
 
-      for (let dayIdx = 0; dayIdx < participantDays.length; dayIdx++) {
-        if (usedResidentIndex >= availableResidents.length) break;
+  //     for (let dayIdx = 0; dayIdx < participantDays.length; dayIdx++) {
+  //       if (usedResidentIndex >= availableResidents.length) break;
 
-        const dayCap = participantDays[dayIdx];
-        const noLimitForDay = Boolean(noParticipantLimitList?.[dayIdx]);
+  //       const dayCap = participantDays[dayIdx];
+  //       const noLimitForDay = Boolean(noParticipantLimitList?.[dayIdx]);
 
-        // Count existing participants for this day
-        const existingForDay = participants.filter(
-          (p) =>
-            (p.role || "Participant").toLowerCase() === "participant" &&
-            p.dayChosen === dayIdx
-        ).length;
+  //       // Count existing participants for this day
+  //       const existingForDay = participants.filter(
+  //         (p) =>
+  //           (p.role || "Participant").toLowerCase() === "participant" &&
+  //           p.dayChosen === dayIdx
+  //       ).length;
 
-        let maxToAddForDay = perDayTarget;
+  //       let maxToAddForDay = perDayTarget;
 
-        if (!noLimitForDay && Number.isFinite(dayCap)) {
-          const remainingForDay = (dayCap as number) - existingForDay;
-          if (remainingForDay <= 0) {
-            continue; // this day is already full
-          }
-          maxToAddForDay = Math.min(maxToAddForDay, remainingForDay);
-        }
+  //       if (!noLimitForDay && Number.isFinite(dayCap)) {
+  //         const remainingForDay = (dayCap as number) - existingForDay;
+  //         if (remainingForDay <= 0) {
+  //           continue; // this day is already full
+  //         }
+  //         maxToAddForDay = Math.min(maxToAddForDay, remainingForDay);
+  //       }
 
-        if (maxToAddForDay <= 0) continue;
+  //       if (maxToAddForDay <= 0) continue;
 
-        for (let i = 0; i < maxToAddForDay && usedResidentIndex < availableResidents.length; i++) {
-          const resident = availableResidents[usedResidentIndex++];
-          const fullName = `${resident.firstName ?? ""} ${resident.lastName ?? ""}`
-            .replace(/\s+/g, " ")
-            .trim();
+  //       for (let i = 0; i < maxToAddForDay && usedResidentIndex < availableResidents.length; i++) {
+  //         const resident = availableResidents[usedResidentIndex++];
+  //         const fullName = `${resident.firstName ?? ""} ${resident.lastName ?? ""}`
+  //           .replace(/\s+/g, " ")
+  //           .trim();
 
-          writes.push(
-            addDoc(colRef, {
-              fullName,
-              firstName: resident.firstName ?? "",
-              lastName: resident.lastName ?? "",
-              contactNumber: resident.contactNumber ?? resident.mobile ?? "",
-              emailAddress: resident.emailAddress ?? "",
-              location: resident.address ?? resident.location ?? "",
-              address: resident.address ?? resident.location ?? "",
-              programId,
-              programName: programTitle,
-              residentId: resident.id,
-              role: "Participant",
-              approvalStatus: "Approved",
-              attendance: true,        // ✅ pre-checked
-              dayChosen: dayIdx,       // ✅ which day
-            })
-          );
+  //         writes.push(
+  //           addDoc(colRef, {
+  //             fullName,
+  //             firstName: resident.firstName ?? "",
+  //             lastName: resident.lastName ?? "",
+  //             contactNumber: resident.contactNumber ?? resident.mobile ?? "",
+  //             emailAddress: resident.emailAddress ?? "",
+  //             location: resident.address ?? resident.location ?? "",
+  //             address: resident.address ?? resident.location ?? "",
+  //             programId,
+  //             programName: programTitle,
+  //             residentId: resident.id,
+  //             role: "Participant",
+  //             approvalStatus: "Approved",
+  //             attendance: true,        // ✅ pre-checked
+  //             dayChosen: dayIdx,       // ✅ which day
+  //           })
+  //         );
 
-          totalAdded++;
-        }
-      }
+  //         totalAdded++;
+  //       }
+  //     }
 
-      if (totalAdded === 0) {
-        setErrorToastMsg("No available slots or residents to auto-fill for any day.");
-        setShowErrorToast(true);
-        setTimeout(() => setShowErrorToast(false), 3000);
-        return;
-      }
+  //     if (totalAdded === 0) {
+  //       setErrorToastMsg("No available slots or residents to auto-fill for any day.");
+  //       setShowErrorToast(true);
+  //       setTimeout(() => setShowErrorToast(false), 3000);
+  //       return;
+  //     }
 
-      await Promise.all(writes);
-      setSuccessToastMsg(`Auto-filled ${totalAdded} participants across all days for testing.`);
-      setShowSuccessToast(true);
-      setTimeout(() => setShowSuccessToast(false), 2500);
-    } catch (err) {
-      console.error("Auto-fill participants error:", err);
-      setErrorToastMsg("Failed to auto-fill participants. Please try again.");
-      setShowErrorToast(true);
-      setTimeout(() => setShowErrorToast(false), 3000);
-    }
-  };
+  //     await Promise.all(writes);
+  //     setSuccessToastMsg(`Auto-filled ${totalAdded} participants across all days for testing.`);
+  //     setShowSuccessToast(true);
+  //     setTimeout(() => setShowSuccessToast(false), 2500);
+  //   } catch (err) {
+  //     console.error("Auto-fill participants error:", err);
+  //     setErrorToastMsg("Failed to auto-fill participants. Please try again.");
+  //     setShowErrorToast(true);
+  //     setTimeout(() => setShowErrorToast(false), 3000);
+  //   }
+  // };
 
 
   return (
@@ -1202,7 +1202,7 @@ const openResidentForm = async (resident: Resident) => {
               </button>
           )}
 
-          {(user?.position === "Secretary" ||
+          {/* {(user?.position === "Secretary" ||
             user?.position === "Assistant Secretary" ||
             user?.position === "Admin Staff") &&(
               <button
@@ -1226,7 +1226,7 @@ const openResidentForm = async (resident: Resident) => {
               >
                 Auto-fill 30
               </button>
-          )}
+          )} */}
 
         </div>
 
