@@ -52,6 +52,7 @@ export default function EditBarangayAccount() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     
+    
 
 
     const [formData, setFormData] = useState({
@@ -119,6 +120,22 @@ export default function EditBarangayAccount() {
 
 
     const confirmSave = async () => {
+
+    // Check if there are any changes
+    const hasChanges =
+        JSON.stringify(formData) !== JSON.stringify(originalData) || password || confirmPassword;
+
+    if (!hasChanges) {
+        setPopupErrorMessage("No changes were made.");
+        setShowErrorPopup(true);    
+        setShowSavePopup(false);
+
+        setTimeout(() => setShowErrorPopup(false), 3000);
+        return;
+    }
+
+
+
         if (password) {
             if (password.length < 6) {
                 setPopupErrorMessage("Password should be at least 6 characters.");
