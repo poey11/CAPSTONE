@@ -4,7 +4,6 @@ import {db, storage} from "@/app/db/firebase";
 import { collection,getDocs, query, where,addDoc, doc, onSnapshot, updateDoc, arrayUnion, getDoc, setDoc, arrayRemove } from "firebase/firestore";
 import {customAlphabet} from "nanoid";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import next from "next";
 
 
 

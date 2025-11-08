@@ -344,7 +344,7 @@ export default function ParticipantsList() {
 
     return () => unsub();
   }, [programId]);
-
+  console.log
   const [dayChosen, setDayChosen] = useState<number>(0);
 
 useEffect(() => {
