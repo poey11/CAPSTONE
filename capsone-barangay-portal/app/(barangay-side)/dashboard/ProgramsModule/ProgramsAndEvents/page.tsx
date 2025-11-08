@@ -1100,177 +1100,133 @@ const generateProgramSummaryXlsx = async (
     // === Sheet 1: Program Info ===
     const programName = p.programName || fallbackName || programId;
 
-    // 1) In-sheet visible title (shows in Excel UI)
-    const headerTitle = `BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n(${programName})`;
+    /**
+     * Helper for big wrapped blocks (Description / Summary)
+     * Fixed font size; split into multiple rows so Excel can paginate nicely.
+     */
+    const addWrappedBlock = (title: string, text: string) => {
+      const content = String(text || "");
+      const bodySize = 16;
+      const headerSize = 16;
+      const maxCharsPerRow = 120; // soft wrap target
+
+      wsInfo.addRow([]);
+
+      // --- HEADER ROW (MERGED A..F) ---
+      const headerRow = wsInfo.addRow([title]);
+      const headerRowNum = headerRow.number;
+      wsInfo.mergeCells(`A${headerRowNum}:F${headerRowNum}`);
+      const headerCell = wsInfo.getCell(`A${headerRowNum}`);
+      headerCell.font = { name: "Calibri", size: headerSize, bold: true };
+      headerCell.alignment = {
+        horizontal: "left",
+        vertical: "middle",
+        wrapText: true,
+      };
+
+      // --- BODY: split into logical "lines" and add one row per line ---
+      const lines: string[] = [];
+      const paragraphs = content.split(/\r?\n/);
+
+      paragraphs.forEach((para) => {
+        let s = para.trim();
+        if (!s) {
+          lines.push("");
+          return;
+        }
+
+        while (s.length > maxCharsPerRow) {
+          let breakPos = s.lastIndexOf(" ", maxCharsPerRow);
+          if (breakPos <= 0) breakPos = maxCharsPerRow;
+          lines.push(s.slice(0, breakPos));
+          s = s.slice(breakPos).trim();
+        }
+        if (s) lines.push(s);
+      });
+
+      if (lines.length === 0) {
+        lines.push("");
+      }
+
+      lines.forEach((line) => {
+        const row = wsInfo.addRow([line]);
+        const rn = row.number;
+        wsInfo.mergeCells(`A${rn}:F${rn}`);
+        const cell = wsInfo.getCell(`A${rn}`);
+        cell.font = { name: "Calibri", size: bodySize };
+        cell.alignment = {
+          wrapText: true,
+          vertical: "top",
+          horizontal: "justify",
+        };
+      });
+    };
+
+    // Title row
     wsInfo.mergeCells("A1:F1");
     const headerCell = wsInfo.getCell("A1");
-    headerCell.value = headerTitle;
-    headerCell.font = { name: "Calibri", size: 16, bold: true };
+    headerCell.value = {
+      richText: [
+        {
+          text: "BARANGAY FAIRVIEW\n",
+          font: { name: "Calibri", size: 20, bold: true },
+        },
+        {
+          text: "PROGRAM SUMMARY REPORT\n",
+          font: { name: "Calibri", size: 20, bold: true },
+        },
+        {
+          text: `(${programName})`,
+          font: { name: "Calibri", size: 16, italic: true },
+        },
+      ],
+    };
     headerCell.alignment = {
       horizontal: "center",
       vertical: "middle",
       wrapText: true,
     };
-    wsInfo.getRow(1).height = 60;
-
+    wsInfo.getRow(1).height = 70;
     wsInfo.addRow([]);
 
     const eventType = p.eventType || "single";
     const sDate = fmtDate(p.startDate);
     const eDate = p.endDate ? fmtDate(p.endDate) : "";
-    const tStart = p.timeStart || "";
-    const tEnd = p.timeEnd || "";
+
+    const rawStart: string = p.timeStart || "";
+    const rawEnd: string = p.timeEnd || "";
+    const tStart = toAmPm(rawStart) || rawStart;
+    const tEnd = toAmPm(rawEnd) || rawEnd;
+
     const location = p.location || "—";
     const approval = p.approvalStatus || "—";
     const progressStatus = p.progressStatus || "—";
     const description = p.description || p.programDescription || "";
     const programSummary = p.programSummary || "";
 
-    // display date/time range
     const dateRange = eDate ? `${sDate} — ${eDate}` : sDate;
     const timeRange =
       tStart && tEnd ? `${tStart} — ${tEnd}` : tStart || tEnd || "";
 
-    // capacity
     const capParticipants = Number(p.participants || 0) || 0;
     const capVolunteers = Number(p.volunteers || 0) || 0;
 
-    // participantDays (for multiple)
     const participantDays: number[] = Array.isArray(p.participantDays)
       ? p.participantDays
       : [];
 
-    // 2) Printed header/footer (this is what PDF converters use)
+    // Printed header/footer – only first page
     wsInfo.headerFooter = {
-      // Centered (&C), bold (&B), font size 16 (&16) for the first two lines
-      // Program name smaller (&10). Escape & as && to avoid Excel header tokens.
-      oddHeader:
-        "&C&B&16BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&10(" +
+      differentFirst: true,
+      firstHeader:
+        "&C&B&18BARANGAY FAIRVIEW\nPROGRAM SUMMARY REPORT\n&12(" +
         String(programName).replace(/&/g, "&&") +
         ")",
+      oddHeader: "",
+      evenHeader: "",
     };
 
-    // Page setup with generous top/header margins so the header prints in PDF
-    wsInfo.pageSetup = {
-      orientation: "portrait",
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9, // A4
-      margins: {
-        left: 0.4,
-        right: 0.4,
-        top: 1.0, // more top so header area is clear in PDF
-        bottom: 0.5,
-        header: 0.5, // header margin area
-        footer: 0.3,
-      },
-    };
-
-    // Info table
-    wsInfo.columns = [
-      { header: "", width: 26 }, // labels
-      { header: "", width: 64 }, // values (wider so text doesn't clip)
-      { header: "", width: 12 },
-      { header: "", width: 12 },
-      { header: "", width: 12 },
-      { header: "", width: 12 },
-    ];
-
-    const addInfo = (label: string, value: string) => {
-      const r = wsInfo.addRow([label, value]);
-      r.getCell(1).font = { bold: true };
-      r.alignment = { vertical: "middle", wrapText: true };
-    };
-
-    wsInfo.addRow([]); // spacer above main details
-    addInfo("Program Name", programName);
-    addInfo("Approval Status", approval);
-    addInfo("Progress Status", progressStatus);
-    addInfo("Event Type", String(eventType).toUpperCase());
-    addInfo("Location", location);
-    addInfo("Date Range", dateRange);
-    if (timeRange) addInfo("Time", timeRange);
-
-    // ── Capacity section (cleaner table layout)
-    if (eventType === "multiple" && participantDays.length) {
-      wsInfo.addRow([]); // spacer
-
-      // Section title
-      const sectionHeader = wsInfo.addRow(["Per-day Max Participants"]);
-      sectionHeader.getCell(1).font = { bold: true };
-      sectionHeader.getCell(1).alignment = { horizontal: "left" };
-
-      // Table header
-      const tblHeader = wsInfo.addRow(["Day", "Max Participants"]);
-      tblHeader.getCell(1).font = { bold: true };
-      tblHeader.getCell(2).font = { bold: true };
-      tblHeader.getCell(1).alignment = { horizontal: "left" };
-      tblHeader.getCell(2).alignment = { horizontal: "right" };
-
-      // Table rows (Day / Value)
-      participantDays.forEach((n, i) => {
-        const row = wsInfo.addRow([`Day ${i + 1}`, Number(n) || 0]);
-        row.getCell(1).alignment = { horizontal: "left" };
-        row.getCell(2).alignment = { horizontal: "right" };
-      });
-
-      // Blank line, then Max Volunteers in same format
-      wsInfo.addRow([]);
-      const mv = wsInfo.addRow([
-        "Max Volunteers",
-        capVolunteers ? String(capVolunteers) : "—",
-      ]);
-      mv.getCell(1).font = { bold: true };
-      mv.getCell(2).alignment = { horizontal: "right" };
-    } else {
-      addInfo(
-        "Max Participants",
-        capParticipants ? String(capParticipants) : "—"
-      );
-      addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
-    }
-
-    if (description) {
-      // add a little vertical space before description
-      wsInfo.addRow([]);
-      const descHeader = wsInfo.addRow(["Description"]);
-      descHeader.font = { bold: true };
-
-      // Create a single long, merged row for the description across A..F
-      const descRow = wsInfo.addRow([description]);
-      const rowNum = descRow.number;
-      wsInfo.mergeCells(`A${rowNum}:F${rowNum}`);
-
-      const cell = wsInfo.getCell(`A${rowNum}`);
-      cell.alignment = { wrapText: true, vertical: "top" };
-
-      // give it generous height
-      descRow.height = 80; // adjust as you like
-    }
-
-    if (programSummary) {
-      wsInfo.addRow([]);
-      const sumHeader = wsInfo.addRow([
-        "Program Summary / Post-event Remarks",
-      ]);
-      sumHeader.font = { bold: true };
-
-      const sumRow = wsInfo.addRow([programSummary]);
-      const sumRowNum = sumRow.number;
-      wsInfo.mergeCells(`A${sumRowNum}:F${sumRowNum}`);
-
-      const cell = wsInfo.getCell(`A${sumRowNum}`);
-      cell.alignment = { wrapText: true, vertical: "top" };
-      sumRow.height = 80;
-    }
-
-    // style basics
-    wsInfo.eachRow((row) => {
-      row.eachCell((cell) => {
-        cell.font = cell.font || { name: "Calibri", size: 12 };
-      });
-    });
+    // Page setup (sheet 1)
     wsInfo.pageSetup = {
       orientation: "portrait",
       fitToPage: true,
@@ -1287,14 +1243,102 @@ const generateProgramSummaryXlsx = async (
       },
     };
 
+    // Info table
+    wsInfo.columns = [
+      { header: "", width: 26 },
+      { header: "", width: 64 },
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+      { header: "", width: 12 },
+    ];
+
+    const addInfo = (label: string, value: string) => {
+      const r = wsInfo.addRow([label, value]);
+      const c1 = r.getCell(1);
+      const c2 = r.getCell(2);
+      c1.font = { name: "Calibri", size: 16, bold: true };
+      c2.font = { name: "Calibri", size: 16 };
+      c1.alignment = { vertical: "middle", wrapText: true };
+      c2.alignment = { vertical: "middle", wrapText: true };
+    };
+
+    wsInfo.addRow([]);
+    addInfo("Program Name", programName);
+    addInfo("Approval Status", approval);
+    addInfo("Progress Status", progressStatus);
+    addInfo("Event Type", String(eventType).toUpperCase());
+    addInfo("Location", location);
+    addInfo("Date Range", dateRange);
+    if (timeRange) addInfo("Time", timeRange);
+
+    if (eventType === "multiple" && participantDays.length) {
+      wsInfo.addRow([]);
+
+      const sectionHeader = wsInfo.addRow(["Per-day Max Participants"]);
+      sectionHeader.getCell(1).font = {
+        name: "Calibri",
+        size: 16,
+        bold: true,
+      };
+      sectionHeader.getCell(1).alignment = { horizontal: "left" };
+
+      const tblHeader = wsInfo.addRow(["Day", "Max Participants"]);
+      tblHeader.getCell(1).font = { name: "Calibri", size: 16, bold: true };
+      tblHeader.getCell(2).font = { name: "Calibri", size: 16, bold: true };
+      tblHeader.getCell(1).alignment = { horizontal: "left" };
+      tblHeader.getCell(2).alignment = { horizontal: "right" };
+
+      participantDays.forEach((n, i) => {
+        const val = Number(n) || 0;
+        const display = val > 0 ? val : "No limit";
+        const row = wsInfo.addRow([`Day ${i + 1}`, display]);
+        row.getCell(1).alignment = { horizontal: "left", wrapText: true };
+        row.getCell(2).alignment = { horizontal: "right", wrapText: true };
+        row.getCell(1).font = { name: "Calibri", size: 16 };
+        row.getCell(2).font = { name: "Calibri", size: 16 };
+      });
+
+      wsInfo.addRow([]);
+      const mv = wsInfo.addRow([
+        "Max Volunteers",
+        capVolunteers ? String(capVolunteers) : "—",
+      ]);
+      mv.getCell(1).font = { name: "Calibri", size: 16, bold: true };
+      mv.getCell(2).alignment = { horizontal: "right" };
+      mv.getCell(2).font = { name: "Calibri", size: 16 };
+    } else {
+      const participantsLabel =
+        capParticipants > 0 ? String(capParticipants) : "No limit";
+      addInfo("Max Participants", participantsLabel);
+      addInfo("Max Volunteers", capVolunteers ? String(capVolunteers) : "—");
+    }
+
+    if (description) {
+      addWrappedBlock("Description", description);
+    }
+
+    if (programSummary) {
+      addWrappedBlock("Program Summary/Post-event Remarks", programSummary);
+    }
+
+    wsInfo.eachRow((row) => {
+      row.eachCell((cell) => {
+        const currentAlign = cell.alignment || {};
+        cell.alignment = { ...currentAlign, wrapText: true };
+      });
+    });
+
     // === Sheet 2: Participants & Volunteers ===
+    // Make columns slightly narrower so all 6 fit on one portrait page,
+    // and rely on wrapping + fitToWidth=1 to keep Role/Attendance together.
     wsList.columns = [
-      { header: "#", width: 6 },
-      { header: "Full Name", width: 32 },
-      { header: "Address", width: 34 },
-      { header: "Contact", width: 18 },
-      { header: "Role", width: 16 },
-      { header: "Attendance", width: 14 },
+      { key: "idx", width: 5 },       // #
+      { key: "fullName", width: 26 }, // Full Name
+      { key: "address", width: 30 },  // Address
+      { key: "contact", width: 15 },  // Contact
+      { key: "role", width: 12 },     // Role
+      { key: "attendance", width: 12 } // Attendance
     ];
 
     const title2 = wsList.addRow([
@@ -1312,87 +1356,196 @@ const generateProgramSummaryXlsx = async (
     };
     wsList.addRow([]);
 
-    const header2 = wsList.addRow(wsList.columns.map((c) => c.header));
-    header2.eachCell((c) => {
-      c.font = { name: "Calibri", size: 12, bold: true };
-      c.alignment = {
-        horizontal: "center",
-        vertical: "middle",
-        wrapText: true,
-      };
-      c.border = {
-        top: { style: "thin" },
-        bottom: { style: "thin" },
-        left: { style: "thin" },
-        right: { style: "thin" },
-      };
-      c.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FFF2F2F2" },
-      };
-    });
-    header2.height = 22;
-
     // Load participants (Approved only)
     const all = await fetchProgramParticipants(programId);
     const approved = all.filter(
-      (r) =>
-        String(r.approvalStatus || "").toLowerCase() === "approved"
+      (r) => String(r.approvalStatus || "").toLowerCase() === "approved"
     );
 
-    // Sort: participants first, then alpha by last name
-    const roleOrder = (r: ParticipantRecord) =>
-      String(r.role || "").toLowerCase() === "participant" ? 0 : 1;
+    const roleOrder = (r: ParticipantRecord) => {
+      const role = String(r.role || "").toLowerCase();
+      if (role === "participant") return 0;
+      if (role === "volunteer") return 1;
+      return 2;
+    };
     const nameKey = (r: ParticipantRecord) =>
       `${(r.lastName || "").toString().toUpperCase()}|${(
         r.firstName || ""
       )
         .toString()
         .toUpperCase()}`;
-    approved.sort(
-      (a, b) =>
-        roleOrder(a) - roleOrder(b) ||
-        nameKey(a).localeCompare(nameKey(b))
-    );
+    const attendanceOrder = (r: ParticipantRecord) =>
+      didAttend(r) ? 0 : 1;
 
-    approved.forEach((rec, i) => {
-      const addr = rec.address || rec.location || "—";
-      const contact = rec.contactNumber || rec.contact || "—";
-      const role = rec.role || "—";
-      const attendance = rec.attendance ? "Yes" : "No";
+    const sortForListing = (records: ParticipantRecord[]) =>
+      [...records].sort(
+        (a, b) =>
+          attendanceOrder(a) - attendanceOrder(b) ||
+          roleOrder(a) - roleOrder(b) ||
+          nameKey(a).localeCompare(nameKey(b))
+      );
 
-      const r = wsList.addRow([
-        i + 1,
-        safeFullName(rec),
-        addr,
-        contact,
-        role,
-        attendance,
+    const addTableHeader = () => {
+      const headerRow = wsList.addRow([
+        "#",
+        "Full Name",
+        "Address",
+        "Contact",
+        "Role",
+        "Attendance",
       ]);
-      r.height = 22;
-      r.eachCell((c) => {
+      headerRow.eachCell((c) => {
+        c.font = { name: "Calibri", size: 14, bold: true };
         c.alignment = {
           horizontal: "center",
           vertical: "middle",
           wrapText: true,
         };
-        c.font = { name: "Calibri", size: 12 };
         c.border = {
           top: { style: "thin" },
           bottom: { style: "thin" },
           left: { style: "thin" },
           right: { style: "thin" },
         };
+        c.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFF2F2F2" },
+        };
       });
-    });
+      headerRow.height = 22;
+    };
 
+    const addParticipantRow = (rec: ParticipantRecord, index: number) => {
+      const addr = rec.address || rec.location || "—";
+      const contact = rec.contactNumber || rec.contact || "—";
+      const role = rec.role || "—";
+      const attendance = didAttend(rec) ? "Yes" : "No";
+
+      const r = wsList.addRow([
+        index,
+        safeFullName(rec),
+        addr,
+        contact,
+        role,
+        attendance,
+      ]);
+
+
+
+      r.eachCell((cell, colNumber) => {
+        // Left-align text-heavy columns, center others
+        let horizontal: "left" | "center" = "center";
+        if (colNumber === 2 || colNumber === 3) horizontal = "left"; // Full Name, Address
+
+        cell.alignment = {
+          horizontal,
+          vertical: "middle",
+          wrapText: true,
+        };
+        cell.font = { name: "Calibri", size: 14 };
+        cell.border = {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        };
+      });
+    };
+
+
+    if (eventType === "multiple" && participantDays.length) {
+      participantDays.forEach((_, dayIndex) => {
+        wsList.addRow([]); // spacer
+
+        const dayApproved = approved.filter(
+          (r) => (r as any).dayChosen === dayIndex
+        );
+        const approvedParticipants = dayApproved.filter(
+          (r) => String(r.role || "").toLowerCase() === "participant"
+        );
+        const totalApproved = approvedParticipants.length;
+        const attendedCount = approvedParticipants.filter(didAttend).length;
+        const perc =
+          totalApproved > 0
+            ? Math.round((attendedCount / totalApproved) * 100)
+            : 0;
+
+        const titleText = `Day ${
+          dayIndex + 1
+        } Attendance — Attendance: ${attendedCount}/${totalApproved} (${perc}% attendance of approved participants)`;
+
+        const dayTitle = wsList.addRow([titleText]);
+        wsList.mergeCells(`A${dayTitle.number}:F${dayTitle.number}`);
+        const cell = wsList.getCell(`A${dayTitle.number}`);
+        cell.font = { name: "Calibri", size: 14, bold: true };
+        cell.alignment = { horizontal: "left", vertical: "middle" };
+
+        wsList.addRow([]);
+        addTableHeader();
+
+        const daySorted = sortForListing(dayApproved);
+        if (daySorted.length === 0) {
+          const emptyRow = wsList.addRow([
+            "No approved participants registered for this day.",
+          ]);
+          wsList.mergeCells(`A${emptyRow.number}:F${emptyRow.number}`);
+          wsList.getCell(`A${emptyRow.number}`).alignment = {
+            horizontal: "left",
+            vertical: "middle",
+            wrapText: true,
+          };
+        } else {
+          daySorted.forEach((rec, idx) => addParticipantRow(rec, idx + 1));
+        }
+      });
+    } else {
+      const approvedParticipants = approved.filter(
+        (r) => String(r.role || "").toLowerCase() === "participant"
+      );
+      const totalApproved = approvedParticipants.length;
+      const attendedCount = approvedParticipants.filter(didAttend).length;
+      const perc =
+        totalApproved > 0
+          ? Math.round((attendedCount / totalApproved) * 100)
+          : 0;
+
+      const titleText = `Attendance: ${attendedCount}/${totalApproved} (${perc}% attendance of approved participants)`;
+      const attTitle = wsList.addRow([titleText]);
+      wsList.mergeCells(`A${attTitle.number}:F${attTitle.number}`);
+      const attCell2 = wsList.getCell(`A${attTitle.number}`);
+      attCell2.font = { name: "Calibri", size: 14, bold: true };
+      attCell2.alignment = { horizontal: "left", vertical: "middle" };
+
+      wsList.addRow([]);
+      addTableHeader();
+
+      const sortedApproved = sortForListing(approved);
+      if (sortedApproved.length === 0) {
+        const emptyRow = wsList.addRow([
+          "No approved participants for this program.",
+        ]);
+        wsList.mergeCells(`A${emptyRow.number}:F${emptyRow.number}`);
+        wsList.getCell(`A${emptyRow.number}`).alignment = {
+          horizontal: "left",
+          vertical: "middle",
+          wrapText: true,
+        };
+      } else {
+        sortedApproved.forEach((rec, idx) =>
+          addParticipantRow(rec, idx + 1)
+        );
+      }
+    }
+
+    // 🔧 IMPORTANT: fit all 6 columns on one page width,
+    // but allow unlimited pages vertically for long lists.
     wsList.pageSetup = {
       orientation: "portrait",
+      paperSize: 9,      // A4
       fitToPage: true,
       fitToWidth: 1,
-      fitToHeight: 0,
-      paperSize: 9,
+      fitToHeight: 0,    // no vertical shrink — just add more pages
       margins: {
         left: 0.3,
         right: 0.3,
@@ -1403,34 +1556,31 @@ const generateProgramSummaryXlsx = async (
       },
     };
 
-    // === Attendance Summary (writes into wsInfo) ===
-    const approvedParticipants = approved.filter(
-      (r) =>
-        String(r.role || "").toLowerCase() === "participant"
+    // === Attendance Summary on Sheet 1 ===
+    const approvedParticipantsAll = approved.filter(
+      (r) => String(r.role || "").toLowerCase() === "participant"
     );
 
-    if (approvedParticipants.length > 0) {
+    if (approvedParticipantsAll.length > 0) {
       wsInfo.addRow([]);
       const attHeader = wsInfo.addRow(["Attendance Summary"]);
-      attHeader.font = { bold: true };
+      attHeader.font = { name: "Calibri", size: 16, bold: true };
 
-      // Helper: create merged, wrapped row in wsInfo
       const addAttLine = (line: string) => {
         const row = wsInfo.addRow([line]);
         const rn = row.number;
         wsInfo.mergeCells(`A${rn}:F${rn}`);
         const cell = wsInfo.getCell(`A${rn}`);
         cell.alignment = { wrapText: true, vertical: "top" };
-        row.height = 20;
+        cell.font = { name: "Calibri", size: 16 };
       };
 
       if (eventType === "multiple" && participantDays.length) {
-        // Per-day stats
         let totalApprovedAll = 0;
         let totalAttendedAll = 0;
 
         participantDays.forEach((_, dayIndex) => {
-          const dayApproved = approvedParticipants.filter(
+          const dayApproved = approvedParticipantsAll.filter(
             (r) => (r as any).dayChosen === dayIndex
           );
           const dayApprovedCount = dayApproved.length;
@@ -1441,9 +1591,7 @@ const generateProgramSummaryXlsx = async (
 
           const percDay =
             dayApprovedCount > 0
-              ? Math.round(
-                  (dayAttended / dayApprovedCount) * 100
-                )
+              ? Math.round((dayAttended / dayApprovedCount) * 100)
               : 0;
 
           addAttLine(
@@ -1453,28 +1601,24 @@ const generateProgramSummaryXlsx = async (
           );
         });
 
-        // Overall
         const overallApproved =
-          totalApprovedAll || approvedParticipants.length;
+          totalApprovedAll || approvedParticipantsAll.length;
         const overallAttended =
           totalAttendedAll ||
-          approvedParticipants.filter(didAttend).length;
+          approvedParticipantsAll.filter(didAttend).length;
 
         const overallPerc =
           overallApproved > 0
-            ? Math.round(
-                (overallAttended / overallApproved) * 100
-              )
+            ? Math.round((overallAttended / overallApproved) * 100)
             : 0;
 
         addAttLine(
           `Total attendance: ${overallAttended}/${overallApproved} approved participants attended (${overallPerc}% attendance achieved throughout the whole event).`
         );
       } else {
-        // Single event
-        const totalApproved = approvedParticipants.length;
+        const totalApproved = approvedParticipantsAll.length;
         const attendedCount =
-          approvedParticipants.filter(didAttend).length;
+          approvedParticipantsAll.filter(didAttend).length;
         const perc =
           totalApproved > 0
             ? Math.round((attendedCount / totalApproved) * 100)
@@ -1514,6 +1658,9 @@ const generateProgramSummaryXlsx = async (
     return null;
   }
 };
+
+
+
 
 
 
