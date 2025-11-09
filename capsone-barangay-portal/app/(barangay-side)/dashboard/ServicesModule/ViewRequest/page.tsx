@@ -2717,9 +2717,7 @@ Functions for Reason for Reject
                   {(status !== "Completed" && status !== "Rejected") && (
                     <>
                       <div className="services-onlinereq-redirectionpage-section"
-                        onMouseMove={handleMouseMove}
-                        onMouseEnter={() => documentMissing && setShowTooltip(true)}
-                        onMouseLeave={() => setShowTooltip(false)}
+                       
                         //style={{ position: "relative", display: "inline-block" }}
                       >
                         
@@ -2729,7 +2727,6 @@ Functions for Reason for Reject
                                 {((requestData?.accID !== "INBRGY-REQ" && requestData?.accID !== "Guest") || (requestData?.residentId !== undefined) ) &&(
                                   <>
                                       <button className="services-onlinereq-redirection-buttons" 
-                                        disabled = {documentMissing}
                                         onClick={(e) => setShowUserHistory(true)}
                                       >
                                         <div className="services-onlinereq-redirection-icons-section">
@@ -2745,7 +2742,6 @@ Functions for Reason for Reject
                               <>
                                 
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}
-                                  disabled = {documentMissing}
                                 >
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2758,7 +2754,6 @@ Functions for Reason for Reject
                             (requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") ? (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" 
-                                disabled = {documentMissing}
                                 onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2769,7 +2764,6 @@ Functions for Reason for Reject
                             ): !requestData?.appointmentDate && (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" 
-                                disabled = {documentMissing}
                                 onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2781,55 +2775,60 @@ Functions for Reason for Reject
                              
                             }
 
-
-                        
-                            {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
-                              <button className="services-onlinereq-redirection-buttons"
-                                disabled = {documentMissing}
-                              onClick={handleApprovedBySAS}>
-                              <div className="services-onlinereq-redirection-icons-section">
-                                  <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                              </div>
-                              <h1>Approve Appointment</h1>
-                            </button>
-                            ):(
-                              <>
-                                {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) 
-                                &&(requestData?.photoUploaded || requestData?.interviewRemarks )&&(
-                                  <>
-                                    <button className="services-onlinereq-redirection-buttons cursor:not-allowed" 
+                            <div
+                              onMouseMove={handleMouseMove}
+                              onMouseEnter={() => documentMissing && setShowTooltip(true)}
+                              onMouseLeave={() => setShowTooltip(false)}
+                            >
+                              {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
+                                <button className="services-onlinereq-redirection-buttons"
+                                  disabled = {documentMissing}
+                                onClick={handleApprovedBySAS}>
+                                <div className="services-onlinereq-redirection-icons-section">
+                                    <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                </div>
+                                <h1>Approve Appointment</h1>
+                              </button>
+                              ):(
+                                <>
+                                  {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) 
+                                  &&(requestData?.photoUploaded || requestData?.interviewRemarks )&&(
+                                    <>
+                                      <button className="services-onlinereq-redirection-buttons cursor:not-allowed" 
+                                      disabled = {documentMissing}
+                                      onClick={print}>
+                                      <div className="services-onlinereq-redirection-icons-section">
+                                          <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                      </div>
+                                        <h1>Generate Document</h1>
+                                      </button>
+                                    </>
+                                  )}
+                                  {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
+                                    <button className="services-onlinereq-redirection-buttons" 
                                     disabled = {documentMissing}
                                     onClick={print}>
-                                    <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                                    </div>
-                                      <h1>Generate Document</h1>
+                                      <div className="services-onlinereq-redirection-icons-section">
+                                          <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                      </div>
+                                        <h1>Generate Document</h1>
                                     </button>
-                                  </>
-                                )}
-                                {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
-                                  <button className="services-onlinereq-redirection-buttons" 
-                                  disabled = {documentMissing}
-                                  onClick={print}>
-                                    <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                                    </div>
-                                      <h1>Generate Document</h1>
-                                  </button>
-                                )}
-                                {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
-                                    <button 
-                                    disabled = {documentMissing}
-                                    className="services-onlinereq-redirection-buttons" onClick={print}>
-                                    <div className="services-onlinereq-redirection-icons-section">
-                                        <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
-                                    </div>
-                                      <h1>Generate Document</h1>
-                                  </button>
-                                )}
-                              </>
-                            )}
-                            
+                                  )}
+                                  {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
+                                      <button 
+                                      disabled = {documentMissing}
+                                      className="services-onlinereq-redirection-buttons" onClick={print}>
+                                      <div className="services-onlinereq-redirection-icons-section">
+                                          <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
+                                      </div>
+                                        <h1>Generate Document</h1>
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              
+                            </div>
+                        
                           </>
                         )}
 

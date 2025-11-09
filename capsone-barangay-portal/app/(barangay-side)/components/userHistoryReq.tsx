@@ -71,10 +71,11 @@ const UserHistory: React.FC<UserHistoryProps> = ({ accID, onClose, requestorFnam
         // unknown format -> return 0 so it sorts to the end
         return 0;
     }
+    const newPurpose = purpose?.replace(/[()]/g, "").trim();
+    console.log("Processed purpose:", newPurpose);
 
     useEffect(() => {
         const serviceRef = collection(db, "ServiceRequests");
-        const newPurpose = purpose?.replace(/[()]/g, "").trim();
         console.log("Fetching history for:", { accID, docType, purpose: newPurpose });
 
         const unsubscribe = onSnapshot(serviceRef, (snapshot) => {
@@ -170,9 +171,14 @@ const UserHistory: React.FC<UserHistoryProps> = ({ accID, onClose, requestorFnam
 
               {/* Example placeholder for request data */}
               <div className="max-h-[60vh] overflow-y-auto">
-                <p className="text-gray-600 text-center">
-                  Showing rejected {docType}{purpose} history for : <b>{requestorFname}</b>
+               <p className="text-gray-700 text-center mb-2">
+                  Showing rejected {docType}
+                  {newPurpose && newPurpose !== "undefined" && newPurpose !== "null" && newPurpose.trim() !== ""
+                    ? ` (${newPurpose}) `
+                    : " "}
+                   history for: <b>{requestorFname}</b>
                 </p>
+
                 <div className="mt-4 space-y-4">
                     {UserHistory.length === 0 ? (
                         <p className="text-gray-500 text-center">No rejected requests found.</p>
