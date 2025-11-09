@@ -297,7 +297,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         transactionData?.docType === "Barangay Clearance" ||
         transactionData?.docType === "Barangay Indigency" ||
         transactionData?.docType === "Temporary Business Permit" ||
-        transactionData?.docType === "Construction Permit" ||
+        transactionData?.docType === "Construction" ||
         transactionData?.docType === "Barangay Permit" ||
         (transactionData?.docType === "Other Documents" && transactionData?.purpose !== "Barangay ID")
           ? "Assistant Secretary"
@@ -333,7 +333,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
 
 
         /*Barangay Certificate, Barangay Indigency, Barangay Clearance & Business Permits */
-        ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction Permit"
+        ...(transactionData?.docType !== "Business Permit" && transactionData?.docType !== "Temporary Business Permit" && transactionData?.docType !== "Construction"
                 ? [
                     { label: "Requestor's Address", key: "address" },
                     { label: "Requestor's Date of Residency", key: "dateOfResidency" },
@@ -477,7 +477,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
             : []),
 
          /*Construction Permit*/
-         ...(transactionData?.docType === "Construction Permit" 
+         ...(transactionData?.docType === "Construction" 
             ? [
                 { label: "Home Address", key: "homeAddress" },
                 { label: "Construction Activity", key: "typeofconstruction" },
@@ -993,7 +993,7 @@ console.log("file url", fileURLs);
                             {/* Additional fields for Business Permit and Temporary Business Permit */}
                             
                             
-                         {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit" || transactionData.docType === "Construction Permit") && (
+                         {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit" || transactionData.docType === "Construction") && (
                           <>
                             <div className="details-section-response-upload">
                                 <div className="title">
@@ -1226,7 +1226,7 @@ console.log("file url", fileURLs);
                            )}
 
 
-                         {(transactionData.docType === "Construction Permit") && (
+                         {(transactionData.docType === "Construction") && (
                             <>
 
                             <div className="details-section-response-upload">

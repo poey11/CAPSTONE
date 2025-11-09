@@ -2,7 +2,7 @@
 
 import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useSearchParams,useRouter } from "next/navigation";
-import { use, useEffect,useState } from "react";
+import { useEffect,useState } from "react";
 import { useSession } from "next-auth/react";
 import { getStorage ,getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
@@ -10,8 +10,8 @@ import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
-import { get } from "http";
-import { set } from "date-fns";
+import UserHistory from "@/app/(barangay-side)/components/userHistoryReq";
+import { request } from "http";
 
 
 interface EmergencyDetails {
@@ -504,7 +504,7 @@ Functions for Reason for Reject
       };
 
 
-
+      console.log("is Request has residentid?: ", requestData?.residentId);
     const handleRejection = async () => {
         try {
             if (!id) return;
@@ -519,7 +519,7 @@ Functions for Reason for Reject
 
             const notificationRef = doc(collection(db, "Notifications"));
             await setDoc(notificationRef, {
-                residentID: data?.residentId,       // the user id linked to this request
+                residentID: data?.accID,       // the user id linked to this request
                 requestID: id,                 // the Firestore UID
                 message: `Your Document Request (${data?.requestId}) has been rejected. Reason: (${rejectionReason.reason})`,
                 timestamp: new Date(),
@@ -2583,6 +2583,7 @@ Functions for Reason for Reject
        console.log("Storage References:", storageFilePaths);
 
       }  
+    const [showUserHistory, setShowUserHistory] = useState<boolean>(false);
 
     return (  
         <main className="main-container-services-onlinereq">
@@ -2640,7 +2641,32 @@ Functions for Reason for Reject
                     </div>
                 </div>
             )}
-
+                {showUserHistory && (
+                  <>
+                    {requestData?.reqType === "Online" ? (
+                      <UserHistory
+                        accID={requestData?.accID || ""}
+                        onClose={() => setShowUserHistory(false)}
+                        requestorFname={requestData?.requestorFname || ""}
+                        docType={requestData?.docType || ""}
+                        requestId={id || ""}
+                        purpose={`(${requestData?.purpose})` || ""}
+                      />
+                    ) : (
+                      requestData?.reqType === "In Barangay" &&
+                      (
+                        <UserHistory
+                          residentId={requestData.residentId}
+                          onClose={() => setShowUserHistory(false)}
+                          requestorFname={requestData?.requestorFname || ""}
+                          docType={requestData?.docType || ""}
+                          requestId={id || ""}
+                          purpose={`(${requestData?.purpose})` || ""}
+                        />
+                      )
+                    )}
+                  </>
+                )}
 
                 {showPopup && (
                 <div className={`popup-overlay-services-onlinereq show`}>
@@ -2650,7 +2676,6 @@ Functions for Reason for Reject
                     </div>
                 </div>
                 )}
-
 
                 {showJobseekerPopup && (
                   <div className="confirmation-popup-overlay-services-onlinereq-status">
@@ -2688,10 +2713,6 @@ Functions for Reason for Reject
                 (["Assistant Secretary", "Secretary"].includes(userPosition || "") && requestData?.sendTo === "SAS")
               )
               && (
-
-
-
-
                 <>
                   {(status !== "Completed" && status !== "Rejected") && (
                     <>
@@ -2704,7 +2725,26 @@ Functions for Reason for Reject
                         
                         {!docPrinted && (
                           <>
-                          
+                            {(requestData?.docType === "Construction" || requestData?.docType ==="Business Permit" || requestData?.docType === "Temporary Business Permit") &&
+                            ( 
+                              <>
+                                {(requestData?.accID !== "INBRGY-REQ" || (requestData?.residentId !== undefined) ) &&(
+                                  <>
+                                      <button className="services-onlinereq-redirection-buttons" 
+                                        disabled = {documentMissing}
+                                        onClick={(e) => setShowUserHistory(true)}
+                                      >
+                                        <div className="services-onlinereq-redirection-icons-section">
+                                            <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
+                                        </div>
+                                        <h1>Check User History</h1>
+                                      </button> 
+                                  </>
+                                )}
+                                
+                              </>
+
+                            )}
                             {requestData?.appointmentDate  && (
                               <>
                                 
