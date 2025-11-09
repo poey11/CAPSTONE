@@ -2725,9 +2725,7 @@ Functions for Reason for Reject
                         
                         {!docPrinted && (
                           <>
-                            {(requestData?.docType === "Construction" || requestData?.docType ==="Business Permit" || requestData?.docType === "Temporary Business Permit") &&
-                            ( 
-                              <>
+                            
                                 {(requestData?.accID !== "INBRGY-REQ" || (requestData?.residentId !== undefined) ) &&(
                                   <>
                                       <button className="services-onlinereq-redirection-buttons" 
@@ -2739,9 +2737,7 @@ Functions for Reason for Reject
                                         </div>
                                         <h1>Check User History</h1>
                                       </button> 
-                                  </>
-                                )}
-                                
+                                 
                               </>
 
                             )}
