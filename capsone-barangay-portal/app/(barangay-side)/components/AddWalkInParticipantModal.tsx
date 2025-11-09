@@ -888,7 +888,7 @@ const isDayDisabledByPrior = (idx: number): { disabled: boolean; reason?: string
                             className="walkin-input-field-day-chosen"
                             value={formData.dayChosen ?? ""}
                             onChange={(e) => handleFormTextChange("dayChosen", e.target.value)}
-                            disabled={disabledSingle || lockDaySelection}
+                            disabled={disabledSingle || lockDaySelection || selectedRole === "Volunteer"}
                             title={
                               disabledSingle
                                 ? "One-day event only"

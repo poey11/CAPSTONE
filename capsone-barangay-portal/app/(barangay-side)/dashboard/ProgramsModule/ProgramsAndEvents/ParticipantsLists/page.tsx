@@ -582,6 +582,14 @@ const getResidentDisableInfo = (residentId?: string) => {
     multipleDayParticipantCount,
   ]);
 
+  const isVolunteerAtCapacity = useMemo(() => {
+    // If there is no volunteer cap, we never block on volunteers
+    if (typeof programVolunteerCapacity !== "number" || programVolunteerCapacity <= 0) {
+      return false;
+    }
+    return volunteerCount >= programVolunteerCapacity;
+  }, [volunteerCount, programVolunteerCapacity]);  
+
   const showVolunteerBadge = useMemo(
     () => typeof programVolunteerCapacity === "number" && programVolunteerCapacity > 0,
     [programVolunteerCapacity]
@@ -652,7 +660,7 @@ const canUserEditAttendance = useMemo(() => {
       setTimeout(() => setShowErrorToast(false), 3000);
       return;
     }
-    if (isAtCapacity) {
+    if (isAtCapacity && isVolunteerAtCapacity) {
       setErrorToastMsg("Program capacity reached. Cannot add more participants.");
       setShowErrorToast(true);
       setTimeout(() => setShowErrorToast(false), 3000);
@@ -1186,7 +1194,7 @@ const openResidentForm = async (resident: Resident) => {
             user?.position === "Assistant Secretary" ||
             user?.position === "Admin Staff") &&
             !isProgramClosed &&
-            !isAtCapacity &&
+            !(isAtCapacity && isVolunteerAtCapacity) &&
             !isSelectedDayEnded && (
               <button
                 type="button"
