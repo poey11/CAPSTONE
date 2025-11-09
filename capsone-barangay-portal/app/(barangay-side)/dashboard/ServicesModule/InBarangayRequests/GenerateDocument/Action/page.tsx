@@ -1707,6 +1707,9 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
               </div>
 
               <div className="createRequest-bottom-section">
+                <p className="text-red-600 bg-red-100 border border-red-400 p-4 rounded-md">
+                  If you uploaded incomplete document requirements, you may upload them later in the View Request section; however, the request will not be processed until all required documents are submitted.
+                </p>
                 <nav className="createRequest-info-toggle-wrapper">
                   {["basic", "full", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
                     <button
@@ -3619,7 +3622,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                   {activeSection === "others" && (
                     <>
                       <div className="others-main-container">
-  
+                        
                         <div className="box-container-outer-inbrgy">
                           <div className="title-verificationdocs-signature">
                             Signature Over Printed Name
