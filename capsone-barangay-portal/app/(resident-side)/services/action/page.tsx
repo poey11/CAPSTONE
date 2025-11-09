@@ -893,7 +893,7 @@ const handleFileChange = (
 };
 
   
- const handleReportUpload = async (key: any, storageRefs: Record<string, any>) => {
+const handleReportUpload = async (key: any, storageRefs: Record<string, any>, hasIncompleteRequirements: boolean = false) => {
   try {
   
     const docRef = collection(db, "ServiceRequests"); // Reference to the collection
@@ -975,59 +975,114 @@ const handleFileChange = (
         hour12: true,
       });
       
-    await addDoc(notificationRef, {
-    message: 
-      clearanceInput.purpose === "First Time Jobseeker"
-        ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
-        : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
-          ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-          : clearanceInput.docB === "Barangay Indigency"
-            ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-            : clearanceInput.docB === "Construction"
-              ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
-              : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
+    // NEW: BRANCH MESSAGES BASED ON INCOMPLETE REQUIREMENTS @malcolm eto yung magbabase kung
+    if (hasIncompleteRequirements) {
 
-      timestamp: new Date(),
-      requestorId: userData?.residentId || "Guest",
-      isRead: false,
-      ...(documentTypeIs !== "" ? {
-        transactionType: "Online Service Request",}:
-      {
-        transactionType: "Online Service Request",
-      }),      recipientRole: (
-        clearanceInput.purpose === "First Time Jobseeker" ||
-        clearanceInput.docB === "Barangay Certificate" ||
-        clearanceInput.docB === "Barangay Clearance" ||
-        clearanceInput.docB === "Barangay Indigency" ||
-        clearanceInput.docB === "Temporary Business Permit" ||
-        clearanceInput.docB === "Construction" ||
-        clearanceInput.docB === "Barangay Permit" ||        
-        (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-      )
-        ? "Assistant Secretary"
-        : "Admin Staff",
-      requestID: newDoc,
-    });
+      await addDoc(notificationRef, {
+      message: 
+        clearanceInput.purpose === "First Time Jobseeker"
+          ? `Incomplete requirements for Jobseeker Certificate request by ${clearanceInput.requestorFname} (Online). The request cannot proceed until all requirements are submitted.`
+          : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+            ? `Incomplete requirements for Residency request by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). Please wait for the applicant to complete the requirements.`
+            : clearanceInput.docB === "Barangay Indigency"
+              ? `Incomplete requirements for Barangay Indigency (${clearanceInput.purpose}) requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). The request cannot move forward until all documents are provided.`
+              : clearanceInput.docB === "Construction"
+                ? `Incomplete requirements for Construction Permit requested by ${clearanceInput.requestorFname} (Online). Please wait for the submission of all necessary documents.`
+                : `Incomplete requirements for ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online). Processing will continue once all requirements are submitted.`,
+
+        timestamp: new Date(),
+        requestorId: userData?.residentId || "Guest",
+        isRead: false,
+        ...(documentTypeIs !== "" ? {
+          transactionType: "Online Service Request",}:
+        {
+          transactionType: "Online Service Request",
+        }),      recipientRole: (
+          clearanceInput.purpose === "First Time Jobseeker" ||
+          clearanceInput.docB === "Barangay Certificate" ||
+          clearanceInput.docB === "Barangay Clearance" ||
+          clearanceInput.docB === "Barangay Indigency" ||
+          clearanceInput.docB === "Temporary Business Permit" ||
+          clearanceInput.docB === "Construction" ||
+          clearanceInput.docB === "Barangay Permit" ||        
+          (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+        )
+          ? "Assistant Secretary"
+          : "Admin Staff",
+        requestID: newDoc,
+      });
+      
     
-  
-  await addDoc(collection(db, "Notifications"), {
-    residentID: userData?.residentId || "Guest",
-    requestID: newDoc,
-    message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
-    timestamp: new Date(),
-    ...(documentTypeIs !== "" ? {
-        transactionType: "Online Service Request",}:
-      {
-        transactionType: "Online Service Request",
-      }),
-    isRead: false,
-  });
+    await addDoc(collection(db, "Notifications"), {
+      residentID: userData?.residentId || "Guest",
+      requestID: newDoc,
+      message: `Your document request (${clearanceInput?.requestId}) is currently on hold due to incomplete requirements. Please submit all necessary documents to proceed with the request.`,
+      timestamp: new Date(),
+      ...(documentTypeIs !== "" ? {
+          transactionType: "Online Service Request",}:
+        {
+          transactionType: "Online Service Request",
+        }),
+      isRead: false,
+    });
 
+    } else {
+
+      await addDoc(notificationRef, {
+      message: 
+        clearanceInput.purpose === "First Time Jobseeker"
+          ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
+          : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
+            ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+            : clearanceInput.docB === "Barangay Indigency"
+              ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+              : clearanceInput.docB === "Construction"
+                ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
+                : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
+
+        timestamp: new Date(),
+        requestorId: userData?.residentId || "Guest",
+        isRead: false,
+        ...(documentTypeIs !== "" ? {
+          transactionType: "Online Service Request",}:
+        {
+          transactionType: "Online Service Request",
+        }),      recipientRole: (
+          clearanceInput.purpose === "First Time Jobseeker" ||
+          clearanceInput.docB === "Barangay Certificate" ||
+          clearanceInput.docB === "Barangay Clearance" ||
+          clearanceInput.docB === "Barangay Indigency" ||
+          clearanceInput.docB === "Temporary Business Permit" ||
+          clearanceInput.docB === "Construction" ||
+          clearanceInput.docB === "Barangay Permit" ||        
+          (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+        )
+          ? "Assistant Secretary"
+          : "Admin Staff",
+        requestID: newDoc,
+      });
+      
+    
+    await addDoc(collection(db, "Notifications"), {
+      residentID: userData?.residentId || "Guest",
+      requestID: newDoc,
+      message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
+      timestamp: new Date(),
+      ...(documentTypeIs !== "" ? {
+          transactionType: "Online Service Request",}:
+        {
+          transactionType: "Online Service Request",
+        }),
+      isRead: false,
+    });
+
+    }
   
   } catch (e: any) {
     console.error("Error uploading request:", e);
   }
 };
+
 
 
   
@@ -1273,7 +1328,6 @@ const handleFileChange = (
       }
 
 
-      
 
       const atLeastOneIDRequired =
         (docB === "Barangay Certificate" ||
@@ -1314,6 +1368,28 @@ const handleFileChange = (
 
 
       requiredImageFields.push(...dynamicImageFields); // Ensure signature is always required
+
+      // NEW: DETECT MISSING REQUIRED IMAGE FIELDS WITHOUT BLOCKING SUBMISSION
+      let hasIncompleteRequirements = false;
+      const missingImageFields: string[] = [];
+
+      for (const imgField of requiredImageFields) {
+        const value = clearanceInput[imgField as keyof ClearanceInput];
+
+        if (
+          (!value || !(value instanceof File)) &&
+          !(atLeastOneIDRequired &&
+            (imgField === "barangayIDjpg" ||
+            imgField === "validIDjpg" ||
+            imgField === "letterjpg"))
+        ) {
+          missingImageFields.push(imgField);
+        }
+      }
+
+      if (missingImageFields.length > 0) {
+        hasIncompleteRequirements = true;
+      }
 
       // // Step 2: Check other required image fields
       // for (const imgField of requiredImageFields) {
@@ -1451,7 +1527,7 @@ const handleFileChange = (
         deathCertificate: filenames.deathCertificate,
         }),
         ...(clearanceInput.purpose === "Good Moral and Probation" && {
-         ...(clearanceInput.goodMoralPurpose ==="Others" ? 
+        ...(clearanceInput.goodMoralPurpose ==="Others" ? 
           { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
           { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
         }),
@@ -1524,7 +1600,8 @@ const handleFileChange = (
         }
       });
 
-      handleReportUpload(clearanceVars, storageRefs);
+      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
+      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
       }
 
       // 📌 Handling for Temporary Business Permit & Business Permit
@@ -1563,7 +1640,8 @@ const handleFileChange = (
         // isCCTV: filenames.isCCTV,
         // signaturejpg: filenames.signaturejpg,
       };
-      handleReportUpload(clearanceVars, storageRefs);
+      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
+      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
       }
 
       // 📌 Handling for Construction Permit
@@ -1604,7 +1682,8 @@ const handleFileChange = (
         // signaturejpg: filenames.signaturejpg,
         ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
       };
-      handleReportUpload(clearanceVars, storageRefs);
+      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
+      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
       }
 
       if (
@@ -1663,12 +1742,14 @@ const handleFileChange = (
         }
       });
 
-      handleReportUpload(clearanceVars, storageRefs);
+      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
+      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
       }
-     // alert("Document request submitted successfully!");
+    // alert("Document request submitted successfully!");
       router.push('/services/notification'); 
     //  router.push("/services");
     };
+
 
     const isAllRequiredFieldsFilledUp = (requiredFields:string []) => {
       for (const key of requiredFields) {
