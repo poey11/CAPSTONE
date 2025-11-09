@@ -1022,26 +1022,136 @@ export default function ProgramDetails() {
     await createAnnouncementFromProgram();
   };
 
-  // Dummy SMS handler – REPLACE BODY when backend SMS is ready
-  const handleSendSmsToApprovedParticipants = async() => {
+
+  const formatDateSMS = (dateStr?: string) => {
+    if (!dateStr) return "N/A";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "N/A";
+    return d.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const formatTimeSMS = (timeStr?: string) => {
+    if (!timeStr || !timeStr.includes(":")) return "";
+    const [hStr, mStr] = timeStr.split(":");
+    let h = Number(hStr);
+    const m = Number(mStr);
+    if (Number.isNaN(h) || Number.isNaN(m)) return "";
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    return `${h}:${pad2(m)}${ampm}`;
+  };
+
+  const buildSmsBodyForParticipant = (p: Participant): string => {
+    const greeting = `Good day Mx. ${p.fullName || "Participant"}!\n\n`;
+    const intro = `Please take note of the following changes for the program “${programName}”, where you have been successfully approved as a ${p.role || "Participant"}.\n\n`;
+
+    const oldStart = originalEventType === "single" ? originalSingleDate : originalStartDate;
+    const oldEnd = originalEventType === "single" ? originalSingleDate : originalEndDate;
+    const newStart = eventType === "single" ? singleDate : startDate;
+    const newEnd = eventType === "single" ? singleDate : endDate;
+
+    const oldStartText = formatDateSMS(oldStart);
+    const oldEndText = formatDateSMS(oldEnd);
+    const newStartText = formatDateSMS(newStart);
+    const newEndText = formatDateSMS(newEnd);
+
+    const oldTimeStartText = formatTimeSMS(originalTimeStart);
+    const oldTimeEndText = formatTimeSMS(originalTimeEnd);
+    const newTimeStartText = formatTimeSMS(timeStart);
+    const newTimeEndText = formatTimeSMS(timeEnd);
+
+    let scheduleSection = "";
+
+    if (eventType === "single") {
+      scheduleSection = 
+  `Previous Schedule:
+  Date: ${oldStartText}
+  Time: ${oldTimeStartText} - ${oldTimeEndText}
+
+  New Schedule:
+  Date: ${newStartText}
+  Time: ${newTimeStartText} - ${newTimeEndText}\n\n`;
+    } else {
+      scheduleSection = 
+  `Previous Schedule:
+  Start: ${oldStartText}
+  End: ${oldEndText}
+  Time: ${oldTimeStartText} - ${oldTimeEndText}
+
+  New Schedule:
+  Start: ${newStartText}
+  End: ${newEndText}
+  Time: ${newTimeStartText} - ${newTimeEndText}\n\n`;
+    }
+
+    const closing = 
+  `We apologize for any inconvenience this may cause and appreciate your understanding.
+
+  For more information, kindly visit the Barangay Fairview website and check the Announcements section.`;
+
+    return `${greeting}${intro}${scheduleSection}${closing}`;
+  };
+
+
+  const handleSendSmsToApprovedParticipants = async () => {
     setShowSmsPromptPopup(false);
+    if (!participantList.length) {
+      setPopupErrorMessage("No approved participants found to send SMS.");
+      setShowErrorPopup(true);
+      return;
+    }
 
-    // TODO: Replace this block with real SMS sending logic
-    setTimeout(() => {
-      setPopupMessage("SMS sent to all approved participants successfully!");
+    if (!hasScheduleChanged()) {
+      setPopupErrorMessage("No schedule changes detected. SMS not sent.");
+      setShowErrorPopup(true);
+      return;
+    }
+
+    const contentTemplate = buildScheduleChangeContent();
+    const results: { success: number; failed: number } = { success: 0, failed: 0 };
+
+    // Send all SMS sequentially or in parallel
+    await Promise.all(
+      participantList.map(async (p) => {
+        const smsBody = buildSmsBodyForParticipant(p);
+        try {
+          const response = await fetch("/api/clickSendApi", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              to: p.contactNumber,
+              message: smsBody,
+            }),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          results.success++;
+        } catch (err) {
+          console.error(`❌ Failed to send SMS to ${p.fullName}:`, err);
+          results.failed++;
+        }
+      })
+    );
+
+    // Show proper feedback
+    if (results.success > 0) {
+      setPopupMessage(`SMS successfully sent to ${results.success} participant${results.success > 1 ? "s" : ""}!`);
       setShowPopup(true);
-    }, 2000);
+    } else {
+      setPopupErrorMessage("Failed to send SMS. Please check ClickSend settings or contact numbers.");
+      setShowErrorPopup(true);
+    }
 
-    // After SMS, if schedule changed, auto-open Add Announcement popup
-    if (hasScheduleChanged()) {
-      const headline = `Changes in Schedule for ${programName}`;
+    // After SMS, auto-open Add Announcement if schedule changed
+    if (results.success > 0 && hasScheduleChanged()) {
       const now = new Date();
+      const headline = `Changes in Schedule for ${programName}`;
       const createdAtStr = formatDate12(now);
       const author = user?.fullName || user?.name || "";
-
       const content = buildScheduleChangeContent();
-
-      
 
       setNewAnnouncement({
         announcementHeadline: headline,
@@ -1060,31 +1170,6 @@ export default function ProgramDetails() {
       setPopupErrorMessage("");
       setShowErrorPopup(false);
       setShowAddAnnouncementPopup(true);
-
-      participantList.forEach(async (p) => {
-        console.log(`Preparing to send announcement to participant: ${p.fullName} (Resident ID: ${p.residentId})`);
-        console.log(`Preparing to send announcement to participant: ${p.fullName} (Resident ID: ${p.residentId})`);
-        try {
-          const response = await fetch("/api/clickSendApi", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                to: p.contactNumber,
-                message:`${content} 
-                \n\nFor more details, please check the announcement in the Barangay Fairview Website. Thank You!`, 
-            })
-          });   
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          } 
-
-          } catch (error) {
-            console.error("Error sending SMS:", error);
-
-        }
-      })
     }
   };
 
