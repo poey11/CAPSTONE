@@ -144,6 +144,15 @@ const [formData, setFormData] = useState<Record<string, string>>(() => {
 
 
 
+  useEffect(() => {
+    if (selectedRole === "Volunteer") {
+      setFormData((prev) => {
+        if (!prev.dayChosen) return prev; // nothing to clear
+        return { ...prev, dayChosen: "" };
+      });
+    }
+  }, [selectedRole]);
+
 
   const [formFiles, setFormFiles] = useState<Record<string, File | null>>({});
   const [saving, setSaving] = useState(false);
@@ -904,7 +913,7 @@ const isDayDisabledByPrior = (idx: number): { disabled: boolean; reason?: string
                             {(days.length ? days : [null]).map((_, idx) => {
                               const dIdx = days.length ? idx : 0;
                               let label = `Day ${dIdx + 1}`;
-                              let optionDisabled = disabledSingle || lockDaySelection;
+                              let optionDisabled = disabledSingle || lockDaySelection || selectedRole === "Volunteer";
 
                               if (start) {
                                 const optionDate = new Date(start);
