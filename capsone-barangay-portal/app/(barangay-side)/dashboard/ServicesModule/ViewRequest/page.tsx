@@ -4,12 +4,14 @@ import { getSpecificDocument } from "@/app/helpers/firestorehelper";
 import { useSearchParams,useRouter } from "next/navigation";
 import { use, useEffect,useState } from "react";
 import { useSession } from "next-auth/react";
-import { getDownloadURL, ref, uploadBytes} from "firebase/storage";
+import { getStorage ,getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {storage,db} from "@/app/db/firebase";
 import "@/CSS/barangaySide/ServicesModule/ViewOnlineRequest.css";
 import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, addDoc, where } from "firebase/firestore";
 import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
+import { get } from "http";
+import { set } from "date-fns";
 
 
 interface EmergencyDetails {
@@ -239,6 +241,45 @@ const ViewOnlineRequest = () => {
         checkJobseeker();
       }, [requestData]);
       
+        const [documentMising, setDocumentMising] = useState<boolean>(false);
+      
+        const imageFields = [
+              'signaturejpg',
+              'barangayIDjpg',
+              'validIDjpg',
+              'letterjpg',
+              'copyOfPropertyTitle',
+              'dtiRegistration',
+              'isCCTV',
+              'taxDeclaration',
+              'approvedBldgPlan',
+              'deathCertificate',
+              'twoByTwoPicture',
+        ] as const;
+      
+        const [nullImageFields, setNullImageFields] = useState<string[]>([]);
+      
+        useEffect(() => {
+        if (!requestData) return;
+
+        const missingFields: string[] = [];
+
+        for (const field of imageFields) {
+            const fileData = requestData[field as keyof OnlineRequest];
+
+            // 🔍 Check if the field value is null
+            if (fileData === null) {
+            missingFields.push(field);
+            }
+        }
+
+        // ✅ Update both states once after the loop
+        setNullImageFields(missingFields);
+        setDocumentMising(missingFields.length > 0);
+
+        }, [requestData]);
+        console.log("Missing Image Fields:", nullImageFields);
+        console.log("Is Document Missing?:", documentMising);
 
 const handleJobseekerAutoAdd = async () => {
   try {
@@ -803,7 +844,7 @@ Functions for Reason for Reject
         { key: "taxDeclaration", label: "Tax Declaration" },
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
-        { key: "identificationPic", label: "Identification Picture" },
+        { key: "twoByTwoPicture", label: "Identification Picture" },
 
         // OR
         { key: "orNumber", label: "OR Number" },
@@ -1444,8 +1485,18 @@ Functions for Reason for Reject
             return defaultFieldSections;
           }
         }, [requestData?.purpose, requestData?.docType, otherDocuments]);
-        
+      
+        const [existingJpgList, setExistingJpgList] = useState<string[]>([]);
+        useEffect(() => {
+          if (!requestData) return;
 
+          const existingFields = imageFields.filter((field) => field in requestData);
+          setExistingJpgList(existingFields);
+
+        }, [requestData]);
+
+        console.log("Request Data:", requestData);
+        console.log("Existing JPG List:", existingJpgList);
         
         const formatFieldName = (name: string) =>
           name
@@ -1524,68 +1575,102 @@ Functions for Reason for Reject
       if (sectionName === "others") {
         return (
          <div className="others-image-section">
-            {requestData?.reqType === "InBarangay" ? (
-              <>
-                {requestData?.docsRequired?.map((file, index) => (
-                  <div key={index} className="services-onlinereq-verification-requirements-section">
-                    <span className="verification-requirements-label">Image {index + 1}</span>
-                    <div className="services-onlinereq-verification-requirements-container">
-                      <a href={file.name} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={file.name}
-                          alt={`Image ${index}`}
-                          className="verification-reqs-pic uploaded-picture"
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
-               {requestData &&
+              {requestData &&
                 [
-                  ...fieldKeys,
+                  ...existingJpgList,
                   ...Object.keys(requestData).filter((key) => {
                     const value = String(requestData[key as keyof typeof requestData]);
                     return (
-                      !fieldKeys.includes(key) &&
+                      !existingJpgList.includes(key) &&
                       typeof value === "string" &&
                       (value.startsWith("https://firebasestorage") || value.startsWith("service_request_"))
                     );
                   }),
                 ].map((key) => {
                   const value = requestData[key as keyof typeof requestData];
-                  if (!value) return null;
+                  const label = getLabel(key);
+                  let fileUrl: string | undefined|null;
+                  if (typeof value === "string") {
+                    fileUrl = value.startsWith("service_request_")
+                      ? resolvedImageUrls[key]
+                      : value;
+                  }
 
-                  let fileUrl: string | undefined;
-                    if (typeof value === "string") {
-                      fileUrl = value.startsWith("service_request_") ? resolvedImageUrls[key] : value;
-                    }
+                  if(requestData?.reqType === "In Barangay" && userPosition === "Admin Staff" && (!value||!fileUrl)){
+                      return (
+                      <div key={key} className="services-onlinereq-verification-requirements-section">
+                        <span className="verification-requirements-label">{label}</span>
+                        <p 
+                        className="justify-center flex mt-5">
+                            <input 
+                                id= {`file-upload${key}`}
+                                type = "file"
+                                accept=".jpg,.jpeg,.png"
+                                onChange={(e) => {
+                                    setFilesToUpload((prevFiles) =>
+                                        prevFiles.map((file) =>
+                                            file.field === key
+                                                ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                : file
+                                        )
+                                    );
+                                }}
+                            />
 
-                  if (!fileUrl) return null; // still loading or failed to resolve
+                        </p>
+                      </div>
+                    );
+                  }
+                  // Handle missing file
+                  if (!value) {
+                    return (
+                      <div key={key} className="services-onlinereq-verification-requirements-section">
+                        <span className="verification-requirements-label">{label}</span>
+                        <p 
+                        className="justify-center flex mt-5"
 
+                        style={{ color: "red", fontWeight: "bold"}}>
+                          File is not yet uploaded.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  
+
+                  // Still missing after resolving URL
+                  if (!fileUrl) {
+                    return (
+                      <div key={key} className="services-onlinereq-verification-requirements-section">
+                        <span className="verification-requirements-label">{label}</span>
+                        <p
+                        className="justify-center flex mt-5"
+                        style={{ color: "red", fontWeight: "bold"}}>
+                          File is not yet uploaded.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  
+
+                  // ✅ File found: show preview
                   return (
                     <div key={key} className="services-onlinereq-verification-requirements-section">
-                      <span className="verification-requirements-label">{getLabel(key)}</span>
+                      <span className="verification-requirements-label">{label}</span>
                       <div className="services-onlinereq-verification-requirements-container">
-                      {fileUrl && (
                         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
                           <img
                             src={fileUrl}
-                            alt={getLabel(key)}
+                            alt={label}
                             className="verification-reqs-pic uploaded-picture"
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: "pointer" }}
                           />
                         </a>
-                      )}
                       </div>
                     </div>
                   );
-                })}
-              </>
-            )}
+                })}  
           </div>
         );
       }
@@ -2398,7 +2483,93 @@ Functions for Reason for Reject
       "7": "Educational",
       "8": "Vocational",
     };
+      const [showTooltip, setShowTooltip] = useState(false);
+      const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+      const handleMouseMove = (e: React.MouseEvent) => {
+        setMousePos({ x: e.clientX + 10, y: e.clientY + 10 }); // small offset from cursor
+      };
+    const [filesToUpload, setFilesToUpload] = useState<{ field: string; files: File[] | null, imageName:string }[]>([
+        { field: 'signaturejpg', files: null, imageName: 'Signature' },
+        { field: 'barangayIDjpg', files: null, imageName: 'Barangay ID'  },
+        { field: 'validIDjpg', files: null, imageName: 'Valid ID'  },
+        { field: 'letterjpg', files: null, imageName: 'Endorsement Letter'  },
+        { field: 'copyOfPropertyTitle', files: null, imageName: 'Copy of Property Title'  },
+        { field: 'dtiRegistration', files: null, imageName: 'Certified True Copy of DTI Registration'  },
+        { field: 'isCCTV', files: null, imageName: 'Picture of CCTV installed in the establishment'  },
+        { field: 'taxDeclaration', files: null, imageName: 'Certified True Copy of Tax Declaration' },
+        { field: 'approvedBldgPlan', files: null, imageName: 'Approved Building/Construction Plan'  },
 
+    ]);  
+
+    const handleSubmitReuploadDocument = async (e: React.FormEvent) => {
+      e.preventDefault();
+      for (const field of nullImageFields) {
+        if (filesToUpload.find(f => f.field === field)?.files === null) {
+            alert(`Please upload files for ${filesToUpload.find(f => f.field === field)?.imageName} before submitting.`);
+            return;
+        }
+      }
+      console.log("Submitting re-uploaded documents...");
+      console.log(filesToUpload);
+
+        const storage = getStorage();
+        const storageRefs: Record<string, any> = {}; // refs for upload
+        const storageFilePaths: Record<string, string> = {}; // file path strings to save to Firestore
+
+        // Prepare storage refs and file paths
+        for (const field of nullImageFields) {
+            const files = filesToUpload.find(f => f.field === field)?.files;
+            if (files && files.length > 0) {
+                let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // prevent collisions
+                // Safely extract filename and derive extension; fallback to empty string if missing
+                const uploadedName = files[0]?.name ?? "";
+                const fileExtension = uploadedName.split('.').pop() || "";
+                const filename = `service_request_${requestData?.accID}.${field}.${timeStamp}.${fileExtension}`;
+                const fullPath = `ServiceRequests/${filename}`;
+                storageFilePaths[field] = filename;
+                storageRefs[field] = ref(storage, fullPath);
+              
+            }
+        }
+        const listOfDownloadURLs: Record<string, string> = {};
+        // Upload files
+        for (const [key, storageRef] of Object.entries(storageRefs)) {
+          const file = filesToUpload.find(f => f.field === key)?.files?.[0];
+          if (file instanceof File && storageRef) {
+            try {
+              await uploadBytes(storageRef, file);
+              console.log(`${key} uploaded successfully`);
+              const downloadURL = await getDownloadURL(storageRef);
+              listOfDownloadURLs[key] = downloadURL;
+              console.log(`Download URL for ${key}: ${downloadURL}`);
+            } catch (uploadError) {
+              console.error(`Error uploading ${key}:`, uploadError);
+              // optionally handle partial failures here
+            }
+          }
+        }
+
+        try {
+          // Update Firestore document with new file references
+          const docRef = doc(db, "ServiceRequests", id!);
+
+
+          const updatePayload: Record<string, any> = {};
+          for (const [field, path] of Object.entries(listOfDownloadURLs)) {
+                updatePayload[field] = path; // ✅ set as string directly
+        }
+        
+          // Use updateDoc to only update the provided fields (does not overwrite other fields)
+          await updateDoc(docRef, updatePayload);
+          // Optionally refetch or update local state here
+          console.log("Firestore document updated with file references:", updatePayload);
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+
+       console.log("Storage References:", storageFilePaths);
+
+      }  
 
     return (  
         <main className="main-container-services-onlinereq">
@@ -2497,18 +2668,26 @@ Functions for Reason for Reject
                     )}
     
 
-        
-            {
+        {
               
               (
                 (userPosition === "Admin Staff" && requestData?.sendTo === "Admin Staff") ||
                 (["Assistant Secretary", "Secretary"].includes(userPosition || "") && requestData?.sendTo === "SAS")
               )
               && (
+
+
+
+
                 <>
                   {(status !== "Completed" && status !== "Rejected") && (
                     <>
-                      <div className="services-onlinereq-redirectionpage-section">
+                      <div className="services-onlinereq-redirectionpage-section"
+                        onMouseMove={handleMouseMove}
+                        onMouseEnter={() => documentMising && setShowTooltip(true)}
+                        onMouseLeave={() => setShowTooltip(false)}
+                        //style={{ position: "relative", display: "inline-block" }}
+                      >
                         
                         {!docPrinted && (
                           <>
@@ -2516,7 +2695,9 @@ Functions for Reason for Reject
                             {requestData?.appointmentDate  && (
                               <>
                                 
-                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}
+                                  disabled = {documentMising}
+                                >
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
@@ -2527,7 +2708,9 @@ Functions for Reason for Reject
                             {!requestData?.appointmentDate && (requestData?.purpose !=="Residency" && requestData?.docType !== "Barangay Indigency") || 
                             (requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") ? (
                               <>
-                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                <button className="services-onlinereq-redirection-buttons" 
+                                disabled = {documentMising}
+                                onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
@@ -2536,7 +2719,9 @@ Functions for Reason for Reject
                               </>
                             ): !requestData?.appointmentDate && (
                               <>
-                                <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}>
+                                <button className="services-onlinereq-redirection-buttons" 
+                                disabled = {documentMising}
+                                onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
                                   </div>
@@ -2550,7 +2735,9 @@ Functions for Reason for Reject
 
                         
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
-                              <button className="services-onlinereq-redirection-buttons" onClick={handleApprovedBySAS}>
+                              <button className="services-onlinereq-redirection-buttons"
+                                disabled = {documentMising}
+                              onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
@@ -2561,7 +2748,9 @@ Functions for Reason for Reject
                                 {((requestData?.docType === "Barangay Indigency" || requestData?.purpose==="Residency") && (user?.position === "Secretary" || user?.position === "Assistant Secretary" )) 
                                 &&(requestData?.photoUploaded || requestData?.interviewRemarks )&&(
                                   <>
-                                    <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <button className="services-onlinereq-redirection-buttons cursor:not-allowed" 
+                                    disabled = {documentMising}
+                                    onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
@@ -2570,7 +2759,9 @@ Functions for Reason for Reject
                                   </>
                                 )}
                                 {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
-                                  <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                  <button className="services-onlinereq-redirection-buttons" 
+                                  disabled = {documentMising}
+                                  onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
@@ -2578,7 +2769,9 @@ Functions for Reason for Reject
                                   </button>
                                 )}
                                 {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
-                                    <button className="services-onlinereq-redirection-buttons" onClick={print}>
+                                    <button 
+                                    disabled = {documentMising}
+                                    className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                     </div>
@@ -2593,7 +2786,9 @@ Functions for Reason for Reject
 
                         {(requestData?.docType === "Barangay Certificate"&&requestData?.purpose==="Residency") && (requestData?.photoUploaded === "") &&( 
                           <>
-                             <button className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
+                             <button 
+                             disabled = {documentMising}
+                             className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
                                     <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                 </div>
@@ -2604,7 +2799,9 @@ Functions for Reason for Reject
                         
                         {(requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks === "") &&( 
                           <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowInterviewForm(true)}>
+                            <button 
+                            disabled = {documentMising}
+                            className="services-onlinereq-redirection-buttons" onClick={() => setShowInterviewForm(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
                                     <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                                 </div>
@@ -2618,6 +2815,7 @@ Functions for Reason for Reject
                         {docPrinted && (userPosition !== "Admin Staff") ? (
                           <>
                             <button className="services-onlinereq-redirection-buttons"
+                            disabled = {documentMising}
                             onClick={() => {
                               handleNextStep();            
                               setShowNotifyAdminPopup(true); // show popup
@@ -2632,6 +2830,7 @@ Functions for Reason for Reject
                         ) : (docPrinted && !["Assistant Secretary", "Secretary"].includes(userPosition as string) && status !== "Pick-up") &&(
                           <>
                             <button className="services-onlinereq-redirection-buttons"
+                            disabled = {documentMising}
                               onClick={() => {
                                 handleNextStep();            
                                 setShowNotifyRequestorPopup(true); // show popup
@@ -2646,7 +2845,9 @@ Functions for Reason for Reject
                         )}
                          {docPrinted && status === "Pick-up" && (
                           <>
-                            <button className="services-onlinereq-redirection-buttons" onClick={() => setShowReceivalForm(true)}>
+                            <button className="services-onlinereq-redirection-buttons" 
+                            disabled = {documentMising}
+                            onClick={() => setShowReceivalForm(true)}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
                               </div>
@@ -2676,7 +2877,7 @@ Functions for Reason for Reject
                   )}
                 </>
             )}
-
+       
          {/*}   <div className="services-onlinereq-main-content"> */}
 
 
@@ -2695,14 +2896,25 @@ Functions for Reason for Reject
                 >
 
                 <div className="services-onlinereq-main-section1">
-                    <div className="services-onlinereq-main-section1-left">
-                        <button onClick={handleBack}>
-                            <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
-                        </button>
+                  <div className="services-onlinereq-main-section1-left">
+                    <button onClick={handleBack}>
+                      <img src="/Images/left-arrow.png" alt="Left Arrow" className="back-btn"/> 
+                    </button>
+                    <h1>{requestData?.reqType || "Online"} Document Request Details</h1>
+                  </div>
 
-                        <h1> {requestData?.reqType || "Online"} Document Request Details </h1>
+                  {(documentMising && userPosition === "Admin Staff" && requestData?.reqType === "In Barangay") && (
+                    <div className="mr-10">
+                      <button
+                        className="bg-green-500 p-2 text-white rounded-md shadow-md text-center text-base font-semibold w-36"
+                        onClick={(e) => handleSubmitReuploadDocument(e)}
+                      >
+                        Submit Files
+                      </button>
                     </div>
+                  )}
                 </div>
+
 
                 <div className="services-onlinereq-header-body">
 
@@ -3630,6 +3842,21 @@ Functions for Reason for Reject
             </div>
           </div>
         )}
+
+        {showTooltip && documentMising && (
+          <div
+            className="fixed z-50 bg-red-600 text-white text-sm px-3 py-2 rounded-lg shadow-lg pointer-events-none transition-opacity duration-150"
+            style={{
+              top: mousePos.y,
+              left: mousePos.x,
+              transform: "translate(0, 0)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            The request has missing documents. Cannot proceed until the requestor uploads everything.
+          </div>
+        )}
+      
 
         </main>
     );

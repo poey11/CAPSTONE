@@ -1,9 +1,10 @@
 "use client";
 import "@/CSS/ResidentAccount/transactions.css";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { doc, getDoc } from "firebase/firestore";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { use, useEffect, useState } from "react";
+import { doc, getDoc,addDoc, collection, getDocs, DocumentData, onSnapshot, query, where,updateDoc, setDoc } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL,uploadBytes } from "firebase/storage";
+
 import { db } from "@/app/db/firebase";
 
 interface EmergencyDetails {
@@ -16,6 +17,7 @@ interface EmergencyDetails {
   }
 
 interface BarangayDocument {
+    accID: string;
     id: string;
     address?: string; 
     age?: string; 
@@ -34,7 +36,7 @@ interface BarangayDocument {
     signaturejpg?: string[];
     barangayIDjpg?: string[];
     validIDjpg?: string[];
-    endorsementLetter?: string[];
+    letterjpg?: string[];
     status?: string; 
     partnerWifeHusbandFullName?: string;
     cohabitationStartDate?: string;
@@ -71,6 +73,22 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
     const [transactionData, setTransactionData] = useState<BarangayDocument | null>(null);
     const [loading, setLoading] = useState(true);
     const [fileURLs, setFileURLs] = useState<{ field: string; url: string }[]>([]);
+
+
+    
+    const [filesToUpload, setFilesToUpload] = useState<{ field: string; files: File[] | null, imageName:string }[]>([
+        { field: 'signaturejpg', files: null, imageName: 'Signature' },
+        { field: 'barangayIDjpg', files: null, imageName: 'Barangay ID'  },
+        { field: 'validIDjpg', files: null, imageName: 'Valid ID'  },
+        { field: 'letterjpg', files: null, imageName: 'Endorsement Letter'  },
+        { field: 'copyOfPropertyTitle', files: null, imageName: 'Copy of Property Title'  },
+        { field: 'dtiRegistration', files: null, imageName: 'Certified True Copy of DTI Registration'  },
+        { field: 'isCCTV', files: null, imageName: 'Picture of CCTV installed in the establishment'  },
+        { field: 'taxDeclaration', files: null, imageName: 'Certified True Copy of Tax Declaration' },
+        { field: 'approvedBldgPlan', files: null, imageName: 'Approved Building/Construction Plan'  },
+
+    ]);
+
 
 
     const [activeSection, setActiveSection] = useState("info");
@@ -112,7 +130,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
                 setTransactionData({ ...data, id: docSnap.id });
 
                 const storage = getStorage();
-                const fileFields = ['signaturejpg', 'barangayIDjpg', 'validIDjpg', 'endorsementLetter', 'copyOfPropertyTitle', 'dtiRegistration', 'isCCTV', 'taxDeclaration', 'approvedBldgPlan'] as const;
+                const fileFields = ['signaturejpg', 'barangayIDjpg', 'validIDjpg', 'letterjpg', 'copyOfPropertyTitle', 'dtiRegistration', 'isCCTV', 'taxDeclaration', 'approvedBldgPlan'] as const;
 
                 const urls: { field: string; url: string }[] = [];
 
@@ -158,8 +176,108 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         router.push("/ResidentAccount/Transactions");
       };
     
+    const [documentMising, setDocumentMising] = useState<boolean>(false);
+
+    const imageFields = [
+        'signaturejpg',
+        'barangayIDjpg',
+        'validIDjpg',
+        'letterjpg',
+        'copyOfPropertyTitle',
+        'dtiRegistration',
+        'isCCTV',
+        'taxDeclaration',
+        'approvedBldgPlan',
+        ] as const;
+
+        const [nullImageFields, setNullImageFields] = useState<string[]>([]);
+
+        useEffect(() => {
+        if (!transactionData) return;
+
+        const missingFields: string[] = [];
+
+        for (const field of imageFields) {
+            const fileData = transactionData[field as keyof BarangayDocument];
+
+            // 🔍 Check if the field value is null
+            if (fileData === null) {
+            missingFields.push(field);
+            }
+        }
+
+        // ✅ Update both states once after the loop
+        setNullImageFields(missingFields);
+        setDocumentMising(missingFields.length > 0);
+
+        }, [transactionData]);
+
+        console.log("Document Missing:", documentMising);
+        console.log("Transaction Data:", transactionData);
+        console.log("Null Image Fields:", nullImageFields);
+
+      const handleSubmitDocuments = async (e:any) => {
+        e.preventDefault();
+        for (const field of nullImageFields) {
+            if (filesToUpload.find(f => f.field === field)?.files === null) {
+                alert(`Please upload files for ${filesToUpload.find(f => f.field === field)?.imageName} before submitting.`);
+                return;
+            }
+        }
+
+        const storage = getStorage();
+        const storageRefs: Record<string, any> = {}; // refs for upload
+        const storageFilePaths: Record<string, string> = {}; // file path strings to save to Firestore
+
+        // Prepare storage refs and file paths
+        for (const field of nullImageFields) {
+            const files = filesToUpload.find(f => f.field === field)?.files;
+            if (files && files.length > 0) {
+                let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // prevent collisions
+                const fileExtension = files[0].name.split('.').pop(); // Get file extension from the first file
+                const filename = `service_request_${transactionData?.accID}.${field}.${timeStamp}.${fileExtension}`;
+                const fullPath = `ServiceRequests/${filename}`;
+                storageFilePaths[field] = filename;
+                storageRefs[field] = ref(storage, fullPath);
+            }
+        }
+
+        // Upload files
+        for (const [key, storageRef] of Object.entries(storageRefs)) {
+          const file = filesToUpload.find(f => f.field === key)?.files?.[0];
+          if (file instanceof File && storageRef) {
+            try {
+              await uploadBytes(storageRef, file);
+              console.log(`${key} uploaded successfully`);
+            } catch (uploadError) {
+              console.error(`Error uploading ${key}:`, uploadError);
+              // optionally handle partial failures here
+            }
+          }
+        }
+
+        try {
+          // Update Firestore document with new file references
+          const docRef = doc(db, "ServiceRequests", referenceId);
 
 
+          const updatePayload: Record<string, any> = {};
+          for (const [field, path] of Object.entries(storageFilePaths)) {
+                updatePayload[field] = path; // ✅ set as string directly
+        }
+        
+          // Use updateDoc to only update the provided fields (does not overwrite other fields)
+          await updateDoc(docRef, updatePayload);
+            location.reload();
+          // Optionally refetch or update local state here
+          console.log("Firestore document updated with file references:", updatePayload);
+        } catch (error) {
+          console.error("Error updating document:", error);
+        }
+
+       console.log("Storage References:", storageFilePaths);
+
+      }  
       const barangayDocumentFields = [
         /* General Fields*/
         { label: "Request Date", key: "createdAt" },
@@ -359,6 +477,7 @@ if (loading || !transactionData) {
   );
 }
 
+console.log("file url", fileURLs);
     return (
         <main className="incident-transaction-container">
             <div className="headerpic-specific-transactions">
@@ -373,12 +492,26 @@ if (loading || !transactionData) {
                         <button type="button" className="back-button" onClick={handleBack}></button>
                         <h1>Online Document Request</h1>
                     </div>
+                    
                     <div className="status-container">
                         <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
                         {transactionData.status || "N/A"}
                         </p> 
                         
                     </div>
+                    {documentMising && (
+                        <>
+                            <div >
+                                <button type="button"
+                                className="bg:white p-1 rounded-md shadow-md bg-green-500 size-fit text-center text-base font-semibold w-36"  
+                                onClick={(e) => {
+                                    handleSubmitDocuments(e)
+                                }}>
+                                    Submit Files
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="incident-main-content">
@@ -477,7 +610,7 @@ if (loading || !transactionData) {
                      {activeSection === "reqs" && (
                         <>
                         <div className="incident-main-container-upload">
-                            {fileURLs.some(({ field }) => field === "signaturejpg") && (
+                            {fileURLs.some(({ field }) => field === "signaturejpg") ? (
                             <div className="details-section-response-upload">
                                 <div className="title">
                                 <p>Signature</p>
@@ -496,10 +629,55 @@ if (loading || !transactionData) {
                                     ))}
                                 </div>
                             </div>
+                            ):(
+                                <>
+                                    <div className="details-section-response-upload">
+                                        <div className="title">
+                                        <p>Signature</p>
+                                        </div>
+
+                                        <div className="description">
+                                            {(filesToUpload.find(f => f.field === "signaturejpg")?.files === null || filesToUpload.find(f => f.field === "signaturejpg")?.files?.length ===0) ?(
+                                                <>
+                                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please upload the Document</p>
+                                                </>
+                                            ):(
+                                                <>
+                                                    <p>File ready to be uploaded: </p>
+                                                    
+                                                        {filesToUpload.find(f => f.field === "signaturejpg")?.files?.map((file, idx) => (
+                                                            <p key={idx}>{file.name}</p>
+                                                        ))}
+                                                    
+                                                </>
+                                            )}
+                                        </div>
+                                        {documentMising && (
+                                            <div>
+                                                <label htmlFor="file-upload1">Click to Upload File</label>
+                                                <input 
+                                                    id="file-upload1"
+                                                    type = "file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        setFilesToUpload((prevFiles) =>
+                                                            prevFiles.map((file) =>
+                                                                file.field === "signaturejpg"
+                                                                    ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                    : file
+                                                            )
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                    </div>
+                                </>
                             )}
 
 
-                            {fileURLs.some(({ field }) => field === "barangayIDjpg") && (
+                            {fileURLs.some(({ field }) => field === "barangayIDjpg") ? (
                             <div className="details-section-response-upload">
                                 <div className="title">
                                 <p>Barangay ID</p>
@@ -518,9 +696,57 @@ if (loading || !transactionData) {
                                     ))}
                                 </div>
                             </div>
+                            ):(transactionData && "barangayIDjpg" in transactionData && 
+                                 <>
+                                    <div className="details-section-response-upload">
+                                        <div className="title">
+                                        <p>Barangay ID</p>
+                                        </div>
+
+                                        <div className="description">
+                                            {(filesToUpload.find(f => f.field === "barangayIDjpg")?.files === null ||filesToUpload.find(f => f.field === "barangayIDjpg")?.files?.length ===0)?(
+                                                <>
+                                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                                </>
+                                            ):( 
+                                                <>
+                                                    <p>File ready to be uploaded: </p>
+                                                    
+                                                        {filesToUpload.find(f => f.field === "barangayIDjpg")?.files?.map((file, idx) => (
+                                                            <p key={idx}>{file.name}</p>
+                                                        ))}
+                                                    
+                                                </>
+                                            )}
+                                        </div>
+                                        {
+                                            documentMising && (
+                                                <div>
+                                                    <label htmlFor="file-upload2">Click to Upload File</label>
+                                                    <input 
+                                                        id="file-upload2"
+                                                        type = "file"
+                                                        accept=".jpg,.jpeg,.png"
+                                                        onChange={(e) => {
+                                                            setFilesToUpload((prevFiles) =>
+                                                                prevFiles.map((file) =>
+                                                                    file.field === "barangayIDjpg"
+                                                                        ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                        : file
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            )
+                                        }
+                                        
+
+                                    </div>
+                                </>
                             )}
 
-                                {fileURLs.some(({ field }) => field === "validIDjpg") && (
+                                {fileURLs.some(({ field }) => field === "validIDjpg") ? (
                                 <div className="details-section-response-upload">
                                     <div className="title">
                                     <p>Valid ID</p>
@@ -539,9 +765,54 @@ if (loading || !transactionData) {
                                         ))}
                                     </div>
                                 </div>
+                                ):(
+                                <>
+                                    <div className="details-section-response-upload">
+                                        <div className="title">
+                                        <p>Valid ID</p>
+                                        </div>
+
+                                        <div className="description">
+                                            {(filesToUpload.find(f => f.field === "validIDjpg")?.files === null||filesToUpload.find(f => f.field === "validIDjpg")?.files?.length ===0) ?(
+                                                <>
+                                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                                </>
+                                            ):(
+                                                <>
+                                                    <p>File ready to be uploaded: </p>
+                                                    
+                                                        {filesToUpload.find(f => f.field === "validIDjpg")?.files?.map((file, idx) => (
+                                                            <p key={idx}>{file.name}</p>
+                                                        ))}
+                                                    
+                                                </>
+                                            )}
+                                        </div>
+                                        {documentMising && (
+                                            <div>
+                                                <label htmlFor="file-upload3">Click to Upload File</label>
+                                                <input 
+                                                    id="file-upload3"
+                                                    type = "file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        setFilesToUpload((prevFiles) =>
+                                                            prevFiles.map((file) =>
+                                                                file.field === "validIDjpg"
+                                                                    ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                    : file
+                                                            )
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+                                        )}
+
+                                    </div>
+                                </>
                                 )}
                             
-                            {fileURLs.some(({ field }) => field === "endorsementLetter") && (
+                            {fileURLs.some(({ field }) => field === "letterjpg") ? (
                             <div className="details-section-response-upload">
                                 <div className="title">
                                 <p>Endorsement Letter</p>
@@ -549,7 +820,7 @@ if (loading || !transactionData) {
 
                                 <div className="description">
                                 {fileURLs
-                                    .filter(({ field }) => field === "endorsementLetter")
+                                    .filter(({ field }) => field === "letterjpg")
                                     .map(({ url }, index) => (
                                     <div key={index} className="document-requirements-container">
                                         <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image" />
@@ -560,6 +831,55 @@ if (loading || !transactionData) {
                                     ))}
                                 </div>
                             </div>
+                            ):( transactionData && "letterjpg" in transactionData && 
+                                <>
+                                    <div className="details-section-response-upload">
+                                        <div className="title">
+                                        <p>Endorsement Letter</p>
+                                        </div>
+
+                                        <div className="description">
+                                            {(filesToUpload.find(f => f.field === "letterjpg")?.files === null || filesToUpload.find(f => f.field === "letterjpg")?.files?.length ===0)?(
+                                                <>
+                                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                                </>
+                                            ):(
+                                                <>
+                                                    <p>File ready to be uploaded: </p>
+                                                    
+                                                        {filesToUpload.find(f => f.field === "letterjpg")?.files?.map((file, idx) => (
+                                                            <p key={idx}>{file.name}</p>
+                                                        ))}
+                                                    
+                                                </>
+                                            )}
+                                        </div>
+                                        
+                                        {
+                                            documentMising && (
+
+                                                <div>
+                                                    <label htmlFor="file-upload4">Click to Upload File</label>
+                                                    <input 
+                                                        id="file-upload4"
+                                                        type = "file"
+                                                        accept=".jpg,.jpeg,.png"
+                                                        onChange={(e) => {
+                                                            setFilesToUpload((prevFiles) =>
+                                                                prevFiles.map((file) =>
+                                                                    file.field === "letterjpg"
+                                                                        ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                        : file
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            )
+                                        }
+
+                                    </div>
+                                </>
                             )}
 
 
@@ -588,7 +908,48 @@ if (loading || !transactionData) {
                                         </div>
                                     ))
                                 ) : (
-                                     <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                <>
+                                    <div className="details-section-response-upload">
+                                        <div className="title">
+                                        <p>Copy of Property Title / Contract of Lease</p>
+                                        </div>
+
+                                        <div className="description">
+                                            {(filesToUpload.find(f => f.field === "copyOfPropertyTitle")?.files === null ||filesToUpload.find(f => f.field === "copyOfPropertyTitle")?.files?.length ===0) ?(
+                                                <>
+                                                    <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please Upload the document</p>
+                                                </>
+                                            ):(
+                                                <>
+                                                    <p>File ready to be uploaded: </p>
+                                                    
+                                                        {filesToUpload.find(f => f.field === "copyOfPropertyTitle")?.files?.map((file, idx) => (
+                                                            <p key={idx}>{file.name}</p>
+                                                        ))}
+                                                    
+                                                </>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <label htmlFor="file-upload5">Click to Upload File</label>
+                                            <input 
+                                                id="file-upload5"
+                                                type = "file"
+                                                accept=".jpg,.jpeg,.png"
+                                                onChange={(e) => {
+                                                    setFilesToUpload((prevFiles) =>
+                                                        prevFiles.map((file) =>
+                                                            file.field === "copyOfPropertyTitle"
+                                                                ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                : file
+                                                        )
+                                                    );
+                                                }}
+                                            />
+                                        </div>
+
+                                    </div>
+                                </>
                                 )}
                             </div>
 
@@ -618,7 +979,50 @@ if (loading || !transactionData) {
                                             </div>
                                         ))
                                     ) : (
-                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                        <>
+                                            <div className="details-section-response-upload">
+                                                <div className="title">
+                                                <p>DTI Registration</p>
+                                                </div>
+
+                                                <div className="description">
+                                                    {(filesToUpload.find(f => f.field === "dtiRegistration")?.files === null ||filesToUpload.find(f => f.field === "dtiRegistration")?.files?.length ===0) ?(
+                                                        <>
+                                                            <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please Upload the document</p>
+                                                        </>
+                                                    ):(
+                                                        <>
+                                                            <p>File ready to be uploaded: </p>
+                                                            
+                                                                {filesToUpload.find(f => f.field === "dtiRegistration")?.files?.map((file, idx) => (
+                                                                    <p key={idx}>{file.name}</p>
+                                                                ))}
+                                                            
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="file-upload6">Click to Upload File</label>
+                                                    <input 
+                                                        id="file-upload6"
+                                                        type = "file"
+                                                        accept=".jpg,.jpeg,.png"
+                                                        onChange={(e) => {
+                                                            setFilesToUpload((prevFiles) =>
+                                                                prevFiles.map((file) =>
+                                                                    file.field === "dtiRegistration"
+                                                                        ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                        : file
+                                                                )
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+
+                                            </div>
+                                        </>
+
+
                                     )}
                                 </div>
                              </div>
@@ -641,7 +1045,48 @@ if (loading || !transactionData) {
                                             </div>
                                         ))
                                     ) : (
-                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                    <>
+                                        <div className="details-section-response-upload">
+                                            <div className="title">
+                                            <p>CCTV Picture</p>
+                                            </div>
+
+                                            <div className="description">
+                                                {(filesToUpload.find(f => f.field === "isCCTV")?.files === null ||filesToUpload.find(f => f.field === "isCCTV")?.files?.length ===0) ?(
+                                                    <>
+                                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please Upload the document</p>
+                                                    </>
+                                                ):(
+                                                    <>
+                                                        <p>File ready to be uploaded: </p>
+                                                        
+                                                            {filesToUpload.find(f => f.field === "isCCTV")?.files?.map((file, idx) => (
+                                                                <p key={idx}>{file.name}</p>
+                                                            ))}
+                                                        
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label htmlFor="file-upload7">Click to Upload File</label>
+                                                <input 
+                                                    id="file-upload7"
+                                                    type = "file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        setFilesToUpload((prevFiles) =>
+                                                            prevFiles.map((file) =>
+                                                                file.field === "isCCTV"
+                                                                    ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                    : file
+                                                            )
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+
+                                        </div>
+                                    </>
                                     )}
                                     </div>
 
@@ -672,7 +1117,48 @@ if (loading || !transactionData) {
                                             </div>
                                         ))
                                     ) : (
-                                         <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                    <>
+                                        <div className="details-section-response-upload">
+                                            <div className="title">
+                                            <p>Approved Building / Construction Plan</p>
+                                            </div>
+
+                                            <div className="description">
+                                                {(filesToUpload.find(f => f.field === "approvedBldgPlan")?.files === null ||filesToUpload.find(f => f.field === "approvedBldgPlan")?.files?.length ===0) ?(
+                                                    <>
+                                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please Upload the document</p>
+                                                    </>
+                                                ):(
+                                                    <>
+                                                        <p>File ready to be uploaded: </p>
+                                                        
+                                                            {filesToUpload.find(f => f.field === "approvedBldgPlan")?.files?.map((file, idx) => (
+                                                                <p key={idx}>{file.name}</p>
+                                                            ))}
+                                                        
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label htmlFor="file-upload8">Click to Upload File</label>
+                                                <input 
+                                                    id="file-upload8"
+                                                    type = "file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        setFilesToUpload((prevFiles) =>
+                                                            prevFiles.map((file) =>
+                                                                file.field === "approvedBldgPlan"
+                                                                    ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                    : file
+                                                            )
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+
+                                        </div>
+                                    </>
                                     )}
                                  </div>
 
@@ -696,7 +1182,48 @@ if (loading || !transactionData) {
                                             </div>
                                         ))
                                     ) : (
-                                         <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded.</p>
+                                    <>
+                                        <div className="details-section-response-upload">
+                                            <div className="title">
+                                            <p>Approved Building / Construction Plan</p>
+                                            </div>
+
+                                            <div className="description">
+                                                {(filesToUpload.find(f => f.field === "taxDeclaration")?.files === null||filesToUpload.find(f => f.field === "taxDeclaration")?.files?.length ===0) ?(
+                                                    <>
+                                                        <p style={{ color: "red", fontWeight: "bold" }}>No files uploaded. Please Upload the document</p>
+                                                    </>
+                                                ):(
+                                                    <>
+                                                        <p>File ready to be uploaded: </p>
+                                                        
+                                                            {filesToUpload.find(f => f.field === "taxDeclaration")?.files?.map((file, idx) => (
+                                                                <p key={idx}>{file.name}</p>
+                                                            ))}
+                                                        
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label htmlFor="file-upload9">Click to Upload File</label>
+                                                <input 
+                                                    id="file-upload9"
+                                                    type = "file"
+                                                    accept=".jpg,.jpeg,.png"
+                                                    onChange={(e) => {
+                                                        setFilesToUpload((prevFiles) =>
+                                                            prevFiles.map((file) =>
+                                                                file.field === "taxDeclaration"
+                                                                    ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                                    : file
+                                                            )
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+
+                                        </div>
+                                    </>
                                     )}
                                     </div>
 

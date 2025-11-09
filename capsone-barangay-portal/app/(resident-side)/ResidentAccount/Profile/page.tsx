@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, addDoc, collection } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Eye, EyeOff } from "lucide-react";
 import "@/CSS/ResidentAccount/profile.css";
@@ -184,8 +184,7 @@ export default function SettingsPageResident({searchParams}: any) {
             setErrorPopup({ show: true, message: "User session expired. Please log in again." });
             setLoading(false);
             return;
-          }
-      
+          }      
           if (password || confirmPassword) {
             if (password !== confirmPassword) {
               setErrorPopup({ show: true, message: "Passwords do not match." });
@@ -250,9 +249,24 @@ export default function SettingsPageResident({searchParams}: any) {
             upload: resident.upload,
             reupload: resident.reupload, // <-- ADD THIS
           });
-          
           setResident({ ...resident, ...formData });
-          
+
+          if (
+            (formData.status?.trim().toLowerCase() === "resubmission" ||
+            resident.status?.trim().toLowerCase() === "resubmission") &&
+            resident.reupload &&
+            resident.reupload !== "N/A"
+          ) {
+            const notificationRef = collection(db, "BarangayNotifications");
+            await addDoc(notificationRef, {
+              message: `New resident resubmission pending approval by ${resident.first_name} ${resident.last_name}.`,
+              timestamp: new Date(),
+              isRead: false,
+              transactionType: "Resident Registration",
+              recipientRole: "Assistant Secretary",
+              accID: docRef.id,
+            });
+          }          
       
           setMessage("Profile updated successfully!");
           setShowPopup(true);
