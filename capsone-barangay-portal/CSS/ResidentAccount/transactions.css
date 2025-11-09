@@ -787,6 +787,10 @@ Barangay Response
 
 
 
+
+
+
+
   
   .details-section-response-upload {
   display: flex;
@@ -801,6 +805,8 @@ Barangay Response
     .details-section-response-upload:hover {
     background: #D8DFE5
   }
+
+
 
 
 
@@ -829,6 +835,64 @@ Barangay Response
 
 
 
+.no-signature-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  width: 100%;
+  background: #fafafa;
+}
+
+.no-file-text {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.upload-btn {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-btn:hover {
+  background-color: #0056b3;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+
+.file-ready-text {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fafafa;
+  transition: background 0.3s ease;
+}
+
+.preview-container:hover {
+  background: #f3f6f8;
+}
 
 
 
@@ -1059,3 +1123,66 @@ Barangay Response
 
 
 
+
+
+
+
+  .popup-overlay-submit {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; 
+  }
+
+
+
+  .popup-submit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  width: 450px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 2px solid rgb(168, 161, 158);
+  box-shadow: 0 4px 10px rgba(147, 145, 145, 0.3);
+  padding: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: lighter;
+  position: fixed;
+  }
+  
+  .popup-submit p{
+    color: rgb(97, 97, 97);
+  }
+  
+  .continue-button{
+    padding: 7px 5px;
+    font-size: 16px;
+    background-color:#DF7426;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer; 
+    width: 150px;
+    box-shadow: 0 2px 4px rgba(0, 0, 10, 0.3);
+    margin-top: 30px;
+  }
+  
+  .continue-button:hover {
+    background-color: #e56723;
+  }
+
+  .warning-icon-popup{
+    width: 35px;
+    height: 35px;
+    margin-bottom: 10px;
+  }
