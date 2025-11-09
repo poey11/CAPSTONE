@@ -694,11 +694,21 @@ html, body {
   font-size: 12px;
 }
 
+.services-onlinereq-status-dropdown.pending-onhold {
+  width: 160px; /* longer width */
+  background-color: #d4d64f; /* same as pending background */
+  color: white;
+  font-size: 12px;
+}
+
+
 .services-onlinereq-status-dropdown.in-progress {
   background-color: #dd5312;    
   color: white;
   font-size: 12px;
 }
+
+
 
 
 .services-onlinereq-main-details-description {
