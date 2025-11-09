@@ -1366,7 +1366,10 @@ const handleFileChange = (
         storageRefs[key] = ref(storage, `ServiceRequests/${filename}`);
       }
       });
-
+      const hasAnyUpload =
+        clearanceInput.barangayIDjpg ||
+        clearanceInput.validIDjpg ||
+        clearanceInput.letterjpg;
       // 📌 Handling for Barangay Certificate, Clearance, Indigency, Business ID, First Time Jobseeker
       if (
       docB === "Barangay Certificate" ||
@@ -1456,9 +1459,19 @@ const handleFileChange = (
         noIncomePurpose: clearanceInput.noIncomePurpose,
         noIncomeChildFName: clearanceInput.noIncomeChildFName,
         }),
-        ...(clearanceInput.barangayIDjpg ? { barangayIDjpg: filenames.barangayIDjpg }: {barangayIDjpg:null}),
-        ...(clearanceInput.validIDjpg ? { validIDjpg: filenames.validIDjpg }:{ validIDjpg: null }),
-        ...(clearanceInput.letterjpg ? { letterjpg: filenames.letterjpg }:{ letterjpg: null }),
+        ...(hasAnyUpload ? {
+          ...(clearanceInput.barangayIDjpg && {
+            barangayIDjpg: filenames.barangayIDjpg,
+          }),
+          ...(clearanceInput.validIDjpg && {
+            validIDjpg: filenames.validIDjpg,
+          }),
+          ...(clearanceInput.letterjpg && {
+            letterjpg: filenames.letterjpg,
+          }),
+        }:{
+            validIDjpg: null, // only record this one if none exist
+        }),
         ...(((clearanceInput.purpose === "Residency" && docB === "Barangay Certificate") || docB === "Barangay Indigency") && {
           appointmentDate: clearanceInput.appointmentDate,
           purpose: clearanceInput.purpose,
@@ -1544,6 +1557,7 @@ const handleFileChange = (
         ...clearanceInput.dtiRegistration ? {dtiRegistration: filenames.dtiRegistration } : { dtiRegistration: null },
         ...clearanceInput.isCCTV ? {isCCTV: filenames.isCCTV } : { isCCTV: null },
         ...clearanceInput.signaturejpg ? {signaturejpg: filenames.signaturejpg } : { signaturejpg: null },
+        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
         // copyOfPropertyTitle: filenames.copyOfPropertyTitle,
         // dtiRegistration: filenames.dtiRegistration,
         // isCCTV: filenames.isCCTV,
@@ -1582,6 +1596,7 @@ const handleFileChange = (
         ...(clearanceInput.approvedBldgPlan ? { approvedBldgPlan: filenames.approvedBldgPlan } : { approvedBldgPlan: null }),
         ...(clearanceInput.copyOfPropertyTitle ? { copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null }),
         ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
+          ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
 
         // taxDeclaration: filenames.taxDeclaration,
         // approvedBldgPlan: filenames.approvedBldgPlan,
@@ -1627,6 +1642,8 @@ const handleFileChange = (
         ...(clearanceInput.barangayIDjpg ? { barangayIDjpg: filenames.barangayIDjpg }: { barangayIDjpg: null }),
         ...(clearanceInput.validIDjpg ? { validIDjpg: filenames.validIDjpg }: { validIDjpg: null }),
         ...(clearanceInput.letterjpg ? { letterjpg: filenames.letterjpg }: { letterjpg: null }),
+        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
+
       };
 
       // Add dynamic text fields (non-image fields)

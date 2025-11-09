@@ -11,6 +11,7 @@ import { collection, doc, setDoc, updateDoc, getDocs, query, onSnapshot,getDoc, 
 import { handlePrint,handleGenerateDocument,handleGenerateDocumentTypeB } from "@/app/helpers/pdfhelper";
 import { useMemo } from "react";
 import { get } from "http";
+import { set } from "date-fns";
 
 
 interface EmergencyDetails {
@@ -252,6 +253,8 @@ const ViewOnlineRequest = () => {
               'isCCTV',
               'taxDeclaration',
               'approvedBldgPlan',
+              'deathCertificate',
+              'twoByTwoPicture',
         ] as const;
       
         const [nullImageFields, setNullImageFields] = useState<string[]>([]);
@@ -841,7 +844,7 @@ Functions for Reason for Reject
         { key: "taxDeclaration", label: "Tax Declaration" },
         { key: "approvedBldgPlan", label: "Approved Building Plan" },
         { key: "deathCertificate", label: "Death Certificate" },
-        { key: "identificationPic", label: "Identification Picture" },
+        { key: "twoByTwoPicture", label: "Identification Picture" },
 
         // OR
         { key: "orNumber", label: "OR Number" },
@@ -1482,8 +1485,18 @@ Functions for Reason for Reject
             return defaultFieldSections;
           }
         }, [requestData?.purpose, requestData?.docType, otherDocuments]);
-        
+      
+        const [existingJpgList, setExistingJpgList] = useState<string[]>([]);
+        useEffect(() => {
+          if (!requestData) return;
 
+          const existingFields = imageFields.filter((field) => field in requestData);
+          setExistingJpgList(existingFields);
+
+        }, [requestData]);
+
+        console.log("Request Data:", requestData);
+        console.log("Existing JPG List:", existingJpgList);
         
         const formatFieldName = (name: string) =>
           name
@@ -1562,33 +1575,13 @@ Functions for Reason for Reject
       if (sectionName === "others") {
         return (
          <div className="others-image-section">
-            {requestData?.reqType === "InBarangay" ? (
-              <>
-                {requestData?.docsRequired?.map((file, index) => (
-                  <div key={index} className="services-onlinereq-verification-requirements-section">
-                    <span className="verification-requirements-label">Image {index + 1}</span>
-                    <div className="services-onlinereq-verification-requirements-container">
-                      <a href={file.name} target="_blank" rel="noopener noreferrer">
-                        <img
-                          src={file.name}
-                          alt={`Image ${index}`}
-                          className="verification-reqs-pic uploaded-picture"
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-             <>
               {requestData &&
                 [
-                  ...fieldKeys,
+                  ...existingJpgList,
                   ...Object.keys(requestData).filter((key) => {
                     const value = String(requestData[key as keyof typeof requestData]);
                     return (
-                      !fieldKeys.includes(key) &&
+                      !existingJpgList.includes(key) &&
                       typeof value === "string" &&
                       (value.startsWith("https://firebasestorage") || value.startsWith("service_request_"))
                     );
@@ -1677,10 +1670,7 @@ Functions for Reason for Reject
                       </div>
                     </div>
                   );
-                })}
-            </>
-
-            )}
+                })}  
           </div>
         );
       }

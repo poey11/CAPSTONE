@@ -10,7 +10,6 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
-import { sign } from "crypto";
 
 
 interface EmergencyDetails {
@@ -951,7 +950,10 @@ export default function action() {
           sendTo,
           docPrinted: false,
         };
-
+        const hasAnyUpload =
+          files2.length > 0 ||
+          files3.length > 0 ||
+          files4.length > 0;
         // ✅ Barangay Certificate / Clearance / Indigency / ID / Jobseeker
         if (
           clearanceInput.docType === "Barangay Certificate" ||
@@ -966,35 +968,49 @@ export default function action() {
           if (clearanceInput.purpose === "Barangay ID") {
             docData.twoByTwoPicture = uploadedFileUrls.twoByTwoPicture ?? null;
           }
+          if (hasAnyUpload) {
+            if(clearanceInput.barangayIDjpg){
+              docData.barangayIDjpg = uploadedFileUrls.barangayIDjpg;
+            }
+            if(clearanceInput.validIDjpg){
+              docData.validIDjpg = uploadedFileUrls.validIDjpg ?? clearanceInput.validIDjpg;
+            } 
+            if(clearanceInput.letterjpg){
+              docData.letterjpg = uploadedFileUrls.letterjpg;
+            }
 
+          }else{
+            docData.validIDjpg = null;
+          }
           docData.signaturejpg = uploadedFileUrls.signaturejpg ?? null;
-          docData.barangayIDjpg = uploadedFileUrls.barangayIDjpg ?? null;
-          docData.validIDjpg = uploadedFileUrls.validIDjpg ?? clearanceInput.validIDjpg ??null;
-          docData.letterjpg = uploadedFileUrls.letterjpg ?? null;
         }
 
         // ✅ Temporary Business Permit or Construction
         if (
           clearanceInput.docType === "Temporary Business Permit" ||
-          clearanceInput.docType === "Construction"
+          clearanceInput.docType === "Business Permit"
         ) {
           docData.copyOfPropertyTitle = uploadedFileUrls.copyOfPropertyTitle ?? null;
           docData.dtiRegistration = uploadedFileUrls.dtiRegistration ?? null;
           docData.isCCTV = uploadedFileUrls.isCCTV ?? null;
           docData.signaturejpg = uploadedFileUrls.signaturejpg ?? null;
+          docData.validIDjpg = uploadedFileUrls.validIDjpg ?? clearanceInput.validIDjpg ??  null;
         }
 
         // ✅ Construction specific
         if (clearanceInput.docType === "Construction") {
           docData.taxDeclaration = uploadedFileUrls.taxDeclaration ?? null;
           docData.approvedBldgPlan = uploadedFileUrls.approvedBldgPlan ?? null;
+          docData.copyOfPropertyTitle = uploadedFileUrls.copyOfPropertyTitle ?? null;
+          docData.signaturejpg = uploadedFileUrls.signaturejpg ?? null;
+          docData.validIDjpg = uploadedFileUrls.validIDjpg?? clearanceInput.validIDjpg?? null;
         }
 
         // ✅ Additional conditions
         if (documentTypeIs !== "") docData.documentTypeIs = documentTypeIs;
         if (clearanceInput.docType === "Barangay Indigency") docData.interviewRemarks = "";
         if (clearanceInput.purpose === "Residency") docData.photoUploaded = "";
-                const doc = await addDoc(docRef, docData);
+        const doc = await addDoc(docRef, docData);
 
         router.push(`/dashboard/ServicesModule/InBarangayRequests?highlight=${doc.id}`); // changed by dirick note para if may maging bug haha
 
