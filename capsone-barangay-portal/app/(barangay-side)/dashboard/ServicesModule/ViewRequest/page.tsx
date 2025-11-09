@@ -2503,11 +2503,24 @@ Functions for Reason for Reject
 
     const handleSubmitReuploadDocument = async (e: React.FormEvent) => {
       e.preventDefault();
-      for (const field of nullImageFields) {
-        if (filesToUpload.find(f => f.field === field)?.files === null) {
-            alert(`Please upload files for ${filesToUpload.find(f => f.field === field)?.imageName} before submitting.`);
-            return;
-        }
+
+        // ✅ Check if files are missing before proceeding
+  for (const field of nullImageFields) {
+    const fileEntry = filesToUpload.find(f => f.field === field);
+    if (fileEntry?.files === null || fileEntry?.files?.length === 0) {
+      setPopupErrorMessage(`Please upload files for ${fileEntry?.imageName} before submitting.`);
+      setShowErrorPopup(true);
+
+      // Auto-close popup after 3 seconds (optional)
+      setTimeout(() => {
+        setShowErrorPopup(false);
+        setPopupErrorMessage("");
+      }, 3000);
+
+      return;
+    }
+
+
       }
       console.log("Submitting re-uploaded documents...");
       console.log(filesToUpload);
@@ -2966,28 +2979,34 @@ Functions for Reason for Reject
                                 <div className="services-onlinereq-main-details-topsection">
                                     <h1>{requestData?.requestId}</h1>
                                 </div>
-                                <div className="services-onlinereq-main-details-statussection">
-                                    <h1> Status</h1>
 
-                                    <div className="services-onlinereq-status-section-view">
-                                        <select
-                                            id="status"
-                                            className={`services-onlinereq-status-dropdown ${status?.toLowerCase().replace(/\s*-\s*/g, "-") || ""}`}
-                                            name="status"
-                                            value={status}
-                                            onChange={handleStatusChange}
-                                            disabled
-                                        >
-                                            <option value="Pending">
-                                              {documentMissing && status === "Pending" ? "Pending (On Hold)" : "Pending"}
-                                            </option>
-                                            <option value="In - Progress">In - Progress</option>
-                                            <option value="Pick-up">Pick-up</option>
-                                            <option value="Completed">Completed</option>
-                                            <option value="Rejected" disabled>Rejected</option>
-                                        </select>
-                                      </div>
-                                    </div>
+                                
+                      <div className="services-onlinereq-main-details-statussection">
+                        <h1>Status</h1>
+
+                        <div className="services-onlinereq-status-section-view">
+                          <select
+                            id="status"
+                            className={`services-onlinereq-status-dropdown 
+                              ${status?.toLowerCase().replace(/\s*-\s*/g, "-") || ""}
+                              ${documentMissing && status === "Pending" ? "pending-onhold" : ""}
+                            `}
+                            name="status"
+                            value={status}
+                            onChange={handleStatusChange}
+                            disabled
+                          >
+                            <option value="Pending">
+                              {documentMissing && status === "Pending" ? "Pending (On Hold)" : "Pending"}
+                            </option>
+                            <option value="In - Progress">In - Progress</option>
+                            <option value="Pick-up">Pick-up</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Rejected" disabled>Rejected</option>
+                          </select>
+                        </div>
+                      </div>
+
 
                                 
 
