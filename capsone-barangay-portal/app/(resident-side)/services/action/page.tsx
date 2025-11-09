@@ -1980,6 +1980,8 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
           </nav> 
         </div>
 
+
+
         <form className="document-req-form" onSubmit={handleSubmit}>
           {activeSection === "details" && (
             <>
@@ -3807,6 +3809,14 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
 
           {activeSection === "others" && (
             <>
+
+       <div className="note-box-services">
+             <p>
+               <span className="required-services">*</span>  Requirements below can be uploaded at a later date aside from a Valid ID.<br />
+              <span className="required-services">*</span> Upon submission, requirements must be complete before being processed by the barangay.
+                 </p>
+        </div>
+
               <div className="document-req-form-container-requirements">
 
                 <div className="required-documents-container">
