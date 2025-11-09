@@ -177,7 +177,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         router.push("/ResidentAccount/Transactions");
       };
     
-    const [documentMising, setDocumentMising] = useState<boolean>(false);
+    const [documentMissing, setdocumentMissing] = useState<boolean>(false);
 
     const imageFields = [
         'signaturejpg',
@@ -209,11 +209,11 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
 
         // ✅ Update both states once after the loop
         setNullImageFields(missingFields);
-        setDocumentMising(missingFields.length > 0);
+        setdocumentMissing(missingFields.length > 0);
 
         }, [transactionData]);
 
-        console.log("Document Missing:", documentMising);
+        console.log("Document Missing:", documentMissing);
         console.log("Transaction Data:", transactionData);
         console.log("Null Image Fields:", nullImageFields);
 
@@ -517,6 +517,11 @@ if (loading || !transactionData) {
   );
 }
 
+const displayStatus =
+  transactionData.status === "Pending" && documentMissing
+    ? "Pending (On Hold)"
+    : transactionData.status || "N/A";
+
 console.log("file url", fileURLs);
     return (
         <main className="incident-transaction-container">
@@ -535,11 +540,11 @@ console.log("file url", fileURLs);
                     
                     <div className="status-container">
                         <p className={`status-dropdown-transactions ${transactionData.status?.toLowerCase().replace(/[\s\-]+/g, "-")}`}>
-                        {transactionData.status || "N/A"}
+                            {displayStatus}
                         </p> 
                         
                     </div>
-                    {documentMising && (
+                    {documentMissing && (
                         <>
                             <div >
                                 <button type="button"
@@ -602,8 +607,10 @@ console.log("file url", fileURLs);
                                                     ? getEducationalAttainmentLabel(
                                                         (transactionData as Record<string, any>)[field.key]
                                                     )
+                                                    : field.key === "status"
+                                                    ? displayStatus
                                                     : (transactionData as Record<string, any>)[field.key] ||
-                                                    "N/A"}
+                                                        "N/A"}
                                                 </p>
                                             </div>
                                         </div>
@@ -631,8 +638,10 @@ console.log("file url", fileURLs);
                                                         ? getEducationalAttainmentLabel(
                                                             (transactionData as Record<string, any>)[field.key]
                                                         )
+                                                        : field.key === "status"
+                                                        ? displayStatus
                                                         : (transactionData as Record<string, any>)[field.key] ||
-                                                        "N/A"}
+                                                            "N/A"}
                                                     </p>
                                                 </div>
                                             </div>
@@ -684,7 +693,7 @@ console.log("file url", fileURLs);
                         <div className="no-signature-placeholder">
                             <p style={{ color: "red", fontWeight: "bold", marginBottom:"1rem" }}>No signature uploaded.</p>
 
-                            {documentMising && (
+                            {documentMissing && (
                             <>
                                 <label htmlFor="file-upload1" className="upload-btn">
                                 Click to Upload File
@@ -771,7 +780,7 @@ console.log("file url", fileURLs);
                                         <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                             No files uploaded.
                                         </p>
-                                        {documentMising && (
+                                        {documentMissing && (
                                             <>
                                             <label htmlFor="file-upload2" className="upload-btn">
                                                 Click to Upload File
@@ -851,7 +860,7 @@ console.log("file url", fileURLs);
                                         <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                         No files uploaded.
                                         </p>
-                                        {documentMising && (
+                                        {documentMissing && (
                                         <>
                                             <label htmlFor="file-upload3" className="upload-btn">
                                             Click to Upload File
@@ -931,7 +940,7 @@ console.log("file url", fileURLs);
                                         <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                             No files uploaded.
                                         </p>
-                                        {documentMising && (
+                                        {documentMissing && (
                                             <>
                                             <label htmlFor="file-upload4" className="upload-btn">
                                                 Click to Upload File
@@ -1012,7 +1021,7 @@ console.log("file url", fileURLs);
                                             <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                                 No files uploaded.
                                             </p>
-                                            {documentMising && (
+                                            {documentMissing && (
                                                 <>
                                                 <label htmlFor="file-upload5" className="upload-btn">
                                                     Click to Upload File
@@ -1093,7 +1102,7 @@ console.log("file url", fileURLs);
               <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                 No files uploaded.
               </p>
-              {documentMising && (
+              {documentMissing && (
                 <>
                   <label htmlFor="file-upload6" className="upload-btn">
                     Click to Upload File
@@ -1166,7 +1175,7 @@ console.log("file url", fileURLs);
               <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                 No files uploaded.
               </p>
-              {documentMising && (
+              {documentMissing && (
                 <>
                   <label htmlFor="file-upload7" className="upload-btn">
                     Click to Upload File
@@ -1246,7 +1255,7 @@ console.log("file url", fileURLs);
                                         <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                             No files uploaded.
                                         </p>
-                                        {documentMising && (
+                                        {documentMissing && (
                                             <>
                                             <label htmlFor="file-upload8" className="upload-btn">
                                                 Click to Upload File
@@ -1318,7 +1327,7 @@ console.log("file url", fileURLs);
                                     <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
                                         No files uploaded.
                                     </p>
-                                    {documentMising && (
+                                    {documentMissing && (
                                         <>
                                         <label htmlFor="file-upload9" className="upload-btn">
                                             Click to Upload File

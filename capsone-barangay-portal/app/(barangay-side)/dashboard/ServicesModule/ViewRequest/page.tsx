@@ -241,7 +241,7 @@ const ViewOnlineRequest = () => {
         checkJobseeker();
       }, [requestData]);
       
-        const [documentMising, setDocumentMising] = useState<boolean>(false);
+        const [documentMissing, setdocumentMissing] = useState<boolean>(false);
       
         const imageFields = [
               'signaturejpg',
@@ -275,11 +275,11 @@ const ViewOnlineRequest = () => {
 
         // ✅ Update both states once after the loop
         setNullImageFields(missingFields);
-        setDocumentMising(missingFields.length > 0);
+        setdocumentMissing(missingFields.length > 0);
 
         }, [requestData]);
         console.log("Missing Image Fields:", nullImageFields);
-        console.log("Is Document Missing?:", documentMising);
+        console.log("Is Document Missing?:", documentMissing);
 
 const handleJobseekerAutoAdd = async () => {
   try {
@@ -2684,7 +2684,7 @@ Functions for Reason for Reject
                     <>
                       <div className="services-onlinereq-redirectionpage-section"
                         onMouseMove={handleMouseMove}
-                        onMouseEnter={() => documentMising && setShowTooltip(true)}
+                        onMouseEnter={() => documentMissing && setShowTooltip(true)}
                         onMouseLeave={() => setShowTooltip(false)}
                         //style={{ position: "relative", display: "inline-block" }}
                       >
@@ -2696,7 +2696,7 @@ Functions for Reason for Reject
                               <>
                                 
                                 <button className="services-onlinereq-redirection-buttons" onClick={handlerejection}
-                                  disabled = {documentMising}
+                                  disabled = {documentMissing}
                                 >
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2709,7 +2709,7 @@ Functions for Reason for Reject
                             (requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") ? (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" 
-                                disabled = {documentMising}
+                                disabled = {documentMissing}
                                 onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2720,7 +2720,7 @@ Functions for Reason for Reject
                             ): !requestData?.appointmentDate && (
                               <>
                                 <button className="services-onlinereq-redirection-buttons" 
-                                disabled = {documentMising}
+                                disabled = {documentMissing}
                                 onClick={handlerejection}>
                                   <div className="services-onlinereq-redirection-icons-section">
                                       <img src="/Images/rejected.png" alt="user info" className="redirection-icons-info" />
@@ -2736,7 +2736,7 @@ Functions for Reason for Reject
                         
                             {!requestData?.approvedBySAS && requestData?.appointmentDate ? (
                               <button className="services-onlinereq-redirection-buttons"
-                                disabled = {documentMising}
+                                disabled = {documentMissing}
                               onClick={handleApprovedBySAS}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2749,7 +2749,7 @@ Functions for Reason for Reject
                                 &&(requestData?.photoUploaded || requestData?.interviewRemarks )&&(
                                   <>
                                     <button className="services-onlinereq-redirection-buttons cursor:not-allowed" 
-                                    disabled = {documentMising}
+                                    disabled = {documentMissing}
                                     onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2760,7 +2760,7 @@ Functions for Reason for Reject
                                 )}
                                 {!requestData?.appointmentDate && requestData?.docType !== "Barangay Indigency" && requestData?.purpose !=="Residency" && (
                                   <button className="services-onlinereq-redirection-buttons" 
-                                  disabled = {documentMising}
+                                  disabled = {documentMissing}
                                   onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2770,7 +2770,7 @@ Functions for Reason for Reject
                                 )}
                                 {(requestData?.docType === "Barangay Clearance" && requestData?.purpose ==="Residency") && (
                                     <button 
-                                    disabled = {documentMising}
+                                    disabled = {documentMissing}
                                     className="services-onlinereq-redirection-buttons" onClick={print}>
                                     <div className="services-onlinereq-redirection-icons-section">
                                         <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2787,7 +2787,7 @@ Functions for Reason for Reject
                         {(requestData?.docType === "Barangay Certificate"&&requestData?.purpose==="Residency") && (requestData?.photoUploaded === "") &&( 
                           <>
                              <button 
-                             disabled = {documentMising}
+                             disabled = {documentMissing}
                              className="services-onlinereq-redirection-buttons" onClick={()=>setshowPhotoUpload(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
                                     <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2800,7 +2800,7 @@ Functions for Reason for Reject
                         {(requestData?.docType === "Barangay Indigency") &&(requestData?.interviewRemarks === "") &&( 
                           <>
                             <button 
-                            disabled = {documentMising}
+                            disabled = {documentMissing}
                             className="services-onlinereq-redirection-buttons" onClick={() => setShowInterviewForm(true)}>
                                 <div className="services-onlinereq-redirection-icons-section">
                                     <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2815,7 +2815,7 @@ Functions for Reason for Reject
                         {docPrinted && (userPosition !== "Admin Staff") ? (
                           <>
                             <button className="services-onlinereq-redirection-buttons"
-                            disabled = {documentMising}
+                            disabled = {documentMissing}
                             onClick={() => {
                               handleNextStep();            
                               setShowNotifyAdminPopup(true); // show popup
@@ -2830,7 +2830,7 @@ Functions for Reason for Reject
                         ) : (docPrinted && !["Assistant Secretary", "Secretary"].includes(userPosition as string) && status !== "Pick-up") &&(
                           <>
                             <button className="services-onlinereq-redirection-buttons"
-                            disabled = {documentMising}
+                            disabled = {documentMissing}
                               onClick={() => {
                                 handleNextStep();            
                                 setShowNotifyRequestorPopup(true); // show popup
@@ -2846,7 +2846,7 @@ Functions for Reason for Reject
                          {docPrinted && status === "Pick-up" && (
                           <>
                             <button className="services-onlinereq-redirection-buttons" 
-                            disabled = {documentMising}
+                            disabled = {documentMissing}
                             onClick={() => setShowReceivalForm(true)}>
                               <div className="services-onlinereq-redirection-icons-section">
                                   <img src="/Images/generatedoc.png" alt="user info" className="redirection-icons-info" />
@@ -2903,7 +2903,7 @@ Functions for Reason for Reject
                     <h1>{requestData?.reqType || "Online"} Document Request Details</h1>
                   </div>
 
-                  {(documentMising && userPosition === "Admin Staff" && requestData?.reqType === "In Barangay") && (
+                  {(documentMissing && userPosition === "Admin Staff" && requestData?.reqType === "In Barangay") && (
                     <div className="mr-10">
                       <button
                         className="bg-green-500 p-2 text-white rounded-md shadow-md text-center text-base font-semibold w-36"
@@ -2973,20 +2973,21 @@ Functions for Reason for Reject
                                         <select
                                             id="status"
                                             className={`services-onlinereq-status-dropdown ${status?.toLowerCase().replace(/\s*-\s*/g, "-") || ""}`}
-
                                             name="status"
                                             value={status}
                                             onChange={handleStatusChange}
                                             disabled
                                         >
-                                            <option value="Pending">Pending</option>
+                                            <option value="Pending">
+                                              {documentMissing && status === "Pending" ? "Pending (On Hold)" : "Pending"}
+                                            </option>
                                             <option value="In - Progress">In - Progress</option>
                                             <option value="Pick-up">Pick-up</option>
                                             <option value="Completed">Completed</option>
                                             <option value="Rejected" disabled>Rejected</option>
                                         </select>
-                                    </div> 
-                                </div>
+                                      </div>
+                                    </div>
 
                                 
 
@@ -3843,7 +3844,7 @@ Functions for Reason for Reject
           </div>
         )}
 
-        {showTooltip && documentMising && (
+        {showTooltip && documentMissing && (
           <div
             className="fixed z-50 bg-red-600 text-white text-sm px-3 py-2 rounded-lg shadow-lg pointer-events-none transition-opacity duration-150"
             style={{
