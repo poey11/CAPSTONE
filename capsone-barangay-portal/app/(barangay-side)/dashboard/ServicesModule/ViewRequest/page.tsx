@@ -2726,7 +2726,7 @@ Functions for Reason for Reject
                         {!docPrinted && (
                           <>
                             
-                                {(requestData?.accID !== "INBRGY-REQ" || (requestData?.residentId !== undefined) ) &&(
+                                {((requestData?.accID !== "INBRGY-REQ" && requestData?.accID !== "Guest") || (requestData?.residentId !== undefined) ) &&(
                                   <>
                                       <button className="services-onlinereq-redirection-buttons" 
                                         disabled = {documentMissing}
