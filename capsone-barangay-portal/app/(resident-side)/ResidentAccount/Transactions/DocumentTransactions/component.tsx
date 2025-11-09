@@ -547,7 +547,7 @@ console.log("file url", fileURLs);
                         </p> 
                         
                     </div>
-                    {documentMissing && (
+                    {(documentMissing && transactionData?.status !== "Rejected" && transactionData?.status !== "Completed")  && (
                         <>
                             <div >
                                 <button type="button"
