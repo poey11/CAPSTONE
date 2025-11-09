@@ -216,15 +216,22 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         console.log("Transaction Data:", transactionData);
         console.log("Null Image Fields:", nullImageFields);
 
+        const [errorPopup, setErrorPopup] = useState<{ show: boolean; message: string }>({ show: false, message: "" });
+
       const handleSubmitDocuments = async (e:any) => {
         e.preventDefault();
-        for (const field of nullImageFields) {
-            if (filesToUpload.find(f => f.field === field)?.files === null) {
-                alert(`Please upload files for ${filesToUpload.find(f => f.field === field)?.imageName} before submitting.`);
-                return;
-            }
-        }
 
+    for (const field of nullImageFields) {
+        const fileEntry = filesToUpload.find(f => f.field === field);
+        if (!fileEntry?.files || fileEntry.files.length === 0) {
+            // Use popup instead of alert
+            setErrorPopup({
+                show: true,
+                message: `Please upload files for ${fileEntry?.imageName} before submitting.`
+            });
+            return;
+        }
+    }
         const storage = getStorage();
         const storageRefs: Record<string, any> = {}; // refs for upload
         const storageFilePaths: Record<string, string> = {}; // file path strings to save to Firestore
@@ -1426,9 +1433,14 @@ console.log("file url", fileURLs);
                      )}
                     </div>
 
+                 
+
                 </div>
+                
 
             </div>
+
+               {errorPopup.show && ( <div className="popup-overlay-submit error"> <div className="popup-submit"> <img src="/Images/warning.png" alt="warning icon" className="warning-icon-popup" /> <p>{errorPopup.message}</p> <button onClick={() => setErrorPopup({ show: false, message: "" })} className="continue-button">Close</button> </div> </div> )}
 
     
     </main>
