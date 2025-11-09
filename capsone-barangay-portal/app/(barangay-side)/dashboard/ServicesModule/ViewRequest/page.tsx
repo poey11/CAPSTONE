@@ -2650,7 +2650,7 @@ Functions for Reason for Reject
                         requestorFname={requestData?.requestorFname || ""}
                         docType={requestData?.docType || ""}
                         requestId={id || ""}
-                        purpose={`(${requestData?.purpose})` || ""}
+                        purpose={` (${requestData?.purpose})` || ""}
                       />
                     ) : (
                       requestData?.reqType === "In Barangay" &&
@@ -2661,7 +2661,7 @@ Functions for Reason for Reject
                           requestorFname={requestData?.requestorFname || ""}
                           docType={requestData?.docType || ""}
                           requestId={id || ""}
-                          purpose={`(${requestData?.purpose})` || ""}
+                          purpose={` (${requestData?.purpose})` || ""}
                         />
                       )
                     )}
