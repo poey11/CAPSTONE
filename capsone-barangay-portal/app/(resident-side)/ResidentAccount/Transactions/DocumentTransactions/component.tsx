@@ -62,6 +62,7 @@ interface BarangayDocument {
     isCCTV?: string[];
     taxDeclaration?: string[];
     approvedBldgPlan?: string[];
+    deathCertificate?: string[];
 
 }
 
@@ -87,6 +88,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         { field: 'isCCTV', files: null, imageName: 'Picture of CCTV installed in the establishment'  },
         { field: 'taxDeclaration', files: null, imageName: 'Certified True Copy of Tax Declaration' },
         { field: 'approvedBldgPlan', files: null, imageName: 'Approved Building/Construction Plan'  },
+        { field: 'deathCertificate', files: null, imageName: 'Death Certificate'  },
 
     ]);
 
@@ -131,7 +133,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
                 setTransactionData({ ...data, id: docSnap.id });
 
                 const storage = getStorage();
-                const fileFields = ['signaturejpg', 'barangayIDjpg', 'validIDjpg', 'letterjpg', 'copyOfPropertyTitle', 'dtiRegistration', 'isCCTV', 'taxDeclaration', 'approvedBldgPlan'] as const;
+                const fileFields = ['signaturejpg', 'barangayIDjpg', 'validIDjpg', 'letterjpg', 'copyOfPropertyTitle', 'dtiRegistration', 'isCCTV', 'taxDeclaration', 'approvedBldgPlan', 'deathCertificate'] as const;
 
                 const urls: { field: string; url: string }[] = [];
 
@@ -189,6 +191,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         'isCCTV',
         'taxDeclaration',
         'approvedBldgPlan',
+        'deathCertificate',
         ] as const;
 
         const [nullImageFields, setNullImageFields] = useState<string[]>([]);
@@ -991,7 +994,89 @@ console.log("file url", fileURLs);
 
 
                             {/* Additional fields for Business Permit and Temporary Business Permit */}
-                            
+                        {transactionData.purpose ==="Death Residency" && (
+                            <>
+                                {fileURLs.some(({ field }) => field === "deathCertificate") ? (
+                            <div className="details-section-response-upload">
+                                <div className="title">
+                                <p>Death Certificate</p>
+                                </div>
+
+                                <div className="description">
+                                {fileURLs
+                                    .filter(({ field }) => field === "deathCertificate")
+                                    .map(({ url }, index) => (
+                                    <div key={index} className="document-requirements-container">
+                                        <img src={url} alt="Endorsement Letter - Uploaded File" className="requirements-image" />
+                                        <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                        View File
+                                        </a>
+                                    </div>
+                                    ))}
+                                </div>
+                            </div>
+                            ) : (
+                            transactionData && "deathCertificate" in transactionData && (
+                                <div className="details-section-response-upload">
+                                <div className="title">
+                                    <p>Death Certificate</p>
+                                </div>
+
+                                <div className="description">
+                                    {(filesToUpload.find(f => f.field === "deathCertificate")?.files === null ||
+                                    filesToUpload.find(f => f.field === "deathCertificate")?.files?.length === 0) ? (
+                                    <div className="document-requirements-container">
+                                        <div className="no-signature-placeholder">
+                                        <p style={{ color: "red", fontWeight: "bold", marginBottom: "1rem" }}>
+                                            No files uploaded.
+                                        </p>
+                                        {documentMissing && (
+                                            <>
+                                            <label htmlFor="file-upload10" className="upload-btn">
+                                                Click to Upload File
+                                            </label>
+                                            <input
+                                                id="file-upload10"
+                                                type="file"
+                                                accept=".jpg,.jpeg,.png"
+                                                onChange={(e) => {
+                                                setFilesToUpload((prevFiles) =>
+                                                    prevFiles.map((file) =>
+                                                    file.field === "deathCertificate"
+                                                        ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
+                                                        : file
+                                                    )
+                                                );
+                                                }}
+                                            />
+                                            </>
+                                        )}
+                                        </div>
+                                    </div>
+                                    ) : (
+                                    <div className="document-requirements-container">
+                                        {filesToUpload
+                                        .find(f => f.field === "deathCertificate")
+                                        ?.files?.map((file, idx) => {
+                                            const previewURL = URL.createObjectURL(file);
+                                            return (
+                                            <div key={idx} className="preview-container">
+                                                <img src={previewURL} alt="Preview" className="requirements-image" />
+                                                <p className="file-name">{file.name}</p>
+                                                <a href={previewURL} target="_blank" rel="noopener noreferrer" className="view-file-link">
+                                                View Image
+                                                </a>
+                                            </div>
+                                            );
+                                        })}
+                                    </div>
+                                    )}
+                                </div>
+                                </div>
+                            )
+                            )}
+                            </>
+                        )}
                             
                          {(transactionData.docType === "Business Permit" || transactionData.docType === "Temporary Business Permit" || transactionData.docType === "Construction") && (
                           <>
