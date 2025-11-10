@@ -197,37 +197,48 @@ const IncidentHeatmap: React.FC<props> = ({ incidents }) => {
 
       });
 
-      map.current?.on("mousemove", "area-fill", (e) => {
-        if (!e.features?.length) return;
-        const feature = e.features[0];
-        const areaName = feature.properties?.name;
-        const color = feature.properties?.color;
-        const score = feature.properties?.score;
+map.current?.on("mousemove", "area-fill", (e) => {
+  if (!e.features?.length) return;
+  const feature = e.features[0];
+  const areaName = feature.properties?.name;
+  const color = feature.properties?.color;
+  const score = feature.properties?.score;
 
-        popup
-          .setLngLat(e.lngLat)
-          .setHTML(`
-            <div style="font-size:13px; pointer-events:none;">
-              <strong>${areaName}</strong><br/>
-              <span style="color:${color}">●</span> Score: ${score.toFixed(2)}
-              <br>
-              <span>Total Cases: </span>
-              <span>${
-                incidents.filter(
-                  (incident) => incident.areaOfIncident === areaName
-                ).length
-              }</span>
-              <br>
+  popup
+    .setLngLat(e.lngLat)
+    .setHTML(`
+      <div style="pointer-events:none;">
+        <div
+          style="
+            font-size:13px;
+            background:#ffffff;
+            padding:8px 12px;
+            border-radius:6px;
+            box-shadow:0 1px 4px rgba(0,0,0,0.25);
+            display:inline-block;
+          "
+        >
+          <strong>${areaName}</strong><br/>
+          <span style="color:${color}">●</span> Score: ${score.toFixed(2)}
+          <br>
+          <span>Total Cases: </span>
+          <span>${
+            incidents.filter(
+              (incident) => incident.areaOfIncident === areaName
+            ).length
+          }</span>
+          <br>
+          <span style="display:block; font-size:11px; color:#555;">
+            (Hovering to view details)
+          </span>
+        </div>
+      </div>
+    `)
+    .addTo(map.current!);
 
-              
-              <span style="display:block; font-size:11px; color:#555;">(Hovering to view details)</span>
+  map.current?.setFilter("area-hover", ["==", "name", areaName]);
+});
 
-            </div>
-          `)
-          .addTo(map.current!);
-
-        map.current?.setFilter("area-hover", ["==", "name", areaName]);
-      });
 
       map.current?.on("mouseleave", "area-fill", () => {
         popup.remove();

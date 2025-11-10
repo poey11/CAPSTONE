@@ -15,8 +15,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import React from "react";
 
 import { getApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
-import { error } from "console";
 
 console.log("projectId:", getApp().options.projectId);
 console.log("storageBucket:", getApp().options.storageBucket); // should be "<project-id>.appspot.com"
@@ -1374,54 +1372,57 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       // NEW: DETECT MISSING REQUIRED IMAGE FIELDS WITHOUT BLOCKING SUBMISSION
       let hasIncompleteRequirements = false;
       const missingImageFields: string[] = [];
-
-      for (const imgField of requiredImageFields) {
-        const value = clearanceInput[imgField as keyof ClearanceInput];
-
-        if (
-          (!value || !(value instanceof File)) &&
-          !(atLeastOneIDRequired &&
-            (imgField === "barangayIDjpg" ||
-            imgField === "validIDjpg" ||
-            imgField === "letterjpg"))
-        ) {
-          missingImageFields.push(imgField);
-        }
-      }
-
-      if (missingImageFields.length > 0) {
-        hasIncompleteRequirements = true;
-      }
-
-      // Step 2: Check other required image fields
-      for (const imgField of requiredImageFields) {
-        const value = clearanceInput[imgField];
       
-        if (
-          (!value || !(value instanceof File)) &&
-          !(atLeastOneIDRequired &&
-            (imgField === "barangayIDjpg" ||
+      if(user === null){
+        for (const imgField of requiredImageFields) {
+          const value = clearanceInput[imgField as keyof ClearanceInput];
+
+          if (
+            (!value || !(value instanceof File)) &&
+            !(atLeastOneIDRequired &&
+              (imgField === "barangayIDjpg" ||
               imgField === "validIDjpg" ||
               imgField === "letterjpg"))
-        ) {
-            const label =
-            imageFieldLabels[imgField] ||
-            imgField
-              .replace(/_/g, " ") // Replace underscores with spaces
-              .replace(/(?!^)([A-Z])/g, " $1")
-              .replace(/\.[^/.]+$/, "")
-              .toLowerCase()
-              .replace(/\b\w/g, (c) => c.toUpperCase())
-              .replace(/\b(Id|ID|id)\b/g, "ID")
-              .replace(/\b(Ph|PH|ph)\b/g, "PH");
-        
-          //setErrorMessage(`Your request has incomplete requirements. Please upload the required document/s later. Your request will be put on hold until all requirements are submitted.`);
-          //setShowErrorPopup(true);
-          //break; // No need to check further, we already found a missing field
-        
+          ) {
+            missingImageFields.push(imgField);
+          }
         }
-      }
 
+        if (missingImageFields.length > 0) {
+          hasIncompleteRequirements = true;
+        }
+
+        // Step 2: Check other required image fields
+        for (const imgField of requiredImageFields) {
+          const value = clearanceInput[imgField];
+        
+          if (
+            (!value || !(value instanceof File)) &&
+            !(atLeastOneIDRequired &&
+              (imgField === "barangayIDjpg" ||
+                imgField === "validIDjpg" ||
+                imgField === "letterjpg"))
+          ) {
+              const label =
+              imageFieldLabels[imgField] ||
+              imgField
+                .replace(/_/g, " ") // Replace underscores with spaces
+                .replace(/(?!^)([A-Z])/g, " $1")
+                .replace(/\.[^/.]+$/, "")
+                .toLowerCase()
+                .replace(/\b\w/g, (c) => c.toUpperCase())
+                .replace(/\b(Id|ID|id)\b/g, "ID")
+                .replace(/\b(Ph|PH|ph)\b/g, "PH");
+          
+            setErrorMessage(`Please upload the required document: ${label}.`);
+            setShowErrorPopup(true);
+            return; // No need to check further, we already found a missing field
+          
+          }
+        }
+
+      }
+      
       
       // List all file-related keys in an array for easier maintenance
       const fileKeys = [
@@ -1958,6 +1959,9 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
     </main>
   );
 }
+console.log("User:", user);
+console.log("IsGuest:", isGuest);
+console.log("UserData:", userData);
 
   return (
 
@@ -1972,12 +1976,15 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       
 
         <div className="document-req-section-upper">
-          <div className="note-box-services">
+          {user &&(
+             <div className="note-box-services">
                 <p>
                   <span className="required-services">*</span> For Logged-in Users: Requirements in the <strong>Others</strong> section can be uploaded at a later time, except for a Valid ID.<br />
                   <span className="required-services">*</span> Upon submission, requirements must be complete before being processed by the barangay.
-                    </p>
+                </p>
             </div>
+          )}
+         
 
           <nav className="document-req-section-toggle-wrapper">
             {["details", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
@@ -2182,7 +2189,7 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
                       <option value="female">Female</option>
                     </select>
                   </div>
-                  {(userData?.status === "Verified" || !isGuest) && (
+                  {(userData?.status === "Verified" && !isGuest) && (
                       <div className="form-group-document-req">
                         <label htmlFor="dateOfResidency" className="form-label-document-req">Requestor's Date of Residency<span className="required">*</span></label>
                         <input 
