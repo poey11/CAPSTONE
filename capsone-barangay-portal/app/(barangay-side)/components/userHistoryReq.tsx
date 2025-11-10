@@ -161,45 +161,44 @@ const UserHistory: React.FC<UserHistoryProps> = ({ accID, onClose, requestorFnam
           </button>
 
           {/* Modal content */}
-          <main className="flex flex-col items-center">
-            <div className="w-full">
-              <div className="border-b border-gray-200 pb-4 mb-4">
-                <p className="text-2xl font-semibold text-gray-800 text-center">
-                  User Request History
-                </p>
-              </div>
-
-              {/* Example placeholder for request data */}
-              <div className="max-h-[60vh] overflow-y-auto">
-               <p className="text-gray-700 text-center mb-2">
-                  Showing rejected {docType}
-                  {newPurpose && newPurpose !== "undefined" && newPurpose !== "null" && newPurpose.trim() !== ""
-                    ? ` (${newPurpose}) `
-                    : " "}
-                   history for: <b>{requestorFname}</b>
-                </p>
-
-                <div className="mt-4 space-y-4">
-                    {UserHistory.length === 0 ? (
-                        <p className="text-gray-500 text-center">No rejected requests found.</p>
-                    ) : (
-                        UserHistory.map((request) => (
-                            <div key={request.requestId} className="p-4 border border-gray-300 rounded-lg shadow-sm">
-                                <p><span className="font-semibold">Request ID:</span> {request.requestId}</p>
-                                <p><span className="font-semibold">Document Type:</span> {request.docType}</p>
-                                <p><span className="font-semibold">Purpose:</span> {request.purpose}</p>
-                                <p><span className="font-semibold">Status:</span> {request.status}</p>
-                                <p><span className="font-semibold">Rejection Reason:</span> {request.rejectionReason}</p>
-                            </div>
-                        ))
-                    )}
+            <main className="userrequesthistory-modal">
+              <div className="userrequesthistory-modal-container">
+                <div className="userrequesthistory-modal-header">
+                  <p>User Request History</p>
                 </div>
 
+                <div className="userrequesthistory-modal-body">
+                  <p className="userrequesthistory-description">
+                    Showing rejected {docType}
+                    {newPurpose && newPurpose !== "undefined" && newPurpose !== "null" && newPurpose.trim() !== ""
+                      ? ` (${newPurpose}) `
+                      : " "}
+                    history for: <b>{requestorFname}</b>
+                  </p>
 
-                {/* You can map over request data here later */}
+                  <div className="userrequesthistory-list">
+                    {UserHistory.length === 0 ? (
+                      <div className="userrequesthistory-empty">
+                        <img src="/Images/no-results.png" alt="No results" className="no-result-icon-services" />
+                        <p>No rejected requests found for this document.</p>
+                      </div>
+                    ) : (
+                      UserHistory.map((request) => (
+                        <div key={request.requestId} className="userrequesthistory-item">
+                          <p><span className="label">Request ID:</span> {request.requestId}</p>
+                          <p><span className="label">Document Type:</span> {request.docType}</p>
+                          <p><span className="label">Purpose:</span> {request.purpose}</p>
+                          <p><span className="label">Status:</span> {request.status}</p>
+                          <p><span className="label">Rejection Reason:</span> {request.rejectionReason}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          </main>
+            </main>
+
+
         </div>
       </div>
 

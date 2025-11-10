@@ -1743,3 +1743,111 @@ For error pop up
   right: 12px;
   font-size: 20px;
 }
+
+
+
+
+
+
+
+.userrequesthistory-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.userrequesthistory-modal-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  max-height: 70vh;
+  min-height: 400px; /* ✅ keeps consistent size */
+  overflow-y: auto;
+}
+
+.userrequesthistory-modal-header {
+  border-bottom: 2px solid rgba(33, 70, 102, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.userrequesthistory-modal-header p {
+  font-size: 22px;
+  font-weight: 600;
+  color: #214666;
+}
+
+.userrequesthistory-modal-body {
+  text-align: center;
+}
+
+.userrequesthistory-description {
+  color: #214666;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.userrequesthistory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 55vh;
+  min-height: 200px; /* ✅ adds visual space even if empty */
+  overflow-y: auto;
+  justify-content: center; /* centers the "no results" message */
+}
+
+
+.userrequesthistory-item {
+  border: 1px solid rgba(33, 70, 102, 0.25);
+  border-left: 6px solid #214666;
+  border-radius: 14px;
+  padding: 22px 20px; /* increased for more breathing space */
+  background-color: #f4f8fc; /* slightly deeper blue-white for contrast */
+  text-align: left;
+  font-size: 16px; /* slightly bigger text */
+  line-height: 1.6; /* improves readability */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.userrequesthistory-item:hover {
+
+  box-shadow: 0 4px 10px rgba(33, 70, 102, 0.15);
+}
+
+.userrequesthistory-item .label {
+  font-weight: 600;
+  color: #214666;
+}
+
+
+.userrequesthistory-item p {
+  margin-bottom: 6px;
+}
+.userrequesthistory-item p:last-child {
+  margin-bottom: 0;
+}
+
+.userrequesthistory-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #d91414;
+  font-style: italic;
+  text-align: center;
+  gap: 10px;
+}
+
+.no-result-icon-services {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  filter: invert(22%) sepia(94%) saturate(7473%) hue-rotate(357deg) brightness(92%) contrast(123%) 
+          drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
