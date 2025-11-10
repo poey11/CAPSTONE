@@ -293,7 +293,7 @@ export default function action() {
       deathCertificate: null,
       identificationPic: null,
       twoByTwoPicture: null,  
-      isResident: false,
+      isResident: true,
     
       // ADD THESE TO AVOID WARNINGS
       residentId: "",
@@ -1149,125 +1149,130 @@ export default function action() {
       if(!isAllRequiredFieldsFilledUp(Array.from(uniqueFields))){
         return;
       }
-      //  // Check if any required dynamic image field is missing
-      // for (const fieldName of dynamicImageFields) {
-      //   if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
-      //     setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
 
-    
-      // // Signature
-      // if (!files1 || files1.length === 0) {
-      //   setPopupErrorMessage("Please upload Signature Over Printed Name.");
-      //   setShowErrorPopup(true);
-      //   setTimeout(() => setShowErrorPopup(false), 3000);
-      //   return;
-      // }
-    
-      // const isBarangayDocumentAndNewPermit =
-      //   isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
-    
-      // //  If it's a Barangay Permit type, require at least one of the three
-      // if (
-      //   isBarangayDocumentAndNewPermit &&
-      //   clearanceInput.purpose !== "Barangay ID"
-      // ) {
-      //   const hasBarangayID = files2 && files2.length > 0;
-      //   const hasValidID = files3 && files3.length > 0;
-      //   const hasLetter = files4 && files4.length > 0;
+      if(clearanceInput.isResident === false){
+          // Check if any required dynamic image field is missing
+          for (const fieldName of dynamicImageFields) {
+            if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
+              setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
 
-      //   if (!hasValidID && !hasLetter && !hasBarangayID) {
-      //     setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // } 
+        
+          // Signature
+          if (!files1 || files1.length === 0) {
+            setPopupErrorMessage("Please upload Signature Over Printed Name.");
+            setShowErrorPopup(true);
+            setTimeout(() => setShowErrorPopup(false), 3000);
+            return;
+          }
+        
+          const isBarangayDocumentAndNewPermit =
+            isBarangayDocument || otherDocPurposes["Barangay Permit"]?.includes(docType || "") || clearanceInput.purpose === "First Time Jobseeker";
+        
+          //  If it's a Barangay Permit type, require at least one of the three
+          if (
+            isBarangayDocumentAndNewPermit &&
+            clearanceInput.purpose !== "Barangay ID"
+          ) {
+            const hasBarangayID = files2 && files2.length > 0;
+            const hasValidID = files3 && files3.length > 0;
+            const hasLetter = files4 && files4.length > 0;
+
+            if (!hasValidID && !hasLetter && !hasBarangayID) {
+              setPopupErrorMessage("Please upload at least one of: Barangay ID, Valid ID, or Endorsement Letter.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          } 
+          
+          
       
-      
-   
-      // if (clearanceInput.docType !== "Barangay Clearance" && clearanceInput.docType !== "Barangay Certificate" && clearanceInput.docType !== "Barangay Indigency"
-      // ) {
-      //   if (!files3 || files3.length === 0) {
-      //     setPopupErrorMessage("Please upload Valid ID.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
+          if (clearanceInput.docType !== "Barangay Clearance" && clearanceInput.docType !== "Barangay Certificate" && clearanceInput.docType !== "Barangay Indigency"
+          ) {
+            if (!files3 || files3.length === 0) {
+              setPopupErrorMessage("Please upload Valid ID.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
 
 
-      
-    
-      // if (isBusinessPermit) {
-      //   if (!files5 || files5.length === 0) {
-      //     setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-    
-      //   if (!files6 || files6.length === 0) {
-      //     setPopupErrorMessage("Please upload DTI Registration.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-    
-      //   if (!files7 || files7.length === 0) {
-      //     setPopupErrorMessage("Please upload Picture of CCTV Installed.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
-    
-      // if (isConstruction) {
-      //   if (!files5 || files5.length === 0) {
-      //     setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-    
-      //   if (!files8 || files8.length === 0) {
-      //     setPopupErrorMessage("Please upload Tax Declaration.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-    
-      //   if (!files9 || files9.length === 0) {
-      //     setPopupErrorMessage("Please upload Building/Construction Plan.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
-    
-      // if (["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "")) {
-      //   if (!files10 || files10.length === 0) {
-      //     setPopupErrorMessage("Please upload Death Certificate.");
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
-      
+          
+        
+          if (isBusinessPermit) {
+            if (!files5 || files5.length === 0) {
+              setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+        
+            if (!files6 || files6.length === 0) {
+              setPopupErrorMessage("Please upload DTI Registration.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+        
+            if (!files7 || files7.length === 0) {
+              setPopupErrorMessage("Please upload Picture of CCTV Installed.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
+        
+          if (isConstruction) {
+            if (!files5 || files5.length === 0) {
+              setPopupErrorMessage("Please upload Title of the Property/Contract of Lease.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+        
+            if (!files8 || files8.length === 0) {
+              setPopupErrorMessage("Please upload Tax Declaration.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+        
+            if (!files9 || files9.length === 0) {
+              setPopupErrorMessage("Please upload Building/Construction Plan.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
+        
+          if (["Estate Tax", "Death Residency"].includes(clearanceInput.purpose ?? "")) {
+            if (!files10 || files10.length === 0) {
+              setPopupErrorMessage("Please upload Death Certificate.");
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
+          
 
-      // // Check if any required dynamic image field is missing
-      // for (const fieldName of dynamicImageFields) {
-      //   if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
-      //     setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
-      //     setShowErrorPopup(true);
-      //     setTimeout(() => setShowErrorPopup(false), 3000);
-      //     return;
-      //   }
-      // }
+          // Check if any required dynamic image field is missing
+          for (const fieldName of dynamicImageFields) {
+            if (!dynamicFileStates[fieldName] || dynamicFileStates[fieldName].length === 0) {
+              setPopupErrorMessage(`Please upload ${formatFieldName(fieldName.replace(/jpg$/, "").trim())}.`);
+              setShowErrorPopup(true);
+              setTimeout(() => setShowErrorPopup(false), 3000);
+              return;
+            }
+          }
+      }
+
+     
 
       // Validate birthday and age are >= 18
       if (clearanceInput?.birthday) {
@@ -1707,9 +1712,14 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
               </div>
 
               <div className="createRequest-bottom-section">
-                <p className="text-red-600 bg-red-100 border border-red-400 p-4 rounded-md">
-                  If you uploaded incomplete document requirements, you may upload them later in the View Request section; however, the request will not be processed until all required documents are submitted.
-                </p>
+                {clearanceInput.isResident === true && (
+                  <>
+                    <p className="text-red-600 bg-red-100 border border-red-400 p-4 rounded-md">
+                      If you uploaded incomplete document requirements, you may upload them later in the View Request section; however, the request will not be processed until all required documents are submitted.
+                    </p>
+                  
+                  </>
+                )}
                 <nav className="createRequest-info-toggle-wrapper">
                   {["basic", "full", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
                     <button
