@@ -16,6 +16,7 @@ import React from "react";
 
 import { getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
+import { error } from "console";
 
 console.log("projectId:", getApp().options.projectId);
 console.log("storageBucket:", getApp().options.storageBucket); // should be "<project-id>.appspot.com"
@@ -1240,8 +1241,9 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
   return requiredFields;
 };
 
+   const [hasErrorPopup, sethasErrorPopup] = useState(false);
 
-
+    
     const handleSubmit = async (event: React.FormEvent) => {  
       event.preventDefault(); // Prevent default form submission
       if (RESTRICTED_DOCS.has(docB) && (!user || userData?.status !== "Verified")) {
@@ -1392,34 +1394,36 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         hasIncompleteRequirements = true;
       }
 
-      // // Step 2: Check other required image fields
-      // for (const imgField of requiredImageFields) {
-      //   const value = clearanceInput[imgField];
+      // Step 2: Check other required image fields
+      for (const imgField of requiredImageFields) {
+        const value = clearanceInput[imgField];
       
-      //   if (
-      //     (!value || !(value instanceof File)) &&
-      //     !(atLeastOneIDRequired &&
-      //       (imgField === "barangayIDjpg" ||
-      //         imgField === "validIDjpg" ||
-      //         imgField === "letterjpg"))
-      //   ) {
-      //       const label =
-      //       imageFieldLabels[imgField] ||
-      //       imgField
-      //         .replace(/_/g, " ") // Replace underscores with spaces
-      //         .replace(/(?!^)([A-Z])/g, " $1")
-      //         .replace(/\.[^/.]+$/, "")
-      //         .toLowerCase()
-      //         .replace(/\b\w/g, (c) => c.toUpperCase())
-      //         .replace(/\b(Id|ID|id)\b/g, "ID")
-      //         .replace(/\b(Ph|PH|ph)\b/g, "PH");
+        if (
+          (!value || !(value instanceof File)) &&
+          !(atLeastOneIDRequired &&
+            (imgField === "barangayIDjpg" ||
+              imgField === "validIDjpg" ||
+              imgField === "letterjpg"))
+        ) {
+            const label =
+            imageFieldLabels[imgField] ||
+            imgField
+              .replace(/_/g, " ") // Replace underscores with spaces
+              .replace(/(?!^)([A-Z])/g, " $1")
+              .replace(/\.[^/.]+$/, "")
+              .toLowerCase()
+              .replace(/\b\w/g, (c) => c.toUpperCase())
+              .replace(/\b(Id|ID|id)\b/g, "ID")
+              .replace(/\b(Ph|PH|ph)\b/g, "PH");
         
-      //     setErrorMessage(`Please upload the required image: ${label}.`);
-      //     setShowErrorPopup(true);
-      //     return;
-      //   }
-      // }
+          //setErrorMessage(`Your request has incomplete requirements. Please upload the required document/s later. Your request will be put on hold until all requirements are submitted.`);
+          //setShowErrorPopup(true);
+          //break; // No need to check further, we already found a missing field
+        
+        }
+      }
 
+      
       // List all file-related keys in an array for easier maintenance
       const fileKeys = [
       ...Object.keys(dynamicFileStates), // Add dynamic image fields
@@ -1520,12 +1524,12 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         fullName: clearanceInput.fullName,
         dateofdeath: clearanceInput.dateofdeath,
         estateSince: clearanceInput.estateSince,
-        deathCertificate: filenames.deathCertificate,
+        ...(clearanceInput.deathCertificate ?{deathCertificate:filenames.deathCertificate}:{deathCertificate:null})
         }),
         ...( clearanceInput.purpose === "Death Residency"  && {
         fullName: clearanceInput.fullName,
         dateofdeath: clearanceInput.dateofdeath,
-        deathCertificate: filenames.deathCertificate,
+        ...(clearanceInput.deathCertificate ?{deathCertificate:filenames.deathCertificate}:{deathCertificate:null})
         }),
         ...(clearanceInput.purpose === "Good Moral and Probation" && {
         ...(clearanceInput.goodMoralPurpose ==="Others" ? 
@@ -1577,7 +1581,7 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
           contactNumber: clearanceInput.emergencyDetails?.contactNumber || "",
           relationship: clearanceInput.emergencyDetails?.relationship || "",
         },
-        ...(clearanceInput.twoByTwoPicture && { twoByTwoPicture: filenames.twoByTwoPicture }),
+        ...(clearanceInput.twoByTwoPicture ? { twoByTwoPicture: filenames.twoByTwoPicture }:{ twoByTwoPicture: null}),
         }),
         ...(clearanceInput.purpose === "First Time Jobseeker" && {
         educationalAttainment: clearanceInput.educationalAttainment,
@@ -1602,7 +1606,8 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       });
 
       // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        
       }
 
       // 📌 Handling for Temporary Business Permit & Business Permit
@@ -1642,7 +1647,8 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         // signaturejpg: filenames.signaturejpg,
       };
       // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+                
       }
 
       // 📌 Handling for Construction Permit
@@ -1675,7 +1681,7 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         ...(clearanceInput.approvedBldgPlan ? { approvedBldgPlan: filenames.approvedBldgPlan } : { approvedBldgPlan: null }),
         ...(clearanceInput.copyOfPropertyTitle ? { copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null }),
         ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
-          ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
+        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
 
         // taxDeclaration: filenames.taxDeclaration,
         // approvedBldgPlan: filenames.approvedBldgPlan,
@@ -1684,7 +1690,8 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
       };
       // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        
       }
 
       if (
@@ -1744,7 +1751,8 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       });
 
       // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-      handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
+        
       }
     // alert("Document request submitted successfully!");
       router.push('/services/notification'); 
@@ -1965,6 +1973,10 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       
 
         <div className="document-req-section-upper">
+          <p className="text-red-600 bg-red-100 border border-red-400 p-4 rounded-md">
+            If you uploaded incomplete document requirements, you may upload them later in the Transaction Page; however, the request will not be processed until all required documents are submitted.
+          </p>
+
           <nav className="document-req-section-toggle-wrapper">
             {["details", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
               <button
