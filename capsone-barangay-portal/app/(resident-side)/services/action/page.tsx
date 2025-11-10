@@ -1,9 +1,9 @@
 "use client"
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, use, useEffect, useState } from "react";
 import {useAuth} from "@/app/context/authContext";
 import "@/CSS/ServicesPage/requestdocumentsform/requestdocumentsform.css";
 // import {useSearchParams } from "next/navigation";
-import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, query, where} from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, DocumentData, onSnapshot, query, where, } from "firebase/firestore";
 import { db, storage, auth } from "@/app/db/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/navigation";
@@ -25,6 +25,17 @@ interface EmergencyDetails {
   address: string;
   relationship: string;
   contactNumber: string;
+}
+
+interface approvedBusinessPermit {
+  businessName: string;
+  businessLocation: string;
+  businessNature: string;
+  estimatedCapital: string;
+  createdAt?: any;
+  requestId?:string;
+  status?:string;
+  docType?:string;
 }
 
 interface ClearanceInput {
@@ -341,6 +352,8 @@ useEffect(() => {
     twoByTwoPicture: null,
   })
 
+  
+  const [listOfApprovedExistingBusinessPermits, setListOfApprovedExistingBusinessPermits] = useState<approvedBusinessPermit[]>([]);
 
 
 
@@ -369,6 +382,39 @@ useEffect(() => {
     }
 
   },[user]);
+
+  useEffect(() => {
+    if(!userData) return;
+    if(clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit"){
+      const serviceRef = collection(db, "ServiceRequests");
+      const unsubscribe = onSnapshot(serviceRef, (snapshot) => {
+        const approvedPermits: approvedBusinessPermit[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if(data.residentId === userData.residentId && (data.status === "In - Progress" || data.status === "Accepted")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
+            approvedPermits.push({
+              requestId: data.requestId,
+              docType: data.docType,
+              businessName: data.businessName,
+              businessLocation: data.businessLocation,
+              businessNature: data.businessNature,
+              estimatedCapital: data.estimatedCapital,
+              createdAt: data.createdAt,
+              status: data.status,
+            });
+          }
+          
+        })
+        setListOfApprovedExistingBusinessPermits(approvedPermits);
+      });
+      return () => unsubscribe();
+    }
+
+
+    
+  },[clearanceInput, userData]);
+
+  console.log("listOfApprovedExistingBusinessPermits", listOfApprovedExistingBusinessPermits);
 
   useEffect(() => {
     const getServiceRequestId =  () => {
@@ -939,6 +985,9 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       ...(clearanceInput.purpose === "Flood Victims"&&{
         typhoonSignal: clearanceInput.typhoonSignal,
       }),
+      ...(userData && {
+        residentId: userData.residentId,
+      })
 
     };
     
@@ -2024,7 +2073,21 @@ console.log("UserData:", userData);
                           className="form-input-document-req"
                           required
                           value={clearanceInput.purpose}
-                          onChange={handleChange}
+                          onChange={
+                            (e) => {
+                              handleChange(e);
+                              // Reset dependent fields when purpose changes
+                              setClearanceInput((prevState) => ({
+                                ...prevState,
+                                // Add more fields to reset as necessary
+                                businessName: "",
+                                businessLocation: "",
+                                businessNature: "",
+                                estimatedCapital: "",
+
+                              }));
+                            }
+                          }
                         >
                           <option value="" disabled>Select purpose</option>
 
@@ -2079,7 +2142,19 @@ console.log("UserData:", userData);
                           ) : docB === "Business Permit" || docB === "Temporary Business Permit" ? (
                             <>
                               <option value="New">New</option>
-                              <option value="Renewal">Renewal</option>
+                              {userData? (
+                                <option value="Renewal" 
+                                disabled = {listOfApprovedExistingBusinessPermits.length === 0 ? true : false }
+                                title={
+                                   listOfApprovedExistingBusinessPermits.length === 0
+                                     ? "You need to submit a new permit first before being able to renew it."
+                                     : ""
+                                 }
+                                >Renewal</option>
+                              ):(
+                                <option value="Renewal">Renewal</option>
+                              )}
+                              
                             </>
                           ) : docB === "Other Documents" ? (
                             <>
@@ -2537,32 +2612,96 @@ console.log("UserData:", userData);
 
                   { (clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit") && (
                     <>  
+    
+                      {userData ? (
+                        <>
+                          {clearanceInput.purpose === "New" ? (
+                            <>
+                              <div className="form-group-document-req">
+                                <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
+                                <input 
+                                  type="text"  
+                                  id="businessname"  
+                                  name="businessName"  
+                                  className="form-input-document-req"  
+                                  required 
+                                  placeholder="Enter Business Name"  
+                                  value={clearanceInput.businessName}
+                                  onChange={handleChange}
+                                />
+                              </div>            
+                              
+                            </>
+                          ) : clearanceInput.purpose === "Renewal" && (
+                        <>
+                          <div className="form-group-document-req">
+                            <label htmlFor="businessname" className="form-label-document-req">Select Business Name<span className="required">*</span></label>
+                            
+                            <select 
+                              id="businessname"
+                              name="businessName"
+                              className="form-input-document-req"
+                              value={clearanceInput.businessName}
+                              onChange={(e) => {
+                                setClearanceInput((prev: any) => ({
+                                  ...prev,
+                                  businessName: e.target.value,
+                                  // Auto-fill businessNature and businessLocation based on selected business
+                                  businessNature: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessNature || "",
+                                  businessLocation: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessLocation || "",
+                                  estimatedCapital: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.estimatedCapital || "",
+
+                                }));
+
+                              }}
+                              required
+                            >
+                              <option value="" disabled>Select Business Name</option>
+                              {listOfApprovedExistingBusinessPermits.length === 0 ? (
+                                <option value="" disabled>No existing businesses found</option>
+                              ) : (
+                                listOfApprovedExistingBusinessPermits.map((business, index) => (
+                                  <option key={index} value={business.businessName}>
+                                    {business.businessName}
+                                  </option>
+                                ))
+                              )}
+                            </select>
+                          </div>           
+                        </>
+                          )}
+                        </>
+                      ):(
+                        <>
+                        <div className="form-group-document-req">
+                                <label htmlFor="businessname" className="form-label-document-req">Business Name<span    className="required">*</span></label>
+                                <input 
+                                  type="text"  
+                                  id="businessname"  
+                                  name="businessName"  
+                                  className="form-input-document-req"  
+                                  required 
+                                  placeholder="Enter Business Name"  
+                                  value={clearanceInput.businessName}
+                                  onChange={handleChange}
+                                />
+                              </div>            
+                        </>
+                      )}
                       <div className="form-group-document-req">
-                        <label htmlFor="businessname" className="form-label-document-req">Business Name<span className="required">*</span></label>
-                        <input 
-                          type="text"  
-                          id="businessname"  
-                          name="businessName"  
-                          className="form-input-document-req"  
-                          required 
-                          placeholder="Enter Business Name"  
-                          value={clearanceInput.businessName}
-                          onChange={handleChange}
-                        />
-                      </div>            
-                      <div className="form-group-document-req">
-                        <label htmlFor="businessloc" className="form-label-document-req">Business Location<span className="required">*</span></label>
-                        <input 
-                          type="text"  
-                          id="businessloc"  
-                          name="businessLocation"  
-                          className="form-input-document-req"  
-                          value={clearanceInput.businessLocation}
-                          onChange={handleChange}
-                          required 
-                          placeholder="Enter Business Location"  
-                        />
-                      </div>
+                            <label htmlFor="businessloc" className="form-label-document-req">Business Location<span className="required">*</span></label>
+                            <input 
+                              type="text"  
+                              id="businessloc"  
+                              name="businessLocation"  
+                              className="form-input-document-req"  
+                              value={clearanceInput.businessLocation}
+                              onChange={handleChange}
+                              required 
+                              placeholder="Enter Business Location"  
+                              disabled={purpose === "Renewal" && !!userData}
+                            />
+                          </div>
                     </>
                   )}
 
@@ -3546,6 +3685,7 @@ console.log("UserData:", userData);
                           className="form-input-document-req"  
                           required 
                           placeholder= "Describe the nature of your business (e.g., retail, manufacturing, services)"
+                          disabled= {clearanceInput.purpose === "Renewal"}
                           value={clearanceInput.businessNature}
                           onChange={handleChange}
                         />
@@ -3559,6 +3699,7 @@ console.log("UserData:", userData);
                           className="form-input-document-req"  
                           value={clearanceInput.estimatedCapital}
                           onChange={handleChange}
+                          disabled= {clearanceInput.purpose === "Renewal"}
                           required 
                           placeholder="Enter Estimated Capital"  
                         />

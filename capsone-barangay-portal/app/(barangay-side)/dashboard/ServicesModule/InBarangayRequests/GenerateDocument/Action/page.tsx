@@ -10,6 +10,8 @@ import { db, storage } from "@/app/db/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getSpecificCountofCollection } from "@/app/helpers/firestorehelper";
 import { useSession } from "next-auth/react";
+import { set } from "date-fns";
+import { clear } from "console";
 
 
 interface EmergencyDetails {
@@ -18,7 +20,16 @@ interface EmergencyDetails {
   relationship?: string;
   contactNumber?: string;
 }
-
+interface approvedBusinessPermit {
+  businessName: string;
+  businessLocation: string;
+  businessNature: string;
+  estimatedCapital: string;
+  createdAt?: any;
+  requestId?:string;
+  status?:string;
+  docType?:string;
+}
 interface ClearanceInput {
     residentId?: string;
     accID?: string;
@@ -155,8 +166,9 @@ export default function action() {
 
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
-    
+    const [listOfApprovedExistingBusinessPermits, setListOfApprovedExistingBusinessPermits] = useState<approvedBusinessPermit[]>([]);
 
+    
 
     useEffect(() => {
   // Adjust the collection name if yours differs (e.g. "JobSeekers", "JobSeekerListCollection")
@@ -368,7 +380,38 @@ export default function action() {
       },
     });
     
-      
+    useEffect(() => {
+        if(!clearanceInput.residentId) return;
+        if(clearanceInput.docType === "Business Permit" || clearanceInput.docType === "Temporary Business Permit"){
+          const serviceRef = collection(db, "ServiceRequests");
+          const unsubscribe = onSnapshot(serviceRef, (snapshot) => {
+            const approvedPermits: approvedBusinessPermit[] = [];
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              if(data.residentId === clearanceInput.residentId && (data.status === "In - Progress" || data.status === "Accepted")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
+                approvedPermits.push({
+                  requestId: data.requestId,
+                  docType: data.docType,
+                  businessName: data.businessName,
+                  businessLocation: data.businessLocation,
+                  businessNature: data.businessNature,
+                  estimatedCapital: data.estimatedCapital,
+                  createdAt: data.createdAt,
+                  status: data.status,
+                });
+              }
+              
+            })
+            setListOfApprovedExistingBusinessPermits(approvedPermits);
+          });
+          return () => unsubscribe();
+        }
+    
+    
+        
+      },[clearanceInput]);
+
+
     const [maxDate, setMaxDate] = useState<any>()
       
 
@@ -1766,7 +1809,16 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                             className="createRequest-input-field" 
                             required
                             value ={clearanceInput?.purpose || ""}
-                            onChange={handleChange} // Handle change to update state
+                            onChange={(e)=>{
+                              handleChange(e);
+                              setClearanceInput((prev) => ({
+                                ...prev,
+                                businessName: "",
+                                businessLocation: "",
+                                businessNature: "",
+                                estimatedCapital: "",
+                              })); // Reset other fields when purpose changes
+                            }} // Handle change to update state
                           >
                           <option value="" disabled>Select purpose</option>
                             {docType === "Barangay Certificate" ? (
@@ -1825,7 +1877,27 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                             ) : docType === "Business Permit" || docType === "Temporary Business Permit" ? (
                               <>
                                 <option value="New">New</option>
-                                <option value="Renewal">Renewal</option>
+                                {clearanceInput.isResident === true ? (
+                                  <>
+                                    <option value="Renewal" 
+                                      disabled = {listOfApprovedExistingBusinessPermits.length === 0 ? true : false }
+                                      title={
+                                        listOfApprovedExistingBusinessPermits.length === 0
+                                          ? "You need to submit a new permit first before being able to renew it."
+                                          : ""
+                                      }
+                                      >Renewal</option>
+                                  </>
+                                ):
+                                (
+                                  <>
+                                   <option value="Renewal" 
+                                    
+                                      >Renewal</option>
+                                  </>
+                                )
+                                }
+                               
                               </>
                             ) : docType === "Other Documents" ? (
                               <>
@@ -2592,19 +2664,81 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
 
                           {(docType === "Business Permit" || docType === "Temporary Business Permit") && (
                             <>
-                              <div className="fields-section">
-                                <h1>Business Name<span className="required">*</span></h1>
-                                <input 
-                                  type="text"  
-                                  id="businessName"  
-                                  name="businessName"  
-                                  value={clearanceInput.businessName || ""}
-                                  onChange={handleChange}
-                                  className="createRequest-input-field"  
-                                  required 
-                                  placeholder="Enter Business Name"  
-                                />
-                              </div>
+                              {clearanceInput.isResident === true ? (
+                                <>
+                                  {clearanceInput.purpose === "New" ? (
+                                    <>
+                                      <div className="fields-section">
+                                        <h1>Business Name<span className="required">*</span></h1>
+                                        <input 
+                                          type="text"  
+                                          id="businessName"  
+                                          name="businessName"  
+                                          value={clearanceInput.businessName || ""}
+                                          onChange={handleChange}
+                                          className="createRequest-input-field"  
+                                          required 
+                                          placeholder="Enter Business Name"  
+                                        />
+                                      </div>
+                                    </>
+                                    ):clearanceInput.purpose==="Renewal"  &&(
+                                    <>
+                                      <div className="fields-section">
+                                        <h1>Business Name<span className="required">*</span></h1>
+                                      
+                                        <select 
+                                          id="businessName"
+                                          name="businessName"
+                                          className="createRequest-input-field"
+                                          value={clearanceInput.businessName || ""}
+                                          onChange={ (e)=> {
+                                            setClearanceInput((prev: any) => ({
+                                              ...prev,
+                                              businessName: e.target.value,
+                                              // Auto-fill businessNature and businessLocation based on selected business
+                                              businessNature: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessNature || "",
+                                              businessLocation: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessLocation || "",
+                                              estimatedCapital: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.estimatedCapital || "",
+
+                                            }));
+                                          }}
+                                          required
+                                        >
+                                          <option value="" disabled>Select Business Name</option>
+                                          {listOfApprovedExistingBusinessPermits.length === 0 ? (
+                                            <option value="" disabled>No existing businesses found</option>
+                                          ) : (
+                                            listOfApprovedExistingBusinessPermits.map((business, index) => (
+                                              <option key={index} value={business.businessName}>
+                                                {business.businessName}
+                                              </option>
+                                            ))
+                                          )}
+                                        </select>
+                                      </div>
+                                    
+                                    </>
+                                    )}
+                                </>
+                                ):(
+                                <>
+                                  <div className="fields-section">
+                                        <h1>Business Name<span className="required">*</span></h1>
+                                        <input 
+                                          type="text"  
+                                          id="businessName"  
+                                          name="businessName"  
+                                          value={clearanceInput.businessName || ""}
+                                          onChange={handleChange}
+                                          className="createRequest-input-field"  
+                                          required 
+                                          placeholder="Enter Business Name"  
+                                        />
+                                      </div>
+                                </>
+                              )}
+                              
 
                               <div className="fields-section">
                                 <h1>Business Location<span className="required">*</span></h1>
@@ -2616,7 +2750,10 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
                                   required 
-                                  placeholder="Enter Business Location"  
+                                  disabled={
+                                      clearanceInput.purpose === "Renewal" && clearanceInput.isResident === true
+                                    }                                  
+                                placeholder="Enter Business Location"  
                                 />
                               </div>
 
@@ -3347,6 +3484,9 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                   value={clearanceInput.businessNature || ""}
                                   onChange={handleChange}
                                   className="createRequest-input-field"  
+                                  disabled={
+                                      clearanceInput.purpose === "Renewal" && clearanceInput.isResident === true
+                                    }    
                                   required 
                                   placeholder="Enter Business Nature"  
                                 />
@@ -3360,6 +3500,9 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                   name="estimatedCapital"  
                                   value={clearanceInput.estimatedCapital || ""}
                                   onChange={handleChange}
+                                  disabled={
+                                      clearanceInput.purpose === "Renewal" && clearanceInput.isResident === true
+                                    }    
                                   className="createRequest-input-field"  
                                   required 
                                   placeholder="Enter Estimated Capital"  

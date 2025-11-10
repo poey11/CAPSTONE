@@ -14,7 +14,6 @@ interface UserRequestData {
 }
 
 interface UserHistoryProps {
-  accID?: string;
   onClose: () => void;
   requestorFname?:string ;
   docType?:string ;
@@ -24,7 +23,7 @@ interface UserHistoryProps {
   residentId?:string ;
 }
 
-const UserHistory: React.FC<UserHistoryProps> = ({ accID, onClose, requestorFname, docType, residentId,purpose }) => {
+const UserHistory: React.FC<UserHistoryProps> = ({ onClose, requestorFname, docType, residentId,purpose }) => {
     
     const [UserHistory, setUserHistory] = useState<UserRequestData[]>([]);
     // parse createdAt (Firestore Timestamp, ISO, or "M/D/YYYY, h:mm:ss AM/PM")
@@ -75,74 +74,60 @@ const UserHistory: React.FC<UserHistoryProps> = ({ accID, onClose, requestorFnam
     console.log("Processed purpose:", newPurpose);
 
     useEffect(() => {
-        const serviceRef = collection(db, "ServiceRequests");
-        console.log("Fetching history for:", { accID, docType, purpose: newPurpose });
+  const serviceRef = collection(db, "ServiceRequests");
+  console.log("Fetching history for:", { residentId, docType, purpose: newPurpose });
 
-        const unsubscribe = onSnapshot(serviceRef, (snapshot) => {
-            const allRequests: UserRequestData[] = [];
+  const unsubscribe = onSnapshot(serviceRef, (snapshot) => {
+    const allRequests: UserRequestData[] = [];
 
-            snapshot.forEach((doc) => {
-            const data = doc.data();
-            if(accID){
-                if (data.accID === accID  && data.docType === docType && data.purpose === newPurpose) {
-                    allRequests.push({
-                    requestId: data.requestId,
-                    docType: data.docType,
-                    purpose: data.purpose,
-                    status: data.status,
-                    reqType: data.reqType,
-                    rejectionReason: data.rejectionReason,
-                    createdAt: data.createdAt,
-                    });
-                }
-            }
-            else if(residentId){
-                if (data.residentId === residentId  && data.docType === docType && data.purpose === newPurpose) {
-                    allRequests.push({
-                    requestId: data.requestId,
-                    docType: data.docType,
-                    purpose: data.purpose,
-                    status: data.status,
-                    reqType: data.reqType,
-                    rejectionReason: data.rejectionReason,
-                    createdAt: data.createdAt,
-                    });
-                }
-            }
-            });
-
-            // Sort newest to oldest
-            allRequests.sort((a, b) => createdAtToMillis(b.createdAt) - createdAtToMillis(a.createdAt));
-
-            if (allRequests.length === 0) {
-                setUserHistory([]);
-            return;
-            }
-            console.log("All matching requests:", allRequests);
-
-            const latest = allRequests[1]; // most recent request
-
-            // ✅ If latest is not rejected → no history
-            if (latest.status !== "Rejected") {
-                setUserHistory([]);
-            return;
-            }
-
-            // ✅ Find the most recent Accepted (or Approved) request
-            const lastAcceptedIndex = allRequests.findIndex(req => 
-            req.status === "Completed" || req.status === "In - Progress"
-            );
-
-            // ✅ Get only rejected requests that come AFTER the last Accepted one
-            const rejectedAfterAccepted = allRequests
-            .slice(0, lastAcceptedIndex === -1 ? allRequests.length : lastAcceptedIndex)
-            .filter(req => req.status === "Rejected");
-
-            setUserHistory(rejectedAfterAccepted);
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.residentId === residentId && data.docType === docType && data.purpose === newPurpose) {
+        allRequests.push({
+          requestId: data.requestId,
+          docType: data.docType,
+          purpose: data.purpose,
+          status: data.status,
+          reqType: data.reqType,
+          rejectionReason: data.rejectionReason,
+          createdAt: data.createdAt,
         });
+      }
+    });
 
-        return () => unsubscribe();
-    }, [accID, docType, purpose]);
+    // Sort newest → oldest
+    allRequests.sort((a, b) => createdAtToMillis(b.createdAt) - createdAtToMillis(a.createdAt));
+    console.log("Sorted requests:", allRequests);
+
+    if (allRequests.length === 0) {
+      setUserHistory([]);
+      return;
+    }
+
+    // Find the most recent Completed/In-Progress request
+    const lastAcceptedIndex = allRequests.findIndex(
+      (req) => req.status === "Completed" || req.status === "In - Progress"
+    );
+
+    let rejectedAfterAccepted: UserRequestData[] = [];
+
+    if (lastAcceptedIndex === -1) {
+      // ✅ No Completed/In-Progress → show all Rejected requests
+      rejectedAfterAccepted = allRequests.filter((req) => req.status === "Rejected");
+    } else {
+      // ✅ Show only rejections that occurred *after* the last Completed/In-Progress
+      rejectedAfterAccepted = allRequests
+        .slice(0, lastAcceptedIndex)
+        .filter((req) => req.status === "Rejected");
+    }
+
+    // Update history
+    setUserHistory(rejectedAfterAccepted);
+  });
+
+  return () => unsubscribe();
+}, [residentId, docType, purpose]);
+
 
   
     console.log("User History Data:", UserHistory);
