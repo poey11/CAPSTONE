@@ -1671,14 +1671,23 @@ Functions for Reason for Reject
                   // Handle missing file
                   if (!value) {
                     return (
-                      <div key={key} className="services-onlinereq-verification-requirements-section">
-                        <span className="verification-requirements-label">{label}</span>
-                        <p 
-                        className="justify-center flex mt-5"
+                      <div
+                        key={key}
+                        className="services-onlinereq-verification-requirements-section"
+                      >
+                        <div className="box-container-outer-inbrgy-reupload">
+                          <div className="title-verificationdocs-signature-reupload">
+                            {label}
+                          </div>
 
-                        style={{ color: "red", fontWeight: "bold"}}>
-                          File is not yet uploaded.
-                        </p>
+                          <div className="box-container-inbrgy-reupload">
+                            <div className="file-upload-container-inbrgy-reupload">
+                              <p className="file-missing-message-reupload">
+                                File not uploaded.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     );
                   }
