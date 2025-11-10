@@ -1743,3 +1743,154 @@ For error pop up
   right: 12px;
   font-size: 20px;
 }
+
+
+.box-container-outer-inbrgy-reupload {
+  flex: 0 1 400px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .box-container-outer-inbrgy-reupload {
+    flex: 0 1 100%;
+  }
+}
+
+.title-verificationdocs-signature-reupload {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1f3b57;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 10;
+  width: fit-content;
+  text-align: center;
+}
+
+.box-container-inbrgy-reupload {
+  position: relative;
+  width: 370px;
+  border: 1px solid #5a6b7c;
+  border-radius: 10px;
+  background-color: #ffffff;
+  padding: 40px 20px 50px 20px;
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box-container-inbrgy-reupload:hover {
+  background-color: rgba(245, 143, 88, 0.2);
+}
+
+.file-upload-container-inbrgy-reupload {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  display: block;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 220px;
+  width: 350px;
+  overflow-y: auto;
+  margin-top: 10px;
+  align-self: center;
+}
+
+.upload-link-reupload {
+  color: rgb(245, 143, 88);
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.upload-link-reupload:hover {
+  color: rgb(230, 100, 40);
+}
+
+.file-upload-input-reupload {
+  display: none;
+}
+
+/* Keeping these just in case you later expand previews */
+.file-name-image-display-reupload {
+  margin-top: 10px;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.file-name-image-display-indiv-reupload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  background-color: #F0F2F8;
+  border-radius: 5px;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.file-name-image-display-indiv-reupload li {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.file-item-reupload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+
+.file-preview-reupload {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.file-name-reupload {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  flex-grow: 1;
+}
+
+.delete-container-reupload {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.delete-button-reupload {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.delete-icon-reupload {
+  width: 20px;
+  height: 20px;
+}

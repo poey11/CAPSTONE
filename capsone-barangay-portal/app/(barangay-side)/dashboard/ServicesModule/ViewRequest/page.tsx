@@ -1598,27 +1598,74 @@ Functions for Reason for Reject
 
                   if(requestData?.reqType === "In Barangay" && userPosition === "Admin Staff" && (!value||!fileUrl)){
                       return (
-                      <div key={key} className="services-onlinereq-verification-requirements-section">
-                        <span className="verification-requirements-label">{label}</span>
-                        <p 
-                        className="justify-center flex mt-5">
-                            <input 
-                                id= {`file-upload${key}`}
-                                type = "file"
-                                accept=".jpg,.jpeg,.png"
-                                onChange={(e) => {
-                                    setFilesToUpload((prevFiles) =>
-                                        prevFiles.map((file) =>
-                                            file.field === key
-                                                ? { ...file, files: e.target.files ? Array.from(e.target.files) : null }
-                                                : file
-                                        )
-                                    );
-                                }}
-                            />
+                        <div key={key} className="services-onlinereq-verification-requirements-section" >
+                          <div className="box-container-outer-inbrgy-reupload">
+                            <div className="title-verificationdocs-signature-reupload">
+                              {label}
+                            </div>
+                            <div className="box-container-inbrgy-reupload">
+                              <div className="file-upload-container-inbrgy-reupload">
+                                {/* Upload link */}
+                                <label
+                                  htmlFor={`file-upload${key}`}
+                                  className="upload-link-reupload"
+                                >
+                                  Click to Upload File
+                                </label>
 
-                        </p>
-                      </div>
+                                <input
+                                  id={`file-upload${key}`}
+                                  type="file"
+                                  className="file-upload-input-reupload"
+                                  multiple
+                                  accept=".jpg,.jpeg,.png"
+                                  onChange={(e) => handleFileChangeReupload(key, e)}
+                                />
+
+                                {/* Preview + file names + delete */}
+                                {getFilesForField(key).length > 0 && (
+                                  <div className="file-name-image-display-reupload">
+                                    {getFilesForField(key).map((file, index) => (
+                                      <div
+                                        className="file-name-image-display-indiv-reupload"
+                                        key={index}
+                                      >
+                                        <li className="file-item-reupload">
+                                          <div className="filename-image-container-reupload">
+                                            <img
+                                              src={URL.createObjectURL(file as Blob)}
+                                              alt={file.name}
+                                              className="file-preview-reupload"
+                                            />
+                                          </div>
+
+                                          <span className="file-name-reupload">{file.name}</span>
+
+                                          <div className="delete-container-reupload">
+                                            <button
+                                              type="button"
+                                              className="delete-button-reupload"
+                                              onClick={() =>
+                                                handleFileDeleteReupload(key, index)
+                                              }
+                                            >
+                                              <img
+                                                src="/Images/trash.png"
+                                                alt="Delete"
+                                                className="delete-icon-reupload"
+                                              />
+                                            </button>
+                                          </div>
+                                        </li>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                     );
                   }
                   // Handle missing file
@@ -2488,6 +2535,12 @@ Functions for Reason for Reject
       const handleMouseMove = (e: React.MouseEvent) => {
         setMousePos({ x: e.clientX + 10, y: e.clientY + 10 }); // small offset from cursor
       };
+
+type UploadField = {
+  field: string;       // same as "key"
+  files: File[];
+};
+
     const [filesToUpload, setFilesToUpload] = useState<{ field: string; files: File[] | null, imageName:string }[]>([
         { field: 'signaturejpg', files: null, imageName: 'Signature' },
         { field: 'barangayIDjpg', files: null, imageName: 'Barangay ID'  },
@@ -2584,6 +2637,39 @@ Functions for Reason for Reject
 
       }  
     const [showUserHistory, setShowUserHistory] = useState<boolean>(false);
+
+
+
+    const getFilesForField = (fieldKey: string) => {
+  const entry = filesToUpload.find((f) => f.field === fieldKey);
+  return entry?.files || [];
+};
+
+const handleFileChangeReupload = (
+  fieldKey: string,
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const newFiles = e.target.files ? Array.from(e.target.files) : [];
+
+  setFilesToUpload((prev) =>
+    prev.map((item) =>
+      item.field === fieldKey ? { ...item, files: newFiles } : item
+    )
+  );
+};
+
+const handleFileDeleteReupload = (fieldKey: string, fileIndex: number) => {
+  setFilesToUpload((prev) =>
+    prev.map((item) =>
+      item.field === fieldKey
+        ? {
+            ...item,
+            files: (item.files || []).filter((_, idx) => idx !== fileIndex),
+          }
+        : item
+    )
+  );
+};
 
     return (  
         <main className="main-container-services-onlinereq">
