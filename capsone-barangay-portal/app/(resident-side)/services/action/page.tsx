@@ -976,7 +976,6 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         hour12: true,
       });
       
-    // WAG DEDELETE PLEASE
     // NEW: BRANCH MESSAGES BASED ON INCOMPLETE REQUIREMENTS @malcolm eto yung magbabase kung
     if (hasIncompleteRequirements) {
 
@@ -1973,9 +1972,12 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       
 
         <div className="document-req-section-upper">
-          <p className="text-red-600 bg-red-100 border border-red-400 p-4 rounded-md">
-            If you uploaded incomplete document requirements, you may upload them later in the Transaction Page; however, the request will not be processed until all required documents are submitted.
-          </p>
+          <div className="note-box-services">
+                <p>
+                  <span className="required-services">*</span> For Logged-in Users: Requirements in the <strong>Others</strong> section can be uploaded at a later time, except for a Valid ID.<br />
+                  <span className="required-services">*</span> Upon submission, requirements must be complete before being processed by the barangay.
+                    </p>
+            </div>
 
           <nav className="document-req-section-toggle-wrapper">
             {["details", ...(clearanceInput.purpose === "Barangay ID" ? ["emergency"] : []), "others"].map((section) => (
@@ -3822,14 +3824,6 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
 
           {activeSection === "others" && (
             <>
-
-       <div className="note-box-services">
-             <p>
-               <span className="required-services">*</span>  Requirements below can be uploaded at a later date aside from a Valid ID.<br />
-              <span className="required-services">*</span> Upon submission, requirements must be complete before being processed by the barangay.
-                 </p>
-        </div>
-
               <div className="document-req-form-container-requirements">
 
                 <div className="required-documents-container">
