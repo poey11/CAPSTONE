@@ -942,198 +942,90 @@ const handleFileChange = (
 };
 
   
-const handleReportUpload = async (key: any, storageRefs: Record<string, any>, hasIncompleteRequirements: boolean = false) => {
-  try {
-  
-    const docRef = collection(db, "ServiceRequests"); // Reference to the collection
-    let updates = { ...key };  // No filtering, just spread the object
+    const handleReportUpload = async (
+      key: any,
+      storageRefs: Record<string, any>,
+    ): Promise<string | null> => {
+      try {
+        const docRef = collection(db, "ServiceRequests"); // Reference to the collection
+        let updates = { ...key }; // No filtering, just spread the object
 
-    // Upload files to Firebase Storage if there are any
-     for (const [key, storageRef] of Object.entries(storageRefs)) {
-          const file = clearanceInput[key];
+        // Upload files to Firebase Storage if there are any
+        for (const [key, storageRef] of Object.entries(storageRefs)) {
+          const file = clearanceInput[key as keyof ClearanceInput];
           if (file instanceof File && storageRef) {
-            // Upload each file to storage
             await uploadBytes(storageRef, file);
             console.log(`${key} uploaded successfully`);
           }
         }
 
-    // Upload the report to Firestore
-    let sendTo ="";
-      if(clearanceInput.docB === "Barangay Certificate" || clearanceInput.docB === "Barangay Clearance" 
-        || clearanceInput.docB === "Barangay Indigency" || clearanceInput.docB === "Temporary Business Permit"
-        || clearanceInput.docB === "Construction" || (docB === "Barangay Permit" && purpose)||
-        (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
+        // Prepare extra fields for the ServiceRequests doc
+        let sendTo = "";
+        if (
+          clearanceInput.docB === "Barangay Certificate" ||
+          clearanceInput.docB === "Barangay Clearance" ||
+          clearanceInput.docB === "Barangay Indigency" ||
+          clearanceInput.docB === "Temporary Business Permit" ||
+          clearanceInput.docB === "Construction" ||
+          (docB === "Barangay Permit" && purpose) ||
+          (clearanceInput.docB === "Other Documents" &&
+            clearanceInput.purpose !== "Barangay ID")
+        ) {
+          sendTo = "SAS";
+        } else if (
+          clearanceInput.docB === "Business Permit" ||
+          clearanceInput.purpose === "Barangay ID"
+        ) {
+          sendTo = "Admin Staff";
+        }
 
-      ) {
-        sendTo = "SAS";
-      } 
-      else if(clearanceInput.docB === "Business Permit" || clearanceInput.purpose === "Barangay ID"){
-        sendTo = "Admin Staff";
-      }
-      let documentTypeIs = "";
-        if(otherDocPurposes[clearanceInput.docType || '']?.includes(clearanceInput.purpose || "")) {
+        let documentTypeIs = "";
+        if (
+          otherDocPurposes[clearanceInput.docType || ""]?.includes(
+            clearanceInput.purpose || ""
+          )
+        ) {
           documentTypeIs = "OtherDocuments";
+        }
+
+        updates = {
+          ...updates,
+          sendTo,
+          ...(clearanceInput.appointmentDate && {
+            approvedBySAS: false,
+          }),
+          ...(documentTypeIs !== "" && {
+            documentTypeIs,
+          }),
+          requestorMrMs: clearanceInput.requestorMrMs,
+          requestorFname: clearanceInput.requestorFname,
+          ...(clearanceInput.purpose === "Flood Victims" && {
+            typhoonSignal: clearanceInput.typhoonSignal,
+          }),
+          ...(userData && {
+            residentId: userData.residentId,
+          }),
+        };
+
+        // Create the ServiceRequests document
+        try {
+          const docBRef = await addDoc(docRef, updates);
+          console.log("Request uploaded with ID:", docBRef.id);
+          console.log("Request data to upload:", updates);
+          return docBRef.id; // 👉 this is what we'll use for notifications
+        } catch (error) {
+          console.error("Failed to upload request:", error);
+          setErrorMessage("Failed to submit your request. Please try again.");
+          setShowErrorPopup(true);
+          return null;
+        }
+      } catch (e: any) {
+        console.error("Error uploading request:", e);
+        setErrorMessage("Failed to submit your request. Please try again.");
+        setShowErrorPopup(true);
+        return null;
       }
-    updates = {
-      ...updates,
-      sendTo: sendTo,
-      ...(clearanceInput.appointmentDate && { 
-      approvedBySAS: false,
-      }),
-      ...(documentTypeIs !== "" && {
-      documentTypeIs: documentTypeIs,
-      }),
-      requestorMrMs: clearanceInput.requestorMrMs,
-      requestorFname: clearanceInput.requestorFname,
-      ...(clearanceInput.purpose === "Flood Victims"&&{
-        typhoonSignal: clearanceInput.typhoonSignal,
-      }),
-      ...(userData && {
-        residentId: userData.residentId,
-      })
-
     };
-    
-    // Only go to notification if addDoc is 
-    let newDoc = "";
-    try {
-      const docB = await addDoc(docRef, updates);
-      console.log("Request uploaded with ID:", docB.id);
-      newDoc = docB.id;
-      router.push("/services/notification");
-    } catch (error) {
-      console.error("Failed to upload request:", error);
-      setErrorMessage("Failed to submit your request. Please try again.");
-      setShowErrorPopup(true);
-      return;
-    }
-    console.log("Request data to upload:", updates);
-    
-    const notificationRef = collection(db, "BarangayNotifications");
-    
-    const useDocTypeAsMessage = 
-      clearanceInput.docB === "Business Permit" || 
-      clearanceInput.docB === "Temporary Business Permit";
-
-      const rawDate = new Date(clearanceInput.appointmentDate);
-      const formattedAppointmentDate = rawDate.toLocaleString("en-US", {
-        month: "numeric",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      });
-      
-    // NEW: BRANCH MESSAGES BASED ON INCOMPLETE REQUIREMENTS @malcolm eto yung magbabase kung
-    if (hasIncompleteRequirements) {
-
-      await addDoc(notificationRef, {
-      message: 
-        clearanceInput.purpose === "First Time Jobseeker"
-          ? `Incomplete requirements for Jobseeker Certificate request by ${clearanceInput.requestorFname} (Online). The request cannot proceed until all requirements are submitted.`
-          : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
-            ? `Incomplete requirements for Residency request by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). Please wait for the applicant to complete the requirements.`
-            : clearanceInput.docB === "Barangay Indigency"
-              ? `Incomplete requirements for Barangay Indigency (${clearanceInput.purpose}) requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). The request cannot move forward until all documents are provided.`
-              : clearanceInput.docB === "Construction"
-                ? `Incomplete requirements for Construction Permit requested by ${clearanceInput.requestorFname} (Online). Please wait for the submission of all necessary documents.`
-                : `Incomplete requirements for ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online). Processing will continue once all requirements are submitted.`,
-
-        timestamp: new Date(),
-        requestorId: userData?.residentId || "Guest",
-        isRead: false,
-        ...(documentTypeIs !== "" ? {
-          transactionType: "Online Service Request",}:
-        {
-          transactionType: "Online Service Request",
-        }),      recipientRole: (
-          clearanceInput.purpose === "First Time Jobseeker" ||
-          clearanceInput.docB === "Barangay Certificate" ||
-          clearanceInput.docB === "Barangay Clearance" ||
-          clearanceInput.docB === "Barangay Indigency" ||
-          clearanceInput.docB === "Temporary Business Permit" ||
-          clearanceInput.docB === "Construction" ||
-          clearanceInput.docB === "Barangay Permit" ||        
-          (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-        )
-          ? "Assistant Secretary"
-          : "Admin Staff",
-        requestID: newDoc,
-      });
-      
-    
-    await addDoc(collection(db, "Notifications"), {
-      residentID: userData?.residentId || "Guest",
-      requestID: newDoc,
-      message: `Your document request (${clearanceInput?.requestId}) is currently on hold due to incomplete requirements. Please submit all necessary documents to proceed with the request.`,
-      timestamp: new Date(),
-      ...(documentTypeIs !== "" ? {
-          transactionType: "Online Service Request",}:
-        {
-          transactionType: "Online Service Request",
-        }),
-      isRead: false,
-    });
-
-    } else {
-
-      await addDoc(notificationRef, {
-      message: 
-        clearanceInput.purpose === "First Time Jobseeker"
-          ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
-          : clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency"
-            ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-            : clearanceInput.docB === "Barangay Indigency"
-              ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
-              : clearanceInput.docB === "Construction"
-                ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
-                : `New ${useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose} requested by ${clearanceInput.requestorFname} (Online).`,
-
-        timestamp: new Date(),
-        requestorId: userData?.residentId || "Guest",
-        isRead: false,
-        ...(documentTypeIs !== "" ? {
-          transactionType: "Online Service Request",}:
-        {
-          transactionType: "Online Service Request",
-        }),      recipientRole: (
-          clearanceInput.purpose === "First Time Jobseeker" ||
-          clearanceInput.docB === "Barangay Certificate" ||
-          clearanceInput.docB === "Barangay Clearance" ||
-          clearanceInput.docB === "Barangay Indigency" ||
-          clearanceInput.docB === "Temporary Business Permit" ||
-          clearanceInput.docB === "Construction" ||
-          clearanceInput.docB === "Barangay Permit" ||        
-          (clearanceInput.docB === "Other Documents" && clearanceInput.purpose !== "Barangay ID")
-        )
-          ? "Assistant Secretary"
-          : "Admin Staff",
-        requestID: newDoc,
-      });
-      
-    
-    await addDoc(collection(db, "Notifications"), {
-      residentID: userData?.residentId || "Guest",
-      requestID: newDoc,
-      message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
-      timestamp: new Date(),
-      ...(documentTypeIs !== "" ? {
-          transactionType: "Online Service Request",}:
-        {
-          transactionType: "Online Service Request",
-        }),
-      isRead: false,
-    });
-
-    }
-  
-  } catch (e: any) {
-    console.error("Error uploading request:", e);
-  }
-};
 
 
 
@@ -1296,14 +1188,20 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
     
     const handleSubmit = async (event: React.FormEvent) => {  
       event.preventDefault(); // Prevent default form submission
+
+      const isGuest = !user;
+
       if (RESTRICTED_DOCS.has(docB) && (!user || userData?.status !== "Verified")) {
         return;
       }    
-      if((clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || clearanceInput.docB === "Barangay Indigency") {
-        
+
+      //  APPOINTMENT CHECKS
+      if (
+        (clearanceInput.docB === "Barangay Certificate" && clearanceInput.purpose === "Residency" ) || 
+        clearanceInput.docB === "Barangay Indigency"
+      ) {
         const selectedDateWTime = toPHISOString(new Date(clearanceInput.appointmentDate));
 
-      
         // check if the user has an existing appointment for this docB and purpose on the selected date
         const selectedDateOnly = new Date(clearanceInput.appointmentDate).toDateString();
         const userAppointment = userAppointmentsMap[clearanceInput.docB]?.find((app: any) => {
@@ -1322,75 +1220,96 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         const getAllUserAppointments = Object.values(userAppointmentsMap).flat();
         const appointments = getAllUserAppointments?.find((app:any) => app.appointmentDate === selectedDateWTime);
 
-        if(appointments ){
+        if (appointments) {
           setErrorMessage("You already have an appointment in this time slot. Please choose another date or time.");
           setShowErrorPopup(true);
-          return
+          return;
         }  
       }
-                      
 
-
+      //  CONTACT VALIDATION
       const contactPattern = /^09\d{9}$/; // Regex for Philippine mobile numbers
       if (!contactPattern.test(clearanceInput.contact)) {
-      setErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
-      setShowErrorPopup(true);
-      return;
+        setErrorMessage("Invalid contact number. Format should be: 0917XXXXXXX");
+        setShowErrorPopup(true);
+        return;
       }
 
+      //  AGE VALIDATION
       if (Number(clearanceInput.age) < 18) {
-      setErrorMessage("Age must be 18 or above to proceed with this document request.");
-      setShowErrorPopup(true);
-      return;
+        setErrorMessage("Age must be 18 or above to proceed with this document request.");
+        setShowErrorPopup(true);
+        return;
       }
 
-      // Gather required fields for this docB/purpose
+      //  REQUIRED TEXT FIELDS
       const requiredFields = getRequiredFields();
-
       requiredFields.push(...filteredDynamicFields);
       console.log("Required Fields:", requiredFields);
       
-      if(!isAllRequiredFieldsFilledUp(requiredFields)){
+      if (!isAllRequiredFieldsFilledUp(requiredFields)) {
         return;
       }
-      // Add dynamic image fields
-      const requiredImageFields = [
-      ...Object.keys(dynamicFileStates),
-      "signaturejpg"
-      ];
-      // Add static image fields if they are visible in the UI for this docB/purpose
+
+      //  REQUIRED IMAGE FIELDS (UPDATED)
+      const requiredImageFieldSet = new Set<string>();
+
+      // dynamic image fields (from UI / Firestore config)
+      Object.keys(dynamicFileStates).forEach((k) => requiredImageFieldSet.add(k));
+
+      // doc/purpose-specific hard-required images
       if (
-      docB === "Barangay Certificate" ||
-      docB === "Barangay Clearance" ||
-      docB === "Barangay Indigency" ||
-      clearanceInput.purpose === "First Time Jobseeker"
+        docB === "Barangay Certificate" ||
+        docB === "Barangay Clearance" ||
+        docB === "Barangay Indigency" ||
+        clearanceInput.purpose === "First Time Jobseeker"
       ) {
-        requiredImageFields.push("barangayIDjpg", "validIDjpg", "letterjpg");
+        requiredImageFieldSet.add("barangayIDjpg");
+        requiredImageFieldSet.add("validIDjpg");
+        requiredImageFieldSet.add("letterjpg");
       }
-      if(clearanceInput.purpose === "Barangay ID"){
-        requiredImageFields.push("signaturejpg", "validIDjpg");
+
+      if (clearanceInput.purpose === "Barangay ID") {
+        requiredImageFieldSet.add("validIDjpg");
+        // 2x2 picture usually required for ID
+        requiredImageFieldSet.add("twoByTwoPicture");
+        // signature is treated as soft-required (handled separately below)
       }
+
       if (docB === "Temporary Business Permit" || docB === "Business Permit") {
-        requiredImageFields.push("copyOfPropertyTitle", "dtiRegistration", "isCCTV", "validIDjpg");
+        requiredImageFieldSet.add("copyOfPropertyTitle");
+        requiredImageFieldSet.add("dtiRegistration");
+        requiredImageFieldSet.add("isCCTV");
+        requiredImageFieldSet.add("validIDjpg");
       }
+
       if (docB === "Construction") {
-        requiredImageFields.push("copyOfPropertyTitle", "taxDeclaration", "approvedBldgPlan", "validIDjpg");
-      }
-      if (clearanceInput.purpose === "Death Residency" || clearanceInput.purpose === "Estate Tax") {
-        requiredImageFields.push("deathCertificate");
+        requiredImageFieldSet.add("copyOfPropertyTitle");
+        requiredImageFieldSet.add("taxDeclaration");
+        requiredImageFieldSet.add("approvedBldgPlan");
+        requiredImageFieldSet.add("validIDjpg");
       }
 
+      if (
+        clearanceInput.purpose === "Death Residency" ||
+        clearanceInput.purpose === "Estate Tax"
+      ) {
+        requiredImageFieldSet.add("deathCertificate");
+      }
 
+      // include configured dynamic image fields from Firestore
+      dynamicImageFields.forEach((fieldName: string) => {
+        requiredImageFieldSet.add(fieldName);
+      });
 
       const atLeastOneIDRequired =
-        (docB === "Barangay Certificate" ||
-          docB === "Barangay Clearance" ||
-          docB === "Barangay Indigency" ||
-          clearanceInput.purpose === "Barangay ID" ||
-          clearanceInput.purpose === "First Time Jobseeker"
-        );
+        docB === "Barangay Certificate" ||
+        docB === "Barangay Clearance" ||
+        docB === "Barangay Indigency" ||
+        clearanceInput.purpose === "Barangay ID" ||
+        clearanceInput.purpose === "First Time Jobseeker";
       
-      // Step 1: Handle special case: Require at least one of the three
+      // Special case: Require at least one of the three ID uploads (for both guests & residents)
       if (
         atLeastOneIDRequired &&
         !clearanceInput.barangayIDjpg &&
@@ -1404,86 +1323,61 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
         return;
       }
 
-      // Mapping image field keys to human-readable labels
-      const imageFieldLabels: { [key: string]: string } = {
-        isCCTV: "CCTV Picture",
-        copyOfPropertyTitle: "Copy of Property Title",
-        dtiRegistration: "DTI Registration or BIR Registration",
-        approvedBldgPlan: "Approved Building Plan",
-        deathCertificate: "Death Certificate",
-        twoByTwoPicture: "2x2 Picture",
-        signaturejpg: "Signature",
-        letterjpg: "Endorsement Letter",
-        barangayIDjpg: "Barangay ID",
-        validIDjpg: "Valid ID",
-        taxDeclaration: "Tax Declaration",
-      };
+      // 🔍 ONE PASS TO FIND MISSING HARD-REQUIRED IMAGES
+      const missingRequiredImages: string[] = [];
 
+      for (const imgField of requiredImageFieldSet) {
+        const value = clearanceInput[imgField as keyof ClearanceInput];
 
-      requiredImageFields.push(...dynamicImageFields); // Ensure signature is always required
+        const isOneOfOptionalIDs =
+          atLeastOneIDRequired &&
+          (imgField === "barangayIDjpg" ||
+            imgField === "validIDjpg" ||
+            imgField === "letterjpg");
 
-      // NEW: DETECT MISSING REQUIRED IMAGE FIELDS WITHOUT BLOCKING SUBMISSION
-      let hasIncompleteRequirements = false;
-      const missingImageFields: string[] = [];
-      
-      if(user === null){
-        for (const imgField of requiredImageFields) {
-          const value = clearanceInput[imgField as keyof ClearanceInput];
-
-          if (
-            (!value || !(value instanceof File)) &&
-            !(atLeastOneIDRequired &&
-              (imgField === "barangayIDjpg" ||
-              imgField === "validIDjpg" ||
-              imgField === "letterjpg"))
-          ) {
-            missingImageFields.push(imgField);
-          }
+        if ((!value || !(value instanceof File)) && !isOneOfOptionalIDs) {
+          missingRequiredImages.push(imgField);
         }
+      }
 
-        if (missingImageFields.length > 0) {
+      // soft requirement: signature can be submitted later, but should mark
+      // the request as INCOMPLETE for logged-in residents
+      const isSignatureMissing =
+        !clearanceInput.signaturejpg ||
+        !(clearanceInput.signaturejpg instanceof File);
+
+      let hasIncompleteRequirements = false;
+
+      if (isGuest) {
+        // Guests must not have any missing hard-required images
+        if (missingRequiredImages.length > 0) {
+          setErrorMessage(
+            "Please upload all required documents before submitting your request."
+          );
+          setShowErrorPopup(true);
+          return;
+        }
+      } else {
+        // Logged-in residents: allow submission but mark as incomplete if:
+        // - any hard-required images are missing, OR
+        // - signature is missing (soft requirement)
+        if (missingRequiredImages.length > 0 || isSignatureMissing) {
           hasIncompleteRequirements = true;
         }
-
-        // Step 2: Check other required image fields
-        for (const imgField of requiredImageFields) {
-          const value = clearanceInput[imgField];
-        
-          if (
-            (!value || !(value instanceof File)) &&
-            !(atLeastOneIDRequired &&
-              (imgField === "barangayIDjpg" ||
-                imgField === "validIDjpg" ||
-                imgField === "letterjpg"))
-          ) {
-              const label =
-              imageFieldLabels[imgField] ||
-              imgField
-                .replace(/_/g, " ") // Replace underscores with spaces
-                .replace(/(?!^)([A-Z])/g, " $1")
-                .replace(/\.[^/.]+$/, "")
-                .toLowerCase()
-                .replace(/\b\w/g, (c) => c.toUpperCase())
-                .replace(/\b(Id|ID|id)\b/g, "ID")
-                .replace(/\b(Ph|PH|ph)\b/g, "PH");
-          
-            setErrorMessage(`Please upload the required document: ${label}.`);
-            setShowErrorPopup(true);
-            return; // No need to check further, we already found a missing field
-          
-          }
-        }
-
       }
-      
-      
-      // List all file-related keys in an array for easier maintenance
+
+      console.log("requiredImageFields:", Array.from(requiredImageFieldSet));
+      console.log("missingRequiredImages:", missingRequiredImages);
+      console.log("isSignatureMissing:", isSignatureMissing);
+      console.log("hasIncompleteRequirements (before upload):", hasIncompleteRequirements);
+
+      // 📁 FILE KEYS, FILENAMES, STORAGE REFS
       const fileKeys = [
-      ...Object.keys(dynamicFileStates), // Add dynamic image fields
-      "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
-      "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
-      "taxDeclaration", "approvedBldgPlan", "deathCertificate", 
-      "twoByTwoPicture"
+        ...Object.keys(dynamicFileStates), // Add dynamic image fields
+        "barangayIDjpg", "validIDjpg", "letterjpg", "signaturejpg",
+        "copyOfPropertyTitle", "dtiRegistration", "isCCTV",
+        "taxDeclaration", "approvedBldgPlan", "deathCertificate", 
+        "twoByTwoPicture"
       ];  
 
       const filenames: Record<string, string> = {};
@@ -1491,325 +1385,480 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
 
       // Generate unique filenames for each uploaded file
       fileKeys.forEach((key) => {
-      const file = clearanceInput[key];
-      if (file && file instanceof File) {
-        let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // Add random digits to prevent collisions
-        const fileExtension = file.name.split('.').pop();
-        const filename = `service_request_${clearanceInput.accountId}.${key}.${timeStamp}.${fileExtension}`;
-        filenames[key] = filename;
-        storageRefs[key] = ref(storage, `ServiceRequests/${filename}`);
-      }
+        const file = clearanceInput[key as keyof ClearanceInput];
+        if (file && file instanceof File) {
+          let timeStamp = Date.now().toString() + Math.floor(Math.random() * 1000); // Add random digits to prevent collisions
+          const fileExtension = file.name.split('.').pop();
+          const filename = `service_request_${clearanceInput.accountId}.${key}.${timeStamp}.${fileExtension}`;
+          filenames[key] = filename;
+          storageRefs[key] = ref(storage, `ServiceRequests/${filename}`);
+        }
       });
+
       const hasAnyUpload =
         clearanceInput.barangayIDjpg ||
         clearanceInput.validIDjpg ||
         clearanceInput.letterjpg;
-      // 📌 Handling for Barangay Certificate, Clearance, Indigency, Business ID, First Time Jobseeker
+
+      let newDocId: string | null = null;
+
+      // ==========================
+      //   BUILD clearanceVars PER TYPE
+      // ==========================
+
+      //  Handling for Barangay Certificate, Clearance, Indigency, Barangay ID, First Time Jobseeker
       if (
-      docB === "Barangay Certificate" ||
-      docB === "Barangay Clearance" ||
-      docB === "Barangay Indigency" ||
-      clearanceInput.purpose === "Barangay ID" ||
-      clearanceInput.purpose === "First Time Jobseeker"
+        docB === "Barangay Certificate" ||
+        docB === "Barangay Clearance" ||
+        docB === "Barangay Indigency" ||
+        clearanceInput.purpose === "Barangay ID" ||
+        clearanceInput.purpose === "First Time Jobseeker"
       ) {
-      const clearanceVars: Record<string, any> = {
-        createdAt: formatCreatedAtPH(new Date()),
-        requestId: clearanceInput.requestId,
-        reqType: "Online",
-        status: "Pending",
-        statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
-        accID: clearanceInput.accountId,
-        docType: docB,
-        docB,
-        purpose: clearanceInput.purpose,
-        dateOfResidency: clearanceInput.dateOfResidency,
-        address: clearanceInput.address,
-        residentId: userData?.status === "Verified" ? userData.residentId : "Guest",
-        ...(clearanceInput.purpose === "Residency" && {
-        CYFrom: clearanceInput.CYFrom,
-        CYTo: clearanceInput.CYTo,
-        attestedBy: clearanceInput.attestedBy,
-        }),
-        ...(clearanceInput.purpose === "Guardianship" && {
-        fullName: clearanceInput.fullName,
-        wardFname: clearanceInput.wardFname,
-        wardRelationship: clearanceInput.wardRelationship,
-        guardianshipType: clearanceInput.guardianshipType,
-        }),
-        ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
-        fullName: clearanceInput.fullName,
-        toAddress: clearanceInput.toAddress, 
-        fromAddress: clearanceInput.fromAddress,
-        }),
-        ...(clearanceInput.purpose === "Garage/TRU" && {
-        businessName: clearanceInput.businessName,
-        businessLocation: clearanceInput.businessLocation,
-        noOfVehicles: clearanceInput.noOfVehicles,
-        businessNature: clearanceInput.businessNature,
-        vehicleMake: clearanceInput.vehicleMake,
-        vehicleType: clearanceInput.vehicleType,
-        vehiclePlateNo: clearanceInput.vehiclePlateNo,
-        vehicleSerialNo: clearanceInput.vehicleSerialNo,
-        vehicleChassisNo: clearanceInput.vehicleChassisNo,
-        vehicleEngineNo: clearanceInput.vehicleEngineNo,
-        vehicleFileNo: clearanceInput.vehicleFileNo,
-        }),
-        ...(clearanceInput.purpose === "Garage/PUV" && {
-        vehicleType: clearanceInput.vehicleType,
-        vehicleMake: clearanceInput.vehicleMake,
-        noOfVehicles: clearanceInput.noOfVehicles,
-        goodMoralOtherPurpose: clearanceInput.goodMoralOtherPurpose,
-        }),
-        birthday: clearanceInput.birthday,
-        age: clearanceInput.age,
-        gender: clearanceInput.gender,
-        civilStatus: clearanceInput.civilStatus,
-        contact: clearanceInput.contact,
-        citizenship: clearanceInput.citizenship,
-        ...(clearanceInput.signaturejpg? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
-        ...(clearanceInput.purpose === "Cohabitation" && {
-        partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
-        cohabitationStartDate: clearanceInput.cohabitationStartDate,
-        cohabitationRelationship: clearanceInput.cohabitationRelationship,
-        }),
-        ...(clearanceInput.purpose === "Estate Tax" && {
-        fullName: clearanceInput.fullName,
-        dateofdeath: clearanceInput.dateofdeath,
-        estateSince: clearanceInput.estateSince,
-        ...(clearanceInput.deathCertificate ?{deathCertificate:filenames.deathCertificate}:{deathCertificate:null})
-        }),
-        ...( clearanceInput.purpose === "Death Residency"  && {
-        fullName: clearanceInput.fullName,
-        dateofdeath: clearanceInput.dateofdeath,
-        ...(clearanceInput.deathCertificate ?{deathCertificate:filenames.deathCertificate}:{deathCertificate:null})
-        }),
-        ...(clearanceInput.purpose === "Good Moral and Probation" && {
-        ...(clearanceInput.goodMoralPurpose ==="Others" ? 
-          { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
-          { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
-        }),
-        ...(clearanceInput.purpose === "No Income" && {
-        noIncomePurpose: clearanceInput.noIncomePurpose,
-        noIncomeChildFName: clearanceInput.noIncomeChildFName,
-        }),
-        ...(hasAnyUpload ? {
-          ...(clearanceInput.barangayIDjpg && {
-            barangayIDjpg: filenames.barangayIDjpg,
-          }),
-          ...(clearanceInput.validIDjpg && {
-            validIDjpg: filenames.validIDjpg,
-          }),
-          ...(clearanceInput.letterjpg && {
-            letterjpg: filenames.letterjpg,
-          }),
-        }:{
-            validIDjpg: null, // only record this one if none exist
-        }),
-        ...(((clearanceInput.purpose === "Residency" && docB === "Barangay Certificate") || docB === "Barangay Indigency") && {
-          appointmentDate: clearanceInput.appointmentDate,
+        const clearanceVars: Record<string, any> = {
+          createdAt: formatCreatedAtPH(new Date()),
+          requestId: clearanceInput.requestId,
+          reqType: "Online",
+          status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs} ${clearanceInput.requestorFname}`,
+          accID: clearanceInput.accountId,
+          docType: docB,
+          docB,
           purpose: clearanceInput.purpose,
-        }),
-        ...(clearanceInput.purpose === "Financial Subsidy of Solo Parent" && {
-        noIncomeChildFName: clearanceInput.noIncomeChildFName,
-        }),
-        ...(clearanceInput.purpose === "Fire Victims" && {
-        dateOfFireIncident: clearanceInput.dateOfFireIncident,
-        }),
-        ...(clearanceInput.purpose === "Flood Victims" && {
-        nameOfTyphoon: clearanceInput.nameOfTyphoon,
-        dateOfTyphoon: clearanceInput.dateOfTyphoon,
-        }),
-        ...(clearanceInput.purpose === "Barangay ID" && {
-        birthplace: clearanceInput.birthplace,
-        religion: clearanceInput.religion,
-        nationality: clearanceInput.nationality,
-        height: clearanceInput.height,
-        weight: clearanceInput.weight,
-        bloodtype: clearanceInput.bloodtype,
-        occupation: clearanceInput.occupation,
-        emergencyDetails: {
-          fullName: clearanceInput.emergencyDetails?.fullName || "",
-          address: clearanceInput.emergencyDetails?.address || "",
-          contactNumber: clearanceInput.emergencyDetails?.contactNumber || "",
-          relationship: clearanceInput.emergencyDetails?.relationship || "",
-        },
-        ...(clearanceInput.twoByTwoPicture ? { twoByTwoPicture: filenames.twoByTwoPicture }:{ twoByTwoPicture: null}),
-        }),
-        ...(clearanceInput.purpose === "First Time Jobseeker" && {
-        educationalAttainment: clearanceInput.educationalAttainment,
-        course: clearanceInput.course,
-        isBeneficiary: clearanceInput.isBeneficiary,
-        })
-      };
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          residentId: userData?.status === "Verified" ? userData.residentId : "Guest",
+          ...(clearanceInput.purpose === "Residency" && {
+            CYFrom: clearanceInput.CYFrom,
+            CYTo: clearanceInput.CYTo,
+            attestedBy: clearanceInput.attestedBy,
+          }),
+          ...(clearanceInput.purpose === "Guardianship" && {
+            fullName: clearanceInput.fullName,
+            wardFname: clearanceInput.wardFname,
+            wardRelationship: clearanceInput.wardRelationship,
+            guardianshipType: clearanceInput.guardianshipType,
+          }),
+          ...(clearanceInput.purpose === "Occupancy /  Moving Out" && {
+            fullName: clearanceInput.fullName,
+            toAddress: clearanceInput.toAddress, 
+            fromAddress: clearanceInput.fromAddress,
+          }),
+          ...(clearanceInput.purpose === "Garage/TRU" && {
+            businessName: clearanceInput.businessName,
+            businessLocation: clearanceInput.businessLocation,
+            noOfVehicles: clearanceInput.noOfVehicles,
+            businessNature: clearanceInput.businessNature,
+            vehicleMake: clearanceInput.vehicleMake,
+            vehicleType: clearanceInput.vehicleType,
+            vehiclePlateNo: clearanceInput.vehiclePlateNo,
+            vehicleSerialNo: clearanceInput.vehicleSerialNo,
+            vehicleChassisNo: clearanceInput.vehicleChassisNo,
+            vehicleEngineNo: clearanceInput.vehicleEngineNo,
+            vehicleFileNo: clearanceInput.vehicleFileNo,
+          }),
+          ...(clearanceInput.purpose === "Garage/PUV" && {
+            vehicleType: clearanceInput.vehicleType,
+            vehicleMake: clearanceInput.vehicleMake,
+            noOfVehicles: clearanceInput.noOfVehicles,
+            goodMoralOtherPurpose: clearanceInput.goodMoralOtherPurpose,
+          }),
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          ...(clearanceInput.signaturejpg
+            ? { signaturejpg: filenames.signaturejpg }
+            : { signaturejpg: null }),
+          ...(clearanceInput.purpose === "Cohabitation" && {
+            partnerWifeHusbandFullName: clearanceInput.partnerWifeHusbandFullName,
+            cohabitationStartDate: clearanceInput.cohabitationStartDate,
+            cohabitationRelationship: clearanceInput.cohabitationRelationship,
+          }),
+          ...(clearanceInput.purpose === "Estate Tax" && {
+            fullName: clearanceInput.fullName,
+            dateofdeath: clearanceInput.dateofdeath,
+            estateSince: clearanceInput.estateSince,
+            ...(clearanceInput.deathCertificate
+              ? { deathCertificate: filenames.deathCertificate }
+              : { deathCertificate: null }),
+          }),
+          ...(clearanceInput.purpose === "Death Residency" && {
+            fullName: clearanceInput.fullName,
+            dateofdeath: clearanceInput.dateofdeath,
+            ...(clearanceInput.deathCertificate
+              ? { deathCertificate: filenames.deathCertificate }
+              : { deathCertificate: null }),
+          }),
+          ...(clearanceInput.purpose === "Good Moral and Probation" && {
+            ...(clearanceInput.goodMoralPurpose ==="Others" ? 
+              { goodMoralPurpose: clearanceInput.goodMoralOtherPurpose }:
+              { goodMoralPurpose: clearanceInput.goodMoralPurpose }),
+          }),
+          ...(clearanceInput.purpose === "No Income" && {
+            noIncomePurpose: clearanceInput.noIncomePurpose,
+            noIncomeChildFName: clearanceInput.noIncomeChildFName,
+          }),
+          ...(hasAnyUpload ? {
+            ...(clearanceInput.barangayIDjpg && {
+              barangayIDjpg: filenames.barangayIDjpg,
+            }),
+            ...(clearanceInput.validIDjpg && {
+              validIDjpg: filenames.validIDjpg,
+            }),
+            ...(clearanceInput.letterjpg && {
+              letterjpg: filenames.letterjpg,
+            }),
+          }:{
+            validIDjpg: null, // only record this one if none exist
+          }),
+          ...(((clearanceInput.purpose === "Residency" && docB === "Barangay Certificate") || docB === "Barangay Indigency") && {
+            appointmentDate: clearanceInput.appointmentDate,
+            purpose: clearanceInput.purpose,
+          }),
+          ...(clearanceInput.purpose === "Financial Subsidy of Solo Parent" && {
+            noIncomeChildFName: clearanceInput.noIncomeChildFName,
+          }),
+          ...(clearanceInput.purpose === "Fire Victims" && {
+            dateOfFireIncident: clearanceInput.dateOfFireIncident,
+          }),
+          ...(clearanceInput.purpose === "Flood Victims" && {
+            nameOfTyphoon: clearanceInput.nameOfTyphoon,
+            dateOfTyphoon: clearanceInput.dateOfTyphoon,
+          }),
+          ...(clearanceInput.purpose === "Barangay ID" && {
+            birthplace: clearanceInput.birthplace,
+            religion: clearanceInput.religion,
+            nationality: clearanceInput.nationality,
+            height: clearanceInput.height,
+            weight: clearanceInput.weight,
+            bloodtype: clearanceInput.bloodtype,
+            occupation: clearanceInput.occupation,
+            emergencyDetails: {
+              fullName: clearanceInput.emergencyDetails?.fullName || "",
+              address: clearanceInput.emergencyDetails?.address || "",
+              contactNumber: clearanceInput.emergencyDetails?.contactNumber || "",
+              relationship: clearanceInput.emergencyDetails?.relationship || "",
+            },
+            ...(clearanceInput.twoByTwoPicture
+              ? { twoByTwoPicture: filenames.twoByTwoPicture }
+              : { twoByTwoPicture: null}),
+          }),
+          ...(clearanceInput.purpose === "First Time Jobseeker" && {
+            educationalAttainment: clearanceInput.educationalAttainment,
+            course: clearanceInput.course,
+            isBeneficiary: clearanceInput.isBeneficiary,
+          })
+        };
 
-      filteredDynamicFields.forEach((fieldName) => {
-        if (
-        !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "twoByTwoPicture"].includes(fieldName) &&
-        clearanceInput[fieldName] !== undefined
-        ) {
-        clearanceVars[fieldName] = clearanceInput[fieldName];
-        }
-      });
+        filteredDynamicFields.forEach((fieldName) => {
+          if (
+            !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg", "twoByTwoPicture"].includes(fieldName) &&
+            clearanceInput[fieldName as keyof ClearanceInput] !== undefined
+          ) {
+            clearanceVars[fieldName] = clearanceInput[fieldName as keyof ClearanceInput];
+          }
+        });
 
-      Object.keys(dynamicFileStates).forEach((key) => {
-        if (clearanceInput[key] instanceof File && filenames[key]) {
-        clearanceVars[key] = filenames[key];
-        }
-      });
+        Object.keys(dynamicFileStates).forEach((key) => {
+          if (clearanceInput[key] instanceof File && filenames[key]) {
+            clearanceVars[key] = filenames[key];
+          }
+        });
 
-      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
-        
+        newDocId = await handleReportUpload(
+          clearanceVars,
+          storageRefs
+        );
+        if (!newDocId) return; // stop if upload failed
       }
 
-      // 📌 Handling for Temporary Business Permit & Business Permit
+      // Handling for Temporary Business Permit & Business Permit
       if (docB === "Temporary Business Permit" || docB === "Business Permit") {
-      const clearanceVars = {
-        createdAt: formatCreatedAtPH(new Date()),
-        requestId: clearanceInput.requestId,
-        status: "Pending",
-        reqType: "Online",
-        statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
-        accID: clearanceInput.accountId,
-        dateOfResidency: clearanceInput.dateOfResidency,
-        address: clearanceInput.address,
-        birthday: clearanceInput.birthday,
-        age: clearanceInput.age,
-        gender: clearanceInput.gender,
-        civilStatus: clearanceInput.civilStatus,
-        contact: clearanceInput.contact,
-        citizenship: clearanceInput.citizenship,
-        docType: docB,
-        docB,
-        purpose: clearanceInput.purpose,
-        businessName: clearanceInput.businessName,
-        businessLocation: clearanceInput.businessLocation,
-        businessNature: clearanceInput.businessNature,
-        estimatedCapital: clearanceInput.estimatedCapital,
+        const clearanceVars = {
+          createdAt: formatCreatedAtPH(new Date()),
+          requestId: clearanceInput.requestId,
+          status: "Pending",
+          reqType: "Online",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
+          accID: clearanceInput.accountId,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          docType: docB,
+          docB,
+          purpose: clearanceInput.purpose,
+          businessName: clearanceInput.businessName,
+          businessLocation: clearanceInput.businessLocation,
+          businessNature: clearanceInput.businessNature,
+          estimatedCapital: clearanceInput.estimatedCapital,
 
-        ...clearanceInput.copyOfPropertyTitle ? {copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null },
-        ...clearanceInput.dtiRegistration ? {dtiRegistration: filenames.dtiRegistration } : { dtiRegistration: null },
-        ...clearanceInput.isCCTV ? {isCCTV: filenames.isCCTV } : { isCCTV: null },
-        ...clearanceInput.signaturejpg ? {signaturejpg: filenames.signaturejpg } : { signaturejpg: null },
-        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
-        // copyOfPropertyTitle: filenames.copyOfPropertyTitle,
-        // dtiRegistration: filenames.dtiRegistration,
-        // isCCTV: filenames.isCCTV,
-        // signaturejpg: filenames.signaturejpg,
-      };
-      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
-                
+          ...(clearanceInput.copyOfPropertyTitle 
+            ? {copyOfPropertyTitle: filenames.copyOfPropertyTitle } 
+            : { copyOfPropertyTitle: null }),
+          ...(clearanceInput.dtiRegistration 
+            ? {dtiRegistration: filenames.dtiRegistration } 
+            : { dtiRegistration: null }),
+          ...(clearanceInput.isCCTV 
+            ? {isCCTV: filenames.isCCTV } 
+            : { isCCTV: null }),
+          ...(clearanceInput.signaturejpg 
+            ? {signaturejpg: filenames.signaturejpg } 
+            : { signaturejpg: null }),
+          ...(clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg }),
+        };
+
+        newDocId = await handleReportUpload(
+          clearanceVars,
+          storageRefs
+        );
+        if (!newDocId) return; // stop if upload failed
       }
 
-      // 📌 Handling for Construction Permit
+      //  Handling for Construction Permit
       if (docB === "Construction") {
-      const clearanceVars = {
-        createdAt: formatCreatedAtPH(new Date()),
-        requestId: clearanceInput.requestId,
-        status: "Pending",
-        statusPriority: 1,
-        reqType: "Online",
-        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
-        accID: clearanceInput.accountId,
-        docType: docB,
-        docB,
-        typeofconstruction: clearanceInput.typeofconstruction,
-        homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
-        dateOfResidency: clearanceInput.dateOfResidency,
-        address: clearanceInput.address,
-        birthday: clearanceInput.birthday,
-        age: clearanceInput.age,
-        gender: clearanceInput.gender,
-        civilStatus: clearanceInput.civilStatus,
-        contact: clearanceInput.contact,
-        citizenship: clearanceInput.citizenship,
-        typeofbldg: clearanceInput.typeofbldg,
-        projectName: clearanceInput.projectName,
-        projectLocation: clearanceInput.projectLocation,
+        const clearanceVars = {
+          createdAt: formatCreatedAtPH(new Date()),
+          requestId: clearanceInput.requestId,
+          status: "Pending",
+          statusPriority: 1,
+          reqType: "Online",
+          requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
+          accID: clearanceInput.accountId,
+          docType: docB,
+          docB,
+          typeofconstruction: clearanceInput.typeofconstruction,
+          homeOrOfficeAddress: clearanceInput.homeOrOfficeAddress,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          typeofbldg: clearanceInput.typeofbldg,
+          projectName: clearanceInput.projectName,
+          projectLocation: clearanceInput.projectLocation,
 
-        ...(clearanceInput.taxDeclaration ? { taxDeclaration: filenames.taxDeclaration } : { taxDeclaration: null }),
-        ...(clearanceInput.approvedBldgPlan ? { approvedBldgPlan: filenames.approvedBldgPlan } : { approvedBldgPlan: null }),
-        ...(clearanceInput.copyOfPropertyTitle ? { copyOfPropertyTitle: filenames.copyOfPropertyTitle } : { copyOfPropertyTitle: null }),
-        ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
-        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
-
-        // taxDeclaration: filenames.taxDeclaration,
-        // approvedBldgPlan: filenames.approvedBldgPlan,
-        // copyOfPropertyTitle: filenames.copyOfPropertyTitle,
-        // signaturejpg: filenames.signaturejpg,
-        ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
-      };
-      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
-        
+          ...(clearanceInput.taxDeclaration 
+            ? { taxDeclaration: filenames.taxDeclaration } 
+            : { taxDeclaration: null }),
+          ...(clearanceInput.approvedBldgPlan 
+            ? { approvedBldgPlan: filenames.approvedBldgPlan } 
+            : { approvedBldgPlan: null }),
+          ...(clearanceInput.copyOfPropertyTitle 
+            ? { copyOfPropertyTitle: filenames.copyOfPropertyTitle } 
+            : { copyOfPropertyTitle: null }),
+          ...(clearanceInput.signaturejpg 
+            ? { signaturejpg: filenames.signaturejpg } 
+            : { signaturejpg: null }),
+          ...(clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg }),
+          ...(clearanceInput.typeofbldg === "Others" && {othersTypeofbldg: clearanceInput.othersTypeofbldg}),
+        };
+        newDocId = await handleReportUpload(
+          clearanceVars,
+          storageRefs
+        );
+        if (!newDocId) return; // stop if upload failed
       }
 
+      // Handling for Other Docs (excluding Barangay ID & First Time Jobseeker)
       if (
-      docB &&
+        docB &&
         ![
-        "Barangay Certificate",
-        "Barangay Clearance",
-        "Barangay Indigency",
-        "Temporary Business Permit",
-        "Business Permit",
-        "Construction"
+          "Barangay Certificate",
+          "Barangay Clearance",
+          "Barangay Indigency",
+          "Temporary Business Permit",
+          "Business Permit",
+          "Construction"
         ].includes(docB) &&
         !["Barangay ID", "First Time Jobseeker"].includes(clearanceInput.purpose)
       ) {
-      const clearanceVars: Record<string, any> = {
-        createdAt: formatCreatedAtPH(new Date()),
-        requestId: clearanceInput.requestId,
-        reqType: "Online",
-        status: "Pending",
-        statusPriority: 1,
-        requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
-        accID: clearanceInput.accountId,
-        docType: docB,
-        docB,
-        purpose: clearanceInput.purpose,
-        dateOfResidency: clearanceInput.dateOfResidency,
-        address: clearanceInput.address,
-        birthday: clearanceInput.birthday,
-        age: clearanceInput.age,
-        gender: clearanceInput.gender,
-        civilStatus: clearanceInput.civilStatus,
-        contact: clearanceInput.contact,
-        citizenship: clearanceInput.citizenship,
-        ...(clearanceInput.signaturejpg ? { signaturejpg: filenames.signaturejpg } : { signaturejpg: null }),
-        ...(clearanceInput.barangayIDjpg ? { barangayIDjpg: filenames.barangayIDjpg }: { barangayIDjpg: null }),
-        ...(clearanceInput.validIDjpg ? { validIDjpg: filenames.validIDjpg }: { validIDjpg: null }),
-        ...(clearanceInput.letterjpg ? { letterjpg: filenames.letterjpg }: { letterjpg: null }),
-        ...clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg },
+        const clearanceVars: Record<string, any> = {
+          createdAt: formatCreatedAtPH(new Date()),
+          requestId: clearanceInput.requestId,
+          reqType: "Online",
+          status: "Pending",
+          statusPriority: 1,
+          requestor: `${clearanceInput.requestorMrMs||""} ${clearanceInput.requestorFname||""} ${clearanceInput.requestorLname||""}`,
+          accID: clearanceInput.accountId,
+          docType: docB,
+          docB,
+          purpose: clearanceInput.purpose,
+          dateOfResidency: clearanceInput.dateOfResidency,
+          address: clearanceInput.address,
+          birthday: clearanceInput.birthday,
+          age: clearanceInput.age,
+          gender: clearanceInput.gender,
+          civilStatus: clearanceInput.civilStatus,
+          contact: clearanceInput.contact,
+          citizenship: clearanceInput.citizenship,
+          ...(clearanceInput.signaturejpg 
+            ? { signaturejpg: filenames.signaturejpg } 
+            : { signaturejpg: null }),
+          ...(clearanceInput.barangayIDjpg 
+            ? { barangayIDjpg: filenames.barangayIDjpg } 
+            : { barangayIDjpg: null }),
+          ...(clearanceInput.validIDjpg 
+            ? { validIDjpg: filenames.validIDjpg } 
+            : { validIDjpg: null }),
+          ...(clearanceInput.letterjpg 
+            ? { letterjpg: filenames.letterjpg } 
+            : { letterjpg: null }),
+          ...(clearanceInput.validIDjpg && {validIDjpg: filenames.validIDjpg }),
+        };
 
-      };
+        // Add dynamic text fields (non-image fields)
+        filteredDynamicFields.forEach((fieldName) => {
+          if (
+            !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"].includes(fieldName) &&
+            clearanceInput[fieldName as keyof ClearanceInput] !== undefined
+          ) {
+            clearanceVars[fieldName] = clearanceInput[fieldName as keyof ClearanceInput];
+          }
+        });
 
-      // Add dynamic text fields (non-image fields)
-      filteredDynamicFields.forEach((fieldName) => {
-        if (
-        !["signaturejpg", "barangayIDjpg", "validIDjpg", "letterjpg"].includes(fieldName) &&
-        clearanceInput[fieldName] !== undefined
-        ) {
-        clearanceVars[fieldName] = clearanceInput[fieldName];
-        }
-      });
+        // Add dynamic image fields
+        Object.keys(dynamicFileStates).forEach((key) => {
+          if (clearanceInput[key] instanceof File && filenames[key]) {
+            clearanceVars[key] = filenames[key];
+          }
+        });
 
-      // Add dynamic image fields
-      Object.keys(dynamicFileStates).forEach((key) => {
-        if (clearanceInput[key] instanceof File && filenames[key]) {
-        clearanceVars[key] = filenames[key];
-        }
-      });
-
-      // PASS HASINCOMPLETEREQUIREMENTS FLAG HERE
-        handleReportUpload(clearanceVars, storageRefs, hasIncompleteRequirements);
-        
+        newDocId = await handleReportUpload(
+          clearanceVars,
+          storageRefs
+        );
+        if (!newDocId) return; // stop if upload failed
       }
-    // alert("Document request submitted successfully!");
-      router.push('/services/notification'); 
-    //  router.push("/services");
+
+      // Safety check
+      if (!newDocId) {
+        setErrorMessage("Failed to submit your request. Please try again.");
+        setShowErrorPopup(true);
+        return;
+      }
+
+      // NOTIFICATIONS
+      const notificationRef = collection(db, "BarangayNotifications");
+      const useDocTypeAsMessage =
+        clearanceInput.docB === "Business Permit" ||
+        clearanceInput.docB === "Temporary Business Permit";
+
+      let formattedAppointmentDate = "";
+      if (clearanceInput.appointmentDate) {
+        const rawDate = new Date(clearanceInput.appointmentDate);
+        formattedAppointmentDate = rawDate.toLocaleString("en-US", {
+          month: "numeric",
+          day: "numeric",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+      }
+
+      console.log("hasIncompleteRequirements (before notifications):", hasIncompleteRequirements);
+
+      if (hasIncompleteRequirements) {
+        await addDoc(notificationRef, {
+          message:
+            clearanceInput.purpose === "First Time Jobseeker"
+              ? `Incomplete requirements for Jobseeker Certificate request by ${clearanceInput.requestorFname} (Online). The request cannot proceed until all requirements are submitted.`
+              : clearanceInput.docB === "Barangay Certificate" &&
+                clearanceInput.purpose === "Residency"
+              ? `Incomplete requirements for Residency request by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). Please wait for the applicant to complete the requirements.`
+              : clearanceInput.docB === "Barangay Indigency"
+              ? `Incomplete requirements for Barangay Indigency (${clearanceInput.purpose}) requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online). The request cannot move forward until all documents are provided.`
+              : clearanceInput.docB === "Construction"
+              ? `Incomplete requirements for Construction Permit requested by ${clearanceInput.requestorFname} (Online). Please wait for the submission of all necessary documents.`
+              : `Incomplete requirements for ${
+                  useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose
+                } requested by ${clearanceInput.requestorFname} (Online). Processing will continue once all requirements are submitted.`,
+          timestamp: new Date(),
+          requestorId: userData?.residentId || "Guest",
+          isRead: false,
+          transactionType: "Online Service Request",
+          recipientRole:
+            clearanceInput.purpose === "First Time Jobseeker" ||
+            clearanceInput.docB === "Barangay Certificate" ||
+            clearanceInput.docB === "Barangay Clearance" ||
+            clearanceInput.docB === "Barangay Indigency" ||
+            clearanceInput.docB === "Temporary Business Permit" ||
+            clearanceInput.docB === "Construction" ||
+            clearanceInput.docB === "Barangay Permit" ||
+            (clearanceInput.docB === "Other Documents" &&
+              clearanceInput.purpose !== "Barangay ID")
+              ? "Assistant Secretary"
+              : "Admin Staff",
+          requestID: newDocId,
+        });
+
+        await addDoc(collection(db, "Notifications"), {
+          residentID: userData?.residentId || "Guest",
+          requestID: newDocId,
+          message: `Your document request (${clearanceInput?.requestId}) is currently on hold due to incomplete requirements. Please submit all necessary documents to proceed with the request.`,
+          timestamp: new Date(),
+          transactionType: "Online Service Request",
+          isRead: false,
+        });
+      } else {
+        await addDoc(notificationRef, {
+          message:
+            clearanceInput.purpose === "First Time Jobseeker"
+              ? `New Jobseeker Certificate requested by ${clearanceInput.requestorFname} (Online).`
+              : clearanceInput.docB === "Barangay Certificate" &&
+                clearanceInput.purpose === "Residency"
+              ? `New Residency requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+              : clearanceInput.docB === "Barangay Indigency"
+              ? `New Barangay Indigency ${clearanceInput.purpose} requested by ${clearanceInput.requestorFname} with proposed appointment on ${formattedAppointmentDate} (Online).`
+              : clearanceInput.docB === "Construction"
+              ? `New Construction Permit requested by ${clearanceInput.requestorFname}. (Online)`
+              : `New ${
+                  useDocTypeAsMessage ? clearanceInput.docB : clearanceInput.purpose
+                } requested by ${clearanceInput.requestorFname} (Online).`,
+          timestamp: new Date(),
+          requestorId: userData?.residentId || "Guest",
+          isRead: false,
+          transactionType: "Online Service Request",
+          recipientRole:
+            clearanceInput.purpose === "First Time Jobseeker" ||
+            clearanceInput.docB === "Barangay Certificate" ||
+            clearanceInput.docB === "Barangay Clearance" ||
+            clearanceInput.docB === "Barangay Indigency" ||
+            clearanceInput.docB === "Temporary Business Permit" ||
+            clearanceInput.docB === "Construction" ||
+            clearanceInput.docB === "Barangay Permit" ||
+            (clearanceInput.docB === "Other Documents" &&
+              clearanceInput.purpose !== "Barangay ID")
+              ? "Assistant Secretary"
+              : "Admin Staff",
+          requestID: newDocId,
+        });
+
+        await addDoc(collection(db, "Notifications"), {
+          residentID: userData?.residentId || "Guest",
+          requestID: newDocId,
+          message: `Your document request (${clearanceInput?.requestId}) is now (Pending). We will notify you once it progresses.`,
+          timestamp: new Date(),
+          transactionType: "Online Service Request",
+          isRead: false,
+        });
+      }
+
+      // Finally navigate
+      router.push("/services/notification");
     };
 
 
