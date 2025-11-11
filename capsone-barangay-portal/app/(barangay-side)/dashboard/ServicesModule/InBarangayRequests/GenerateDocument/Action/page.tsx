@@ -167,7 +167,8 @@ export default function action() {
     
     const employerPopupRef = useRef<HTMLDivElement>(null);
     const [listOfApprovedExistingBusinessPermits, setListOfApprovedExistingBusinessPermits] = useState<approvedBusinessPermit[]>([]);
-
+    const [permitRequestAt, setPermitRequestAt] = useState<string>("");
+  
     
 
     useEffect(() => {
@@ -388,7 +389,7 @@ export default function action() {
             const approvedPermits: approvedBusinessPermit[] = [];
             snapshot.forEach((doc) => {
               const data = doc.data();
-              if(data.residentId === clearanceInput.residentId && (data.status === "In - Progress" || data.status === "Accepted")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
+              if(data.residentId === clearanceInput.residentId && ( data.status === "Completed")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
                 approvedPermits.push({
                   requestId: data.requestId,
                   docType: data.docType,
@@ -1818,6 +1819,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                 businessNature: "",
                                 estimatedCapital: "",
                               })); // Reset other fields when purpose changes
+                              setPermitRequestAt("")
                             }} // Handle change to update state
                           >
                           <option value="" disabled>Select purpose</option>
@@ -2702,6 +2704,9 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                               estimatedCapital: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.estimatedCapital || "",
 
                                             }));
+                                            setPermitRequestAt(
+                                              listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.createdAt ||""
+                                            )
                                           }}
                                           required
                                         >
@@ -2709,11 +2714,26 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
                                           {listOfApprovedExistingBusinessPermits.length === 0 ? (
                                             <option value="" disabled>No existing businesses found</option>
                                           ) : (
-                                            listOfApprovedExistingBusinessPermits.map((business, index) => (
-                                              <option key={index} value={business.businessName}>
-                                                {business.businessName}
-                                              </option>
-                                            ))
+                                            listOfApprovedExistingBusinessPermits.map((business, index) => {
+                                              const createdYear = new Date(business.createdAt.split(",")[0]).getFullYear();
+                                              const currentYear = new Date().getFullYear();
+
+                                              const isDisabled = createdYear === currentYear;
+                                              return(
+                                                <option 
+                                                key={index}
+                                                value={business.businessName}
+                                                disabled={isDisabled}
+                                                title={
+                                                  isDisabled
+                                                    ? `This business cannot request a renewal permit until ${createdYear + 1}`
+                                                    : ""}
+                                                >
+                                                  {business.businessName}
+                                                </option>
+                                              )
+                                            }
+                                            )
                                           )}
                                         </select>
                                       </div>
@@ -3475,6 +3495,23 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
 
                           {(docType === "Business Permit" || docType === "Temporary Business Permit") && (
                             <>
+                              {clearanceInput.purpose === "Renewal" && (
+                                <>
+                                  <div className="fields-section">
+                                    <h1>New Permit Requested At<span className="required">*</span></h1>
+                                    <input 
+                                      type="text"  
+                                      id="permitRequestAt"  
+                                      name="permitRequestAt"  
+                                      value={permitRequestAt}
+                                      className="createRequest-input-field"  
+                                      disabled
+                                      required 
+                                      placeholder="New Requested Permit At"  
+                                    />
+                                  </div>
+                                </>
+                              )}
                               <div className="fields-section">
                                 <h1>Business Nature<span className="required">*</span></h1>
                                 <input 
