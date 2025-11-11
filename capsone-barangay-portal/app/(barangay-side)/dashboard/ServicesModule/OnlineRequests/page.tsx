@@ -483,6 +483,7 @@ const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
                         <option value="Barangay Certificate">Barangay Certificate</option>
                         <option value="Barangay Indigency">Barangay Indigency</option>
                         <option value="Business Permit">Business Permits</option>
+                        <option value="Temporary Business Permit">Temporary Business Permits</option>                        
                         <option value="Construction">Construction Permits</option>
                         <option value="Barangay Clearance">Barangay Clearance</option>
                         <option value="Other">Other Documents</option>

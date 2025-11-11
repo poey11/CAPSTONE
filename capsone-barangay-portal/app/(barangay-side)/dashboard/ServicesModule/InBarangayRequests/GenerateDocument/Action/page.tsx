@@ -1257,7 +1257,7 @@ export default function action() {
             }
         
             if (!files6 || files6.length === 0) {
-              setPopupErrorMessage("Please upload DTI Registration.");
+              setPopupErrorMessage("Please upload DTI Registration or BIR Registration.");
               setShowErrorPopup(true);
               setTimeout(() => setShowErrorPopup(false), 3000);
               return;
@@ -4164,7 +4164,7 @@ const showFTJStatus = (clearanceInput.purpose ?? "") === "First Time Jobseeker";
 
                             <div className="box-container-outer-inbrgy">
                               <div className="title-verificationdocs-dti">
-                                DTI Registration
+                                DTI Registration or BIR Registration
                               </div>
 
                               <div className="box-container-inbrgy">

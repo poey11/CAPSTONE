@@ -1404,7 +1404,7 @@ const handleReportUpload = async (key: any, storageRefs: Record<string, any>, ha
       const imageFieldLabels: { [key: string]: string } = {
         isCCTV: "CCTV Picture",
         copyOfPropertyTitle: "Copy of Property Title",
-        dtiRegistration: "DTI Registration",
+        dtiRegistration: "DTI Registration or BIR Registration",
         approvedBldgPlan: "Approved Building Plan",
         deathCertificate: "Death Certificate",
         twoByTwoPicture: "2x2 Picture",
@@ -4488,7 +4488,7 @@ console.log("UserData:", userData);
                 {(docB ==="Temporary Business Permit"||docB ==="Business Permit") &&(
                   <>
                     <div className="required-documents-container">
-                      <label className="form-label-required-documents">Certified True Copy of DTI Registration<span className="required">*</span></label>
+                      <label className="form-label-required-documents">Certified True Copy of DTI Registration or BIR Registration<span className="required">*</span></label>
 
                       <div className="file-upload-container-required-documents">
                         <label htmlFor="file-upload6"  className="upload-link">Click to Upload File</label>
