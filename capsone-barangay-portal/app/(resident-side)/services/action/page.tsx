@@ -138,6 +138,7 @@ export default function Action({ searchParams }: any) {
   // const purpose = searchParam.get("purpose") || "";
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null); // moved UP here
+  const [permitRequestAt, setPermitRequestAt] = useState<string>("");
 
 
   const [checkingAccess, setCheckingAccess] = useState(true);
@@ -391,7 +392,7 @@ useEffect(() => {
         const approvedPermits: approvedBusinessPermit[] = [];
         snapshot.forEach((doc) => {
           const data = doc.data();
-          if(data.residentId === userData.residentId && (data.status === "In - Progress" || data.status === "Accepted")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
+          if(data.residentId === userData.residentId && ( data.status === "Completed")  && (data.purpose === "New") && (data.docType === clearanceInput.docType)){ 
             approvedPermits.push({
               requestId: data.requestId,
               docType: data.docType,
@@ -415,6 +416,9 @@ useEffect(() => {
   },[clearanceInput, userData]);
 
   console.log("listOfApprovedExistingBusinessPermits", listOfApprovedExistingBusinessPermits);
+
+  
+
 
   useEffect(() => {
     const getServiceRequestId =  () => {
@@ -2086,6 +2090,7 @@ console.log("UserData:", userData);
                                 estimatedCapital: "",
 
                               }));
+                              setPermitRequestAt("");
                             }
                           }
                         >
@@ -2650,8 +2655,11 @@ console.log("UserData:", userData);
                                   businessNature: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessNature || "",
                                   businessLocation: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.businessLocation || "",
                                   estimatedCapital: listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.estimatedCapital || "",
-
+                                  
                                 }));
+                                setPermitRequestAt(
+                                  listOfApprovedExistingBusinessPermits.find((business) => business.businessName === e.target.value)?.createdAt ||""
+                                );
 
                               }}
                               required
@@ -2660,11 +2668,29 @@ console.log("UserData:", userData);
                               {listOfApprovedExistingBusinessPermits.length === 0 ? (
                                 <option value="" disabled>No existing businesses found</option>
                               ) : (
-                                listOfApprovedExistingBusinessPermits.map((business, index) => (
-                                  <option key={index} value={business.businessName}>
+                                listOfApprovedExistingBusinessPermits.map((business, index) =>  {
+                                  const createdYear = new Date(business.createdAt.split(",")[0]).getFullYear();
+                                  const currentYear = new Date().getFullYear();
+
+                                  const isDisabled = createdYear === currentYear;
+                                  return (   
+                                  <option 
+                                   key={index}
+                                    value={business.businessName}
+                                    disabled={isDisabled}
+                                    title={
+                                      isDisabled
+                                        ? `This business cannot request a renewal permit until ${createdYear + 1}`
+                                        : ""
+                                    }
+                                    className={isDisabled ? "text-gray-400 cursor-not-allowed" : ""}
+                                                            
+                                  >
                                     {business.businessName}
                                   </option>
-                                ))
+                                  )
+                                }
+                                )
                               )}
                             </select>
                           </div>           
@@ -3676,6 +3702,23 @@ console.log("UserData:", userData);
 
                   {(clearanceInput.docB === "Business Permit" || clearanceInput.docB === "Temporary Business Permit") && (
                     <>  
+
+                      
+                      {clearanceInput.purpose === "Renewal" && (
+                        <div className="form-group-document-req">
+                          <label htmlFor="permitRequestAt" className="form-label-document-req">New Permit Requested At<span className="required">*</span></label>
+                          <input 
+                            type="text"  
+                            id="permitRequestAt"  
+                            name="permitRequestAt"  
+                            className="form-input-document-req"  
+                            value={permitRequestAt}
+                            disabled
+                            required 
+                            placeholder="New Requested Permit At"  
+                          />
+                        </div>
+                      )}
                       <div className="form-group-document-req">
                         <label htmlFor="businessNature" className="form-label-document-req">Business Nature<span className="required">*</span></label>
                         <input 
@@ -3704,6 +3747,7 @@ console.log("UserData:", userData);
                           placeholder="Enter Estimated Capital"  
                         />
                       </div>
+
                     </>
                   )}
 
