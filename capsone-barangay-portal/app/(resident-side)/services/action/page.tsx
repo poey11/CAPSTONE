@@ -2764,19 +2764,19 @@ console.log("UserData:", userData);
                         </>
                       )}
                       <div className="form-group-document-req">
-                            <label htmlFor="businessloc" className="form-label-document-req">Business Location<span className="required">*</span></label>
-                            <input 
-                              type="text"  
-                              id="businessloc"  
-                              name="businessLocation"  
-                              className="form-input-document-req"  
-                              value={clearanceInput.businessLocation}
-                              onChange={handleChange}
-                              required 
-                              placeholder="Enter Business Location"  
-                              disabled={purpose === "Renewal" && !!userData}
-                            />
-                          </div>
+                        <label htmlFor="businessLocation" className="form-label-document-req">Business Location<span className="required">*</span></label>
+                        <input 
+                          type="text"  
+                          id="businessLocation"  
+                          name="businessLocation"  
+                          className="form-input-document-req"  
+                          required 
+                          placeholder= "Describe the nature of your business (e.g., retail, manufacturing, services)"
+                          disabled= {clearanceInput.purpose === "Renewal"}
+                          value={clearanceInput.businessLocation}
+                          onChange={handleChange}
+                        />
+                      </div>  
                     </>
                   )}
 
