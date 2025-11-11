@@ -84,7 +84,7 @@ export default function DocumentTransactionsDetails({referenceId}:any) {
         { field: 'validIDjpg', files: null, imageName: 'Valid ID'  },
         { field: 'letterjpg', files: null, imageName: 'Endorsement Letter'  },
         { field: 'copyOfPropertyTitle', files: null, imageName: 'Copy of Property Title'  },
-        { field: 'dtiRegistration', files: null, imageName: 'Certified True Copy of DTI Registration'  },
+        { field: 'dtiRegistration', files: null, imageName: 'Certified True Copy of DTI Registration or BIR Registration'  },
         { field: 'isCCTV', files: null, imageName: 'Picture of CCTV installed in the establishment'  },
         { field: 'taxDeclaration', files: null, imageName: 'Certified True Copy of Tax Declaration' },
         { field: 'approvedBldgPlan', files: null, imageName: 'Approved Building/Construction Plan'  },
@@ -1163,7 +1163,7 @@ console.log("file url", fileURLs);
                             <>
 <div className="details-section-response-upload">
   <div className="title">
-    <p>DTI Registration</p>
+    <p>DTI Registration or BIR Registration</p>
   </div>
 
   <div className="description">
@@ -1172,7 +1172,7 @@ console.log("file url", fileURLs);
         .filter(({ field }) => field === "dtiRegistration")
         .map(({ url }, index) => (
           <div key={index} className="document-requirements-container">
-            <img src={url} alt="DTI Registration" className="requirements-image" />
+            <img src={url} alt="DTI Registration or BIR Registration" className="requirements-image" />
             <a href={url} target="_blank" rel="noopener noreferrer" className="view-file-link">
               View File
             </a>
