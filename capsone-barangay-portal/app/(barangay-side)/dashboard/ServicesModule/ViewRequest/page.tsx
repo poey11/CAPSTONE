@@ -2738,28 +2738,14 @@ const handleFileDeleteReupload = (fieldKey: string, fileIndex: number) => {
             )}
                 {showUserHistory && (
                   <>
-                    {requestData?.reqType === "Online" ? (
-                      <UserHistory
-                        accID={requestData?.accID || ""}
-                        onClose={() => setShowUserHistory(false)}
-                        requestorFname={requestData?.requestorFname || ""}
-                        docType={requestData?.docType || ""}
-                        requestId={id || ""}
-                        purpose={` (${requestData?.purpose})` || ""}
-                      />
-                    ) : (
-                      requestData?.reqType === "In Barangay" &&
-                      (
-                        <UserHistory
-                          residentId={requestData.residentId}
+                    <UserHistory
+                          residentId={requestData?.residentId}
                           onClose={() => setShowUserHistory(false)}
                           requestorFname={requestData?.requestorFname || ""}
                           docType={requestData?.docType || ""}
                           requestId={id || ""}
                           purpose={` (${requestData?.purpose})` || ""}
                         />
-                      )
-                    )}
                   </>
                 )}
 
