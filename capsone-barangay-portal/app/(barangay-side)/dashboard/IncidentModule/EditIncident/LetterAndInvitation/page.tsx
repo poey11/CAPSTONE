@@ -1030,7 +1030,7 @@ const handleDeliveryChange: React.ChangeEventHandler<HTMLInputElement> = (e) => 
                   setPopupMessage("SMS sent successfully!!");
                   setShowPopup(true);
                   if (showSubmitPopup.letterType === "summon") {
-                    //sendSMSForSummons();
+                    sendSMSForSummons();
                     setTimeout(() => {
                       router.push(`/dashboard/IncidentModule/EditIncident/HearingSection?id=${docId}&department=${department}`);
                       setShowSubmitPopup({ show: false, message: "", message2: "", letterType: undefined });
